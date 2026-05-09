@@ -1,0 +1,319 @@
+"""Client for MLB StatsAPI (statsapi.mlb.com)."""
+
+from __future__ import annotations
+
+import logging
+from datetime import date, datetime
+from typing import Any
+
+import httpx
+
+from mlb.config import settings
+
+logger = logging.getLogger(__name__)
+
+# MLB StatsAPI team abbreviation lookup (API uses numeric IDs internally)
+TEAM_ABBREVS: dict[int, str] = {
+    108: "LAA", 109: "ARI", 110: "BAL", 111: "BOS", 112: "CHC",
+    113: "CIN", 114: "CLE", 115: "COL", 116: "DET", 117: "HOU",
+    118: "KC",  119: "LAD", 120: "WSH", 121: "NYM", 133: "OAK",
+    134: "PIT", 135: "SD",  136: "SEA", 137: "SF",  138: "STL",
+    139: "TB",  140: "TEX", 141: "TOR", 142: "MIN", 143: "PHI",
+    144: "ATL", 145: "CWS", 146: "MIA", 147: "NYY", 158: "MIL",
+}
+
+TEAM_IDS: dict[str, int] = {v: k for k, v in TEAM_ABBREVS.items()}
+
+
+class MLBApiClient:
+    """Async client for the MLB Stats API."""
+
+    def __init__(self, base_url: str | None = None):
+        self.base_url = base_url or settings.mlb_api_base_url
+        self._client: httpx.AsyncClient | None = None
+
+    async def _get_client(self) -> httpx.AsyncClient:
+        if self._client is None or self._client.is_closed:
+            self._client = httpx.AsyncClient(
+                base_url=self.base_url,
+                timeout=30.0,
+                headers={"User-Agent": "ThatsBaseball/0.1"},
+            )
+        return self._client
+
+    async def close(self):
+        if self._client and not self._client.is_closed:
+            await self._client.aclose()
+
+    async def _get(self, endpoint: str, params: dict | None = None) -> dict[str, Any]:
+        client = await self._get_client()
+        resp = await client.get(endpoint, params=params)
+        resp.raise_for_status()
+        return resp.json()
+
+    # ── Schedule & Games ───────────────────────────────────────
+
+    async def get_schedule(
+        self, game_date: date, sport_id: int = 1
+    ) -> list[dict[str, Any]]:
+        """Fetch all MLB games for a given date."""
+        data = await self._get(
+            "/schedule",
+            params={
+                "sportId": sport_id,
+                "date": game_date.isoformat(),
+                "hydrate": "team,linescore,probablePitcher",
+            },
+        )
+        games = []
+        for date_entry in data.get("dates", []):
+            for game in date_entry.get("games", []):
+                games.append(self._parse_schedule_game(game))
+        return games
+
+    async def get_schedule_range(
+        self, start: date, end: date, sport_id: int = 1
+    ) -> list[dict[str, Any]]:
+        """Fetch all games in a date range."""
+        data = await self._get(
+            "/schedule",
+            params={
+                "sportId": sport_id,
+                "startDate": start.isoformat(),
+                "endDate": end.isoformat(),
+                "hydrate": "team,linescore",
+            },
+        )
+        games = []
+        for date_entry in data.get("dates", []):
+            for game in date_entry.get("games", []):
+                games.append(self._parse_schedule_game(game))
+        return games
+
+    def _parse_schedule_game(self, game: dict) -> dict[str, Any]:
+        teams = game.get("teams", {})
+        home = teams.get("home", {})
+        away = teams.get("away", {})
+        linescore = game.get("linescore", {})
+
+        home_team_id = home.get("team", {}).get("id")
+        away_team_id = away.get("team", {}).get("id")
+
+        return {
+            "game_id": str(game["gamePk"]),
+            "game_date": game.get("officialDate", game.get("gameDate", "")[:10]),
+            "home_team_id": TEAM_ABBREVS.get(home_team_id, str(home_team_id)),
+            "away_team_id": TEAM_ABBREVS.get(away_team_id, str(away_team_id)),
+            "home_score": home.get("score"),
+            "away_score": away.get("score"),
+            "status": game.get("status", {}).get("detailedState", "Unknown"),
+            "home_probable_pitcher": self._extract_pitcher(home),
+            "away_probable_pitcher": self._extract_pitcher(away),
+            "innings": linescore.get("currentInning"),
+        }
+
+    def _extract_pitcher(self, team_data: dict) -> dict[str, Any] | None:
+        pitcher = team_data.get("probablePitcher")
+        if not pitcher:
+            return None
+        return {
+            "player_id": pitcher["id"],
+            "name": pitcher.get("fullName", ""),
+        }
+
+    # ── Boxscores ──────────────────────────────────────────────
+
+    async def get_boxscore(self, game_id: str | int) -> dict[str, Any]:
+        """Fetch full boxscore for a completed game."""
+        data = await self._get(f"/game/{game_id}/boxscore")
+        return self._parse_boxscore(data, str(game_id))
+
+    def _parse_boxscore(self, data: dict, game_id: str) -> dict[str, Any]:
+        result: dict[str, Any] = {"game_id": game_id, "home": {}, "away": {}}
+
+        for side in ("home", "away"):
+            team_data = data.get("teams", {}).get(side, {})
+            team_info = team_data.get("team", {})
+            team_id = TEAM_ABBREVS.get(team_info.get("id"), str(team_info.get("id", "")))
+
+            batters = []
+            pitchers = []
+            for player_id_str, player in team_data.get("players", {}).items():
+                pid = player.get("person", {}).get("id")
+                name = player.get("person", {}).get("fullName", "")
+                stats = player.get("stats", {})
+
+                batting = stats.get("batting", {})
+                if batting:
+                    batters.append({
+                        "player_id": pid,
+                        "name": name,
+                        "at_bats": _int(batting.get("atBats")),
+                        "runs": _int(batting.get("runs")),
+                        "hits": _int(batting.get("hits")),
+                        "doubles": _int(batting.get("doubles")),
+                        "triples": _int(batting.get("triples")),
+                        "home_runs": _int(batting.get("homeRuns")),
+                        "rbi": _int(batting.get("rbi")),
+                        "walks": _int(batting.get("baseOnBalls")),
+                        "strikeouts": _int(batting.get("strikeOuts")),
+                        "stolen_bases": _int(batting.get("stolenBases")),
+                    })
+
+                pitching = stats.get("pitching", {})
+                if pitching and pitching.get("inningsPitched"):
+                    pitchers.append({
+                        "player_id": pid,
+                        "name": name,
+                        "innings_pitched": _ip(pitching.get("inningsPitched")),
+                        "hits_allowed": _int(pitching.get("hits")),
+                        "runs_allowed": _int(pitching.get("runs")),
+                        "earned_runs": _int(pitching.get("earnedRuns")),
+                        "walks_allowed": _int(pitching.get("baseOnBalls")),
+                        "strikeouts_recorded": _int(pitching.get("strikeOuts")),
+                        "pitches_thrown": _int(pitching.get("numberOfPitches")),
+                    })
+
+            result[side] = {
+                "team_id": team_id,
+                "batters": batters,
+                "pitchers": pitchers,
+            }
+
+        return result
+
+    # ── Team Stats ─────────────────────────────────────────────
+
+    async def get_team_stats(
+        self, team_id: int, season: int, group: str = "hitting"
+    ) -> dict[str, Any]:
+        """Fetch season stats for a team. group: hitting | pitching | fielding."""
+        data = await self._get(
+            f"/teams/{team_id}/stats",
+            params={
+                "stats": "season",
+                "group": group,
+                "season": season,
+            },
+        )
+        splits = data.get("stats", [{}])[0].get("splits", [])
+        if splits:
+            return splits[0].get("stat", {})
+        return {}
+
+    async def get_team_season_stats(
+        self, team_abbrev: str, season: int
+    ) -> dict[str, dict[str, Any]]:
+        """Fetch hitting, pitching, and fielding stats for a team."""
+        team_id = TEAM_IDS.get(team_abbrev)
+        if team_id is None:
+            raise ValueError(f"Unknown team abbreviation: {team_abbrev}")
+
+        hitting = await self.get_team_stats(team_id, season, "hitting")
+        pitching = await self.get_team_stats(team_id, season, "pitching")
+        fielding = await self.get_team_stats(team_id, season, "fielding")
+
+        return {"hitting": hitting, "pitching": pitching, "fielding": fielding}
+
+    # ── Player Stats ───────────────────────────────────────────
+
+    async def get_player_stats(
+        self, player_id: int, season: int, group: str = "hitting"
+    ) -> dict[str, Any]:
+        """Fetch season stats for a player."""
+        data = await self._get(
+            f"/people/{player_id}/stats",
+            params={
+                "stats": "season",
+                "group": group,
+                "season": season,
+            },
+        )
+        splits = data.get("stats", [{}])[0].get("splits", [])
+        if splits:
+            return splits[0].get("stat", {})
+        return {}
+
+    async def get_player_game_log(
+        self, player_id: int, season: int, group: str = "hitting"
+    ) -> list[dict[str, Any]]:
+        """Fetch game-by-game stats for a player."""
+        data = await self._get(
+            f"/people/{player_id}/stats",
+            params={
+                "stats": "gameLog",
+                "group": group,
+                "season": season,
+            },
+        )
+        splits = data.get("stats", [{}])[0].get("splits", [])
+        return splits
+
+    # ── Rosters ────────────────────────────────────────────────
+
+    async def get_roster(
+        self, team_id: int, roster_type: str = "active"
+    ) -> list[dict[str, Any]]:
+        """Fetch team roster. roster_type: active | fullSeason | 40Man."""
+        data = await self._get(
+            f"/teams/{team_id}/roster",
+            params={"rosterType": roster_type},
+        )
+        players = []
+        for entry in data.get("roster", []):
+            person = entry.get("person", {})
+            pos = entry.get("position", {})
+            players.append({
+                "player_id": person.get("id"),
+                "name": person.get("fullName", ""),
+                "position": pos.get("abbreviation", ""),
+                "bats": person.get("batSide", {}).get("code", ""),
+                "throws": person.get("pitchHand", {}).get("code", ""),
+            })
+        return players
+
+    # ── Teams List ─────────────────────────────────────────────
+
+    async def get_teams(self, season: int | None = None) -> list[dict[str, Any]]:
+        """Fetch all MLB teams."""
+        params: dict[str, Any] = {"sportId": 1}
+        if season:
+            params["season"] = season
+        data = await self._get("/teams", params=params)
+        teams = []
+        for t in data.get("teams", []):
+            teams.append({
+                "team_id": TEAM_ABBREVS.get(t["id"], str(t["id"])),
+                "team_api_id": t["id"],
+                "team_name": t.get("name", ""),
+                "division": t.get("division", {}).get("name", ""),
+                "league": t.get("league", {}).get("abbreviation", ""),
+                "stadium_name": t.get("venue", {}).get("name", ""),
+            })
+        return teams
+
+
+# ── Helpers ────────────────────────────────────────────────────
+
+
+def _int(val: Any) -> int | None:
+    if val is None:
+        return None
+    try:
+        return int(val)
+    except (ValueError, TypeError):
+        return None
+
+
+def _ip(val: Any) -> float | None:
+    """Convert innings pitched string (e.g. '6.2' meaning 6 and 2/3) to float."""
+    if val is None:
+        return None
+    try:
+        s = str(val)
+        if "." in s:
+            whole, frac = s.split(".")
+            return int(whole) + int(frac) / 3.0
+        return float(s)
+    except (ValueError, TypeError):
+        return None

@@ -1,0 +1,75 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+*.so
+*.pyd
+
+# Virtual environments
+.env
+.venv/
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Linting
+.ruff_cache/
+.mypy_cache/
+
+# Database
+*.db
+*.sqlite3
+postgres_data/
+
+# Logs
+*.log
+logs/
+
+# Docker
+docker-compose.override.yml
+
+# Secrets / credentials
+*.pem
+*.key
+credentials.json
+secrets.yaml
+.env.*
+!.env.example
+
+# Model artifacts
+*.pkl
+*.joblib
+*.h5
+*.onnx
+mlruns/
+mlartifacts/
+
+# Data files (large)
+*.csv
+*.parquet
+*.feather
+data/raw/
+data/processed/
+
+# OS
+Thumbs.db
