@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>That's Baseball — MLB Predictions & Rankings</title>
+    <style>
+        :root {
+            --bg: #0f1117;
+            --surface: #1a1d27;
+            --surface2: #232734;
+            --border: #2e3348;
+            --text: #e4e6f0;
+            --text-muted: #8b8fa3;
+            --accent: #4f8ff7;
+            --green: #34d399;
+            --red: #f87171;
+            --yellow: #fbbf24;
+            --orange: #fb923c;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+        }
+
+        /* ── Layout ─────────────────────────────── */
+
+        .header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .header h1 span { color: var(--accent); }
+
+        .nav { display: flex; gap: 0.25rem; }
+
+        .nav button {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.15s;
+        }
+
+        .nav button:hover { border-color: var(--accent); color: var(--text); }
+        .nav button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+        .container { max-width: 1400px; margin: 0 auto; padding: 1.5rem 2rem; }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+
+        @media (max-width: 1024px) {
+            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+        }
+
+        /* ── Cards ──────────────────────────────── */
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.25rem;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .card-header h2 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* ── Stat Boxes ─────────────────────────── */
+
+        .stat-box {
+            background: var(--surface2);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-box .label { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem; }
+        .stat-box .value { font-size: 1.75rem; font-weight: 700; }
+        .stat-box .sub { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem; }
+
+        .positive { color: var(--green); }
+        .negative { color: var(--red); }
+        .neutral { color: var(--yellow); }
+
+        /* ── Tables ─────────────────────────────── */
+
+        table { width: 100%; border-collapse: collapse; }
+
+        th {
+            text-align: left;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 0.65rem 0.75rem;
+            font-size: 0.875rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tr:hover { background: var(--surface2); }
+
+        .rank-cell { font-weight: 700; color: var(--accent); width: 40px; }
+
+        .team-cell {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tier-badge {
+            font-size: 0.65rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 99px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .tier-elite { background: rgba(79,143,247,0.15); color: var(--accent); }
+        .tier-contender { background: rgba(52,211,153,0.15); color: var(--green); }
+        .tier-average { background: rgba(251,191,36,0.15); color: var(--yellow); }
+        .tier-below_average { background: rgba(251,146,60,0.15); color: var(--orange); }
+        .tier-rebuilding { background: rgba(248,113,113,0.15); color: var(--red); }
+
+        .change-up { color: var(--green); }
+        .change-down { color: var(--red); }
+
+        /* ── Score Bar ──────────────────────────── */
+
+        .score-bar-wrap { display: flex; align-items: center; gap: 0.5rem; }
+
+        .score-bar {
+            flex: 1;
+            height: 6px;
+            background: var(--surface2);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .score-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+
+        .score-val { font-size: 0.8rem; font-weight: 600; min-width: 32px; text-align: right; }
+
+        /* ── Game Cards ─────────────────────────── */
+
+        .game-card {
+            background: var(--surface2);
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .game-matchup {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .game-matchup .vs { color: var(--text-muted); font-weight: 400; font-size: 0.8rem; }
+
+        .game-prob {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+        }
+
+        .prob-bar {
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            display: flex;
+        }
+
+        .prob-bar .home-fill {
+            background: var(--accent);
+            transition: width 0.3s;
+        }
+
+        .prob-bar .away-fill {
+            background: var(--red);
+            transition: width 0.3s;
+        }
+
+        .game-score {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .game-confidence {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* ── Bet Cards ──────────────────────────── */
+
+        .bet-card {
+            background: var(--surface2);
+            border-radius: 8px;
+            padding: 1rem;
+            border-left: 3px solid var(--green);
+        }
+
+        .bet-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .bet-type { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
+        .bet-edge { font-weight: 700; color: var(--green); }
+
+        .bet-details { font-size: 0.85rem; display: flex; flex-direction: column; gap: 0.25rem; }
+
+        /* ── Loading ────────────────────────────── */
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        .spinner {
+            width: 32px; height: 32px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── Section Spacing ────────────────────── */
+
+        .section { margin-bottom: 1.5rem; }
+        .section-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>That's <span>Baseball</span></h1>
+    <div class="nav">
+        <button class="active" onclick="showTab('predictions')">Predictions</button>
+        <button onclick="showTab('rankings')">Rankings</button>
+        <button onclick="showTab('betting')">Betting</button>
+        <button onclick="showTab('analytics')">Analytics</button>
+    </div>
+</div>
+
+<div class="container">
+
+    <!-- PREDICTIONS TAB -->
+    <div id="tab-predictions">
+        <div class="section">
+            <div class="section-title">Today's Predictions</div>
+            <div id="predictions-grid" class="grid-3">
+                <div class="loading"><div class="spinner"></div>Loading predictions...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RANKINGS TAB -->
+    <div id="tab-rankings" class="hidden">
+        <div class="section">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Team Power Rankings</h2>
+                    <div class="nav">
+                        <button class="active" onclick="loadRankings('power', this)">Power</button>
+                        <button onclick="loadRankings('offense', this)">Offense</button>
+                        <button onclick="loadRankings('pitching', this)">Pitching</button>
+                        <button onclick="loadRankings('defense', this)">Defense</button>
+                        <button onclick="loadRankings('bullpen', this)">Bullpen</button>
+                    </div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Team</th>
+                            <th>Score</th>
+                            <th>OFF</th>
+                            <th>PIT</th>
+                            <th>DEF</th>
+                            <th>BP</th>
+                            <th>MOM</th>
+                            <th>Record</th>
+                            <th>L10</th>
+                            <th>Streak</th>
+                            <th>Tier</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rankings-body">
+                        <tr><td colspan="12" class="loading">Loading rankings...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- BETTING TAB -->
+    <div id="tab-betting" class="hidden">
+        <div class="section">
+            <div class="grid-4" id="betting-stats">
+                <div class="stat-box">
+                    <div class="label">Today's Bets</div>
+                    <div class="value" id="stat-bets">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">Total Stake</div>
+                    <div class="value" id="stat-stake">$0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">Expected Value</div>
+                    <div class="value positive" id="stat-ev">$0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">Risk Level</div>
+                    <div class="value neutral" id="stat-risk">--</div>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <div class="section-title">Value Bets</div>
+            <div id="bets-grid" class="grid-2">
+                <div class="loading">No betting recommendations yet</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ANALYTICS TAB -->
+    <div id="tab-analytics" class="hidden">
+        <div class="section">
+            <div class="grid-4" id="perf-stats">
+                <div class="stat-box">
+                    <div class="label">Accuracy</div>
+                    <div class="value" id="stat-acc">--%</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">Brier Score</div>
+                    <div class="value" id="stat-brier">--</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">ROI (Kelly)</div>
+                    <div class="value positive" id="stat-roi">--%</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">Sharpe Ratio</div>
+                    <div class="value" id="stat-sharpe">--</div>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-header"><h2>Stadium Park Factors</h2></div>
+                    <table>
+                        <thead>
+                            <tr><th>Team</th><th>Alt (ft)</th><th>Surface</th><th>Roof</th><th>Avg Dim</th></tr>
+                        </thead>
+                        <tbody id="stadiums-body">
+                            <tr><td colspan="5" class="loading">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h2>Model Performance</h2></div>
+                    <div class="loading" style="padding:2rem">
+                        Train models and run predictions to see performance metrics here.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+const API = '/api/v1';
+
+function showTab(tab) {
+    document.querySelectorAll('[id^="tab-"]').forEach(el => el.classList.add('hidden'));
+    document.getElementById(`tab-${tab}`).classList.remove('hidden');
+    document.querySelectorAll('.header .nav button').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+
+    if (tab === 'predictions') loadPredictions();
+    if (tab === 'rankings') loadRankings('power');
+    if (tab === 'betting') loadBetting();
+    if (tab === 'analytics') loadAnalytics();
+}
+
+async function fetchJSON(url) {
+    try {
+        const res = await fetch(url);
+        return await res.json();
+    } catch (e) {
+        console.error('Fetch error:', e);
+        return null;
+    }
+}
+
+// ── Predictions ─────────────────────────────────────
+
+async function loadPredictions() {
+    const data = await fetchJSON(`${API}/predictions/daily`);
+    const grid = document.getElementById('predictions-grid');
+
+    if (!data || !data.games || data.games.length === 0) {
+        grid.innerHTML = `<div class="loading">No predictions available yet. Run the daily pipeline to generate predictions.</div>`;
+        return;
+    }
+
+    grid.innerHTML = data.games.map(g => `
+        <div class="game-card">
+            <div class="game-matchup">
+                <span>${g.away_team}</span>
+                <span class="vs">@</span>
+                <span>${g.home_team}</span>
+            </div>
+            <div class="game-prob">
+                <span>${(g.away_win_prob * 100).toFixed(1)}%</span>
+                <span>${(g.home_win_prob * 100).toFixed(1)}%</span>
+            </div>
+            <div class="prob-bar">
+                <div class="away-fill" style="width:${g.away_win_prob * 100}%"></div>
+                <div class="home-fill" style="width:${g.home_win_prob * 100}%"></div>
+            </div>
+            <div class="game-score">
+                Predicted: ${g.predicted_away_runs} - ${g.predicted_home_runs}
+            </div>
+            <div class="game-confidence">
+                <span>Confidence: ${g.confidence.toFixed(0)}%</span>
+                <span>Winner: ${g.predicted_winner}</span>
+            </div>
+        </div>
+    `).join('');
+}
+
+// ── Rankings ────────────────────────────────────────
+
+async function loadRankings(type, btn) {
+    if (btn) {
+        btn.closest('.nav').querySelectorAll('button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    }
+
+    const data = await fetchJSON(`${API}/rankings/teams?type=${type}`);
+    const tbody = document.getElementById('rankings-body');
+
+    if (!data || !data.rankings || data.rankings.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="12" class="loading">No rankings available yet.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = data.rankings.map(r => {
+        const changeIcon = r.rank_change > 0 ? `<span class="change-up">+${r.rank_change}</span>` :
+                          r.rank_change < 0 ? `<span class="change-down">${r.rank_change}</span>` : '-';
+        const tierClass = `tier-${r.tier}`;
+
+        return `<tr>
+            <td class="rank-cell">${r.rank}</td>
+            <td><div class="team-cell">${r.team_name} ${changeIcon}</div></td>
+            <td><b>${r.power_score.toFixed(1)}</b></td>
+            <td>${scoreBar(r.offense_score)}</td>
+            <td>${scoreBar(r.pitching_score)}</td>
+            <td>${scoreBar(r.defense_score)}</td>
+            <td>${scoreBar(r.bullpen_score)}</td>
+            <td>${scoreBar(r.momentum_score)}</td>
+            <td>${r.wins}-${r.losses}</td>
+            <td>${r.last_10_record}</td>
+            <td>${r.streak}</td>
+            <td><span class="tier-badge ${tierClass}">${r.tier.replace('_', ' ')}</span></td>
+        </tr>`;
+    }).join('');
+}
+
+function scoreBar(val) {
+    const color = val >= 65 ? 'var(--accent)' : val >= 50 ? 'var(--green)' : val >= 35 ? 'var(--yellow)' : 'var(--red)';
+    return `<div class="score-bar-wrap">
+        <div class="score-bar"><div class="score-bar-fill" style="width:${val}%;background:${color}"></div></div>
+        <span class="score-val">${val.toFixed(0)}</span>
+    </div>`;
+}
+
+// ── Betting ─────────────────────────────────────────
+
+async function loadBetting() {
+    const data = await fetchJSON(`${API}/betting/recommendations`);
+    if (!data) return;
+
+    document.getElementById('stat-bets').textContent = data.num_bets;
+    document.getElementById('stat-stake').textContent = `$${data.total_stake.toFixed(0)}`;
+    document.getElementById('stat-ev').textContent = `$${data.total_ev.toFixed(0)}`;
+    document.getElementById('stat-risk').textContent = data.risk_level;
+
+    const grid = document.getElementById('bets-grid');
+    if (!data.bets || data.bets.length === 0) {
+        grid.innerHTML = `<div class="loading">No value bets found today.</div>`;
+        return;
+    }
+
+    grid.innerHTML = data.bets.map(b => `
+        <div class="bet-card">
+            <div class="bet-header">
+                <span class="bet-type">${b.bet_type} — ${b.selection}</span>
+                <span class="bet-edge">+${b.edge_pct.toFixed(1)}% edge</span>
+            </div>
+            <div class="bet-details">
+                <span>${b.away_team} @ ${b.home_team}</span>
+                <span>Odds: ${b.odds > 0 ? '+' : ''}${b.odds} | Model: ${(b.model_prob * 100).toFixed(1)}% vs Market: ${(b.implied_prob * 100).toFixed(1)}%</span>
+                <span>Stake: $${b.recommended_stake.toFixed(0)} | EV: $${(b.ev_per_dollar * b.recommended_stake).toFixed(2)}</span>
+            </div>
+        </div>
+    `).join('');
+}
+
+// ── Analytics ───────────────────────────────────────
+
+async function loadAnalytics() {
+    const stadiums = await fetchJSON(`${API}/analytics/stadiums`);
+    const tbody = document.getElementById('stadiums-body');
+
+    if (stadiums && stadiums.length) {
+        tbody.innerHTML = stadiums.map(s => `
+            <tr>
+                <td><b>${s.team_id}</b></td>
+                <td>${s.altitude_ft.toLocaleString()}</td>
+                <td>${s.surface}</td>
+                <td>${s.roof}</td>
+                <td>${s.dimension_avg}</td>
+            </tr>
+        `).join('');
+    }
+
+    const perf = await fetchJSON(`${API}/analytics/performance`);
+    if (perf) {
+        document.getElementById('stat-acc').textContent = perf.accuracy ? `${(perf.accuracy * 100).toFixed(1)}%` : '--%';
+        document.getElementById('stat-brier').textContent = perf.brier_score ? perf.brier_score.toFixed(4) : '--';
+        document.getElementById('stat-roi').textContent = perf.roi_kelly ? `${(perf.roi_kelly * 100).toFixed(1)}%` : '--%';
+    }
+}
+
+// ── Init ────────────────────────────────────────────
+
+loadPredictions();
+</script>
+
+</body>
+</html>
