@@ -134,7 +134,7 @@ class BettingConfig:
     kelly_fraction: float = 0.25  # Quarter Kelly
     max_bet_pct: float = 0.05  # Max 5% of bankroll per bet
     max_daily_exposure: float = 0.20  # Max 20% of bankroll at risk per day
-    min_confidence: float = 40.0  # Minimum model confidence to bet
+    min_confidence: float = 50.0  # Minimum model confidence to bet
     min_odds: float = -200  # Won't bet on heavy favorites past -200
     max_odds: float = 250  # Won't bet on longshots past +250
 

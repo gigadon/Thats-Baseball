@@ -133,8 +133,16 @@ class DailyRunner:
             try:
                 odds_data = await self.odds_client.get_mlb_odds()
                 if odds_data:
-                    odds_matched = self._match_odds_to_games(predictions, odds_data)
-                    slip = self.betting_engine.find_value_bets(predictions, odds_matched)
+                    # Only bet on games where both starters are announced
+                    eligible_ids = {
+                        p["game_id"]
+                        for p in result["predictions"]
+                        if p.get("home_sp_name", "TBD") != "TBD"
+                        and p.get("away_sp_name", "TBD") != "TBD"
+                    }
+                    bet_preds = [p for p in predictions if p.game_id in eligible_ids]
+                    odds_matched = self._match_odds_to_games(bet_preds, odds_data)
+                    slip = self.betting_engine.find_value_bets(bet_preds, odds_matched)
                     result["betting_slip"] = self._slip_to_dict(slip)
                     logger.info(
                         "Betting: %d value bets, $%.2f total stake, $%.2f EV",
