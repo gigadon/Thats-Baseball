@@ -488,6 +488,8 @@ class DailyRunner:
                     "recommended_stake": b.recommended_stake,
                     "confidence": b.confidence,
                     "ev_per_dollar": b.ev_per_dollar,
+                    "decimal_odds": b.decimal_odds,
+                    "total_line": b.total_line,
                 }
                 for b in slip.bets
             ],

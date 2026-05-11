@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from fastapi import APIRouter, Query
 
 from mlb.api.schemas import (
@@ -21,15 +23,29 @@ async def get_performance(
     start_date: str = Query(default=None),
     end_date: str = Query(default=None),
 ):
-    """Get model performance metrics for a period."""
+    """Get model performance metrics from settlement data."""
+    from mlb.betting.settlement import load_all_settlements
+
+    settlements = load_all_settlements(Path("data"))
+    if start_date:
+        settlements = [s for s in settlements if s["date"] >= start_date]
+    if end_date:
+        settlements = [s for s in settlements if s["date"] <= end_date]
+
+    all_bets = [b for s in settlements for b in s.get("bets", [])]
+    total = len(all_bets)
+    wins = sum(1 for b in all_bets if b.get("result") == "win")
+    staked = sum(b.get("recommended_stake", 0) for b in all_bets)
+    pnl = sum(b.get("pnl", 0) for b in all_bets)
+
     return PerformanceResponse(
         period=f"{start_date or 'season_start'} to {end_date or 'today'}",
-        total_games=0,
-        accuracy=0.0,
+        total_games=total,
+        accuracy=round(wins / total, 4) if total > 0 else 0.0,
         brier_score=0.0,
         auc_roc=0.0,
-        roi_flat=0.0,
-        roi_kelly=0.0,
+        roi_flat=round(pnl / staked, 4) if staked > 0 else 0.0,
+        roi_kelly=round(pnl / staked, 4) if staked > 0 else 0.0,
         high_confidence_accuracy=0.0,
         calibration_error=0.0,
     )
@@ -40,8 +56,27 @@ async def get_pnl_history(
     start_date: str = Query(default=None),
     end_date: str = Query(default=None),
 ):
-    """Get daily P&L history."""
-    return []
+    """Get daily P&L history from settlement files."""
+    from mlb.betting.settlement import load_all_settlements
+
+    settlements = load_all_settlements(Path("data"))
+    if start_date:
+        settlements = [s for s in settlements if s["date"] >= start_date]
+    if end_date:
+        settlements = [s for s in settlements if s["date"] <= end_date]
+
+    return [
+        PnLResponse(
+            date=s["date"],
+            daily_pnl=s["summary"]["daily_pnl"],
+            cumulative_pnl=s["summary"]["cumulative_pnl"],
+            bets_placed=s["summary"]["bets_placed"],
+            bets_won=s["summary"]["bets_won"],
+            roi=s["summary"]["roi"],
+            max_drawdown=s["summary"]["max_drawdown"],
+        )
+        for s in settlements
+    ]
 
 
 @router.get("/stadium/{team_id}", response_model=StadiumAnalysisResponse)

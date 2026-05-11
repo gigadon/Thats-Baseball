@@ -80,15 +80,35 @@ async def get_betting_history(
     end_date: str = Query(default=None),
     limit: int = Query(30, ge=1, le=365),
 ):
-    """Get betting P&L history."""
-    # In production, pull from betting_results table
+    """Get settled bet history with P&L."""
+    from mlb.betting.settlement import load_all_settlements
+
+    settlements = load_all_settlements(Path("data"))
+
+    if start_date:
+        settlements = [s for s in settlements if s["date"] >= start_date]
+    if end_date:
+        settlements = [s for s in settlements if s["date"] <= end_date]
+
+    settlements = settlements[-limit:]
+
+    all_bets = []
+    for s in settlements:
+        for bet in s.get("bets", []):
+            bet["date"] = s["date"]
+            all_bets.append(bet)
+
+    total_won = sum(1 for b in all_bets if b.get("result") == "win")
+    total_staked = sum(b.get("recommended_stake", 0) for b in all_bets)
+    total_pnl = sum(b.get("pnl", 0) for b in all_bets)
+
     return {
         "period": f"{start_date or 'start'} to {end_date or 'now'}",
-        "total_bets": 0,
-        "total_wins": 0,
-        "total_pnl": 0.0,
-        "roi": 0.0,
-        "records": [],
+        "total_bets": len(all_bets),
+        "total_wins": total_won,
+        "total_pnl": round(total_pnl, 2),
+        "roi": round(total_pnl / total_staked, 4) if total_staked > 0 else 0.0,
+        "records": settlements,
     }
 
 

@@ -405,6 +405,29 @@
                 <div class="loading">No betting recommendations yet</div>
             </div>
         </div>
+        <div class="section">
+            <div class="section-title">Bet History</div>
+            <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Game</th>
+                        <th>Type</th>
+                        <th>Pick</th>
+                        <th>Odds</th>
+                        <th>Stake</th>
+                        <th>Score</th>
+                        <th>Result</th>
+                        <th>P&L</th>
+                    </tr>
+                </thead>
+                <tbody id="history-body">
+                    <tr><td colspan="9" class="loading">No settled bets yet</td></tr>
+                </tbody>
+            </table>
+            </div>
+        </div>
     </div>
 
     <!-- ANALYTICS TAB -->
@@ -412,41 +435,43 @@
         <div class="section">
             <div class="grid-4" id="perf-stats">
                 <div class="stat-box">
-                    <div class="label">Accuracy</div>
+                    <div class="label">Total P&L</div>
+                    <div class="value" id="stat-total-pnl">$0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">Win Rate</div>
                     <div class="value" id="stat-acc">--%</div>
                 </div>
                 <div class="stat-box">
-                    <div class="label">Brier Score</div>
-                    <div class="value" id="stat-brier">--</div>
+                    <div class="label">ROI</div>
+                    <div class="value" id="stat-roi">--%</div>
                 </div>
                 <div class="stat-box">
-                    <div class="label">ROI (Kelly)</div>
-                    <div class="value positive" id="stat-roi">--%</div>
-                </div>
-                <div class="stat-box">
-                    <div class="label">Sharpe Ratio</div>
-                    <div class="value" id="stat-sharpe">--</div>
+                    <div class="label">Max Drawdown</div>
+                    <div class="value" id="stat-drawdown">--%</div>
                 </div>
             </div>
         </div>
         <div class="section">
-            <div class="grid-2">
-                <div class="card">
-                    <div class="card-header"><h2>Stadium Park Factors</h2></div>
-                    <table>
-                        <thead>
-                            <tr><th>Team</th><th>Alt (ft)</th><th>Surface</th><th>Roof</th><th>Avg Dim</th></tr>
-                        </thead>
-                        <tbody id="stadiums-body">
-                            <tr><td colspan="5" class="loading">Loading...</td></tr>
-                        </tbody>
-                    </table>
+            <div class="card">
+                <div class="card-header"><h2>Cumulative P&L</h2></div>
+                <div id="pnl-chart" style="padding:1rem; min-height:200px;">
+                    <div class="loading">No settlement data yet</div>
                 </div>
-                <div class="card">
-                    <div class="card-header"><h2>Model Performance</h2></div>
-                    <div class="loading" style="padding:2rem">
-                        Train models and run predictions to see performance metrics here.
-                    </div>
+            </div>
+        </div>
+        <div class="section">
+            <div class="card">
+                <div class="card-header"><h2>Stadium Park Factors</h2></div>
+                <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>Team</th><th>Alt (ft)</th><th>Surface</th><th>Roof</th><th>Avg Dim</th></tr>
+                    </thead>
+                    <tbody id="stadiums-body">
+                        <tr><td colspan="5" class="loading">Loading...</td></tr>
+                    </tbody>
+                </table>
                 </div>
             </div>
         </div>
@@ -598,14 +623,49 @@ async function loadBetting() {
             </div>
         </div>
     `).join('');
+
+    // Load bet history
+    await loadBetHistory();
 }
+
+async function loadBetHistory() {
+    const data = await fetchJSON(`${API}/betting/history?limit=50`);
+    const tbody = document.getElementById('history-body');
+    if (!data || !data.records || data.records.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="loading">No settled bets yet</td></tr>';
+        return;
+    }
+
+    let rows = '';
+    for (const day of data.records.reverse()) {
+        for (const b of day.bets) {
+            const badge = b.result === 'win'
+                ? '<span style="color:var(--green);font-weight:700">W</span>'
+                : b.result === 'loss'
+                    ? '<span style="color:var(--red);font-weight:700">L</span>'
+                    : '<span style="color:var(--yellow);font-weight:700">P</span>';
+            const pnlColor = b.pnl >= 0 ? 'var(--green)' : 'var(--red)';
+            rows += `<tr>
+                <td>${day.date}</td>
+                <td>${b.away_team}@${b.home_team}</td>
+                <td>${b.bet_type}</td>
+                <td>${b.selection}</td>
+                <td>${b.odds > 0 ? '+' : ''}${b.odds}</td>
+                <td>$${b.recommended_stake.toFixed(0)}</td>
+                <td>${b.actual_away_score}-${b.actual_home_score}</td>
+                <td>${badge}</td>
+                <td style="color:${pnlColor}">$${b.pnl >= 0 ? '+' : ''}${b.pnl.toFixed(2)}</td>
+            </tr>`;
+        }
+    }
+    tbody.innerHTML = rows;
 
 // ── Analytics ───────────────────────────────────────
 
 async function loadAnalytics() {
+    // Load stadiums
     const stadiums = await fetchJSON(`${API}/analytics/stadiums`);
     const tbody = document.getElementById('stadiums-body');
-
     if (stadiums && stadiums.length) {
         tbody.innerHTML = stadiums.map(s => `
             <tr>
@@ -618,12 +678,67 @@ async function loadAnalytics() {
         `).join('');
     }
 
+    // Load performance stats
     const perf = await fetchJSON(`${API}/analytics/performance`);
     if (perf) {
         document.getElementById('stat-acc').textContent = perf.accuracy ? `${(perf.accuracy * 100).toFixed(1)}%` : '--%';
-        document.getElementById('stat-brier').textContent = perf.brier_score ? perf.brier_score.toFixed(4) : '--';
         document.getElementById('stat-roi').textContent = perf.roi_kelly ? `${(perf.roi_kelly * 100).toFixed(1)}%` : '--%';
     }
+
+    // Load P&L chart
+    const pnl = await fetchJSON(`${API}/analytics/pnl`);
+    const chartEl = document.getElementById('pnl-chart');
+
+    if (!pnl || pnl.length === 0) {
+        chartEl.innerHTML = '<div class="loading">No settlement data yet</div>';
+        // Update stat boxes
+        document.getElementById('stat-total-pnl').textContent = '$0';
+        document.getElementById('stat-drawdown').textContent = '--%';
+        return;
+    }
+
+    // Update stat boxes from latest data
+    const latest = pnl[pnl.length - 1];
+    const totalPnl = latest.cumulative_pnl;
+    const pnlEl = document.getElementById('stat-total-pnl');
+    pnlEl.textContent = `$${totalPnl >= 0 ? '+' : ''}${totalPnl.toFixed(0)}`;
+    pnlEl.className = `value ${totalPnl >= 0 ? 'positive' : 'negative'}`;
+    document.getElementById('stat-drawdown').textContent = `${(latest.max_drawdown * 100).toFixed(1)}%`;
+
+    // Draw SVG line chart
+    const W = 600, H = 180, PAD = 40;
+    const values = pnl.map(d => d.cumulative_pnl);
+    const minV = Math.min(0, ...values);
+    const maxV = Math.max(0, ...values);
+    const range = maxV - minV || 1;
+
+    function x(i) { return PAD + (i / Math.max(values.length - 1, 1)) * (W - PAD * 2); }
+    function y(v) { return PAD + (1 - (v - minV) / range) * (H - PAD * 2); }
+
+    const points = values.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+    const zeroY = y(0).toFixed(1);
+    const lineColor = totalPnl >= 0 ? 'var(--green)' : 'var(--red)';
+
+    // Build date labels (first, middle, last)
+    const labels = [];
+    if (pnl.length >= 1) labels.push(`<text x="${PAD}" y="${H - 5}" fill="var(--text-muted)" font-size="10">${pnl[0].date.slice(5)}</text>`);
+    if (pnl.length >= 3) {
+        const mid = Math.floor(pnl.length / 2);
+        labels.push(`<text x="${x(mid).toFixed(1)}" y="${H - 5}" fill="var(--text-muted)" font-size="10" text-anchor="middle">${pnl[mid].date.slice(5)}</text>`);
+    }
+    if (pnl.length >= 2) labels.push(`<text x="${W - PAD}" y="${H - 5}" fill="var(--text-muted)" font-size="10" text-anchor="end">${pnl[pnl.length-1].date.slice(5)}</text>`);
+
+    chartEl.innerHTML = `
+        <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;">
+            <line x1="${PAD}" y1="${zeroY}" x2="${W-PAD}" y2="${zeroY}" stroke="var(--border)" stroke-dasharray="4"/>
+            <text x="${PAD - 5}" y="${zeroY}" fill="var(--text-muted)" font-size="10" text-anchor="end" dominant-baseline="middle">$0</text>
+            <text x="${PAD - 5}" y="${y(maxV).toFixed(1)}" fill="var(--green)" font-size="10" text-anchor="end" dominant-baseline="middle">$${maxV.toFixed(0)}</text>
+            ${minV < 0 ? `<text x="${PAD - 5}" y="${y(minV).toFixed(1)}" fill="var(--red)" font-size="10" text-anchor="end" dominant-baseline="middle">$${minV.toFixed(0)}</text>` : ''}
+            <polyline points="${points}" fill="none" stroke="${lineColor}" stroke-width="2"/>
+            ${values.map((v, i) => `<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="3" fill="${lineColor}"/>`).join('')}
+            ${labels.join('')}
+        </svg>
+    `;
 }
 
 // ── Init ────────────────────────────────────────────

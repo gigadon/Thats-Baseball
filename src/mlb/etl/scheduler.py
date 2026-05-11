@@ -33,20 +33,23 @@ class DailyScheduler:
         model_dir: Path = Path("models"),
         predict_hour: int = 10,   # 10 AM local time
         backfill_hour: int = 6,   # 6 AM local time
+        settle_hour: int = 23,    # 11 PM local time
     ):
         self.data_dir = data_dir
         self.model_dir = model_dir
         self.predict_hour = predict_hour
         self.backfill_hour = backfill_hour
+        self.settle_hour = settle_hour
         self._running = True
         self._last_backfill: date | None = None
         self._last_predict: date | None = None
+        self._last_settle: date | None = None
 
     async def start(self, run_now: bool = False):
         """Start the scheduler loop."""
         logger.info(
-            "Scheduler started — backfill at %02d:00, predictions at %02d:00",
-            self.backfill_hour, self.predict_hour,
+            "Scheduler started — backfill at %02d:00, predictions at %02d:00, settlement at %02d:00",
+            self.backfill_hour, self.predict_hour, self.settle_hour,
         )
 
         if run_now:
@@ -68,6 +71,12 @@ class DailyScheduler:
                 await self._run_predictions(today)
                 self._last_predict = today
 
+            # Run settlement if it's past settle_hour and hasn't run today
+            if now.hour >= self.settle_hour and self._last_settle != today:
+                logger.info("Starting scheduled settlement...")
+                await self._run_settlement(today)
+                self._last_settle = today
+
             # Sleep until the next check (every 15 minutes)
             await asyncio.sleep(900)
 
@@ -77,10 +86,11 @@ class DailyScheduler:
         logger.info("Scheduler stopping...")
 
     async def _run_daily_cycle(self):
-        """Run the full daily cycle: backfill yesterday + predict today."""
+        """Run the full daily cycle: backfill yesterday + predict today + settle yesterday."""
         today = date.today()
         await self._run_backfill(today)
         await self._run_predictions(today)
+        await self._run_settlement(today - timedelta(days=1))
         self._last_backfill = today
         self._last_predict = today
 
@@ -93,6 +103,31 @@ class DailyScheduler:
             logger.info("Backfill completed for %s", yesterday)
         except Exception:
             logger.exception("Backfill failed for %s", yesterday)
+
+    async def _run_settlement(self, target: date):
+        """Settle bets for the target date."""
+        try:
+            from mlb.betting.settlement import settle_day
+
+            result = await settle_day(target, data_dir=self.data_dir)
+            if result:
+                s = result["summary"]
+                logger.info(
+                    "Settlement completed for %s: %dW-%dL, P&L: $%.2f",
+                    target, s["bets_won"], s["bets_lost"], s["daily_pnl"],
+                )
+                # Send settlement alert
+                try:
+                    from mlb.alerts import AlertService
+
+                    alerts = AlertService()
+                    await alerts.send_settlement_alert(result)
+                except Exception:
+                    logger.debug("Settlement alert skipped")
+            else:
+                logger.info("No bets to settle for %s", target)
+        except Exception:
+            logger.exception("Settlement failed for %s", target)
 
     async def _run_predictions(self, today: date):
         """Generate predictions for today's games."""
@@ -130,6 +165,7 @@ def main():
     parser.add_argument("--run-now", action="store_true", help="Run immediately, then schedule")
     parser.add_argument("--predict-hour", type=int, default=10, help="Hour to run predictions (0-23)")
     parser.add_argument("--backfill-hour", type=int, default=6, help="Hour to run backfill (0-23)")
+    parser.add_argument("--settle-hour", type=int, default=23, help="Hour to run settlement (0-23)")
     parser.add_argument("--data-dir", type=str, default="data")
     parser.add_argument("--model-dir", type=str, default="models")
     args = parser.parse_args()
@@ -139,6 +175,7 @@ def main():
         model_dir=Path(args.model_dir),
         predict_hour=args.predict_hour,
         backfill_hour=args.backfill_hour,
+        settle_hour=args.settle_hour,
     )
 
     loop = asyncio.new_event_loop()

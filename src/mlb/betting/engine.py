@@ -88,6 +88,9 @@ class BetOpportunity:
     # Expected value
     ev_per_dollar: float  # Expected value per $1 wagered
 
+    # Total line (for total bets)
+    total_line: float | None = None
+
     @property
     def is_value(self) -> bool:
         return self.edge > 0 and self.ev_per_dollar > 0
@@ -365,7 +368,7 @@ class BettingEngine:
             bets.append(self._build_opportunity(
                 pred, "total", "over", over_odds,
                 over_prob, true_over, american_to_implied(over_odds),
-                bankroll,
+                bankroll, total_line=total_line,
             ))
 
         # Under
@@ -374,7 +377,7 @@ class BettingEngine:
             bets.append(self._build_opportunity(
                 pred, "total", "under", under_odds,
                 under_prob, true_under, american_to_implied(under_odds),
-                bankroll,
+                bankroll, total_line=total_line,
             ))
 
         return bets
@@ -389,6 +392,7 @@ class BettingEngine:
         implied_prob: float,
         raw_implied: float,
         bankroll: float,
+        total_line: float | None = None,
     ) -> BetOpportunity:
         dec_odds = american_to_decimal(odds)
         edge = model_prob - implied_prob
@@ -427,6 +431,7 @@ class BettingEngine:
             confidence=pred.confidence,
             model_agreement=pred.model_agreement,
             ev_per_dollar=round(ev, 4),
+            total_line=total_line,
         )
 
     def _apply_position_limits(
@@ -471,9 +476,11 @@ class BettingEngine:
 
         elif bet.bet_type == "total":
             total = home_score + away_score
-            # Would need the line to determine push; simplify
+            line = bet.total_line or 8.5
+            if total == line:
+                return None  # Push
             if bet.selection == "over":
-                return total > 8.5  # Placeholder — real impl uses actual line
-            return total < 8.5
+                return total > line
+            return total < line
 
         return None

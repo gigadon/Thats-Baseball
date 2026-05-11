@@ -142,6 +142,94 @@ class AlertService:
 
         return {"blocks": blocks}
 
+    async def send_settlement_alert(self, settlement: dict):
+        """Send alerts for settlement results."""
+        summary = settlement.get("summary", {})
+        if not summary.get("bets_placed"):
+            return
+
+        message = self._format_settlement_message(settlement)
+        slack_blocks = self._format_settlement_slack_blocks(settlement)
+
+        if self.slack_enabled:
+            await self._send_slack(slack_blocks)
+        if self.email_enabled:
+            self._send_email(
+                subject=f"MLB Settlement — {settlement['date']}",
+                body=message,
+            )
+
+    def _format_settlement_message(self, settlement: dict) -> str:
+        """Format plain-text settlement summary."""
+        s = settlement["summary"]
+        lines = [
+            f"MLB Settlement for {settlement['date']}",
+            "=" * 40,
+            "",
+            f"Record: {s['bets_won']}W-{s['bets_lost']}L-{s['bets_pushed']}P",
+            f"Staked: ${s['total_staked']:.2f}",
+            f"Daily P&L: ${s['daily_pnl']:+.2f}",
+            f"ROI: {s['roi']:.1%}",
+            f"Cumulative P&L: ${s['cumulative_pnl']:+.2f}",
+            f"Max Drawdown: {s['max_drawdown']:.1%}",
+            "",
+        ]
+        for b in settlement.get("bets", []):
+            tag = "W" if b["result"] == "win" else ("L" if b["result"] == "loss" else "P")
+            lines.append(
+                f"  [{tag}] {b['bet_type'].upper()} {b['selection']}  "
+                f"{b['away_team']}@{b['home_team']}  "
+                f"{b['actual_away_score']}-{b['actual_home_score']}  "
+                f"${b['pnl']:+.2f}"
+            )
+        return "\n".join(lines)
+
+    def _format_settlement_slack_blocks(self, settlement: dict) -> dict:
+        """Format Slack Block Kit settlement message."""
+        s = settlement["summary"]
+        pnl_emoji = ":chart_with_upwards_trend:" if s["daily_pnl"] >= 0 else ":chart_with_downwards_trend:"
+
+        blocks = [
+            {
+                "type": "header",
+                "text": {"type": "plain_text", "text": f"Settlement Results — {settlement['date']}"},
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": (
+                        f"{pnl_emoji} *{s['bets_won']}W-{s['bets_lost']}L-{s['bets_pushed']}P*\n"
+                        f"Daily P&L: *${s['daily_pnl']:+.2f}* ({s['roi']:.1%})\n"
+                        f"Cumulative: *${s['cumulative_pnl']:+.2f}*"
+                    ),
+                },
+            },
+            {"type": "divider"},
+        ]
+
+        bet_lines = []
+        for b in settlement.get("bets", []):
+            if b["result"] == "win":
+                emoji = ":white_check_mark:"
+            elif b["result"] == "loss":
+                emoji = ":x:"
+            else:
+                emoji = ":heavy_minus_sign:"
+            bet_lines.append(
+                f"{emoji} {b['bet_type'].upper()} {b['selection']}  "
+                f"*{b['away_team']}@{b['home_team']}*  "
+                f"{b['actual_away_score']}-{b['actual_home_score']}  "
+                f"${b['pnl']:+.2f}"
+            )
+
+        blocks.append({
+            "type": "section",
+            "text": {"type": "mrkdwn", "text": "\n".join(bet_lines)},
+        })
+
+        return {"blocks": blocks}
+
     async def _send_slack(self, payload: dict):
         """Send a Slack webhook message."""
         try:

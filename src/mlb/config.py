@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     mlb_api_base_url: str = "https://statsapi.mlb.com/api/v1"
     mlb_api_rate_limit: int = 1000  # requests per hour
 
-    model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
+    model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 
 
 settings = Settings()

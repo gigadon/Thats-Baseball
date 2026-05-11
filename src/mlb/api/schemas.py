@@ -122,6 +122,8 @@ class BetResponse(BaseModel):
     recommended_stake: float
     confidence: float
     ev_per_dollar: float
+    decimal_odds: float = 0.0
+    total_line: float | None = None
 
 
 class BettingSlipResponse(BaseModel):
