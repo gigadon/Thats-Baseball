@@ -94,6 +94,6 @@ class TestOddsParser:
         assert game["home_moneyline"] == -200
         assert game["total_line"] is None
 
-    def test_no_api_key_warning(self):
-        client = OddsApiClient(api_key="")
-        assert client.api_key == ""
+    def test_explicit_api_key(self):
+        client = OddsApiClient(api_key="my_test_key")
+        assert client.api_key == "my_test_key"

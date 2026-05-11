@@ -249,6 +249,35 @@ class MLBApiClient:
         splits = data.get("stats", [{}])[0].get("splits", [])
         return splits
 
+    # ── Pitcher Season Stats (convenience) ──────────────────
+
+    async def get_pitcher_season_stats(
+        self, player_id: int, season: int
+    ) -> dict[str, Any]:
+        """Fetch season pitching stats for a pitcher, returning parsed key metrics."""
+        raw = await self.get_player_stats(player_id, season, group="pitching")
+        if not raw:
+            return {}
+        return {
+            "player_id": player_id,
+            "era": float(raw.get("era", 0)),
+            "whip": float(raw.get("whip", 0)),
+            "innings_pitched": _ip(raw.get("inningsPitched", "0")),
+            "wins": _int(raw.get("wins")) or 0,
+            "losses": _int(raw.get("losses")) or 0,
+            "strikeouts": _int(raw.get("strikeOuts")) or 0,
+            "walks": _int(raw.get("baseOnBalls")) or 0,
+            "hits_allowed": _int(raw.get("hits")) or 0,
+            "home_runs_allowed": _int(raw.get("homeRuns")) or 0,
+            "games_started": _int(raw.get("gamesStarted")) or 0,
+            "k_per_9": float(raw.get("strikeoutsPer9Inn", 0)),
+            "bb_per_9": float(raw.get("walksPer9Inn", 0)),
+            "h_per_9": float(raw.get("hitsPer9Inn", 0)),
+            "hr_per_9": float(raw.get("homeRunsPer9Inn", 0)),
+            "ops_against": float(raw.get("ops", 0)),
+            "avg_against": float(raw.get("avg", 0)),
+        }
+
     # ── Rosters ────────────────────────────────────────────────
 
     async def get_roster(

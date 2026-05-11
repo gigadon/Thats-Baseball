@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import json
 from datetime import date
+from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, Query
 
@@ -14,8 +16,24 @@ from mlb.api.schemas import (
 
 router = APIRouter()
 
-# In-memory store (replaced with DB in production)
+# In-memory store + file-backed persistence
 _predictions_cache: dict[str, list[dict]] = {}
+_CACHE_DIR = Path("data/predictions")
+
+
+def _load_from_file(date_str: str) -> list[dict]:
+    """Load predictions from JSON file if not in memory."""
+    if date_str in _predictions_cache:
+        return _predictions_cache[date_str]
+
+    path = _CACHE_DIR / f"{date_str}.json"
+    if path.exists():
+        data = json.loads(path.read_text())
+        preds = data.get("predictions", [])
+        _predictions_cache[date_str] = preds
+        return preds
+
+    return []
 
 
 @router.get("/daily", response_model=DailyPredictionsResponse)
@@ -24,7 +42,7 @@ async def get_daily_predictions(
 ):
     """Get all game predictions for a given date."""
     target_date = date or _today()
-    games = _predictions_cache.get(target_date, [])
+    games = _load_from_file(target_date)
 
     return DailyPredictionsResponse(
         date=target_date,
@@ -78,5 +96,10 @@ def _today() -> str:
 
 
 def cache_predictions(date_str: str, predictions: list[dict]):
-    """Store predictions in memory (called by the pipeline)."""
+    """Store predictions in memory and write to JSON file."""
     _predictions_cache[date_str] = predictions
+
+    # Persist to file so the API server can read them
+    _CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    path = _CACHE_DIR / f"{date_str}.json"
+    path.write_text(json.dumps({"date": date_str, "predictions": predictions}, default=str))

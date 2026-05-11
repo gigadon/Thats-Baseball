@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 from fastapi import APIRouter, Query
 
 from mlb.api.schemas import BetResponse, BettingConfigRequest, BettingSlipResponse
@@ -9,6 +12,7 @@ from mlb.api.schemas import BetResponse, BettingConfigRequest, BettingSlipRespon
 router = APIRouter()
 
 _betting_cache: dict[str, dict] = {}
+_CACHE_DIR = Path("data/predictions")
 
 
 @router.get("/recommendations", response_model=BettingSlipResponse)
@@ -22,6 +26,15 @@ async def get_recommendations(
 
     target_date = date or d.today().isoformat()
     cached = _betting_cache.get(target_date)
+
+    # Try loading from file if not in memory
+    if not cached:
+        path = _CACHE_DIR / f"{target_date}.json"
+        if path.exists():
+            data = json.loads(path.read_text())
+            cached = data.get("betting_slip")
+            if cached:
+                _betting_cache[target_date] = cached
 
     if cached:
         # Rescale stakes for the requested bankroll
@@ -81,3 +94,12 @@ async def get_betting_history(
 
 def cache_betting_slip(date_str: str, data: dict):
     _betting_cache[date_str] = data
+
+    # Persist — merge into existing predictions file
+    _CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    path = _CACHE_DIR / f"{date_str}.json"
+    existing = {}
+    if path.exists():
+        existing = json.loads(path.read_text())
+    existing["betting_slip"] = data
+    path.write_text(json.dumps(existing, default=str))

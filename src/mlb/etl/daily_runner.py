@@ -28,6 +28,7 @@ from mlb.features.stadium import compute_stadium_features, calculate_stadium_fac
 from mlb.models.predict import GamePrediction, PredictionService
 from mlb.features.assembler import GameFeatureVector
 from mlb.betting.engine import BettingEngine, BettingSlip
+from mlb.api.routes.rankings import cache_team_rankings
 
 logger = logging.getLogger(__name__)
 
@@ -89,7 +90,10 @@ class DailyRunner:
             # 3. Build rolling team stats from CSV data
             team_features = self._build_team_features(target_date)
 
-            # 4. Fetch weather for home stadiums
+            # 4. Fetch starting pitcher stats
+            sp_stats = await self._fetch_sp_stats(scheduled, target_date.year)
+
+            # 5. Fetch weather for home stadiums
             home_teams = list({g["home_team_id"] for g in scheduled})
             weather_data = await self.weather_client.get_bulk_weather(home_teams)
             result["weather"] = {
@@ -102,12 +106,13 @@ class DailyRunner:
                 for k, v in weather_data.items()
             }
 
-            # 5. Generate predictions for each game
+            # 6. Generate predictions for each game
             predictions: list[GamePrediction] = []
             for game in scheduled:
                 try:
                     pred = self._predict_game(
-                        game, team_features, weather_data, target_date
+                        game, team_features, weather_data, target_date,
+                        sp_stats=sp_stats,
                     )
                     if pred:
                         predictions.append(pred)
@@ -116,9 +121,13 @@ class DailyRunner:
                     result["errors"].append(f"Game {game['game_id']}: {e}")
 
             logger.info("Generated %d predictions", len(predictions))
-            result["predictions"] = [self._prediction_to_dict(p) for p in predictions]
+            game_lookup = {g["game_id"]: g for g in scheduled}
+            result["predictions"] = [
+                self._prediction_to_dict(p, game_lookup.get(p.game_id, {}))
+                for p in predictions
+            ]
 
-            # 6. Fetch live odds and generate betting slip
+            # 7. Fetch live odds and generate betting slip
             try:
                 odds_data = await self.odds_client.get_mlb_odds()
                 if odds_data:
@@ -135,8 +144,11 @@ class DailyRunner:
                 logger.warning("Odds fetch failed: %s", e)
                 result["errors"].append(f"Odds: {e}")
 
-            # 7. Cache predictions for the API
+            # 8. Cache predictions for the API
             self._cache_results(target_date, result)
+
+            # 9. Generate team rankings from rolling stats (after cache so it merges into file)
+            self._generate_rankings(team_features, target_date)
 
         except Exception as e:
             logger.exception("Daily runner failed")
@@ -177,12 +189,43 @@ class DailyRunner:
         logger.info("Built features for %d teams", len(features))
         return features
 
+    async def _fetch_sp_stats(
+        self, games: list[dict], season: int
+    ) -> dict[int, dict]:
+        """Fetch season stats for all probable starters in today's games."""
+        sp_stats: dict[int, dict] = {}
+        pitcher_ids: list[int] = []
+
+        for game in games:
+            for side in ("home_probable_pitcher", "away_probable_pitcher"):
+                pitcher = game.get(side)
+                if pitcher and pitcher.get("player_id"):
+                    pitcher_ids.append(pitcher["player_id"])
+
+        # Deduplicate
+        pitcher_ids = list(set(pitcher_ids))
+        logger.info("Fetching stats for %d probable starters...", len(pitcher_ids))
+
+        import asyncio
+        for pid in pitcher_ids:
+            try:
+                stats = await self.mlb_client.get_pitcher_season_stats(pid, season)
+                if stats:
+                    sp_stats[pid] = stats
+                await asyncio.sleep(0.2)  # Rate limit
+            except Exception as e:
+                logger.debug("Failed to fetch SP stats for %d: %s", pid, e)
+
+        logger.info("Got stats for %d / %d starters", len(sp_stats), len(pitcher_ids))
+        return sp_stats
+
     def _predict_game(
         self,
         game: dict,
         team_features: dict[str, dict[str, float]],
         weather_data: dict,
         target_date: date,
+        sp_stats: dict[int, dict] | None = None,
     ) -> GamePrediction | None:
         """Generate a prediction for a single game."""
         home = game["home_team_id"]
@@ -214,11 +257,24 @@ class DailyRunner:
             if k in away_feat:
                 features[f"diff_{k}"] = home_feat[k] - away_feat[k]
 
+        # Starting pitcher stats (used for score adjustment, NOT passed to model)
+        sp_data = sp_stats or {}
+        home_sp = game.get("home_probable_pitcher")
+        away_sp = game.get("away_probable_pitcher")
+        h_sp_stats = sp_data.get(home_sp["player_id"]) if home_sp else None
+        a_sp_stats = sp_data.get(away_sp["player_id"]) if away_sp else None
+
         # Compute composite scores from features
         home_off_score = _compute_offense_score(home_feat)
         away_off_score = _compute_offense_score(away_feat)
         home_pit_score = _compute_pitching_score(home_feat)
         away_pit_score = _compute_pitching_score(away_feat)
+
+        # Adjust pitching scores with SP quality (affects run predictions + confidence)
+        if h_sp_stats:
+            home_pit_score = _adjust_pitching_with_sp(home_pit_score, h_sp_stats)
+        if a_sp_stats:
+            away_pit_score = _adjust_pitching_with_sp(away_pit_score, a_sp_stats)
 
         h_power = _power_score(home_feat)
         a_power = _power_score(away_feat)
@@ -279,6 +335,79 @@ class DailyRunner:
                     break
         return matched
 
+    def _generate_rankings(
+        self,
+        team_features: dict[str, dict[str, float]],
+        target_date: date,
+    ):
+        """Generate team power rankings from rolling stats."""
+        date_str = target_date.isoformat()
+
+        rankings_data = []
+        for team_id, feat in team_features.items():
+            off = _compute_offense_score(feat)
+            pit = _compute_pitching_score(feat)
+            power = _power_score(feat)
+            wins = int(feat.get("gp", 0) * feat.get("win_pct", 0.5))
+            losses = int(feat.get("gp", 0)) - wins
+            l10_w = int(feat.get("l10_wpct", 0.5) * 10)
+            streak = int(feat.get("streak", 0))
+            rd = int(feat.get("gp", 0) * feat.get("run_diff_pg", 0))
+
+            # Tier from power score
+            if power >= 60:
+                tier = "elite"
+            elif power >= 50:
+                tier = "contender"
+            elif power >= 40:
+                tier = "average"
+            elif power >= 30:
+                tier = "below_average"
+            else:
+                tier = "rebuilding"
+
+            rankings_data.append({
+                "team_id": team_id,
+                "team_name": _TEAM_NAMES.get(team_id, team_id),
+                "division": _TEAM_DIVISIONS.get(team_id, ""),
+                "league": _TEAM_LEAGUES.get(team_id, ""),
+                "power_score": round(power, 1),
+                "offense_score": round(off, 1),
+                "pitching_score": round(pit, 1),
+                "defense_score": 50.0,
+                "bullpen_score": 50.0,
+                "momentum_score": round(min(100, max(0, 50 + streak * 3 + (l10_w - 5) * 4)), 1),
+                "wins": wins,
+                "losses": losses,
+                "win_pct": round(feat.get("win_pct", 0.5), 3),
+                "run_diff": rd,
+                "last_10_record": f"{l10_w}-{10 - l10_w}",
+                "streak": f"W{streak}" if streak > 0 else f"L{abs(streak)}" if streak < 0 else "-",
+                "rank_change": 0,
+                "tier": tier,
+            })
+
+        # Sort by each category and cache
+        for category, sort_key in [
+            ("power", "power_score"),
+            ("offense", "offense_score"),
+            ("pitching", "pitching_score"),
+            ("defense", "defense_score"),
+            ("bullpen", "bullpen_score"),
+            ("momentum", "momentum_score"),
+        ]:
+            sorted_teams = sorted(rankings_data, key=lambda t: t[sort_key], reverse=True)
+            for i, team in enumerate(sorted_teams):
+                team["rank"] = i + 1
+
+            cache_team_rankings(date_str, category, {
+                "ranking_date": date_str,
+                "category": category,
+                "rankings": sorted_teams,
+            })
+
+        logger.info("Generated rankings for %d teams", len(rankings_data))
+
     def _cache_results(self, target_date: date, result: dict):
         """Push results into the API cache."""
         try:
@@ -294,7 +423,10 @@ class DailyRunner:
             pass  # API not installed / not running
 
     @staticmethod
-    def _prediction_to_dict(pred: GamePrediction) -> dict:
+    def _prediction_to_dict(pred: GamePrediction, game: dict = None) -> dict:
+        game = game or {}
+        home_sp = game.get("home_probable_pitcher") or {}
+        away_sp = game.get("away_probable_pitcher") or {}
         return {
             "game_id": pred.game_id,
             "game_date": pred.game_date,
@@ -312,6 +444,8 @@ class DailyRunner:
             "top_factors": pred.top_factors,
             "home_power_score": pred.home_power_score,
             "away_power_score": pred.away_power_score,
+            "home_sp_name": home_sp.get("name", "TBD"),
+            "away_sp_name": away_sp.get("name", "TBD"),
         }
 
     @staticmethod
@@ -345,6 +479,88 @@ class DailyRunner:
             "max_exposure": slip.max_exposure,
             "risk_level": slip.risk_level,
         }
+
+
+# ── Team Reference Data ───────────────────────────────────────
+
+_TEAM_NAMES: dict[str, str] = {
+    "ARI": "Arizona Diamondbacks", "ATL": "Atlanta Braves", "BAL": "Baltimore Orioles",
+    "BOS": "Boston Red Sox", "CHC": "Chicago Cubs", "CWS": "Chicago White Sox",
+    "CIN": "Cincinnati Reds", "CLE": "Cleveland Guardians", "COL": "Colorado Rockies",
+    "DET": "Detroit Tigers", "HOU": "Houston Astros", "KC": "Kansas City Royals",
+    "LAA": "Los Angeles Angels", "LAD": "Los Angeles Dodgers", "MIA": "Miami Marlins",
+    "MIL": "Milwaukee Brewers", "MIN": "Minnesota Twins", "NYM": "New York Mets",
+    "NYY": "New York Yankees", "OAK": "Oakland Athletics", "PHI": "Philadelphia Phillies",
+    "PIT": "Pittsburgh Pirates", "SD": "San Diego Padres", "SF": "San Francisco Giants",
+    "SEA": "Seattle Mariners", "STL": "St. Louis Cardinals", "TB": "Tampa Bay Rays",
+    "TEX": "Texas Rangers", "TOR": "Toronto Blue Jays", "WSH": "Washington Nationals",
+}
+
+_TEAM_DIVISIONS: dict[str, str] = {
+    "BAL": "AL East", "BOS": "AL East", "NYY": "AL East", "TB": "AL East", "TOR": "AL East",
+    "CLE": "AL Central", "CWS": "AL Central", "DET": "AL Central", "KC": "AL Central", "MIN": "AL Central",
+    "HOU": "AL West", "LAA": "AL West", "OAK": "AL West", "SEA": "AL West", "TEX": "AL West",
+    "ATL": "NL East", "MIA": "NL East", "NYM": "NL East", "PHI": "NL East", "WSH": "NL East",
+    "CHC": "NL Central", "CIN": "NL Central", "MIL": "NL Central", "PIT": "NL Central", "STL": "NL Central",
+    "ARI": "NL West", "COL": "NL West", "LAD": "NL West", "SD": "NL West", "SF": "NL West",
+}
+
+_TEAM_LEAGUES: dict[str, str] = {t: d[:2] for t, d in _TEAM_DIVISIONS.items()}
+
+
+# ── SP Feature Helpers ─────────────────────────────────────────
+
+
+def _add_sp_features(features: dict, sp: dict | None, prefix: str):
+    """Add starting pitcher features to the feature dict."""
+    if sp:
+        features[f"{prefix}_era"] = sp.get("era", 4.50)
+        features[f"{prefix}_whip"] = sp.get("whip", 1.30)
+        features[f"{prefix}_k_per_9"] = sp.get("k_per_9", 8.0)
+        features[f"{prefix}_bb_per_9"] = sp.get("bb_per_9", 3.0)
+        features[f"{prefix}_h_per_9"] = sp.get("h_per_9", 8.5)
+        features[f"{prefix}_hr_per_9"] = sp.get("hr_per_9", 1.2)
+        features[f"{prefix}_avg_against"] = sp.get("avg_against", 0.250)
+        features[f"{prefix}_ip"] = sp.get("innings_pitched", 0)
+        features[f"{prefix}_wins"] = sp.get("wins", 0)
+        features[f"{prefix}_losses"] = sp.get("losses", 0)
+        # Derived
+        ip = sp.get("innings_pitched", 1) or 1
+        features[f"{prefix}_k_bb_ratio"] = sp.get("k_per_9", 8) / max(sp.get("bb_per_9", 3), 0.1)
+        features[f"{prefix}_fip_approx"] = (
+            (13 * sp.get("hr_per_9", 1.2) + 3 * sp.get("bb_per_9", 3) - 2 * sp.get("k_per_9", 8)) / 3 + 3.2
+        )
+    else:
+        # League-average defaults when no SP announced
+        features[f"{prefix}_era"] = 4.50
+        features[f"{prefix}_whip"] = 1.30
+        features[f"{prefix}_k_per_9"] = 8.0
+        features[f"{prefix}_bb_per_9"] = 3.0
+        features[f"{prefix}_h_per_9"] = 8.5
+        features[f"{prefix}_hr_per_9"] = 1.2
+        features[f"{prefix}_avg_against"] = 0.250
+        features[f"{prefix}_ip"] = 0.0
+        features[f"{prefix}_wins"] = 0.0
+        features[f"{prefix}_losses"] = 0.0
+        features[f"{prefix}_k_bb_ratio"] = 2.67
+        features[f"{prefix}_fip_approx"] = 4.20
+
+
+def _adjust_pitching_with_sp(team_pit_score: float, sp: dict) -> float:
+    """Blend team pitching score with individual SP quality (60/40 split)."""
+    era = sp.get("era", 4.50)
+    whip = sp.get("whip", 1.30)
+    k9 = sp.get("k_per_9", 8.0)
+    sp_score = _compute_sp_score(era, whip, k9)
+    return round(team_pit_score * 0.4 + sp_score * 0.6, 1)
+
+
+def _compute_sp_score(era: float, whip: float, k9: float) -> float:
+    """Individual SP quality score (0-100, higher = better)."""
+    era_score = min(100, max(0, (7.0 - era) / 7.0 * 100))
+    whip_score = min(100, max(0, (2.0 - whip) / 2.0 * 100))
+    k9_score = min(100, max(0, k9 / 14.0 * 100))
+    return era_score * 0.4 + whip_score * 0.35 + k9_score * 0.25
 
 
 # ── Helper score functions ────────────────────────────────────
@@ -422,12 +638,15 @@ def main():
         for p in preds:
             winner = p["predicted_winner"]
             prob = max(p["home_win_prob"], p["away_win_prob"])
+            h_sp = p.get("home_sp_name", "TBD")
+            a_sp = p.get("away_sp_name", "TBD")
             print(
                 f"  {p['away_team']:>3} @ {p['home_team']:<3}  |  "
                 f"{winner} {prob:.1%}  |  "
                 f"Total: {p['predicted_total']:.1f}  |  "
                 f"Conf: {p['confidence']:.0f}"
             )
+            print(f"    SP: {a_sp} vs {h_sp}")
 
     slip = result.get("betting_slip")
     if slip and slip["num_bets"] > 0:

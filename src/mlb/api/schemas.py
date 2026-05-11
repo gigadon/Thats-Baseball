@@ -25,6 +25,8 @@ class GamePredictionResponse(BaseModel):
     top_factors: list[list] = []
     home_power_score: float = 0.0
     away_power_score: float = 0.0
+    home_sp_name: str = "TBD"
+    away_sp_name: str = "TBD"
 
 
 class PredictionRequest(BaseModel):

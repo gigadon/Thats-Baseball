@@ -463,12 +463,18 @@ async function loadPredictions() {
         return;
     }
 
-    grid.innerHTML = data.games.map(g => `
+    grid.innerHTML = data.games.map(g => {
+        const hSP = g.home_sp_name || 'TBD';
+        const aSP = g.away_sp_name || 'TBD';
+        return `
         <div class="game-card">
             <div class="game-matchup">
                 <span>${g.away_team}</span>
                 <span class="vs">@</span>
                 <span>${g.home_team}</span>
+            </div>
+            <div style="text-align:center;font-size:0.8rem;color:var(--text-muted);margin:0.25rem 0">
+                ${aSP} vs ${hSP}
             </div>
             <div class="game-prob">
                 <span>${(g.away_win_prob * 100).toFixed(1)}%</span>
@@ -486,7 +492,7 @@ async function loadPredictions() {
                 <span>Winner: ${g.predicted_winner}</span>
             </div>
         </div>
-    `).join('');
+    `}).join('');
 }
 
 // ── Rankings ────────────────────────────────────────

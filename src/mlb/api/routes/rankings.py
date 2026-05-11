@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 from fastapi import APIRouter, Query
 
 from mlb.api.schemas import (
@@ -12,9 +15,25 @@ from mlb.api.schemas import (
 
 router = APIRouter()
 
-# In-memory store (replaced with DB in production)
+# In-memory store + file-backed persistence
 _team_rankings_cache: dict[str, dict] = {}
 _player_rankings_cache: dict[str, dict] = {}
+_CACHE_DIR = Path("data/predictions")
+
+
+def _load_rankings_from_file(date_str: str, category: str) -> dict | None:
+    cache_key = f"{date_str}_{category}"
+    if cache_key in _team_rankings_cache:
+        return _team_rankings_cache[cache_key]
+
+    path = _CACHE_DIR / f"{date_str}.json"
+    if path.exists():
+        data = json.loads(path.read_text())
+        rankings = data.get("rankings", {}).get(category)
+        if rankings:
+            _team_rankings_cache[cache_key] = rankings
+            return rankings
+    return None
 
 
 @router.get("/teams", response_model=TeamRankingsResponse)
@@ -26,8 +45,7 @@ async def get_team_rankings(
     from datetime import date as d
 
     target_date = date or d.today().isoformat()
-    cache_key = f"{target_date}_{type}"
-    cached = _team_rankings_cache.get(cache_key)
+    cached = _load_rankings_from_file(target_date, type)
 
     if cached:
         return TeamRankingsResponse(**cached)
@@ -89,6 +107,17 @@ async def compare_teams(
 
 def cache_team_rankings(date_str: str, category: str, data: dict):
     _team_rankings_cache[f"{date_str}_{category}"] = data
+
+    # Persist to file
+    _CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    path = _CACHE_DIR / f"{date_str}.json"
+    existing = {}
+    if path.exists():
+        existing = json.loads(path.read_text())
+    rankings = existing.get("rankings", {})
+    rankings[category] = data
+    existing["rankings"] = rankings
+    path.write_text(json.dumps(existing, default=str))
 
 
 def cache_player_rankings(date_str: str, position: str, data: dict):
