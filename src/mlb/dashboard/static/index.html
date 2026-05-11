@@ -70,7 +70,32 @@
         .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
 
         @media (max-width: 1024px) {
-            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+            .grid-2, .grid-3 { grid-template-columns: 1fr 1fr; }
+            .grid-4 { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (max-width: 640px) {
+            .header { flex-direction: column; gap: 0.75rem; padding: 0.75rem 1rem; }
+            .header h1 { font-size: 1.2rem; }
+            .nav { width: 100%; justify-content: center; flex-wrap: wrap; }
+            .nav button { flex: 1; min-width: 0; padding: 0.5rem 0.5rem; font-size: 0.8rem; text-align: center; }
+            .container { padding: 1rem; }
+            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; gap: 0.75rem; }
+            .card { padding: 0.75rem; }
+            .stat-box .value { font-size: 1.25rem; }
+            .game-matchup { font-size: 1rem; }
+
+            /* Horizontal scroll for rankings table */
+            .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            table { min-width: 700px; }
+            th, td { padding: 0.5rem; font-size: 0.75rem; white-space: nowrap; }
+
+            /* Bet cards */
+            .bet-card { padding: 0.75rem; }
+            .bet-details { font-size: 0.8rem; }
+
+            /* Section */
+            .section-title { font-size: 1rem; }
         }
 
         /* ── Cards ──────────────────────────────── */
@@ -325,6 +350,7 @@
                         <button onclick="loadRankings('bullpen', this)">Bullpen</button>
                     </div>
                 </div>
+                <div class="table-wrap">
                 <table>
                     <thead>
                         <tr>
@@ -346,6 +372,7 @@
                         <tr><td colspan="12" class="loading">Loading rankings...</td></tr>
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
     </div>

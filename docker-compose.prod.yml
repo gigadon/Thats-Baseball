@@ -1,0 +1,50 @@
+version: "3.8"
+
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file: .env
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  scheduler:
+    build: .
+    command: ["python", "-m", "mlb.etl.scheduler", "--run-now"]
+    env_file: .env
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+
+  db:
+    image: timescale/timescaledb:latest-pg16
+    environment:
+      POSTGRES_USER: mlb
+      POSTGRES_PASSWORD: mlb
+      POSTGRES_DB: mlb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+volumes:
+  pgdata:

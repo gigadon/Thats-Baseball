@@ -28,6 +28,7 @@ from mlb.features.stadium import compute_stadium_features, calculate_stadium_fac
 from mlb.models.predict import GamePrediction, PredictionService
 from mlb.features.assembler import GameFeatureVector
 from mlb.betting.engine import BettingEngine, BettingSlip
+from mlb.alerts import AlertService
 from mlb.api.routes.rankings import cache_team_rankings
 
 logger = logging.getLogger(__name__)
@@ -48,6 +49,7 @@ class DailyRunner:
         self.weather_client = WeatherClient()
         self.prediction_service = PredictionService(model_dir)
         self.betting_engine = BettingEngine()
+        self.alert_service = AlertService()
 
     async def run(self, target_date: date | None = None) -> dict[str, Any]:
         """Run the full daily pipeline.
@@ -149,6 +151,12 @@ class DailyRunner:
 
             # 9. Generate team rankings from rolling stats (after cache so it merges into file)
             self._generate_rankings(team_features, target_date)
+
+            # 10. Send alerts (Slack/email) if configured
+            try:
+                await self.alert_service.send_betting_alert(result)
+            except Exception as e:
+                logger.debug("Alert send skipped: %s", e)
 
         except Exception as e:
             logger.exception("Daily runner failed")
