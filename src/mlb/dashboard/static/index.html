@@ -153,6 +153,12 @@
             border-bottom: 1px solid var(--border);
         }
 
+        th[data-sort] { cursor: pointer; user-select: none; }
+        th[data-sort]:hover { color: var(--accent); }
+        th[data-sort] .sort-arrow { font-size: 0.6rem; margin-left: 2px; }
+        th.sort-asc .sort-arrow::after { content: "▲"; }
+        th.sort-desc .sort-arrow::after { content: "▼"; }
+
         td {
             padding: 0.65rem 0.75rem;
             font-size: 0.875rem;
@@ -351,18 +357,18 @@
                     </div>
                 </div>
                 <div class="table-wrap">
-                <table>
+                <table id="rankings-table">
                     <thead>
                         <tr>
-                            <th>#</th>
-                            <th>Team</th>
-                            <th>Score</th>
-                            <th>OFF</th>
-                            <th>PIT</th>
-                            <th>DEF</th>
-                            <th>BP</th>
-                            <th>MOM</th>
-                            <th>Record</th>
+                            <th data-sort="rank"># <span class="sort-arrow"></span></th>
+                            <th data-sort="team_name">Team <span class="sort-arrow"></span></th>
+                            <th data-sort="power_score">Score <span class="sort-arrow"></span></th>
+                            <th data-sort="offense_score">OFF <span class="sort-arrow"></span></th>
+                            <th data-sort="pitching_score">PIT <span class="sort-arrow"></span></th>
+                            <th data-sort="defense_score">DEF <span class="sort-arrow"></span></th>
+                            <th data-sort="bullpen_score">BP <span class="sort-arrow"></span></th>
+                            <th data-sort="momentum_score">MOM <span class="sort-arrow"></span></th>
+                            <th data-sort="win_pct">Record <span class="sort-arrow"></span></th>
                             <th>L10</th>
                             <th>Streak</th>
                             <th>Tier</th>
@@ -549,6 +555,9 @@ async function loadPredictions() {
 
 // ── Rankings ────────────────────────────────────────
 
+let _rankingsData = [];
+let _rankingsSort = { key: 'rank', dir: 'asc' };
+
 async function loadRankings(type, btn) {
     if (btn) {
         btn.closest('.nav').querySelectorAll('button').forEach(b => b.classList.remove('active'));
@@ -556,14 +565,48 @@ async function loadRankings(type, btn) {
     }
 
     const data = await fetchJSON(`${API}/rankings/teams?type=${type}`);
-    const tbody = document.getElementById('rankings-body');
 
     if (!data || !data.rankings || data.rankings.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="12" class="loading">No rankings available yet.</td></tr>`;
+        document.getElementById('rankings-body').innerHTML = `<tr><td colspan="12" class="loading">No rankings available yet.</td></tr>`;
         return;
     }
 
-    tbody.innerHTML = data.rankings.map(r => {
+    _rankingsData = data.rankings;
+    _rankingsSort = { key: 'rank', dir: 'asc' };
+    _renderRankings();
+    _initSortHeaders();
+}
+
+function _initSortHeaders() {
+    document.querySelectorAll('#rankings-table th[data-sort]').forEach(th => {
+        th.onclick = () => {
+            const key = th.dataset.sort;
+            if (_rankingsSort.key === key) {
+                _rankingsSort.dir = _rankingsSort.dir === 'asc' ? 'desc' : 'asc';
+            } else {
+                // Default: scores sort descending, rank/name sort ascending
+                const numericKeys = ['power_score','offense_score','pitching_score','defense_score','bullpen_score','momentum_score','win_pct'];
+                _rankingsSort = { key, dir: numericKeys.includes(key) ? 'desc' : 'asc' };
+            }
+            _renderRankings();
+            // Update header classes
+            document.querySelectorAll('#rankings-table th[data-sort]').forEach(h => h.classList.remove('sort-asc','sort-desc'));
+            th.classList.add(_rankingsSort.dir === 'asc' ? 'sort-asc' : 'sort-desc');
+        };
+    });
+}
+
+function _renderRankings() {
+    const sorted = [..._rankingsData].sort((a, b) => {
+        const key = _rankingsSort.key;
+        let va = a[key], vb = b[key];
+        if (typeof va === 'string') {
+            return _rankingsSort.dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+        }
+        return _rankingsSort.dir === 'asc' ? va - vb : vb - va;
+    });
+
+    document.getElementById('rankings-body').innerHTML = sorted.map(r => {
         const changeIcon = r.rank_change > 0 ? `<span class="change-up">+${r.rank_change}</span>` :
                           r.rank_change < 0 ? `<span class="change-down">${r.rank_change}</span>` : '-';
         const tierClass = `tier-${r.tier}`;
@@ -659,6 +702,7 @@ async function loadBetHistory() {
         }
     }
     tbody.innerHTML = rows;
+}
 
 // ── Analytics ───────────────────────────────────────
 

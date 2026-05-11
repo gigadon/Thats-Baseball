@@ -6,7 +6,7 @@ Designed to run as a long-lived process alongside the API server.
 Usage:
     python -m mlb.etl.scheduler                   # Run scheduler
     python -m mlb.etl.scheduler --run-now          # Run once immediately, then schedule
-    python -m mlb.etl.scheduler --predict-hour 10  # Change prediction time (default 10 AM)
+    python -m mlb.etl.scheduler --predict-hour 13  # Change prediction time (default 1 PM)
 """
 
 from __future__ import annotations
@@ -31,7 +31,7 @@ class DailyScheduler:
         self,
         data_dir: Path = Path("data"),
         model_dir: Path = Path("models"),
-        predict_hour: int = 10,   # 10 AM local time
+        predict_hour: int = 13,   # 1 PM local time
         backfill_hour: int = 6,   # 6 AM local time
         settle_hour: int = 23,    # 11 PM local time
     ):
@@ -163,7 +163,7 @@ def main():
 
     parser = argparse.ArgumentParser(description="MLB daily pipeline scheduler")
     parser.add_argument("--run-now", action="store_true", help="Run immediately, then schedule")
-    parser.add_argument("--predict-hour", type=int, default=10, help="Hour to run predictions (0-23)")
+    parser.add_argument("--predict-hour", type=int, default=13, help="Hour to run predictions (0-23)")
     parser.add_argument("--backfill-hour", type=int, default=6, help="Hour to run backfill (0-23)")
     parser.add_argument("--settle-hour", type=int, default=23, help="Hour to run settlement (0-23)")
     parser.add_argument("--data-dir", type=str, default="data")

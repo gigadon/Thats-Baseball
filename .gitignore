@@ -58,18 +58,22 @@ secrets.yaml
 
 # Model artifacts
 *.pkl
-*.joblib
 *.h5
 *.onnx
 mlruns/
 mlartifacts/
 
 # Data files (large)
-*.csv
-*.parquet
 *.feather
 data/raw/
 data/processed/
+data/predictions/
+data/betting/
+
+# Keep training data + models for deployment
+!data/*.csv
+!data/*.parquet
+!models/**
 
 # OS
 Thumbs.db
