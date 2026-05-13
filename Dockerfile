@@ -21,5 +21,7 @@ RUN mkdir -p data/predictions data/betting
 
 EXPOSE 8000
 
-# Default: run the API server
-CMD uvicorn mlb.api.app:app --host 0.0.0.0 --port ${PORT:-8000}
+COPY start.sh .
+
+# Default: run predictions then start API
+CMD ["bash", "start.sh"]
