@@ -359,16 +359,20 @@ class DailyRunner:
         """Generate team power rankings from rolling stats."""
         date_str = target_date.isoformat()
 
+        # Load current season games only for W-L records
+        season_records = self._compute_season_records(target_date.year)
+
         rankings_data = []
         for team_id, feat in team_features.items():
             off = _compute_offense_score(feat)
             pit = _compute_pitching_score(feat)
             power = _power_score(feat)
-            wins = int(feat.get("gp", 0) * feat.get("win_pct", 0.5))
-            losses = int(feat.get("gp", 0)) - wins
+            rec = season_records.get(team_id, {})
+            wins = rec.get("wins", 0)
+            losses = rec.get("losses", 0)
             l10_w = int(feat.get("l10_wpct", 0.5) * 10)
             streak = int(feat.get("streak", 0))
-            rd = int(feat.get("gp", 0) * feat.get("run_diff_pg", 0))
+            rd = rec.get("run_diff", 0)
 
             # Tier from power score
             if power >= 60:
@@ -395,7 +399,7 @@ class DailyRunner:
                 "momentum_score": round(min(100, max(0, 50 + streak * 3 + (l10_w - 5) * 4)), 1),
                 "wins": wins,
                 "losses": losses,
-                "win_pct": round(feat.get("win_pct", 0.5), 3),
+                "win_pct": round(wins / max(wins + losses, 1), 3),
                 "run_diff": rd,
                 "last_10_record": f"{l10_w}-{10 - l10_w}",
                 "streak": f"W{streak}" if streak > 0 else f"L{abs(streak)}" if streak < 0 else "-",
@@ -423,6 +427,34 @@ class DailyRunner:
             })
 
         logger.info("Generated rankings for %d teams", len(rankings_data))
+
+    def _compute_season_records(self, season: int) -> dict[str, dict]:
+        """Compute W-L records from current season games CSV only."""
+        import pandas as pd
+
+        path = self.data_dir / f"games_{season}.csv"
+        if not path.exists():
+            return {}
+
+        df = pd.read_csv(path)
+        records: dict[str, dict] = {}
+
+        for team_id in set(df["home_team_id"]) | set(df["away_team_id"]):
+            home = df[df["home_team_id"] == team_id]
+            away = df[df["away_team_id"] == team_id]
+            wins = len(home[home["home_score"] > home["away_score"]]) + \
+                   len(away[away["away_score"] > away["home_score"]])
+            losses = len(home[home["home_score"] < home["away_score"]]) + \
+                     len(away[away["away_score"] < away["home_score"]])
+            rs = home["home_score"].sum() + away["away_score"].sum()
+            ra = home["away_score"].sum() + away["home_score"].sum()
+            records[team_id] = {
+                "wins": int(wins),
+                "losses": int(losses),
+                "run_diff": int(rs - ra),
+            }
+
+        return records
 
     def _cache_results(self, target_date: date, result: dict):
         """Push results into the API cache."""
