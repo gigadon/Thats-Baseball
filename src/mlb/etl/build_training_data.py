@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import argparse
 import logging
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -19,6 +19,42 @@ import numpy as np
 import pandas as pd
 
 logger = logging.getLogger(__name__)
+
+# Park factors: runs factor relative to league average (1.00).
+# Source: multi-year averages. >1.0 = hitter-friendly, <1.0 = pitcher-friendly.
+PARK_FACTORS: dict[str, dict[str, float]] = {
+    "COL": {"runs": 1.38, "hr": 1.29},  # Coors Field
+    "CIN": {"runs": 1.12, "hr": 1.18},  # Great American
+    "TEX": {"runs": 1.10, "hr": 1.11},  # Globe Life
+    "BOS": {"runs": 1.08, "hr": 1.04},  # Fenway Park
+    "CHC": {"runs": 1.06, "hr": 1.10},  # Wrigley Field
+    "ARI": {"runs": 1.05, "hr": 1.04},  # Chase Field
+    "PHI": {"runs": 1.04, "hr": 1.09},  # Citizens Bank
+    "ATL": {"runs": 1.03, "hr": 1.10},  # Truist Park
+    "MIN": {"runs": 1.03, "hr": 1.06},  # Target Field
+    "TOR": {"runs": 1.02, "hr": 1.07},  # Rogers Centre
+    "LAA": {"runs": 1.01, "hr": 0.99},  # Angel Stadium
+    "BAL": {"runs": 1.01, "hr": 1.10},  # Camden Yards
+    "DET": {"runs": 1.00, "hr": 0.97},  # Comerica Park
+    "CLE": {"runs": 1.00, "hr": 1.00},  # Progressive Field
+    "WSH": {"runs": 1.00, "hr": 1.02},  # Nationals Park
+    "CWS": {"runs": 0.99, "hr": 1.05},  # Guaranteed Rate
+    "NYY": {"runs": 0.99, "hr": 1.09},  # Yankee Stadium
+    "KC":  {"runs": 0.98, "hr": 0.87},  # Kauffman Stadium
+    "HOU": {"runs": 0.98, "hr": 1.00},  # Minute Maid
+    "STL": {"runs": 0.97, "hr": 0.95},  # Busch Stadium
+    "LAD": {"runs": 0.97, "hr": 0.96},  # Dodger Stadium
+    "PIT": {"runs": 0.96, "hr": 0.91},  # PNC Park
+    "MIL": {"runs": 0.96, "hr": 1.02},  # American Family
+    "SEA": {"runs": 0.95, "hr": 0.93},  # T-Mobile Park
+    "SD":  {"runs": 0.94, "hr": 0.87},  # Petco Park
+    "TB":  {"runs": 0.93, "hr": 0.88},  # Tropicana Field
+    "NYM": {"runs": 0.93, "hr": 0.91},  # Citi Field
+    "SF":  {"runs": 0.92, "hr": 0.85},  # Oracle Park
+    "OAK": {"runs": 0.92, "hr": 0.88},  # Oakland Coliseum
+    "MIA": {"runs": 0.90, "hr": 0.86},  # loanDepot park
+}
+PARK_DEFAULT = {"runs": 1.00, "hr": 1.00}
 
 
 class TrainingDataBuilder:
@@ -92,6 +128,11 @@ class TrainingDataBuilder:
             # Differentials
             for k in home_feat:
                 row[f"diff_{k}"] = home_feat[k] - away_feat[k]
+
+            # Ballpark factors (keyed by home team = venue)
+            park = PARK_FACTORS.get(home, PARK_DEFAULT)
+            row["park_runs_factor"] = park["runs"]
+            row["park_hr_factor"] = park["hr"]
 
             feature_rows.append(row)
 
@@ -209,6 +250,7 @@ class TrainingDataBuilder:
                     "ra": ra,
                     "run_diff": rs - ra,
                     "is_home": is_home,
+                    "bp_ip": 0.0,  # filled after pitching calc below
                 })
 
                 gp = wins + losses
@@ -231,6 +273,38 @@ class TrainingDataBuilder:
                 g_ha = int(game_pit["hits_allowed"].sum()) if len(game_pit) else 0
                 g_bba = int(game_pit["walks_allowed"].sum()) if len(game_pit) else 0
                 g_ka = int(game_pit["strikeouts_recorded"].sum()) if len(game_pit) else 0
+
+                # Separate SP (highest IP) from bullpen
+                if len(game_pit) > 0:
+                    sp_row = game_pit.nlargest(1, "innings_pitched").iloc[0]
+                    bp_rows = game_pit.drop(sp_row.name)
+                    sp_ip = float(sp_row["innings_pitched"])
+                    sp_er = int(sp_row["earned_runs"])
+                    sp_ha = int(sp_row["hits_allowed"])
+                    sp_bb = int(sp_row["walks_allowed"])
+                    sp_k = int(sp_row["strikeouts_recorded"])
+                    bp_ip = float(bp_rows["innings_pitched"].sum())
+                    bp_er = int(bp_rows["earned_runs"].sum())
+                    bp_ha = int(bp_rows["hits_allowed"].sum())
+                    bp_bb = int(bp_rows["walks_allowed"].sum())
+                    bp_k = int(bp_rows["strikeouts_recorded"].sum())
+                else:
+                    sp_ip = sp_er = sp_ha = sp_bb = sp_k = 0
+                    bp_ip = bp_er = bp_ha = bp_bb = bp_k = 0
+
+                # Store bp_ip in results_buffer for fatigue calc
+                results_buffer[-1]["bp_ip"] = bp_ip
+
+                # Bullpen fatigue: IP in last 3 calendar days
+                cur_date = game["game_date"]
+                bp_ip_3d = sum(
+                    r["bp_ip"] for r in results_buffer[:-1]
+                    if (cur_date - r["date"]).days <= 3
+                )
+                bp_games_5d = sum(
+                    1 for r in results_buffer[:-1]
+                    if (cur_date - r["date"]).days <= 5
+                )
 
                 # Rolling windows
                 last_10 = results_buffer[-10:]
@@ -313,6 +387,20 @@ class TrainingDataBuilder:
                         sum(1 for r in results_buffer if not r["is_home"] and r["won"])
                         / max(sum(1 for r in results_buffer if not r["is_home"]), 1)
                     ),
+                    # SP game stats
+                    "sp_era": sp_er * 9 / max(sp_ip, 0.1),
+                    "sp_whip": (sp_ha + sp_bb) / max(sp_ip, 0.1),
+                    "sp_k9": sp_k * 9 / max(sp_ip, 0.1),
+                    "sp_bb9": sp_bb * 9 / max(sp_ip, 0.1),
+                    "sp_ip": sp_ip,
+                    # Bullpen game stats
+                    "bp_era": bp_er * 9 / max(bp_ip, 0.1),
+                    "bp_whip": (bp_ha + bp_bb) / max(bp_ip, 0.1),
+                    "bp_k9": bp_k * 9 / max(bp_ip, 0.1),
+                    "bp_bb9": bp_bb * 9 / max(bp_ip, 0.1),
+                    # Bullpen fatigue
+                    "bp_ip_3d": bp_ip_3d,
+                    "bp_games_5d": bp_games_5d,
                 })
 
             team_stats[team_id] = stats_list
@@ -370,14 +458,28 @@ class TrainingDataBuilder:
             "obp_14": _roll_avg(last_14, "g_obp"),
             "slg_14": _roll_avg(last_14, "g_slg"),
             "ops_14": _roll_avg(last_14, "g_ops"),
-            # Rolling pitching (7-game)
-            "era_7": _roll_avg(last_7, "g_era"),
-            "whip_7": _roll_avg(last_7, "g_whip"),
-            "k9_7": _roll_avg(last_7, "g_k9"),
-            # Rolling pitching (14-game)
-            "era_14": _roll_avg(last_14, "g_era"),
-            "whip_14": _roll_avg(last_14, "g_whip"),
-            "k9_14": _roll_avg(last_14, "g_k9"),
+            # Rolling SP pitching (7-game)
+            "sp_era_7": _roll_avg(last_7, "sp_era"),
+            "sp_whip_7": _roll_avg(last_7, "sp_whip"),
+            "sp_k9_7": _roll_avg(last_7, "sp_k9"),
+            "sp_bb9_7": _roll_avg(last_7, "sp_bb9"),
+            "sp_ip_7": _roll_avg(last_7, "sp_ip"),
+            # Rolling SP pitching (14-game)
+            "sp_era_14": _roll_avg(last_14, "sp_era"),
+            "sp_whip_14": _roll_avg(last_14, "sp_whip"),
+            "sp_k9_14": _roll_avg(last_14, "sp_k9"),
+            # Rolling bullpen (7-game)
+            "bp_era_7": _roll_avg(last_7, "bp_era"),
+            "bp_whip_7": _roll_avg(last_7, "bp_whip"),
+            "bp_k9_7": _roll_avg(last_7, "bp_k9"),
+            "bp_bb9_7": _roll_avg(last_7, "bp_bb9"),
+            # Rolling bullpen (14-game)
+            "bp_era_14": _roll_avg(last_14, "bp_era"),
+            "bp_whip_14": _roll_avg(last_14, "bp_whip"),
+            "bp_k9_14": _roll_avg(last_14, "bp_k9"),
+            # Bullpen fatigue
+            "bp_ip_3d": latest.get("bp_ip_3d", 0.0),
+            "bp_games_5d": latest.get("bp_games_5d", 0),
             # Home/away
             "home_wpct": latest["home_wpct"],
             "away_wpct": latest["away_wpct"],

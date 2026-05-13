@@ -23,7 +23,7 @@ import pandas as pd
 from mlb.data.mlb_api import MLBApiClient
 from mlb.data.odds_api import OddsApiClient
 from mlb.data.weather import WeatherClient
-from mlb.etl.build_training_data import TrainingDataBuilder
+from mlb.etl.build_training_data import PARK_DEFAULT, PARK_FACTORS, TrainingDataBuilder
 from mlb.features.stadium import compute_stadium_features, calculate_stadium_factor
 from mlb.models.predict import GamePrediction, PredictionService
 from mlb.features.assembler import GameFeatureVector
@@ -272,6 +272,11 @@ class DailyRunner:
         for k in home_feat:
             if k in away_feat:
                 features[f"diff_{k}"] = home_feat[k] - away_feat[k]
+
+        # Ballpark factors
+        park = PARK_FACTORS.get(home, PARK_DEFAULT)
+        features["park_runs_factor"] = park["runs"]
+        features["park_hr_factor"] = park["hr"]
 
         # Starting pitcher stats (used for score adjustment, NOT passed to model)
         sp_data = sp_stats or {}
@@ -629,10 +634,15 @@ def _compute_offense_score(feat: dict[str, float]) -> float:
 
 
 def _compute_pitching_score(feat: dict[str, float]) -> float:
-    """Quick pitching composite from rolling stats (0-100, higher = better)."""
-    era = feat.get("era_7", 4.50)
-    whip = feat.get("whip_7", 1.30)
-    k9 = feat.get("k9_7", 8.0)
+    """Quick pitching composite from SP + bullpen rolling stats (0-100, higher = better)."""
+    sp_era = feat.get("sp_era_7", 4.50)
+    sp_whip = feat.get("sp_whip_7", 1.30)
+    bp_era = feat.get("bp_era_7", 4.50)
+    bp_whip = feat.get("bp_whip_7", 1.30)
+    k9 = feat.get("sp_k9_7", 8.0)
+    # Weighted: SP 60%, bullpen 40%
+    era = sp_era * 0.6 + bp_era * 0.4
+    whip = sp_whip * 0.6 + bp_whip * 0.4
     # Lower ERA/WHIP = better, higher K9 = better
     era_score = min(100, max(0, (7.0 - era) / 7.0 * 100))
     whip_score = min(100, max(0, (2.0 - whip) / 2.0 * 100))
