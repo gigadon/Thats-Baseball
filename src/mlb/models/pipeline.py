@@ -15,6 +15,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 from sklearn.impute import KNNImputer
+from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
 from sklearn.model_selection import TimeSeriesSplit, train_test_split
 from sklearn.preprocessing import StandardScaler
 
@@ -106,6 +107,168 @@ class TrainingPipeline:
         # 7. Save
         self._save()
 
+        return self.ensemble
+
+    def tune_and_train(
+        self,
+        features_df: pd.DataFrame,
+        target: pd.Series,
+        game_dates: pd.Series | None = None,
+        n_trials: int = 50,
+    ) -> EnsembleModel:
+        """Run Optuna hyperparameter tuning, then train with best params."""
+        import optuna
+        from sklearn.metrics import roc_auc_score
+        from sklearn.model_selection import StratifiedKFold
+
+        optuna.logging.set_verbosity(optuna.logging.WARNING)
+
+        logger.info("Starting hyperparameter tuning (%d trials per model)...", n_trials)
+
+        # Preprocess once
+        X_train, X_test, y_train, y_test = self._split(features_df, target, game_dates)
+        X_train, X_test = self._impute(X_train, X_test)
+        X_train_scaled, X_test_scaled = self._scale(X_train, X_test)
+        feature_names = list(features_df.columns)
+        X_train_sel, X_test_sel, selected_names = self._select_features(
+            X_train_scaled, X_test_scaled, y_train, feature_names
+        )
+        logger.info("Selected %d / %d features", len(selected_names), len(feature_names))
+
+        cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+
+        def _cv_auc(model_cls, params):
+            """Manual CV to avoid sklearn tags compatibility issues."""
+            aucs = []
+            for tr_idx, va_idx in cv.split(X_train_sel, y_train):
+                m = model_cls(**params)
+                m.fit(X_train_sel[tr_idx], y_train[tr_idx])
+                preds = m.predict_proba(X_train_sel[va_idx])[:, 1]
+                aucs.append(roc_auc_score(y_train[va_idx], preds))
+            return np.mean(aucs)
+
+        # Tune XGBoost
+        def xgb_objective(trial):
+            import xgboost as xgb
+            params = {
+                "n_estimators": trial.suggest_int("n_estimators", 200, 800),
+                "max_depth": trial.suggest_int("max_depth", 3, 8),
+                "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.15, log=True),
+                "subsample": trial.suggest_float("subsample", 0.6, 1.0),
+                "colsample_bytree": trial.suggest_float("colsample_bytree", 0.5, 1.0),
+                "min_child_weight": trial.suggest_int("min_child_weight", 1, 20),
+                "reg_alpha": trial.suggest_float("reg_alpha", 1e-3, 10.0, log=True),
+                "reg_lambda": trial.suggest_float("reg_lambda", 1e-3, 10.0, log=True),
+                "random_state": 42, "n_jobs": -1,
+                "objective": "binary:logistic", "eval_metric": "logloss",
+            }
+            return _cv_auc(xgb.XGBClassifier, params)
+
+        study_xgb = optuna.create_study(direction="maximize")
+        study_xgb.optimize(xgb_objective, n_trials=n_trials)
+        logger.info("XGBoost best AUC: %.4f", study_xgb.best_value)
+
+        # Tune LightGBM
+        def lgbm_objective(trial):
+            import lightgbm as lgb
+            params = {
+                "n_estimators": trial.suggest_int("n_estimators", 200, 800),
+                "max_depth": trial.suggest_int("max_depth", 3, 10),
+                "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.15, log=True),
+                "subsample": trial.suggest_float("subsample", 0.6, 1.0),
+                "colsample_bytree": trial.suggest_float("colsample_bytree", 0.5, 1.0),
+                "min_child_samples": trial.suggest_int("min_child_samples", 5, 50),
+                "reg_alpha": trial.suggest_float("reg_alpha", 1e-3, 10.0, log=True),
+                "reg_lambda": trial.suggest_float("reg_lambda", 1e-3, 10.0, log=True),
+                "random_state": 42, "n_jobs": -1,
+                "objective": "binary", "metric": "binary_logloss", "verbose": -1,
+            }
+            return _cv_auc(lgb.LGBMClassifier, params)
+
+        study_lgbm = optuna.create_study(direction="maximize")
+        study_lgbm.optimize(lgbm_objective, n_trials=n_trials)
+        logger.info("LightGBM best AUC: %.4f", study_lgbm.best_value)
+
+        # Tune GradientBoosting
+        def gb_objective(trial):
+            params = {
+                "n_estimators": trial.suggest_int("n_estimators", 100, 500),
+                "max_depth": trial.suggest_int("max_depth", 3, 7),
+                "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.15, log=True),
+                "subsample": trial.suggest_float("subsample", 0.6, 1.0),
+                "min_samples_leaf": trial.suggest_int("min_samples_leaf", 5, 30),
+                "max_features": "sqrt",
+                "random_state": 42,
+            }
+            return _cv_auc(GradientBoostingClassifier, params)
+
+        study_gb = optuna.create_study(direction="maximize")
+        study_gb.optimize(gb_objective, n_trials=n_trials)
+        logger.info("GradientBoosting best AUC: %.4f", study_gb.best_value)
+
+        # Tune RandomForest
+        def rf_objective(trial):
+            params = {
+                "n_estimators": trial.suggest_int("n_estimators", 200, 800),
+                "max_depth": trial.suggest_int("max_depth", 5, 20),
+                "min_samples_leaf": trial.suggest_int("min_samples_leaf", 3, 30),
+                "max_features": trial.suggest_categorical("max_features", ["sqrt", "log2"]),
+                "random_state": 42, "n_jobs": -1,
+            }
+            return _cv_auc(RandomForestClassifier, params)
+
+        study_rf = optuna.create_study(direction="maximize")
+        study_rf.optimize(rf_objective, n_trials=n_trials)
+        logger.info("RandomForest best AUC: %.4f", study_rf.best_value)
+
+        # Apply best params to the base models
+        from mlb.models.base import ModelConfig
+        best_configs = [
+            ModelConfig(name="XGBoost", params={
+                **study_xgb.best_params,
+                "random_state": 42, "n_jobs": -1,
+                "objective": "binary:logistic", "eval_metric": "logloss",
+            }),
+            ModelConfig(name="GradientBoosting", params={
+                **study_gb.best_params,
+                "max_features": "sqrt", "random_state": 42,
+            }),
+            ModelConfig(name="LightGBM", params={
+                **study_lgbm.best_params,
+                "random_state": 42, "n_jobs": -1,
+                "objective": "binary", "metric": "binary_logloss", "verbose": -1,
+            }),
+            ModelConfig(name="RandomForest", params={
+                **study_rf.best_params,
+                "random_state": 42, "n_jobs": -1,
+            }),
+        ]
+
+        from mlb.models.base import (
+            XGBoostModel, GradientBoostingModel, LightGBMModel, RandomForestModel,
+        )
+        self.ensemble = EnsembleModel(self.config.ensemble_config)
+        self.ensemble.base_models = [
+            XGBoostModel(best_configs[0]),
+            GradientBoostingModel(best_configs[1]),
+            LightGBMModel(best_configs[2]),
+            RandomForestModel(best_configs[3]),
+        ]
+
+        # Train ensemble with tuned models
+        self.ensemble.train(X_train_sel, y_train, selected_names)
+
+        # Evaluate
+        metrics = self.ensemble.evaluate(X_test_sel, y_test)
+        self.run_metrics = {name: vars(m) for name, m in metrics.items()}
+
+        for name, m in metrics.items():
+            logger.info(
+                "%s — Acc: %.3f, Brier: %.4f, AUC: %.3f, ECE: %.4f",
+                name, m.accuracy, m.brier_score, m.auc_roc, m.calibration_error,
+            )
+
+        self._save()
         return self.ensemble
 
     def predict(self, features_df: pd.DataFrame) -> np.ndarray:

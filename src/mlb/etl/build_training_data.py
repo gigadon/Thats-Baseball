@@ -56,6 +56,24 @@ PARK_FACTORS: dict[str, dict[str, float]] = {
 }
 PARK_DEFAULT = {"runs": 1.00, "hr": 1.00}
 
+# Elo constants
+ELO_K = 6  # Update speed — moderate for baseball (many games)
+ELO_HOME_ADVANTAGE = 24  # ~54% expected win rate for home team
+
+
+def _update_elo(
+    ratings: dict[str, float], home: str, away: str, home_won: bool
+) -> None:
+    """Update Elo ratings in-place after a game."""
+    h_elo = ratings.get(home, 1500.0)
+    a_elo = ratings.get(away, 1500.0)
+    # Expected score (home gets advantage)
+    exp_h = 1.0 / (1.0 + 10 ** ((a_elo - h_elo - ELO_HOME_ADVANTAGE) / 400))
+    result = 1.0 if home_won else 0.0
+    delta = ELO_K * (result - exp_h)
+    ratings[home] = h_elo + delta
+    ratings[away] = a_elo - delta
+
 
 class TrainingDataBuilder:
     """Builds feature vectors from historical CSV files."""
@@ -82,6 +100,12 @@ class TrainingDataBuilder:
 
         # Build team rolling stats
         team_stats = self._compute_team_rolling_stats(games_df, batting_df, pitching_df)
+
+        # Build Elo ratings and rest days chronologically
+        elo_ratings, last_game_date = self._compute_elo_and_rest(games_df)
+
+        # Build SP season stats lookup
+        sp_season = self._build_sp_season_stats(pitching_df)
 
         # Generate feature rows for each game
         feature_rows = []
@@ -134,7 +158,39 @@ class TrainingDataBuilder:
             row["park_runs_factor"] = park["runs"]
             row["park_hr_factor"] = park["hr"]
 
+            # Elo ratings (pre-game)
+            h_elo = elo_ratings.get(home, 1500.0)
+            a_elo = elo_ratings.get(away, 1500.0)
+            row["h_elo"] = h_elo
+            row["a_elo"] = a_elo
+            row["elo_diff"] = h_elo - a_elo
+
+            # Rest days
+            h_last = last_game_date.get(home)
+            a_last = last_game_date.get(away)
+            row["h_rest_days"] = (game_date - h_last).days if h_last else 5
+            row["a_rest_days"] = (game_date - a_last).days if a_last else 5
+            row["rest_diff"] = row["h_rest_days"] - row["a_rest_days"]
+
+            # Starting pitcher season stats (entering this game)
+            h_sp = sp_season.get((game["game_id"], home))
+            a_sp = sp_season.get((game["game_id"], away))
+            sp_defaults = {"sp_season_era": 4.50, "sp_season_whip": 1.30,
+                           "sp_season_k9": 8.0, "sp_season_bb9": 3.0, "sp_season_ip": 0.0}
+            for k, default in sp_defaults.items():
+                row[f"h_{k}"] = h_sp[k] if h_sp else default
+                row[f"a_{k}"] = a_sp[k] if a_sp else default
+                row[f"diff_{k}"] = row[f"h_{k}"] - row[f"a_{k}"]
+
             feature_rows.append(row)
+
+            # Update Elo AFTER recording pre-game values
+            home_won = game["home_score"] > game["away_score"]
+            _update_elo(elo_ratings, home, away, home_won)
+
+            # Update last game dates
+            last_game_date[home] = game_date
+            last_game_date[away] = game_date
 
             if (idx + 1) % 500 == 0:
                 logger.info("Processed %d / %d games", idx + 1, len(games_sorted))
@@ -192,6 +248,98 @@ class TrainingDataBuilder:
         df = pd.concat(frames, ignore_index=True)
         df["game_date"] = pd.to_datetime(df["game_date"]).dt.date
         return df
+
+    # ── Elo & Rest ────────────────────────────────────────
+
+    def _compute_elo_and_rest(
+        self, games_df: pd.DataFrame
+    ) -> tuple[dict[str, float], dict[str, date]]:
+        """Initialize Elo ratings and last-game-date trackers.
+
+        Returns (elo_ratings, last_game_date) dicts to be updated
+        during the main build loop.
+        """
+        elo_ratings: dict[str, float] = {}  # team_id -> current Elo
+        last_game_date: dict[str, date] = {}  # team_id -> date of last game
+
+        # Pre-seed by replaying all completed games chronologically
+        # so Elo is warmed up before the feature-generation loop.
+        # (The build loop will also update, but this seeds for teams
+        # that appear before the 15-game feature threshold.)
+        # Actually, we return empty dicts — the build loop handles
+        # both reading and updating in one pass.
+        return elo_ratings, last_game_date
+
+    def _build_sp_season_stats(
+        self, pitching_df: pd.DataFrame
+    ) -> dict[tuple, dict[str, float]]:
+        """Build per-game SP season stats entering each game.
+
+        Returns {(game_id, team_id): {"sp_season_era": ..., ...}}
+        where stats reflect the SP's cumulative season performance
+        BEFORE the current game.
+        """
+        if pitching_df.empty:
+            return {}
+
+        # Identify SP (highest IP) for each (game_id, team_id)
+        sp_lookup: dict[tuple, int] = {}  # (game_id, team_id) -> player_id
+        for (gid, tid), grp in pitching_df.groupby(["game_id", "team_id"]):
+            sp_row = grp.nlargest(1, "innings_pitched").iloc[0]
+            sp_lookup[(gid, tid)] = sp_row["player_id"]
+
+        # Accumulate each pitcher's season stats game-by-game
+        # Sort by date to process chronologically
+        sorted_pit = pitching_df.sort_values("game_date")
+        pitcher_totals: dict[tuple, dict] = {}  # (player_id, year) -> cumulative stats
+        result: dict[tuple, dict[str, float]] = {}
+
+        for _, row in sorted_pit.iterrows():
+            pid = row["player_id"]
+            gid = row["game_id"]
+            tid = row["team_id"]
+            year = row["game_date"].year
+
+            # Only process if this pitcher was the SP for this game
+            if sp_lookup.get((gid, tid)) != pid:
+                continue
+
+            key = (pid, year)
+            prev = pitcher_totals.get(key)
+
+            if prev and prev["ip"] > 0:
+                # Stats ENTERING this game
+                era = prev["er"] * 9 / prev["ip"]
+                whip = (prev["ha"] + prev["bb"]) / prev["ip"]
+                k9 = prev["k"] * 9 / prev["ip"]
+                bb9 = prev["bb"] * 9 / prev["ip"]
+                result[(gid, tid)] = {
+                    "sp_season_era": era,
+                    "sp_season_whip": whip,
+                    "sp_season_k9": k9,
+                    "sp_season_bb9": bb9,
+                    "sp_season_ip": prev["ip"],
+                }
+            # else: first start of season, no prior stats
+
+            # Update cumulative totals AFTER recording pre-game stats
+            if prev is None:
+                pitcher_totals[key] = {
+                    "ip": float(row["innings_pitched"]),
+                    "er": int(row["earned_runs"]),
+                    "ha": int(row["hits_allowed"]),
+                    "bb": int(row["walks_allowed"]),
+                    "k": int(row["strikeouts_recorded"]),
+                }
+            else:
+                prev["ip"] += float(row["innings_pitched"])
+                prev["er"] += int(row["earned_runs"])
+                prev["ha"] += int(row["hits_allowed"])
+                prev["bb"] += int(row["walks_allowed"])
+                prev["k"] += int(row["strikeouts_recorded"])
+
+        logger.info("Built SP season stats for %d game-team pairs", len(result))
+        return result
 
     # ── Rolling Stats ─────────────────────────────────────
 

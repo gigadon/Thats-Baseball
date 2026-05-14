@@ -23,7 +23,7 @@ import pandas as pd
 from mlb.data.mlb_api import MLBApiClient
 from mlb.data.odds_api import OddsApiClient
 from mlb.data.weather import WeatherClient
-from mlb.etl.build_training_data import PARK_DEFAULT, PARK_FACTORS, TrainingDataBuilder
+from mlb.etl.build_training_data import PARK_DEFAULT, PARK_FACTORS, TrainingDataBuilder, _update_elo
 from mlb.features.stadium import compute_stadium_features, calculate_stadium_factor
 from mlb.models.predict import GamePrediction, PredictionService
 from mlb.features.assembler import GameFeatureVector
@@ -202,7 +202,24 @@ class DailyRunner:
             if feat:
                 features[team_id] = feat
 
-        logger.info("Built features for %d teams", len(features))
+        # Compute Elo ratings and rest days from game history
+        self._elo_ratings: dict[str, float] = {}
+        self._last_game_date: dict[str, date] = {}
+        completed = games_df[
+            (games_df["status"] == "Final")
+            & games_df["home_score"].notna()
+        ].sort_values("game_date")
+        for _, g in completed.iterrows():
+            h, a = g["home_team_id"], g["away_team_id"]
+            gd = g["game_date"]
+            if gd >= target_date:
+                break
+            home_won = g["home_score"] > g["away_score"]
+            _update_elo(self._elo_ratings, h, a, home_won)
+            self._last_game_date[h] = gd
+            self._last_game_date[a] = gd
+
+        logger.info("Built features for %d teams (Elo for %d)", len(features), len(self._elo_ratings))
         return features
 
     async def _fetch_sp_stats(
@@ -278,12 +295,37 @@ class DailyRunner:
         features["park_runs_factor"] = park["runs"]
         features["park_hr_factor"] = park["hr"]
 
-        # Starting pitcher stats (used for score adjustment, NOT passed to model)
+        # Elo ratings
+        h_elo = self._elo_ratings.get(home, 1500.0)
+        a_elo = self._elo_ratings.get(away, 1500.0)
+        features["h_elo"] = h_elo
+        features["a_elo"] = a_elo
+        features["elo_diff"] = h_elo - a_elo
+
+        # Rest days
+        h_last = self._last_game_date.get(home)
+        a_last = self._last_game_date.get(away)
+        features["h_rest_days"] = (target_date - h_last).days if h_last else 5
+        features["a_rest_days"] = (target_date - a_last).days if a_last else 5
+        features["rest_diff"] = features["h_rest_days"] - features["a_rest_days"]
+
+        # Starting pitcher season stats — passed to model as features
         sp_data = sp_stats or {}
         home_sp = game.get("home_probable_pitcher")
         away_sp = game.get("away_probable_pitcher")
         h_sp_stats = sp_data.get(home_sp["player_id"]) if home_sp else None
         a_sp_stats = sp_data.get(away_sp["player_id"]) if away_sp else None
+
+        sp_defaults = {"era": 4.50, "whip": 1.30, "k_per_nine": 8.0, "bb_per_nine": 3.0, "innings_pitched": 0.0}
+        sp_key_map = {"era": "sp_season_era", "whip": "sp_season_whip",
+                      "k_per_nine": "sp_season_k9", "bb_per_nine": "sp_season_bb9",
+                      "innings_pitched": "sp_season_ip"}
+        for api_key, feat_key in sp_key_map.items():
+            h_val = h_sp_stats.get(api_key, sp_defaults[api_key]) if h_sp_stats else sp_defaults[api_key]
+            a_val = a_sp_stats.get(api_key, sp_defaults[api_key]) if a_sp_stats else sp_defaults[api_key]
+            features[f"h_{feat_key}"] = h_val
+            features[f"a_{feat_key}"] = a_val
+            features[f"diff_{feat_key}"] = h_val - a_val
 
         # Compute composite scores from features
         home_off_score = _compute_offense_score(home_feat)
