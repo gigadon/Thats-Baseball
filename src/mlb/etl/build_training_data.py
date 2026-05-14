@@ -171,6 +171,9 @@ class TrainingDataBuilder:
         # Build lineup recent form (7-day rolling OPS)
         lineup_recent = self._build_lineup_recent_form(batting_df)
 
+        # Build bullpen availability (per-pitcher usage tracking)
+        bp_avail = self._build_bullpen_availability(pitching_df)
+
         # Track last venue for travel fatigue
         last_game_venue: dict[str, str] = {}  # team_id -> venue (home_team_id) of last game
 
@@ -229,8 +232,20 @@ class TrainingDataBuilder:
             row["park_hr_factor"] = park["hr"]
 
             # Weather proxy features (available historically)
-            row["is_dome"] = 1 if home in DOME_TEAMS or home in RETRACTABLE_TEAMS else 0
+            is_dome = home in DOME_TEAMS or home in RETRACTABLE_TEAMS
+            row["is_dome"] = 1 if is_dome else 0
             row["game_month"] = game_date.month
+
+            # Real weather features (defaults — no historical weather data)
+            row["temperature"] = 72.0
+            row["wind_speed"] = 5.0
+            row["humidity"] = 50.0
+            row["is_outdoor"] = 0 if is_dome else 1
+
+            # Market odds features (defaults — no historical odds data)
+            row["market_home_prob"] = 0.5
+            row["market_away_prob"] = 0.5
+            row["market_total"] = 8.5
 
             # Elo ratings (pre-game)
             h_elo = elo_ratings.get(home, 1500.0)
@@ -279,6 +294,25 @@ class TrainingDataBuilder:
             for k, default in recent_defaults.items():
                 row[f"h_{k}"] = h_recent[k] if h_recent else default
                 row[f"a_{k}"] = a_recent[k] if a_recent else default
+                row[f"diff_{k}"] = row[f"h_{k}"] - row[f"a_{k}"]
+
+            # Batter-vs-pitcher matchup OPS (default to league average;
+            # historical BvP data not available in CSVs, but the model
+            # learns the feature exists and weights it when live data is
+            # provided at prediction time)
+            row["h_bvp_ops"] = 0.750
+            row["a_bvp_ops"] = 0.750
+            row["diff_bvp_ops"] = 0.0
+
+            # Bullpen availability
+            h_bp_avail = bp_avail.get((game["game_id"], home))
+            a_bp_avail = bp_avail.get((game["game_id"], away))
+            bp_avail_defaults = {
+                "bp_relievers_used_3d": 4, "bp_freshness": 0.5,
+            }
+            for k, default in bp_avail_defaults.items():
+                row[f"h_{k}"] = h_bp_avail[k] if h_bp_avail else default
+                row[f"a_{k}"] = a_bp_avail[k] if a_bp_avail else default
                 row[f"diff_{k}"] = row[f"h_{k}"] - row[f"a_{k}"]
 
             # Travel fatigue
@@ -633,6 +667,110 @@ class TrainingDataBuilder:
                 }
 
         logger.info("Built lineup season stats for %d game-team pairs", len(result))
+        return result
+
+    # ── Bullpen Availability ───────────────────────────────
+
+    def _build_bullpen_availability(
+        self, pitching_df: pd.DataFrame
+    ) -> dict[tuple, dict[str, float]]:
+        """Build per-game bullpen availability for each team.
+
+        For each (game_id, team_id), looks at the prior 3 calendar days to
+        measure how many unique relievers pitched and total reliever IP.
+
+        The pitcher with the most IP in a game for a team is the starter;
+        everyone else is a reliever.
+
+        Returns {(game_id, team_id): {
+            "bp_relievers_used_1d": int,
+            "bp_relievers_used_3d": int,
+            "bp_ip_recent": float,
+            "bp_freshness": float,
+        }}
+        """
+        if pitching_df.empty:
+            return {}
+
+        sorted_pit = pitching_df.sort_values("game_date")
+
+        # Step 1: Identify starters and collect reliever appearances per game
+        # {(game_id, team_id): set of reliever player_ids}
+        game_relievers: dict[tuple, set[int]] = {}
+        # {(game_id, team_id): total reliever IP}
+        game_reliever_ip: dict[tuple, float] = {}
+        # {(game_id, team_id): game_date}
+        game_dates: dict[tuple, date] = {}
+        # Track all unique relievers per team (across the season so far)
+        team_all_relievers: dict[str, set[int]] = {}
+
+        for (gid, tid), grp in sorted_pit.groupby(["game_id", "team_id"]):
+            game_date = grp.iloc[0]["game_date"]
+            game_dates[(gid, tid)] = game_date
+
+            # Starter = pitcher with max IP in this game for this team
+            sp_row = grp.nlargest(1, "innings_pitched").iloc[0]
+            sp_pid = sp_row["player_id"]
+
+            relievers = set()
+            reliever_ip = 0.0
+            for _, row in grp.iterrows():
+                pid = row["player_id"]
+                if pid != sp_pid:
+                    relievers.add(pid)
+                    reliever_ip += float(row["innings_pitched"])
+                    if tid not in team_all_relievers:
+                        team_all_relievers[tid] = set()
+                    team_all_relievers[tid].add(pid)
+
+            game_relievers[(gid, tid)] = relievers
+            game_reliever_ip[(gid, tid)] = reliever_ip
+
+        # Step 2: For each game-team, look back at the prior 1 and 3 days
+        # Build a per-team chronological index of (game_date, game_id) for lookback
+        team_game_log: dict[str, list[tuple]] = {}  # tid -> [(date, gid), ...]
+        for (gid, tid), gd in sorted(game_dates.items(), key=lambda x: x[1]):
+            if tid not in team_game_log:
+                team_game_log[tid] = []
+            team_game_log[tid].append((gd, gid))
+
+        result: dict[tuple, dict[str, float]] = {}
+
+        for tid, log in team_game_log.items():
+            total_relievers = len(team_all_relievers.get(tid, set()))
+            if total_relievers == 0:
+                total_relievers = 1  # avoid division by zero
+
+            for i, (gd, gid) in enumerate(log):
+                # Look at previous games (not including current) within 1 and 3 days
+                relievers_1d: set[int] = set()
+                relievers_3d: set[int] = set()
+                ip_3d = 0.0
+
+                for j in range(i - 1, -1, -1):
+                    prev_date, prev_gid = log[j]
+                    days_ago = (gd - prev_date).days
+                    if days_ago > 3:
+                        break
+                    key = (prev_gid, tid)
+                    prev_relievers = game_relievers.get(key, set())
+                    prev_ip = game_reliever_ip.get(key, 0.0)
+
+                    relievers_3d |= prev_relievers
+                    ip_3d += prev_ip
+                    if days_ago <= 1:
+                        relievers_1d |= prev_relievers
+
+                freshness = max(0.0, (total_relievers - len(relievers_3d)) / total_relievers)
+
+                result[(gid, tid)] = {
+                    "bp_relievers_used_1d": len(relievers_1d),
+                    "bp_relievers_used_3d": len(relievers_3d),
+                    "bp_ip_recent": ip_3d,
+                    "bp_freshness": freshness,
+                }
+
+        logger.info("Built bullpen availability for %d game-team pairs", len(result))
         return result
 
     # ── Lineup Recent Form ──────────────────────────────

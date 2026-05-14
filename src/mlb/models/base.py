@@ -1,7 +1,7 @@
 """Base model interface and individual model wrappers.
 
 Each wrapper provides a unified train/predict/evaluate interface
-around XGBoost, LightGBM, Gradient Boosting, and Random Forest.
+around XGBoost, LightGBM, Gradient Boosting, Random Forest, and Neural Net.
 """
 
 from __future__ import annotations
@@ -16,6 +16,9 @@ import joblib
 import numpy as np
 from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
 from sklearn.metrics import brier_score_loss, log_loss, roc_auc_score
+from sklearn.neural_network import MLPClassifier
+from sklearn.pipeline import Pipeline as SklearnPipeline
+from sklearn.preprocessing import StandardScaler
 
 logger = logging.getLogger(__name__)
 
@@ -256,6 +259,44 @@ class RandomForestModel(BaseModel):
 
     def _create_model(self):
         return RandomForestClassifier(**self.config.params)
+
+
+class NeuralNetModel(BaseModel):
+    """Neural network (MLP) model. Weight: 0.12 in ensemble.
+
+    Wraps sklearn's MLPClassifier inside a Pipeline with StandardScaler
+    so that feature scaling is handled transparently for train/predict/save/load.
+    """
+
+    def __init__(self, config: ModelConfig | None = None):
+        default = ModelConfig(
+            name="NeuralNet",
+            params={
+                "hidden_layer_sizes": (128, 64, 32),
+                "activation": "relu",
+                "solver": "adam",
+                "learning_rate": "adaptive",
+                "learning_rate_init": 0.001,
+                "max_iter": 500,
+                "early_stopping": True,
+                "validation_fraction": 0.1,
+                "random_state": 42,
+            },
+        )
+        if config:
+            default.params.update(config.params)
+            default.name = config.name or default.name
+        super().__init__(default)
+
+    def _create_model(self):
+        return SklearnPipeline([
+            ("scaler", StandardScaler()),
+            ("mlp", MLPClassifier(**self.config.params)),
+        ])
+
+    def feature_importance(self) -> dict[str, float]:
+        """MLP does not expose feature_importances_; return empty dict."""
+        return {}
 
 
 # ─── Helpers ──────────────────────────────────────────────────

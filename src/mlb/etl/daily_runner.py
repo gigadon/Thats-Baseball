@@ -117,14 +117,33 @@ class DailyRunner:
                 for k, v in weather_data.items()
             }
 
+            # 5b. Fetch live odds early so they can be used as model features
+            odds_data: list[dict] = []
+            try:
+                odds_data = await self.odds_client.get_mlb_odds() or []
+                if odds_data:
+                    logger.info("Fetched %d odds records for features", len(odds_data))
+            except Exception as e:
+                logger.warning("Early odds fetch failed, continuing without: %s", e)
+
+            # Build odds lookup keyed by (home_team, away_team) for feature injection
+            odds_by_matchup: dict[tuple[str, str], dict] = {}
+            for odds in odds_data:
+                key = (odds["home_team"], odds["away_team"])
+                odds_by_matchup[key] = odds
+
             # 6. Generate predictions for each game
             predictions: list[GamePrediction] = []
             for game in scheduled:
                 try:
+                    matched_odds = odds_by_matchup.get(
+                        (game["home_team_id"], game["away_team_id"])
+                    )
                     pred = self._predict_game(
                         game, team_features, weather_data, target_date,
                         sp_stats=sp_stats,
                         lineup_features=lineup_features,
+                        game_odds=matched_odds,
                     )
                     if pred:
                         predictions.append(pred)
@@ -152,9 +171,8 @@ class DailyRunner:
                 for p in predictions
             ]
 
-            # 7. Fetch live odds and generate betting slip
+            # 7. Generate betting slip from already-fetched odds
             try:
-                odds_data = await self.odds_client.get_mlb_odds()
                 if odds_data:
                     # Only bet on games where both starters are announced
                     eligible_ids = {
@@ -370,6 +388,34 @@ class DailyRunner:
 
                 game_feats[f"{prefix}_platoon_adv"] = adv_count / total if total >= 3 else 0.5
 
+            # Batter-vs-pitcher matchup OPS
+            for prefix, side in [("h", "home"), ("a", "away")]:
+                players = lineup_data.get(side, [])
+                opp_side = "away" if side == "home" else "home"
+                sp_key = f"{opp_side}_probable_pitcher"
+                opp_sp = game.get(sp_key)
+                opp_sp_id = opp_sp.get("player_id") if opp_sp else None
+
+                bvp_ops_vals = []
+                if opp_sp_id:
+                    for p in players:
+                        try:
+                            bvp = await self.mlb_client.get_batter_vs_pitcher(
+                                p["id"], opp_sp_id
+                            )
+                            if bvp and bvp["at_bats"] >= 5:
+                                bvp_ops_vals.append(bvp["ops"])
+                            await asyncio.sleep(0.1)
+                        except Exception:
+                            pass
+
+                if len(bvp_ops_vals) >= 3:
+                    game_feats[f"{prefix}_bvp_ops"] = np.mean(bvp_ops_vals)
+                else:
+                    game_feats[f"{prefix}_bvp_ops"] = 0.750  # league average default
+
+            game_feats["diff_bvp_ops"] = game_feats["h_bvp_ops"] - game_feats["a_bvp_ops"]
+
             # Approximate recent form from season stats (precise 7-day form is
             # only available in training data from CSVs — the live API would
             # require ~18 game-log calls per game which is too slow).
@@ -400,6 +446,7 @@ class DailyRunner:
         target_date: date,
         sp_stats: dict[int, dict] | None = None,
         lineup_features: dict[str, dict[str, float]] | None = None,
+        game_odds: dict | None = None,
     ) -> GamePrediction | None:
         """Generate a prediction for a single game."""
         home = game["home_team_id"]
@@ -439,6 +486,38 @@ class DailyRunner:
         # Weather proxy features
         features["is_dome"] = 1 if home in DOME_TEAMS or home in RETRACTABLE_TEAMS else 0
         features["game_month"] = target_date.month
+
+        # Real weather features
+        is_dome = home in DOME_TEAMS or home in RETRACTABLE_TEAMS
+        wx = weather_data.get(home)
+        features["temperature"] = 72.0 if is_dome or not wx else wx.temperature_f
+        features["wind_speed"] = 5.0 if is_dome or not wx else wx.wind_speed_mph
+        features["humidity"] = 50.0 if is_dome or not wx else wx.humidity_pct
+        features["is_outdoor"] = 0 if is_dome else 1
+
+        # Market odds features
+        if game_odds:
+            h_ml = game_odds.get("home_moneyline")
+            a_ml = game_odds.get("away_moneyline")
+            if h_ml is not None and h_ml != 0:
+                features["market_home_prob"] = (
+                    abs(h_ml) / (abs(h_ml) + 100) if h_ml < 0
+                    else 100 / (h_ml + 100)
+                )
+            else:
+                features["market_home_prob"] = 0.5
+            if a_ml is not None and a_ml != 0:
+                features["market_away_prob"] = (
+                    abs(a_ml) / (abs(a_ml) + 100) if a_ml < 0
+                    else 100 / (a_ml + 100)
+                )
+            else:
+                features["market_away_prob"] = 0.5
+            features["market_total"] = game_odds.get("total_line", 8.5) or 8.5
+        else:
+            features["market_home_prob"] = 0.5
+            features["market_away_prob"] = 0.5
+            features["market_total"] = 8.5
 
         # Elo ratings
         h_elo = self._elo_ratings.get(home, 1500.0)
@@ -485,6 +564,29 @@ class DailyRunner:
             features[f"h_{k}"] = lf.get(f"h_{k}", default)
             features[f"a_{k}"] = lf.get(f"a_{k}", default)
             features[f"diff_{k}"] = features[f"h_{k}"] - features[f"a_{k}"]
+
+        # Batter-vs-pitcher matchup OPS
+        features["h_bvp_ops"] = lf.get("h_bvp_ops", 0.750)
+        features["a_bvp_ops"] = lf.get("a_bvp_ops", 0.750)
+        features["diff_bvp_ops"] = features["h_bvp_ops"] - features["a_bvp_ops"]
+
+        # Bullpen availability (approximated from rolling stats)
+        # bp_ip_3d is already in the rolling features from _compute_team_rolling_stats
+        h_bp_ip_3d = home_feat.get("bp_ip_3d", 6.0)
+        a_bp_ip_3d = away_feat.get("bp_ip_3d", 6.0)
+        # Freshness: 15 IP in 3 days = fully depleted (freshness 0)
+        h_bp_freshness = max(0.0, 1.0 - h_bp_ip_3d / 15.0)
+        a_bp_freshness = max(0.0, 1.0 - a_bp_ip_3d / 15.0)
+        # Approximate relievers used from IP (avg ~1.5 IP per reliever appearance)
+        h_bp_relievers_used_3d = round(h_bp_ip_3d / 1.5, 1)
+        a_bp_relievers_used_3d = round(a_bp_ip_3d / 1.5, 1)
+
+        features["h_bp_freshness"] = h_bp_freshness
+        features["a_bp_freshness"] = a_bp_freshness
+        features["diff_bp_freshness"] = h_bp_freshness - a_bp_freshness
+        features["h_bp_relievers_used_3d"] = h_bp_relievers_used_3d
+        features["a_bp_relievers_used_3d"] = a_bp_relievers_used_3d
+        features["diff_bp_relievers_used_3d"] = h_bp_relievers_used_3d - a_bp_relievers_used_3d
 
         # Travel fatigue
         h_prev_venue = self._last_game_venue.get(home)

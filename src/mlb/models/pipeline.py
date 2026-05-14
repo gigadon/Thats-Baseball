@@ -16,6 +16,8 @@ import numpy as np
 import pandas as pd
 from sklearn.impute import KNNImputer
 from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
+from sklearn.neural_network import MLPClassifier
+from sklearn.pipeline import Pipeline as SklearnPipeline
 from sklearn.model_selection import TimeSeriesSplit, train_test_split
 from sklearn.preprocessing import StandardScaler
 
@@ -238,6 +240,61 @@ class TrainingPipeline:
         study_rf.optimize(rf_objective, n_trials=n_trials)
         logger.info("RandomForest best AUC: %.4f", study_rf.best_value)
 
+        # Tune NeuralNet (MLP wrapped in StandardScaler pipeline)
+        def nn_objective(trial):
+            layer_config = trial.suggest_categorical(
+                "layer_config",
+                ["128_64_32", "256_128_64", "128_64", "256_128", "64_32"],
+            )
+            layer_map = {
+                "128_64_32": (128, 64, 32),
+                "256_128_64": (256, 128, 64),
+                "128_64": (128, 64),
+                "256_128": (256, 128),
+                "64_32": (64, 32),
+            }
+            hidden_layers = layer_map[layer_config]
+            params = {
+                "hidden_layer_sizes": hidden_layers,
+                "activation": "relu",
+                "solver": "adam",
+                "learning_rate": "adaptive",
+                "learning_rate_init": trial.suggest_float(
+                    "learning_rate_init", 0.0001, 0.01, log=True
+                ),
+                "alpha": trial.suggest_float("alpha", 1e-5, 1e-2, log=True),
+                "max_iter": 500,
+                "early_stopping": True,
+                "validation_fraction": 0.1,
+                "random_state": 42,
+            }
+            # MLP needs scaled features — use a pipeline for CV evaluation
+            aucs = []
+            for tr_idx, va_idx in cv.split(X_train_sel, y_train):
+                pipe = SklearnPipeline([
+                    ("scaler", StandardScaler()),
+                    ("mlp", MLPClassifier(**params)),
+                ])
+                pipe.fit(X_train_sel[tr_idx], y_train[tr_idx])
+                preds = pipe.predict_proba(X_train_sel[va_idx])[:, 1]
+                aucs.append(roc_auc_score(y_train[va_idx], preds))
+            return np.mean(aucs)
+
+        study_nn = optuna.create_study(direction="maximize")
+        study_nn.optimize(nn_objective, n_trials=n_trials)
+        logger.info("NeuralNet best AUC: %.4f", study_nn.best_value)
+
+        # Resolve best hidden_layer_sizes from categorical label
+        nn_best = dict(study_nn.best_params)
+        layer_map = {
+            "128_64_32": (128, 64, 32),
+            "256_128_64": (256, 128, 64),
+            "128_64": (128, 64),
+            "256_128": (256, 128),
+            "64_32": (64, 32),
+        }
+        nn_best["hidden_layer_sizes"] = layer_map[nn_best.pop("layer_config")]
+
         # Apply best params to the base models
         from mlb.models.base import ModelConfig
         best_configs = [
@@ -263,11 +320,21 @@ class TrainingPipeline:
                 **study_rf.best_params,
                 "random_state": 42, "n_jobs": -1,
             }),
+            ModelConfig(name="NeuralNet", params={
+                **nn_best,
+                "activation": "relu",
+                "solver": "adam",
+                "learning_rate": "adaptive",
+                "max_iter": 500,
+                "early_stopping": True,
+                "validation_fraction": 0.1,
+                "random_state": 42,
+            }),
         ]
 
         from mlb.models.base import (
             XGBoostModel, GradientBoostingModel, LightGBMModel, CatBoostModel,
-            RandomForestModel,
+            RandomForestModel, NeuralNetModel,
         )
         self.ensemble = EnsembleModel(self.config.ensemble_config)
         self.ensemble.base_models = [
@@ -276,6 +343,7 @@ class TrainingPipeline:
             LightGBMModel(best_configs[2]),
             CatBoostModel(best_configs[3]),
             RandomForestModel(best_configs[4]),
+            NeuralNetModel(best_configs[5]),
         ]
 
         # Train ensemble with tuned models

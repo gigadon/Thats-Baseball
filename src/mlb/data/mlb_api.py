@@ -415,6 +415,43 @@ class MLBApiClient:
             "at_bats": ab,
         }
 
+    # ── Batter vs Pitcher ──────────────────────────────────────
+
+    async def get_batter_vs_pitcher(
+        self, batter_id: int, pitcher_id: int
+    ) -> dict[str, Any] | None:
+        """Fetch career stats of a batter against a specific pitcher.
+
+        Returns {"at_bats": int, "hits": int, "home_runs": int, "avg": float, "ops": float}
+        or None if no data exists.
+        """
+        try:
+            data = await self._get(
+                f"/people/{batter_id}/stats",
+                params={
+                    "stats": "vsPlayer",
+                    "opposingPlayerId": pitcher_id,
+                    "group": "hitting",
+                },
+            )
+            splits = data.get("stats", [{}])[0].get("splits", [])
+            if not splits:
+                return None
+            stat = splits[0].get("stat", {})
+            ab = _int(stat.get("atBats")) or 0
+            if ab == 0:
+                return None
+            return {
+                "at_bats": ab,
+                "hits": _int(stat.get("hits")) or 0,
+                "home_runs": _int(stat.get("homeRuns")) or 0,
+                "avg": float(stat.get("avg", 0)),
+                "ops": float(stat.get("ops", 0)),
+            }
+        except Exception as e:
+            logger.debug("BvP lookup failed for %d vs %d: %s", batter_id, pitcher_id, e)
+            return None
+
     # ── Teams List ─────────────────────────────────────────────
 
     async def get_teams(self, season: int | None = None) -> list[dict[str, Any]]:
