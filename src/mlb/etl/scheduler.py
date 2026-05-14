@@ -17,6 +17,7 @@ import signal
 from datetime import date, datetime, time, timedelta
 from pathlib import Path
 from typing import Any
+from zoneinfo import ZoneInfo
 
 from mlb.etl.backfill import HistoricalBackfill
 from mlb.etl.daily_runner import DailyRunner
@@ -31,15 +32,17 @@ class DailyScheduler:
         self,
         data_dir: Path = Path("data"),
         model_dir: Path = Path("models"),
-        predict_hour: int = 13,   # 1 PM local time
-        backfill_hour: int = 6,   # 6 AM local time
-        settle_hour: int = 23,    # 11 PM local time
+        predict_hour: int = 13,   # 1 PM ET
+        backfill_hour: int = 6,   # 6 AM ET
+        settle_hour: int = 23,    # 11 PM ET
+        timezone: str = "America/New_York",
     ):
         self.data_dir = data_dir
         self.model_dir = model_dir
         self.predict_hour = predict_hour
         self.backfill_hour = backfill_hour
         self.settle_hour = settle_hour
+        self.tz = ZoneInfo(timezone)
         self._running = True
         self._last_backfill: date | None = None
         self._last_predict: date | None = None
@@ -48,7 +51,7 @@ class DailyScheduler:
     async def start(self, run_now: bool = False):
         """Start the scheduler loop."""
         logger.info(
-            "Scheduler started — backfill at %02d:00, predictions at %02d:00, settlement at %02d:00",
+            "Scheduler started — backfill at %02d:00, predictions at %02d:00, settlement at %02d:00 (ET)",
             self.backfill_hour, self.predict_hour, self.settle_hour,
         )
 
@@ -56,7 +59,7 @@ class DailyScheduler:
             await self._run_daily_cycle()
 
         while self._running:
-            now = datetime.now()
+            now = datetime.now(self.tz)
             today = now.date()
 
             # Run backfill if it's past backfill_hour and hasn't run today
