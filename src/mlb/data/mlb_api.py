@@ -102,6 +102,7 @@ class MLBApiClient:
         return {
             "game_id": str(game["gamePk"]),
             "game_date": game.get("officialDate", game.get("gameDate", "")[:10]),
+            "game_time": game.get("gameDate", ""),
             "home_team_id": TEAM_ABBREVS.get(home_team_id, str(home_team_id)),
             "away_team_id": TEAM_ABBREVS.get(away_team_id, str(away_team_id)),
             "home_score": home.get("score"),

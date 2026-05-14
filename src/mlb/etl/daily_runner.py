@@ -25,7 +25,8 @@ from mlb.data.odds_api import OddsApiClient
 from mlb.data.weather import WeatherClient
 from mlb.etl.build_training_data import (
     DOME_TEAMS, PARK_DEFAULT, PARK_FACTORS, RETRACTABLE_TEAMS,
-    TrainingDataBuilder, _update_elo,
+    TEAM_TIMEZONES, TrainingDataBuilder, _classify_day_game,
+    _compute_travel_fatigue, _update_elo,
 )
 from mlb.features.stadium import compute_stadium_features, calculate_stadium_factor
 from mlb.models.predict import GamePrediction, PredictionService
@@ -224,9 +225,10 @@ class DailyRunner:
             if feat:
                 features[team_id] = feat
 
-        # Compute Elo ratings and rest days from game history
+        # Compute Elo ratings, rest days, and last venue from game history
         self._elo_ratings: dict[str, float] = {}
         self._last_game_date: dict[str, date] = {}
+        self._last_game_venue: dict[str, str] = {}
         completed = games_df[
             (games_df["status"] == "Final")
             & games_df["home_score"].notna()
@@ -240,6 +242,8 @@ class DailyRunner:
             _update_elo(self._elo_ratings, h, a, home_won)
             self._last_game_date[h] = gd
             self._last_game_date[a] = gd
+            self._last_game_venue[h] = h  # home team was at their own venue
+            self._last_game_venue[a] = h  # away team was at home team's venue
 
         logger.info("Built features for %d teams (Elo for %d)", len(features), len(self._elo_ratings))
         return features
@@ -366,8 +370,21 @@ class DailyRunner:
 
                 game_feats[f"{prefix}_platoon_adv"] = adv_count / total if total >= 3 else 0.5
 
+            # Approximate recent form from season stats (precise 7-day form is
+            # only available in training data from CSVs — the live API would
+            # require ~18 game-log calls per game which is too slow).
+            # Season OPS is a reasonable proxy; the model will weight this
+            # feature based on training data where true 7-day form is available.
+            for prefix, side in [("h", "home"), ("a", "away")]:
+                players = lineup_data.get(side, [])
+                ops_vals = [batting_stats[p["id"]]["ops"] for p in players if p["id"] in batting_stats]
+                game_feats[f"{prefix}_lineup_ops_7d"] = np.mean(ops_vals) if ops_vals else 0.720
+                hot = sum(1 for o in ops_vals if o > 0.800)
+                game_feats[f"{prefix}_lineup_hot_pct"] = hot / len(ops_vals) if ops_vals else 0.4
+
             # Differentials
-            for k in ("lineup_ops", "lineup_obp", "lineup_slg", "platoon_adv"):
+            for k in ("lineup_ops", "lineup_obp", "lineup_slg", "platoon_adv",
+                       "lineup_ops_7d", "lineup_hot_pct"):
                 game_feats[f"diff_{k}"] = game_feats[f"h_{k}"] - game_feats[f"a_{k}"]
 
             result[gid] = game_feats
@@ -461,6 +478,24 @@ class DailyRunner:
             features[f"h_{k}"] = lf.get(f"h_{k}", 0.720 if "ops" in k else 0.320 if "obp" in k else 0.400 if "slg" in k else 0.5)
             features[f"a_{k}"] = lf.get(f"a_{k}", 0.720 if "ops" in k else 0.320 if "obp" in k else 0.400 if "slg" in k else 0.5)
             features[f"diff_{k}"] = features[f"h_{k}"] - features[f"a_{k}"]
+
+        # Lineup recent form (7-day OPS)
+        for k in ("lineup_ops_7d", "lineup_hot_pct"):
+            default = 0.720 if "ops" in k else 0.4
+            features[f"h_{k}"] = lf.get(f"h_{k}", default)
+            features[f"a_{k}"] = lf.get(f"a_{k}", default)
+            features[f"diff_{k}"] = features[f"h_{k}"] - features[f"a_{k}"]
+
+        # Travel fatigue
+        h_prev_venue = self._last_game_venue.get(home)
+        a_prev_venue = self._last_game_venue.get(away)
+        features["h_travel_fatigue"] = _compute_travel_fatigue(h_prev_venue, home) if h_prev_venue else 0.0
+        features["a_travel_fatigue"] = _compute_travel_fatigue(a_prev_venue, home) if a_prev_venue else 0.0
+        features["diff_travel_fatigue"] = features["h_travel_fatigue"] - features["a_travel_fatigue"]
+
+        # Day/night classification
+        game_time_str = game.get("game_time", "")
+        features["is_day_game"] = _classify_day_game(game_time_str, home)
 
         # Compute composite scores from features
         home_off_score = _compute_offense_score(home_feat)
@@ -730,6 +765,7 @@ class DailyRunner:
             "home_sp_losses": h_sp_data.get("losses") if h_sp_data else None,
             "away_sp_wins": a_sp_data.get("wins") if a_sp_data else None,
             "away_sp_losses": a_sp_data.get("losses") if a_sp_data else None,
+            "game_time": game.get("game_time", ""),
         }
 
     @staticmethod

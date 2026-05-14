@@ -39,6 +39,7 @@ class GamePredictionResponse(BaseModel):
     home_sp_losses: int | None = None
     away_sp_wins: int | None = None
     away_sp_losses: int | None = None
+    game_time: str = ""
 
 
 class PredictionRequest(BaseModel):

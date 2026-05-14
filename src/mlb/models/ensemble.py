@@ -1,7 +1,7 @@
 """Stacking ensemble with logistic regression meta-learner.
 
 Architecture:
-    Layer 1: XGBoost (0.35), GBM (0.30), LightGBM (0.25), RF (0.10)
+    Layer 1: XGBoost (0.25), GBM (0.20), LightGBM (0.25), CatBoost (0.20), RF (0.10)
     Layer 2: Logistic Regression meta-model trained on OOF predictions
 
 Supports both weighted average and stacking modes.
@@ -22,6 +22,7 @@ from sklearn.model_selection import StratifiedKFold
 
 from mlb.models.base import (
     BaseModel,
+    CatBoostModel,
     GradientBoostingModel,
     LightGBMModel,
     ModelMetrics,
@@ -39,9 +40,10 @@ class EnsembleConfig:
 
     mode: str = "stacking"  # "stacking" or "weighted_average"
     weights: dict[str, float] = field(default_factory=lambda: {
-        "XGBoost": 0.35,
-        "GradientBoosting": 0.30,
+        "XGBoost": 0.25,
+        "GradientBoosting": 0.20,
         "LightGBM": 0.25,
+        "CatBoost": 0.20,
         "RandomForest": 0.10,
     })
     cv_folds: int = 5
@@ -57,6 +59,7 @@ class EnsembleModel:
             XGBoostModel(),
             GradientBoostingModel(),
             LightGBMModel(),
+            CatBoostModel(),
             RandomForestModel(),
         ]
         self.meta_model: LogisticRegression | None = None

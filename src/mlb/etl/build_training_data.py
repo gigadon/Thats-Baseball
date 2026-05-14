@@ -60,6 +60,57 @@ PARK_DEFAULT = {"runs": 1.00, "hr": 1.00}
 DOME_TEAMS = {"TB"}
 RETRACTABLE_TEAMS = {"ARI", "HOU", "MIA", "MIL", "SEA", "TEX", "TOR"}
 
+# Team timezone UTC offsets (standard time, no DST adjustment needed for relative diffs)
+TEAM_TIMEZONES: dict[str, int] = {
+    # Eastern (-5)
+    "NYY": -5, "NYM": -5, "BOS": -5, "BAL": -5, "TB": -5,
+    "PHI": -5, "PIT": -5, "MIA": -5, "WSH": -5, "ATL": -5,
+    "CIN": -5, "CLE": -5, "DET": -5, "TOR": -5,
+    # Central (-6)
+    "CHC": -6, "CWS": -6, "MIL": -6, "STL": -6,
+    "MIN": -6, "KC": -6, "HOU": -6, "TEX": -6,
+    # Mountain (-7)
+    "ARI": -7, "COL": -7,
+    # Pacific (-8)
+    "LAD": -8, "LAA": -8, "SF": -8, "SD": -8, "SEA": -8, "OAK": -8,
+}
+
+
+def _compute_travel_fatigue(prev_venue: str, current_venue: str) -> float:
+    """Compute travel fatigue score based on timezone change.
+
+    Eastward travel (positive tz_change) is penalized more heavily.
+    Returns 0 if same timezone or unknown teams.
+    """
+    prev_tz = TEAM_TIMEZONES.get(prev_venue)
+    cur_tz = TEAM_TIMEZONES.get(current_venue)
+    if prev_tz is None or cur_tz is None:
+        return 0.0
+    tz_change = cur_tz - prev_tz
+    if tz_change == 0:
+        return 0.0
+    return max(0, tz_change) * 1.5 + abs(tz_change) * 0.5
+
+
+def _classify_day_game(game_time_str: str, home_team: str) -> int:
+    """Classify a game as day (1) or night (0) from ISO timestamp.
+
+    Day game = first pitch before 5pm local time (based on home team timezone).
+    """
+    if not game_time_str or len(game_time_str) < 16:
+        return 0  # default to night
+    try:
+        from datetime import datetime
+        # Parse ISO: "2026-05-11T18:05:00Z"
+        dt = datetime.fromisoformat(game_time_str.replace("Z", "+00:00"))
+        utc_hour = dt.hour
+        tz_offset = TEAM_TIMEZONES.get(home_team, -5)
+        local_hour = (utc_hour + tz_offset) % 24
+        return 1 if local_hour < 17 else 0
+    except (ValueError, AttributeError):
+        return 0
+
+
 # Elo constants
 ELO_K = 6  # Update speed — moderate for baseball (many games)
 ELO_HOME_ADVANTAGE = 24  # ~54% expected win rate for home team
@@ -116,6 +167,15 @@ class TrainingDataBuilder:
 
         # Build platoon features (requires handedness cache)
         platoon = self._build_platoon_features(batting_df, pitching_df)
+
+        # Build lineup recent form (7-day rolling OPS)
+        lineup_recent = self._build_lineup_recent_form(batting_df)
+
+        # Track last venue for travel fatigue
+        last_game_venue: dict[str, str] = {}  # team_id -> venue (home_team_id) of last game
+
+        # Check if game_time column exists for day/night classification
+        has_game_time = "game_time" in games_df.columns
 
         # Generate feature rows for each game
         feature_rows = []
@@ -212,15 +272,46 @@ class TrainingDataBuilder:
             row["a_platoon_adv"] = a_platoon["platoon_adv"] if a_platoon else 0.5
             row["diff_platoon_adv"] = row["h_platoon_adv"] - row["a_platoon_adv"]
 
+            # Lineup recent form (7-day rolling OPS)
+            h_recent = lineup_recent.get((game["game_id"], home))
+            a_recent = lineup_recent.get((game["game_id"], away))
+            recent_defaults = {"lineup_ops_7d": 0.720, "lineup_hot_pct": 0.4}
+            for k, default in recent_defaults.items():
+                row[f"h_{k}"] = h_recent[k] if h_recent else default
+                row[f"a_{k}"] = a_recent[k] if a_recent else default
+                row[f"diff_{k}"] = row[f"h_{k}"] - row[f"a_{k}"]
+
+            # Travel fatigue
+            h_prev_venue = last_game_venue.get(home)
+            a_prev_venue = last_game_venue.get(away)
+            # Home team fatigue: previous venue -> their home stadium
+            row["h_travel_fatigue"] = (
+                _compute_travel_fatigue(h_prev_venue, home) if h_prev_venue else 0.0
+            )
+            # Away team fatigue: previous venue -> current game's home stadium
+            row["a_travel_fatigue"] = (
+                _compute_travel_fatigue(a_prev_venue, home) if a_prev_venue else 0.0
+            )
+            row["diff_travel_fatigue"] = row["h_travel_fatigue"] - row["a_travel_fatigue"]
+
+            # Day/night game classification
+            if has_game_time:
+                game_time_str = game.get("game_time", "")
+                row["is_day_game"] = _classify_day_game(game_time_str, home)
+            else:
+                row["is_day_game"] = 0  # default to night (~70% of MLB games)
+
             feature_rows.append(row)
 
             # Update Elo AFTER recording pre-game values
             home_won = game["home_score"] > game["away_score"]
             _update_elo(elo_ratings, home, away, home_won)
 
-            # Update last game dates
+            # Update last game dates and venues
             last_game_date[home] = game_date
             last_game_date[away] = game_date
+            last_game_venue[home] = home  # venue is the home team's stadium
+            last_game_venue[away] = home
 
             if (idx + 1) % 500 == 0:
                 logger.info("Processed %d / %d games", idx + 1, len(games_sorted))
@@ -544,6 +635,74 @@ class TrainingDataBuilder:
         logger.info("Built lineup season stats for %d game-team pairs", len(result))
         return result
 
+    # ── Lineup Recent Form ──────────────────────────────
+
+    def _build_lineup_recent_form(
+        self, batting_df: pd.DataFrame
+    ) -> dict[tuple, dict[str, float]]:
+        """Build per-game lineup 7-day rolling OPS for hot/cold streak detection.
+
+        For each (game_id, team_id), computes mean OPS of team's batters over
+        their last 7 calendar days (minimum 5 AB in window).
+
+        Returns {(game_id, team_id): {"lineup_ops_7d": ..., "lineup_hot_pct": ...}}
+        """
+        if batting_df.empty:
+            return {}
+
+        sorted_bat = batting_df.sort_values("game_date")
+        from datetime import timedelta
+
+        # Per-player game-by-game batting log: {player_id: [(date, ab, h, 2b, 3b, hr, bb), ...]}
+        player_log: dict[int, list[tuple]] = {}
+        result: dict[tuple, dict[str, float]] = {}
+
+        for (gid, tid), grp in sorted_bat.groupby(["game_id", "team_id"]):
+            game_date = grp.iloc[0]["game_date"]
+            cutoff = game_date - timedelta(days=7)
+
+            ops_vals = []
+            for _, row in grp.iterrows():
+                pid = row["player_id"]
+                ab = int(row["at_bats"])
+
+                # Compute 7-day OPS from previous games
+                if pid in player_log:
+                    recent = [
+                        e for e in player_log[pid] if cutoff <= e[0] < game_date
+                    ]
+                    tot_ab = sum(e[1] for e in recent)
+                    if tot_ab >= 5:
+                        tot_h = sum(e[2] for e in recent)
+                        tot_2b = sum(e[3] for e in recent)
+                        tot_3b = sum(e[4] for e in recent)
+                        tot_hr = sum(e[5] for e in recent)
+                        tot_bb = sum(e[6] for e in recent)
+                        obp = (tot_h + tot_bb) / (tot_ab + tot_bb) if (tot_ab + tot_bb) else 0
+                        slg = (tot_h + tot_2b + 2 * tot_3b + 3 * tot_hr) / tot_ab
+                        ops_vals.append(obp + slg)
+
+                # Record this game AFTER computing (so we don't include current game)
+                if ab > 0:
+                    if pid not in player_log:
+                        player_log[pid] = []
+                    player_log[pid].append((
+                        game_date, ab, int(row["hits"]),
+                        int(row["doubles"]), int(row["triples"]),
+                        int(row["home_runs"]), int(row["walks"]),
+                    ))
+
+            if len(ops_vals) >= 3:
+                mean_ops = np.mean(ops_vals)
+                hot_pct = sum(1 for o in ops_vals if o > 0.800) / len(ops_vals)
+                result[(gid, tid)] = {
+                    "lineup_ops_7d": mean_ops,
+                    "lineup_hot_pct": hot_pct,
+                }
+
+        logger.info("Built lineup recent form for %d game-team pairs", len(result))
+        return result
+
     # ── Rolling Stats ─────────────────────────────────────
 
     def _compute_team_rolling_stats(
@@ -601,6 +760,7 @@ class TrainingDataBuilder:
                     "ra": ra,
                     "run_diff": rs - ra,
                     "is_home": is_home,
+                    "venue": game["home_team_id"],  # venue is always the home team
                     "bp_ip": 0.0,  # filled after pitching calc below
                 })
 

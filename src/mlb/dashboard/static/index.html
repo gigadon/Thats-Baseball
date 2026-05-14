@@ -84,7 +84,13 @@
     border-radius: 999px;
     font-size: 13px; color: var(--text-2);
   }
-  .date-pill .dot{ width:6px;height:6px; border-radius:50%; background:var(--good); box-shadow: 0 0 8px var(--good); }
+  .date-pill .dot{ width:6px;height:6px; border-radius:50%; background:var(--good); box-shadow: 0 0 8px var(--good); transition: box-shadow .3s ease; }
+  .date-pill .dot.pulse{ animation: dot-pulse 1s ease-in-out; }
+  @keyframes dot-pulse{
+    0%,100%{ box-shadow: 0 0 8px var(--good); }
+    50%{ box-shadow: 0 0 18px var(--good), 0 0 30px var(--good); }
+  }
+  .last-updated{ font-size: 11px; color: var(--text-3); margin-left: 4px; }
 
   .hidden { display: none; }
   .section { margin-bottom: 24px; }
@@ -149,6 +155,7 @@
   .streak-l{ background: rgba(248,113,113,.15); color: var(--red); }
   .streak-none{ color: var(--text-3); }
   .vs{ color: var(--text-3); font-size: 13px; font-weight: 500; }
+  .game-time{ font-size: 11px; color: var(--text-3); font-weight: 600; letter-spacing: 0.04em; }
 
   .pitchers{
     display: grid;
@@ -419,7 +426,7 @@
         <div class="page-title">Today's Predictions</div>
         <div class="page-sub" id="pred-sub">Loading...</div>
       </div>
-      <span class="date-pill"><span class="dot"></span> <span id="date-label"></span></span>
+      <span class="date-pill"><span class="dot" id="refresh-dot"></span> <span id="date-label"></span><span class="last-updated" id="last-updated"></span></span>
     </div>
     <div class="grid" id="predictions-grid">
       <div class="loading"><div class="spinner"></div>Loading predictions...</div>
@@ -545,6 +552,9 @@
 <script>
 const API = '/api/v1';
 
+let currentTab = 'predictions';
+let pollTimer = null;
+
 const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 function formatDateLabel() {
@@ -553,16 +563,55 @@ function formatDateLabel() {
 }
 document.getElementById('date-label').textContent = formatDateLabel();
 
+function updateLastUpdated() {
+  const now = new Date();
+  const h = now.getHours(), m = now.getMinutes();
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  const hh = h % 12 || 12;
+  const mm = String(m).padStart(2, '0');
+  document.getElementById('last-updated').textContent = ` \u00B7 ${hh}:${mm} ${ampm}`;
+  const dot = document.getElementById('refresh-dot');
+  dot.classList.remove('pulse');
+  void dot.offsetWidth;
+  dot.classList.add('pulse');
+}
+
+function formatGameTime(isoStr) {
+  if (!isoStr) return '';
+  try {
+    const d = new Date(isoStr);
+    if (isNaN(d.getTime())) return '';
+    let h = d.getHours(), m = d.getMinutes();
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    return `${h}:${String(m).padStart(2, '0')} ${ampm}`;
+  } catch(e) { return ''; }
+}
+
+function refreshCurrentTab() {
+  if (currentTab === 'predictions') loadPredictions();
+  else if (currentTab === 'rankings') loadRankings('power');
+  else if (currentTab === 'betting') loadBetting();
+  else if (currentTab === 'analytics') loadAnalytics();
+}
+
+function startPolling() {
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(refreshCurrentTab, 60000);
+}
+
 function showTab(tab, btn) {
   document.querySelectorAll('[id^="tab-"]').forEach(el => el.classList.add('hidden'));
   document.getElementById(`tab-${tab}`).classList.remove('hidden');
   document.querySelectorAll('.tabs .tab').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
 
+  currentTab = tab;
   if (tab === 'predictions') loadPredictions();
   if (tab === 'rankings') loadRankings('power');
   if (tab === 'betting') loadBetting();
   if (tab === 'analytics') loadAnalytics();
+  startPolling();
 }
 
 async function fetchJSON(url) {
@@ -587,6 +636,8 @@ const fmtERA = e => parseFloat(e).toFixed(2);
 async function loadPredictions() {
   const data = await fetchJSON(`${API}/predictions/daily`);
   const grid = document.getElementById('predictions-grid');
+
+  updateLastUpdated();
 
   if (!data || !data.games || data.games.length === 0) {
     grid.innerHTML = `<div class="loading">No predictions available yet. Run the daily pipeline to generate predictions.</div>`;
@@ -642,8 +693,9 @@ async function loadPredictions() {
             <span class="team-streak ${aStreak.startsWith('W') ? 'streak-w' : aStreak.startsWith('L') ? 'streak-l' : 'streak-none'}">${aStreak}</span>
           </div>
         </div>
-        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
           <span class="vs">@</span>
+          ${g.game_time ? `<span class="game-time">${formatGameTime(g.game_time)}</span>` : ''}
         </div>
         <div class="team home">
           <div class="team-abbr">${g.home_team}</div>
@@ -915,6 +967,7 @@ async function loadAnalytics() {
 
 // ── Init ────────────────────────────────────────────
 loadPredictions();
+startPolling();
 </script>
 
 </body>

@@ -206,6 +206,23 @@ class TrainingPipeline:
         study_gb.optimize(gb_objective, n_trials=n_trials)
         logger.info("GradientBoosting best AUC: %.4f", study_gb.best_value)
 
+        # Tune CatBoost
+        def catboost_objective(trial):
+            from catboost import CatBoostClassifier
+            params = {
+                "depth": trial.suggest_int("depth", 4, 8),
+                "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.1, log=True),
+                "l2_leaf_reg": trial.suggest_float("l2_leaf_reg", 1.0, 10.0),
+                "iterations": trial.suggest_int("iterations", 300, 800),
+                "random_strength": trial.suggest_float("random_strength", 0.5, 2.0),
+                "random_seed": 42, "verbose": 0,
+            }
+            return _cv_auc(CatBoostClassifier, params)
+
+        study_catboost = optuna.create_study(direction="maximize")
+        study_catboost.optimize(catboost_objective, n_trials=n_trials)
+        logger.info("CatBoost best AUC: %.4f", study_catboost.best_value)
+
         # Tune RandomForest
         def rf_objective(trial):
             params = {
@@ -238,6 +255,10 @@ class TrainingPipeline:
                 "random_state": 42, "n_jobs": -1,
                 "objective": "binary", "metric": "binary_logloss", "verbose": -1,
             }),
+            ModelConfig(name="CatBoost", params={
+                **study_catboost.best_params,
+                "random_seed": 42, "verbose": 0,
+            }),
             ModelConfig(name="RandomForest", params={
                 **study_rf.best_params,
                 "random_state": 42, "n_jobs": -1,
@@ -245,14 +266,16 @@ class TrainingPipeline:
         ]
 
         from mlb.models.base import (
-            XGBoostModel, GradientBoostingModel, LightGBMModel, RandomForestModel,
+            XGBoostModel, GradientBoostingModel, LightGBMModel, CatBoostModel,
+            RandomForestModel,
         )
         self.ensemble = EnsembleModel(self.config.ensemble_config)
         self.ensemble.base_models = [
             XGBoostModel(best_configs[0]),
             GradientBoostingModel(best_configs[1]),
             LightGBMModel(best_configs[2]),
-            RandomForestModel(best_configs[3]),
+            CatBoostModel(best_configs[3]),
+            RandomForestModel(best_configs[4]),
         ]
 
         # Train ensemble with tuned models

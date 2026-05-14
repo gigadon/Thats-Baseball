@@ -208,6 +208,32 @@ class GradientBoostingModel(BaseModel):
         return GradientBoostingClassifier(**self.config.params)
 
 
+class CatBoostModel(BaseModel):
+    """CatBoost gradient boosting model. Weight: 0.20 in ensemble."""
+
+    def __init__(self, config: ModelConfig | None = None):
+        default = ModelConfig(
+            name="CatBoost",
+            params={
+                "iterations": 500,
+                "depth": 6,
+                "learning_rate": 0.05,
+                "l2_leaf_reg": 3,
+                "random_seed": 42,
+                "verbose": 0,
+            },
+        )
+        if config:
+            default.params.update(config.params)
+            default.name = config.name or default.name
+        super().__init__(default)
+
+    def _create_model(self):
+        from catboost import CatBoostClassifier
+
+        return CatBoostClassifier(**self.config.params)
+
+
 class RandomForestModel(BaseModel):
     """Random Forest model. Weight: 0.10 in ensemble."""
 
