@@ -169,15 +169,28 @@ class PredictionService:
         home_runs = max(0.5, base_rpg + home_off_adj + home_pit_opp + stadium_adj)
         away_runs = max(0.5, base_rpg + away_off_adj + away_pit_opp + stadium_adj)
 
-        # Nudge toward win probability implication
-        if home_win_prob > 0.5:
-            home_runs += (home_win_prob - 0.5) * 0.5
-            away_runs -= (home_win_prob - 0.5) * 0.3
-        else:
-            away_runs += (0.5 - home_win_prob) * 0.5
-            home_runs -= (0.5 - home_win_prob) * 0.3
+        # Blend with win probability so runs always agree with the predicted winner.
+        # The model's win prob is authoritative; scale the run margin to match.
+        edge = home_win_prob - 0.5  # positive = home favored
+        prob_margin = edge * 3.0  # ±1.5 runs at extremes (e.g. 60% → +0.3)
+        heuristic_margin = home_runs - away_runs
+        # Weighted blend: 40% heuristic, 60% win-prob-implied margin
+        target_margin = heuristic_margin * 0.4 + prob_margin * 0.6
+        midpoint = (home_runs + away_runs) / 2
+        home_runs = max(0.5, midpoint + target_margin / 2)
+        away_runs = max(0.5, midpoint - target_margin / 2)
 
-        return max(0.5, home_runs), max(0.5, away_runs)
+        # Final safety: if runs still disagree with win prob, force consistency
+        if home_win_prob > 0.5 and home_runs <= away_runs:
+            avg = (home_runs + away_runs) / 2
+            home_runs = avg + 0.1
+            away_runs = avg - 0.1
+        elif home_win_prob < 0.5 and away_runs <= home_runs:
+            avg = (home_runs + away_runs) / 2
+            away_runs = avg + 0.1
+            home_runs = avg - 0.1
+
+        return round(max(0.5, home_runs), 1), round(max(0.5, away_runs), 1)
 
     def _get_top_factors(
         self, game_fv: GameFeatureVector, n: int = 10
