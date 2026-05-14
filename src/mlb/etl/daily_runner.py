@@ -535,6 +535,8 @@ class DailyRunner:
         for team_id, feat in team_features.items():
             off = _compute_offense_score(feat)
             pit = _compute_pitching_score(feat)
+            bp = _compute_bullpen_score(feat)
+            defense = _compute_defense_score(feat)
             power = _power_score(feat)
             rec = season_records.get(team_id, {})
             wins = rec.get("wins", 0)
@@ -563,8 +565,8 @@ class DailyRunner:
                 "power_score": round(power, 1),
                 "offense_score": round(off, 1),
                 "pitching_score": round(pit, 1),
-                "defense_score": 50.0,
-                "bullpen_score": 50.0,
+                "defense_score": round(defense, 1),
+                "bullpen_score": round(bp, 1),
                 "momentum_score": round(min(100, max(0, 50 + streak * 3 + (l10_w - 5) * 4)), 1),
                 "wins": wins,
                 "losses": losses,
@@ -576,7 +578,8 @@ class DailyRunner:
                 "tier": tier,
             })
 
-        # Sort by each category and cache
+        # Sort by each category and cache (deep copy to avoid shared references)
+        import copy
         for category, sort_key in [
             ("power", "power_score"),
             ("offense", "offense_score"),
@@ -586,13 +589,16 @@ class DailyRunner:
             ("momentum", "momentum_score"),
         ]:
             sorted_teams = sorted(rankings_data, key=lambda t: t[sort_key], reverse=True)
+            ranked = []
             for i, team in enumerate(sorted_teams):
-                team["rank"] = i + 1
+                t = copy.copy(team)
+                t["rank"] = i + 1
+                ranked.append(t)
 
             cache_team_rankings(date_str, category, {
                 "ranking_date": date_str,
                 "category": category,
-                "rankings": sorted_teams,
+                "rankings": ranked,
             })
 
         logger.info("Generated rankings for %d teams", len(rankings_data))
@@ -812,6 +818,35 @@ def _compute_pitching_score(feat: dict[str, float]) -> float:
     whip_score = min(100, max(0, (2.0 - whip) / 2.0 * 100))
     k9_score = min(100, max(0, k9 / 14.0 * 100))
     return round(era_score * 0.4 + whip_score * 0.35 + k9_score * 0.25, 1)
+
+
+def _compute_bullpen_score(feat: dict[str, float]) -> float:
+    """Bullpen quality from rolling stats (0-100, higher = better)."""
+    bp_era = feat.get("bp_era_7", 4.50)
+    bp_whip = feat.get("bp_whip_7", 1.30)
+    bp_k9 = feat.get("bp_k9_7", 8.0)
+    fatigue = feat.get("bp_ip_3d", 6.0)
+    era_score = min(100, max(0, (7.0 - bp_era) / 7.0 * 100))
+    whip_score = min(100, max(0, (2.0 - bp_whip) / 2.0 * 100))
+    k9_score = min(100, max(0, bp_k9 / 14.0 * 100))
+    # Penalize heavy recent usage (>10 IP in 3 days = overworked)
+    fatigue_penalty = max(0, (fatigue - 10) * 3)
+    return round(max(0, era_score * 0.4 + whip_score * 0.35 + k9_score * 0.25 - fatigue_penalty), 1)
+
+
+def _compute_defense_score(feat: dict[str, float]) -> float:
+    """Defense proxy from runs allowed vs pitching quality (0-100).
+
+    Teams that allow fewer runs than their pitching stats suggest have good defense.
+    """
+    ra = feat.get("ra_per_game", 4.5)
+    pit_era = feat.get("sp_era_7", 4.50) * 0.6 + feat.get("bp_era_7", 4.50) * 0.4
+    # Runs allowed score (lower = better)
+    ra_score = min(100, max(0, (7.0 - ra) / 7.0 * 100))
+    # Defensive efficiency: if RA < expected from ERA, defense is helping
+    era_ra_diff = (pit_era / 9 * 9) - ra  # positive = defense saving runs
+    def_bonus = max(-15, min(15, era_ra_diff * 10))
+    return round(min(100, max(0, ra_score + def_bonus)), 1)
 
 
 def _power_score(feat: dict[str, float]) -> float:
