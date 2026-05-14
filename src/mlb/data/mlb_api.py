@@ -301,6 +301,81 @@ class MLBApiClient:
             })
         return players
 
+    # ── Lineups ────────────────────────────────────────────
+
+    async def get_game_lineups(
+        self, game_date: date
+    ) -> dict[str, dict[str, list[dict]]]:
+        """Fetch starting lineups for all games on a date.
+
+        Returns {game_id: {"home": [player_dicts], "away": [player_dicts]}}
+        where each player has id, name, batSide, pitchHand.
+        """
+        data = await self._get(
+            "/schedule",
+            params={
+                "sportId": 1,
+                "date": game_date.isoformat(),
+                "hydrate": "lineups",
+            },
+        )
+        result: dict[str, dict[str, list[dict]]] = {}
+        for date_entry in data.get("dates", []):
+            for game in date_entry.get("games", []):
+                gid = str(game["gamePk"])
+                lineups = game.get("lineups", {})
+                home_players = lineups.get("homePlayers", [])
+                away_players = lineups.get("awayPlayers", [])
+                if home_players or away_players:
+                    result[gid] = {
+                        "home": [{"id": p["id"], "name": p.get("fullName", "")} for p in home_players],
+                        "away": [{"id": p["id"], "name": p.get("fullName", "")} for p in away_players],
+                    }
+        return result
+
+    async def get_players_info(
+        self, player_ids: list[int]
+    ) -> dict[int, dict[str, str]]:
+        """Fetch batSide and pitchHand for multiple players.
+
+        Returns {player_id: {"bats": "R"/"L"/"S", "throws": "R"/"L"}}
+        """
+        if not player_ids:
+            return {}
+        ids_str = ",".join(str(pid) for pid in player_ids)
+        data = await self._get("/people", params={"personIds": ids_str})
+        result: dict[int, dict[str, str]] = {}
+        for p in data.get("people", []):
+            result[p["id"]] = {
+                "bats": p.get("batSide", {}).get("code", "R"),
+                "throws": p.get("pitchHand", {}).get("code", "R"),
+            }
+        return result
+
+    async def get_player_batting_stats(
+        self, player_id: int, season: int
+    ) -> dict[str, Any]:
+        """Fetch season batting stats for a player."""
+        raw = await self.get_player_stats(player_id, season, group="hitting")
+        if not raw:
+            return {}
+        ab = _int(raw.get("atBats")) or 0
+        h = _int(raw.get("hits")) or 0
+        bb = _int(raw.get("baseOnBalls")) or 0
+        hr = _int(raw.get("homeRuns")) or 0
+        doubles = _int(raw.get("doubles")) or 0
+        triples = _int(raw.get("triples")) or 0
+        pa = ab + bb + _int(raw.get("hitByPitch")) or 0 + _int(raw.get("sacFlies")) or 0
+        obp = float(raw.get("obp", 0))
+        slg = float(raw.get("slg", 0))
+        return {
+            "player_id": player_id,
+            "obp": obp,
+            "slg": slg,
+            "ops": obp + slg,
+            "at_bats": ab,
+        }
+
     # ── Teams List ─────────────────────────────────────────────
 
     async def get_teams(self, season: int | None = None) -> list[dict[str, Any]]:

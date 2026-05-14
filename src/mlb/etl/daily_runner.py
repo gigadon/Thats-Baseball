@@ -23,7 +23,10 @@ import pandas as pd
 from mlb.data.mlb_api import MLBApiClient
 from mlb.data.odds_api import OddsApiClient
 from mlb.data.weather import WeatherClient
-from mlb.etl.build_training_data import PARK_DEFAULT, PARK_FACTORS, TrainingDataBuilder, _update_elo
+from mlb.etl.build_training_data import (
+    DOME_TEAMS, PARK_DEFAULT, PARK_FACTORS, RETRACTABLE_TEAMS,
+    TrainingDataBuilder, _update_elo,
+)
 from mlb.features.stadium import compute_stadium_features, calculate_stadium_factor
 from mlb.models.predict import GamePrediction, PredictionService
 from mlb.features.assembler import GameFeatureVector
@@ -95,6 +98,11 @@ class DailyRunner:
             # 4. Fetch starting pitcher stats
             sp_stats = await self._fetch_sp_stats(scheduled, target_date.year)
 
+            # 4b. Fetch lineups and compute lineup/platoon features
+            lineup_features = await self._fetch_lineup_features(
+                scheduled, target_date
+            )
+
             # 5. Fetch weather for home stadiums
             home_teams = list({g["home_team_id"] for g in scheduled})
             weather_data = await self.weather_client.get_bulk_weather(home_teams)
@@ -115,6 +123,7 @@ class DailyRunner:
                     pred = self._predict_game(
                         game, team_features, weather_data, target_date,
                         sp_stats=sp_stats,
+                        lineup_features=lineup_features,
                     )
                     if pred:
                         predictions.append(pred)
@@ -252,6 +261,107 @@ class DailyRunner:
         logger.info("Got stats for %d / %d starters", len(sp_stats), len(pitcher_ids))
         return sp_stats
 
+    async def _fetch_lineup_features(
+        self, games: list[dict], target_date: date,
+    ) -> dict[str, dict[str, float]]:
+        """Fetch lineups and compute lineup OPS + platoon advantage per game side.
+
+        Returns {game_id: {"h_lineup_ops": ..., "a_lineup_ops": ..., "h_platoon_adv": ..., ...}}
+        """
+        result: dict[str, dict[str, float]] = {}
+        try:
+            lineups = await self.mlb_client.get_game_lineups(target_date)
+        except Exception as e:
+            logger.warning("Lineup fetch failed: %s", e)
+            return result
+
+        if not lineups:
+            return result
+
+        # Collect all player IDs to fetch info (handedness) and batting stats
+        all_pids: set[int] = set()
+        for gid, sides in lineups.items():
+            for side in ("home", "away"):
+                for p in sides.get(side, []):
+                    all_pids.add(p["id"])
+
+        # Fetch handedness for all players
+        try:
+            player_info = await self.mlb_client.get_players_info(list(all_pids))
+        except Exception as e:
+            logger.warning("Player info fetch failed: %s", e)
+            player_info = {}
+
+        # Fetch batting stats for lineup players
+        season = target_date.year
+        batting_stats: dict[int, dict] = {}
+        for pid in all_pids:
+            try:
+                stats = await self.mlb_client.get_player_batting_stats(pid, season)
+                if stats and stats.get("at_bats", 0) >= 20:
+                    batting_stats[pid] = stats
+                await asyncio.sleep(0.1)
+            except Exception:
+                pass
+
+        logger.info("Got batting stats for %d / %d lineup players", len(batting_stats), len(all_pids))
+
+        # Compute features per game
+        for game in games:
+            gid = game["game_id"]
+            lineup_data = lineups.get(gid)
+            if not lineup_data:
+                continue
+
+            game_feats: dict[str, float] = {}
+            for prefix, side in [("h", "home"), ("a", "away")]:
+                players = lineup_data.get(side, [])
+                ops_vals = []
+                for p in players:
+                    bs = batting_stats.get(p["id"])
+                    if bs:
+                        ops_vals.append(bs["ops"])
+
+                game_feats[f"{prefix}_lineup_ops"] = np.mean(ops_vals) if ops_vals else 0.720
+                game_feats[f"{prefix}_lineup_obp"] = np.mean(
+                    [batting_stats[p["id"]]["obp"] for p in players if p["id"] in batting_stats]
+                ) if any(p["id"] in batting_stats for p in players) else 0.320
+                game_feats[f"{prefix}_lineup_slg"] = np.mean(
+                    [batting_stats[p["id"]]["slg"] for p in players if p["id"] in batting_stats]
+                ) if any(p["id"] in batting_stats for p in players) else 0.400
+
+                # Platoon advantage vs opposing SP
+                opp_side = "away" if side == "home" else "home"
+                sp_key = f"{opp_side}_probable_pitcher"
+                opp_sp = game.get(sp_key)
+                sp_throws = "R"
+                if opp_sp and opp_sp.get("player_id"):
+                    sp_info = player_info.get(opp_sp["player_id"])
+                    if sp_info:
+                        sp_throws = sp_info.get("throws", "R")
+
+                adv_count = 0
+                total = 0
+                for p in players:
+                    pi = player_info.get(p["id"])
+                    if not pi:
+                        continue
+                    total += 1
+                    bats = pi.get("bats", "R")
+                    if bats == "S" or (bats == "L" and sp_throws == "R") or (bats == "R" and sp_throws == "L"):
+                        adv_count += 1
+
+                game_feats[f"{prefix}_platoon_adv"] = adv_count / total if total >= 3 else 0.5
+
+            # Differentials
+            for k in ("lineup_ops", "lineup_obp", "lineup_slg", "platoon_adv"):
+                game_feats[f"diff_{k}"] = game_feats[f"h_{k}"] - game_feats[f"a_{k}"]
+
+            result[gid] = game_feats
+
+        logger.info("Computed lineup features for %d games", len(result))
+        return result
+
     def _predict_game(
         self,
         game: dict,
@@ -259,6 +369,7 @@ class DailyRunner:
         weather_data: dict,
         target_date: date,
         sp_stats: dict[int, dict] | None = None,
+        lineup_features: dict[str, dict[str, float]] | None = None,
     ) -> GamePrediction | None:
         """Generate a prediction for a single game."""
         home = game["home_team_id"]
@@ -295,6 +406,10 @@ class DailyRunner:
         features["park_runs_factor"] = park["runs"]
         features["park_hr_factor"] = park["hr"]
 
+        # Weather proxy features
+        features["is_dome"] = 1 if home in DOME_TEAMS or home in RETRACTABLE_TEAMS else 0
+        features["game_month"] = target_date.month
+
         # Elo ratings
         h_elo = self._elo_ratings.get(home, 1500.0)
         a_elo = self._elo_ratings.get(away, 1500.0)
@@ -326,6 +441,13 @@ class DailyRunner:
             features[f"h_{feat_key}"] = h_val
             features[f"a_{feat_key}"] = a_val
             features[f"diff_{feat_key}"] = h_val - a_val
+
+        # Lineup and platoon features
+        lf = (lineup_features or {}).get(game["game_id"], {})
+        for k in ("lineup_ops", "lineup_obp", "lineup_slg", "platoon_adv"):
+            features[f"h_{k}"] = lf.get(f"h_{k}", 0.720 if "ops" in k else 0.320 if "obp" in k else 0.400 if "slg" in k else 0.5)
+            features[f"a_{k}"] = lf.get(f"a_{k}", 0.720 if "ops" in k else 0.320 if "obp" in k else 0.400 if "slg" in k else 0.5)
+            features[f"diff_{k}"] = features[f"h_{k}"] - features[f"a_{k}"]
 
         # Compute composite scores from features
         home_off_score = _compute_offense_score(home_feat)

@@ -16,6 +16,7 @@ from typing import Any
 
 import joblib
 import numpy as np
+from sklearn.calibration import CalibratedClassifierCV
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold
 
@@ -59,6 +60,7 @@ class EnsembleModel:
             RandomForestModel(),
         ]
         self.meta_model: LogisticRegression | None = None
+        self.calibrator: CalibratedClassifierCV | None = None
         self.feature_names: list[str] = []
         self.is_fitted = False
         self._oof_metrics: dict[str, ModelMetrics] = {}
@@ -140,6 +142,10 @@ class EnsembleModel:
         self.meta_model.fit(oof_preds, y)
         logger.info("Meta-model trained on %d OOF predictions", n_samples)
 
+        # Calibrate: fit isotonic regression on meta-model OOF outputs
+        meta_probs = self.meta_model.predict_proba(oof_preds)[:, 1]
+        self._fit_calibrator(meta_probs, y)
+
         # Retrain base models on full dataset
         for model in self.base_models:
             model.train(X, y, self.feature_names)
@@ -150,6 +156,24 @@ class EnsembleModel:
         for model in self.base_models:
             model.train(X, y, self.feature_names)
 
+    def _fit_calibrator(self, probs: np.ndarray, y: np.ndarray):
+        """Fit isotonic calibration on OOF probabilities."""
+        from sklearn.isotonic import IsotonicRegression
+
+        self.calibrator = IsotonicRegression(y_min=0.01, y_max=0.99, out_of_bounds="clip")
+        self.calibrator.fit(probs, y)
+        cal_probs = self.calibrator.predict(probs)
+
+        from sklearn.metrics import brier_score_loss
+        raw_brier = brier_score_loss(y, probs)
+        cal_brier = brier_score_loss(y, cal_probs)
+        raw_ece = _expected_calibration_error(y, probs)
+        cal_ece = _expected_calibration_error(y, cal_probs)
+        logger.info(
+            "Calibration: Brier %.4f → %.4f, ECE %.4f → %.4f",
+            raw_brier, cal_brier, raw_ece, cal_ece,
+        )
+
     def predict_proba(self, X: np.ndarray) -> np.ndarray:
         """Return ensemble win probability for each sample."""
         if not self.is_fitted:
@@ -158,9 +182,14 @@ class EnsembleModel:
         base_preds = self._get_base_predictions(X)
 
         if self.config.mode == "stacking" and self.meta_model is not None:
-            return self.meta_model.predict_proba(base_preds)[:, 1]
+            probs = self.meta_model.predict_proba(base_preds)[:, 1]
         else:
-            return self._weighted_average(base_preds)
+            probs = self._weighted_average(base_preds)
+
+        if self.calibrator is not None:
+            probs = self.calibrator.predict(probs)
+
+        return probs
 
     def predict(self, X: np.ndarray) -> np.ndarray:
         """Return binary predictions."""
@@ -227,6 +256,9 @@ class EnsembleModel:
         if self.meta_model is not None:
             joblib.dump(self.meta_model, directory / "meta_model.joblib")
 
+        if self.calibrator is not None:
+            joblib.dump(self.calibrator, directory / "calibrator.joblib")
+
         joblib.dump(
             {
                 "config": self.config,
@@ -252,6 +284,10 @@ class EnsembleModel:
         meta_path = directory / "meta_model.joblib"
         if meta_path.exists():
             self.meta_model = joblib.load(meta_path)
+
+        cal_path = directory / "calibrator.joblib"
+        if cal_path.exists():
+            self.calibrator = joblib.load(cal_path)
 
         self.is_fitted = True
         logger.info("Ensemble loaded from %s", directory)

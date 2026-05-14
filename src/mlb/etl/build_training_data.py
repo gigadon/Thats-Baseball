@@ -56,6 +56,10 @@ PARK_FACTORS: dict[str, dict[str, float]] = {
 }
 PARK_DEFAULT = {"runs": 1.00, "hr": 1.00}
 
+# Dome/retractable stadiums — weather neutralized
+DOME_TEAMS = {"TB"}
+RETRACTABLE_TEAMS = {"ARI", "HOU", "MIA", "MIL", "SEA", "TEX", "TOR"}
+
 # Elo constants
 ELO_K = 6  # Update speed — moderate for baseball (many games)
 ELO_HOME_ADVANTAGE = 24  # ~54% expected win rate for home team
@@ -106,6 +110,12 @@ class TrainingDataBuilder:
 
         # Build SP season stats lookup
         sp_season = self._build_sp_season_stats(pitching_df)
+
+        # Build lineup aggregate season stats
+        lineup_season = self._build_lineup_season_stats(batting_df)
+
+        # Build platoon features (requires handedness cache)
+        platoon = self._build_platoon_features(batting_df, pitching_df)
 
         # Generate feature rows for each game
         feature_rows = []
@@ -158,6 +168,10 @@ class TrainingDataBuilder:
             row["park_runs_factor"] = park["runs"]
             row["park_hr_factor"] = park["hr"]
 
+            # Weather proxy features (available historically)
+            row["is_dome"] = 1 if home in DOME_TEAMS or home in RETRACTABLE_TEAMS else 0
+            row["game_month"] = game_date.month
+
             # Elo ratings (pre-game)
             h_elo = elo_ratings.get(home, 1500.0)
             a_elo = elo_ratings.get(away, 1500.0)
@@ -181,6 +195,22 @@ class TrainingDataBuilder:
                 row[f"h_{k}"] = h_sp[k] if h_sp else default
                 row[f"a_{k}"] = a_sp[k] if a_sp else default
                 row[f"diff_{k}"] = row[f"h_{k}"] - row[f"a_{k}"]
+
+            # Lineup aggregate season stats
+            h_lineup = lineup_season.get((game["game_id"], home))
+            a_lineup = lineup_season.get((game["game_id"], away))
+            lineup_defaults = {"lineup_ops": 0.720, "lineup_obp": 0.320, "lineup_slg": 0.400}
+            for k, default in lineup_defaults.items():
+                row[f"h_{k}"] = h_lineup[k] if h_lineup else default
+                row[f"a_{k}"] = a_lineup[k] if a_lineup else default
+                row[f"diff_{k}"] = row[f"h_{k}"] - row[f"a_{k}"]
+
+            # Platoon advantage
+            h_platoon = platoon.get((game["game_id"], home))
+            a_platoon = platoon.get((game["game_id"], away))
+            row["h_platoon_adv"] = h_platoon["platoon_adv"] if h_platoon else 0.5
+            row["a_platoon_adv"] = a_platoon["platoon_adv"] if a_platoon else 0.5
+            row["diff_platoon_adv"] = row["h_platoon_adv"] - row["a_platoon_adv"]
 
             feature_rows.append(row)
 
@@ -339,6 +369,179 @@ class TrainingDataBuilder:
                 prev["k"] += int(row["strikeouts_recorded"])
 
         logger.info("Built SP season stats for %d game-team pairs", len(result))
+        return result
+
+    # ── Player Handedness Cache ─────────────────────────────
+
+    def _load_handedness_cache(self) -> dict[int, dict[str, str]]:
+        """Load player handedness from cache file.
+
+        Returns {player_id: {"bats": "R"/"L"/"S", "throws": "R"/"L"}}
+        """
+        import json
+        cache_path = self.data_dir / "player_handedness.json"
+        if cache_path.exists():
+            with open(cache_path) as f:
+                raw = json.load(f)
+            return {int(k): v for k, v in raw.items()}
+        return {}
+
+    def _save_handedness_cache(self, cache: dict[int, dict[str, str]]):
+        import json
+        cache_path = self.data_dir / "player_handedness.json"
+        with open(cache_path, "w") as f:
+            json.dump({str(k): v for k, v in cache.items()}, f)
+
+    def _build_platoon_features(
+        self, batting_df: pd.DataFrame, pitching_df: pd.DataFrame
+    ) -> dict[tuple, dict[str, float]]:
+        """Compute platoon advantage for each (game_id, team_id).
+
+        Platoon advantage = fraction of lineup batters with the handedness advantage
+        vs the opposing SP. LHB vs RHP and RHB vs LHP have a historical edge.
+
+        Returns {(game_id, team_id): {"platoon_adv": 0.0-1.0}}
+        """
+        if batting_df.empty or pitching_df.empty:
+            return {}
+
+        hand_cache = self._load_handedness_cache()
+
+        # Identify SP for each (game_id, team_id)
+        sp_lookup: dict[tuple, int] = {}
+        for (gid, tid), grp in pitching_df.groupby(["game_id", "team_id"]):
+            sp_row = grp.nlargest(1, "innings_pitched").iloc[0]
+            sp_lookup[(gid, tid)] = sp_row["player_id"]
+
+        # Build game_id -> {home_team, away_team} mapping
+        game_teams: dict[str, dict[str, str]] = {}
+        for (gid, tid), _ in batting_df.groupby(["game_id", "team_id"]):
+            if gid not in game_teams:
+                game_teams[gid] = {}
+            side = batting_df[
+                (batting_df["game_id"] == gid) & (batting_df["team_id"] == tid)
+            ]["side"].iloc[0]
+            game_teams[gid][side] = tid
+
+        result: dict[tuple, dict[str, float]] = {}
+
+        for (gid, tid), grp in batting_df.groupby(["game_id", "team_id"]):
+            # Find opposing SP
+            sides = game_teams.get(gid, {})
+            batting_side = grp["side"].iloc[0]
+            opp_side = "away" if batting_side == "home" else "home"
+            opp_tid = sides.get(opp_side)
+            if not opp_tid:
+                continue
+
+            opp_sp_id = sp_lookup.get((gid, opp_tid))
+            if not opp_sp_id:
+                continue
+
+            sp_hand_info = hand_cache.get(opp_sp_id)
+            if not sp_hand_info:
+                continue
+            sp_throws = sp_hand_info.get("throws", "R")
+
+            # Count lineup batters with platoon advantage
+            adv_count = 0
+            total = 0
+            for _, row in grp.iterrows():
+                if int(row["at_bats"]) == 0:
+                    continue
+                pid = row["player_id"]
+                batter_info = hand_cache.get(pid)
+                if not batter_info:
+                    continue
+                bats = batter_info.get("bats", "R")
+                total += 1
+                # Platoon advantage: LHB vs RHP, RHB vs LHP, switch hitters always have it
+                if bats == "S" or (bats == "L" and sp_throws == "R") or (bats == "R" and sp_throws == "L"):
+                    adv_count += 1
+
+            if total >= 5:
+                result[(gid, tid)] = {
+                    "platoon_adv": adv_count / total,
+                }
+
+        logger.info("Built platoon features for %d game-team pairs", len(result))
+        return result
+
+    # ── Lineup Season Stats ────────────────────────────────
+
+    def _build_lineup_season_stats(
+        self, batting_df: pd.DataFrame
+    ) -> dict[tuple, dict[str, float]]:
+        """Build per-game lineup aggregate season stats entering each game.
+
+        For each (game_id, team_id), computes the mean OPS/OBP/SLG of the
+        lineup batters based on their cumulative season stats BEFORE that game.
+
+        Returns {(game_id, team_id): {"lineup_ops": ..., "lineup_obp": ..., ...}}
+        """
+        if batting_df.empty:
+            return {}
+
+        sorted_bat = batting_df.sort_values("game_date")
+
+        # Accumulate each batter's season stats game-by-game
+        batter_totals: dict[tuple, dict] = {}  # (player_id, year) -> cumulative
+        result: dict[tuple, dict[str, float]] = {}
+
+        # Group by game to process all batters in a game together
+        for (gid, tid), grp in sorted_bat.groupby(["game_id", "team_id"]):
+            year = grp.iloc[0]["game_date"].year
+
+            # Collect pre-game stats for each batter in this lineup
+            lineup_ops_vals = []
+            for _, row in grp.iterrows():
+                pid = row["player_id"]
+                ab = int(row["at_bats"])
+                if ab == 0:
+                    continue  # pinch runner, etc.
+
+                key = (pid, year)
+                prev = batter_totals.get(key)
+
+                if prev and prev["ab"] >= 20:
+                    # Stats entering this game
+                    p_ab = prev["ab"]
+                    p_h = prev["h"]
+                    p_2b = prev["2b"]
+                    p_3b = prev["3b"]
+                    p_hr = prev["hr"]
+                    p_bb = prev["bb"]
+                    avg = p_h / p_ab
+                    obp = (p_h + p_bb) / (p_ab + p_bb) if (p_ab + p_bb) > 0 else 0
+                    slg = (p_h + p_2b + 2 * p_3b + 3 * p_hr) / p_ab
+                    lineup_ops_vals.append({"obp": obp, "slg": slg, "ops": obp + slg})
+
+                # Update cumulative AFTER recording
+                if prev is None:
+                    batter_totals[key] = {
+                        "ab": int(row["at_bats"]),
+                        "h": int(row["hits"]),
+                        "2b": int(row["doubles"]),
+                        "3b": int(row["triples"]),
+                        "hr": int(row["home_runs"]),
+                        "bb": int(row["walks"]),
+                    }
+                else:
+                    prev["ab"] += int(row["at_bats"])
+                    prev["h"] += int(row["hits"])
+                    prev["2b"] += int(row["doubles"])
+                    prev["3b"] += int(row["triples"])
+                    prev["hr"] += int(row["home_runs"])
+                    prev["bb"] += int(row["walks"])
+
+            if len(lineup_ops_vals) >= 5:
+                result[(gid, tid)] = {
+                    "lineup_ops": np.mean([v["ops"] for v in lineup_ops_vals]),
+                    "lineup_obp": np.mean([v["obp"] for v in lineup_ops_vals]),
+                    "lineup_slg": np.mean([v["slg"] for v in lineup_ops_vals]),
+                }
+
+        logger.info("Built lineup season stats for %d game-team pairs", len(result))
         return result
 
     # ── Rolling Stats ─────────────────────────────────────
