@@ -51,13 +51,21 @@ class AlertService:
         slip = result.get("betting_slip")
 
         if not preds:
+            logger.info("No predictions to alert on")
             return
+
+        logger.info(
+            "Sending alerts (slack=%s, email=%s, %d predictions)",
+            self.slack_enabled, self.email_enabled, len(preds),
+        )
 
         message = self._format_message(result)
         slack_blocks = self._format_slack_blocks(result)
 
         if self.slack_enabled:
             await self._send_slack(slack_blocks)
+        else:
+            logger.warning("Slack not enabled — SLACK_WEBHOOK_URL is empty")
         if self.email_enabled:
             self._send_email(
                 subject=f"MLB Predictions — {result['date']}",

@@ -187,7 +187,7 @@ class DailyRunner:
             try:
                 await self.alert_service.send_betting_alert(result)
             except Exception as e:
-                logger.debug("Alert send skipped: %s", e)
+                logger.warning("Alert send failed: %s", e)
 
         except Exception as e:
             logger.exception("Daily runner failed")

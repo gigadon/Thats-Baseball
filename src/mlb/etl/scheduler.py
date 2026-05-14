@@ -122,8 +122,8 @@ class DailyScheduler:
 
                     alerts = AlertService()
                     await alerts.send_settlement_alert(result)
-                except Exception:
-                    logger.debug("Settlement alert skipped")
+                except Exception as e:
+                    logger.warning("Settlement alert failed: %s", e)
             else:
                 logger.info("No bets to settle for %s", target)
         except Exception:
