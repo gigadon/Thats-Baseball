@@ -133,13 +133,20 @@ class DailyRunner:
 
             logger.info("Generated %d predictions", len(predictions))
             game_lookup = {g["game_id"]: g for g in scheduled}
-            season_records = self._compute_season_records(target_date.year)
+
+            # Fetch live standings for current records/streaks
+            try:
+                live_standings = await self.mlb_client.get_standings(target_date.year)
+                logger.info("Fetched live standings for %d teams", len(live_standings))
+            except Exception as e:
+                logger.warning("Live standings fetch failed, falling back to CSV: %s", e)
+                live_standings = {}
+
             result["predictions"] = [
                 self._prediction_to_dict(
                     p, game_lookup.get(p.game_id, {}),
                     sp_stats=sp_stats,
-                    team_features=team_features,
-                    season_records=season_records,
+                    live_standings=live_standings,
                 )
                 for p in predictions
             ]
@@ -173,7 +180,7 @@ class DailyRunner:
             self._cache_results(target_date, result)
 
             # 9. Generate team rankings from rolling stats (after cache so it merges into file)
-            self._generate_rankings(team_features, target_date)
+            self._generate_rankings(team_features, target_date, live_standings)
 
             # 10. Send alerts (Slack/email) if configured
             try:
@@ -530,12 +537,17 @@ class DailyRunner:
         self,
         team_features: dict[str, dict[str, float]],
         target_date: date,
+        live_standings: dict[str, dict] | None = None,
     ):
         """Generate team power rankings from rolling stats."""
         date_str = target_date.isoformat()
+        live_standings = live_standings or {}
 
-        # Load current season games only for W-L records
-        season_records = self._compute_season_records(target_date.year)
+        # Fall back to CSV records only if live standings unavailable
+        if not live_standings:
+            csv_records = self._compute_season_records(target_date.year)
+        else:
+            csv_records = {}
 
         rankings_data = []
         for team_id, feat in team_features.items():
@@ -544,12 +556,27 @@ class DailyRunner:
             bp = _compute_bullpen_score(feat)
             defense = _compute_defense_score(feat)
             power = _power_score(feat)
-            rec = season_records.get(team_id, {})
-            wins = rec.get("wins", 0)
-            losses = rec.get("losses", 0)
-            l10_w = int(feat.get("l10_wpct", 0.5) * 10)
-            streak = int(feat.get("streak", 0))
-            rd = rec.get("run_diff", 0)
+
+            std = live_standings.get(team_id, {})
+            rec = csv_records.get(team_id, {})
+            wins = std.get("wins", rec.get("wins", 0))
+            losses = std.get("losses", rec.get("losses", 0))
+            rd = std.get("run_diff", rec.get("run_diff", 0))
+            streak_str = std.get("streak", "-")
+            l10_str = std.get("l10", "")
+
+            # Parse streak for momentum calc
+            streak = 0
+            if streak_str.startswith("W"):
+                streak = int(streak_str[1:]) if len(streak_str) > 1 else 0
+            elif streak_str.startswith("L"):
+                streak = -int(streak_str[1:]) if len(streak_str) > 1 else 0
+
+            # Parse L10 for momentum calc
+            if l10_str and "-" in l10_str:
+                l10_w = int(l10_str.split("-")[0])
+            else:
+                l10_w = int(feat.get("l10_wpct", 0.5) * 10)
 
             # Tier from power score
             if power >= 60:
@@ -578,8 +605,8 @@ class DailyRunner:
                 "losses": losses,
                 "win_pct": round(wins / max(wins + losses, 1), 3),
                 "run_diff": rd,
-                "last_10_record": f"{l10_w}-{10 - l10_w}",
-                "streak": f"W{streak}" if streak > 0 else f"L{abs(streak)}" if streak < 0 else "-",
+                "last_10_record": l10_str or f"{l10_w}-{10 - l10_w}",
+                "streak": streak_str,
                 "rank_change": 0,
                 "tier": tier,
             })
@@ -656,27 +683,17 @@ class DailyRunner:
         pred: GamePrediction,
         game: dict = None,
         sp_stats: dict[int, dict] | None = None,
-        team_features: dict[str, dict] | None = None,
-        season_records: dict[str, dict] | None = None,
+        live_standings: dict[str, dict] | None = None,
     ) -> dict:
         game = game or {}
         home_sp = game.get("home_probable_pitcher") or {}
         away_sp = game.get("away_probable_pitcher") or {}
         sp_stats = sp_stats or {}
-        season_records = season_records or {}
-        team_features = team_features or {}
+        live_standings = live_standings or {}
 
-        # Team records
-        h_rec = season_records.get(pred.home_team_id, {})
-        a_rec = season_records.get(pred.away_team_id, {})
-
-        # Team streaks from rolling features
-        h_feat = team_features.get(pred.home_team_id, {})
-        a_feat = team_features.get(pred.away_team_id, {})
-        h_streak_val = int(h_feat.get("streak", 0))
-        a_streak_val = int(a_feat.get("streak", 0))
-        h_streak = f"W{h_streak_val}" if h_streak_val > 0 else f"L{abs(h_streak_val)}" if h_streak_val < 0 else "-"
-        a_streak = f"W{a_streak_val}" if a_streak_val > 0 else f"L{abs(a_streak_val)}" if a_streak_val < 0 else "-"
+        # Live team records and streaks from MLB API standings
+        h_std = live_standings.get(pred.home_team_id, {})
+        a_std = live_standings.get(pred.away_team_id, {})
 
         # SP stats
         h_sp_data = sp_stats.get(home_sp.get("player_id")) if home_sp else None
@@ -701,12 +718,12 @@ class DailyRunner:
             "away_power_score": pred.away_power_score,
             "home_sp_name": home_sp.get("name", "TBD"),
             "away_sp_name": away_sp.get("name", "TBD"),
-            "home_wins": h_rec.get("wins", 0),
-            "home_losses": h_rec.get("losses", 0),
-            "away_wins": a_rec.get("wins", 0),
-            "away_losses": a_rec.get("losses", 0),
-            "home_streak": h_streak,
-            "away_streak": a_streak,
+            "home_wins": h_std.get("wins", 0),
+            "home_losses": h_std.get("losses", 0),
+            "away_wins": a_std.get("wins", 0),
+            "away_losses": a_std.get("losses", 0),
+            "home_streak": h_std.get("streak", "-"),
+            "away_streak": a_std.get("streak", "-"),
             "home_sp_era": h_sp_data.get("era") if h_sp_data else None,
             "away_sp_era": a_sp_data.get("era") if a_sp_data else None,
             "home_sp_wins": h_sp_data.get("wins") if h_sp_data else None,

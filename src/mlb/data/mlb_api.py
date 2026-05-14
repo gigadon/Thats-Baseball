@@ -278,6 +278,44 @@ class MLBApiClient:
             "avg_against": float(raw.get("avg", 0)),
         }
 
+    # ── Standings ──────────────────────────────────────────────
+
+    async def get_standings(self, season: int | None = None) -> dict[str, dict[str, Any]]:
+        """Fetch current MLB standings. Returns {team_abbr: {wins, losses, pct, streak, l10}}."""
+        params: dict[str, Any] = {"leagueId": "103,104"}
+        if season:
+            params["season"] = season
+        data = await self._get("/standings", params=params)
+
+        standings: dict[str, dict[str, Any]] = {}
+        for record in data.get("records", []):
+            for team_rec in record.get("teamRecords", []):
+                team_id = team_rec.get("team", {}).get("id")
+                abbr = TEAM_ABBREVS.get(team_id)
+                if not abbr:
+                    continue
+
+                streak_obj = team_rec.get("streak", {})
+                streak_str = streak_obj.get("streakCode", "-")  # e.g. "W4", "L2"
+
+                # L10 record from records -> splitRecords or from the API
+                l10 = team_rec.get("records", {}).get("splitRecords", [])
+                l10_str = "-"
+                for sr in l10:
+                    if sr.get("type") == "lastTen":
+                        l10_str = f"{sr.get('wins', 0)}-{sr.get('losses', 0)}"
+                        break
+
+                standings[abbr] = {
+                    "wins": team_rec.get("wins", 0),
+                    "losses": team_rec.get("losses", 0),
+                    "pct": float(team_rec.get("winningPercentage", ".500")),
+                    "streak": streak_str,
+                    "l10": l10_str,
+                    "run_diff": team_rec.get("runDifferential", 0),
+                }
+        return standings
+
     # ── Rosters ────────────────────────────────────────────────
 
     async def get_roster(
