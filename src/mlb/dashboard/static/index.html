@@ -141,6 +141,13 @@
   .home .team-meta{ flex-direction: row-reverse; }
   .team-record{ color: var(--text-2); font-weight: 600; font-variant-numeric: tabular-nums; }
   .team-pct{ font-variant-numeric: tabular-nums; }
+  .team-streak{
+    font-size: 11px; font-weight: 600; padding: 1px 6px;
+    border-radius: 4px;
+  }
+  .streak-w{ background: rgba(74,222,128,.15); color: var(--good); }
+  .streak-l{ background: rgba(248,113,113,.15); color: var(--red); }
+  .streak-none{ color: var(--text-3); }
   .vs{ color: var(--text-3); font-size: 13px; font-weight: 500; }
 
   .pitchers{
@@ -174,6 +181,9 @@
     background: var(--accent-soft); color: #8fb6f7;
     padding: 1px 7px; border-radius: 4px; font-weight: 600;
     font-size: 11px;
+  }
+  .p-stats .wl{
+    color: var(--text-2); font-weight: 600; font-size: 11px;
   }
   .home .p-stats{ flex-direction: row-reverse; }
 
@@ -596,20 +606,29 @@ async function loadPredictions() {
     const aSP = g.away_sp_name || 'TBD';
     const hRec = `${g.home_wins||0}-${g.home_losses||0}`;
     const aRec = `${g.away_wins||0}-${g.away_losses||0}`;
+    const hStreak = g.home_streak || '-';
+    const aStreak = g.away_streak || '-';
     const conf = g.confidence || 0;
+    const hSpEra = g.home_sp_era;
+    const aSpEra = g.away_sp_era;
+    const hSpWL = g.home_sp_wins != null ? `${g.home_sp_wins}-${g.home_sp_losses}` : null;
+    const aSpWL = g.away_sp_wins != null ? `${g.away_sp_wins}-${g.away_sp_losses}` : null;
 
-    const pitcherBlock = (name, side) => {
+    const pitcherBlock = (name, side, era, wl) => {
       if (!name || name === 'TBD') return `
         <div class="pitcher ${side}">
           <div class="p-label">Probable</div>
           <div class="p-name" style="color:var(--text-3)">TBD</div>
           <div class="p-stats"><span style="color:var(--text-3)">\u2014</span></div>
         </div>`;
+      const eraStr = era != null ? `<span class="era">${parseFloat(era).toFixed(2)} ERA</span>` : '';
+      const wlStr = wl ? `<span class="wl">${wl}</span>` : '';
+      const sep = eraStr && wlStr ? '<span class="sep">\u00B7</span>' : '';
       return `
         <div class="pitcher ${side}">
           <div class="p-label">Probable</div>
           <div class="p-name">${name}</div>
-          <div class="p-stats"></div>
+          <div class="p-stats">${wlStr}${sep}${eraStr}</div>
         </div>`;
     };
 
@@ -620,6 +639,7 @@ async function loadPredictions() {
           <div class="team-abbr">${g.away_team}</div>
           <div class="team-meta">
             <span class="team-record">${aRec}</span>
+            <span class="team-streak ${aStreak.startsWith('W') ? 'streak-w' : aStreak.startsWith('L') ? 'streak-l' : 'streak-none'}">${aStreak}</span>
           </div>
         </div>
         <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
@@ -628,15 +648,16 @@ async function loadPredictions() {
         <div class="team home">
           <div class="team-abbr">${g.home_team}</div>
           <div class="team-meta">
+            <span class="team-streak ${hStreak.startsWith('W') ? 'streak-w' : hStreak.startsWith('L') ? 'streak-l' : 'streak-none'}">${hStreak}</span>
             <span class="team-record">${hRec}</span>
           </div>
         </div>
       </div>
 
       <div class="pitchers">
-        ${pitcherBlock(aSP, 'away')}
+        ${pitcherBlock(aSP, 'away', aSpEra, aSpWL)}
         <div></div>
-        ${pitcherBlock(hSP, 'home')}
+        ${pitcherBlock(hSP, 'home', hSpEra, hSpWL)}
       </div>
 
       <div class="prob">

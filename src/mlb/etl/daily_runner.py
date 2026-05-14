@@ -133,8 +133,14 @@ class DailyRunner:
 
             logger.info("Generated %d predictions", len(predictions))
             game_lookup = {g["game_id"]: g for g in scheduled}
+            season_records = self._compute_season_records(target_date.year)
             result["predictions"] = [
-                self._prediction_to_dict(p, game_lookup.get(p.game_id, {}))
+                self._prediction_to_dict(
+                    p, game_lookup.get(p.game_id, {}),
+                    sp_stats=sp_stats,
+                    team_features=team_features,
+                    season_records=season_records,
+                )
                 for p in predictions
             ]
 
@@ -646,10 +652,36 @@ class DailyRunner:
             pass  # API not installed / not running
 
     @staticmethod
-    def _prediction_to_dict(pred: GamePrediction, game: dict = None) -> dict:
+    def _prediction_to_dict(
+        pred: GamePrediction,
+        game: dict = None,
+        sp_stats: dict[int, dict] | None = None,
+        team_features: dict[str, dict] | None = None,
+        season_records: dict[str, dict] | None = None,
+    ) -> dict:
         game = game or {}
         home_sp = game.get("home_probable_pitcher") or {}
         away_sp = game.get("away_probable_pitcher") or {}
+        sp_stats = sp_stats or {}
+        season_records = season_records or {}
+        team_features = team_features or {}
+
+        # Team records
+        h_rec = season_records.get(pred.home_team_id, {})
+        a_rec = season_records.get(pred.away_team_id, {})
+
+        # Team streaks from rolling features
+        h_feat = team_features.get(pred.home_team_id, {})
+        a_feat = team_features.get(pred.away_team_id, {})
+        h_streak_val = int(h_feat.get("streak", 0))
+        a_streak_val = int(a_feat.get("streak", 0))
+        h_streak = f"W{h_streak_val}" if h_streak_val > 0 else f"L{abs(h_streak_val)}" if h_streak_val < 0 else "-"
+        a_streak = f"W{a_streak_val}" if a_streak_val > 0 else f"L{abs(a_streak_val)}" if a_streak_val < 0 else "-"
+
+        # SP stats
+        h_sp_data = sp_stats.get(home_sp.get("player_id")) if home_sp else None
+        a_sp_data = sp_stats.get(away_sp.get("player_id")) if away_sp else None
+
         return {
             "game_id": pred.game_id,
             "game_date": pred.game_date,
@@ -669,6 +701,18 @@ class DailyRunner:
             "away_power_score": pred.away_power_score,
             "home_sp_name": home_sp.get("name", "TBD"),
             "away_sp_name": away_sp.get("name", "TBD"),
+            "home_wins": h_rec.get("wins", 0),
+            "home_losses": h_rec.get("losses", 0),
+            "away_wins": a_rec.get("wins", 0),
+            "away_losses": a_rec.get("losses", 0),
+            "home_streak": h_streak,
+            "away_streak": a_streak,
+            "home_sp_era": h_sp_data.get("era") if h_sp_data else None,
+            "away_sp_era": a_sp_data.get("era") if a_sp_data else None,
+            "home_sp_wins": h_sp_data.get("wins") if h_sp_data else None,
+            "home_sp_losses": h_sp_data.get("losses") if h_sp_data else None,
+            "away_sp_wins": a_sp_data.get("wins") if a_sp_data else None,
+            "away_sp_losses": a_sp_data.get("losses") if a_sp_data else None,
         }
 
     @staticmethod

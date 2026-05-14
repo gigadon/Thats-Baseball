@@ -27,6 +27,18 @@ class GamePredictionResponse(BaseModel):
     away_power_score: float = 0.0
     home_sp_name: str = "TBD"
     away_sp_name: str = "TBD"
+    home_wins: int = 0
+    home_losses: int = 0
+    away_wins: int = 0
+    away_losses: int = 0
+    home_streak: str = ""
+    away_streak: str = ""
+    home_sp_era: float | None = None
+    away_sp_era: float | None = None
+    home_sp_wins: int | None = None
+    home_sp_losses: int | None = None
+    away_sp_wins: int | None = None
+    away_sp_losses: int | None = None
 
 
 class PredictionRequest(BaseModel):
