@@ -23,7 +23,7 @@ async def get_performance(
     start_date: str = Query(default=None),
     end_date: str = Query(default=None),
 ):
-    """Get model performance metrics from settlement data."""
+    """Get aggregate betting performance stats from settlement data."""
     from mlb.betting.settlement import load_all_settlements
 
     settlements = load_all_settlements(Path("data"))
@@ -35,19 +35,38 @@ async def get_performance(
     all_bets = [b for s in settlements for b in s.get("bets", [])]
     total = len(all_bets)
     wins = sum(1 for b in all_bets if b.get("result") == "win")
+    losses = sum(1 for b in all_bets if b.get("result") == "loss")
+    pushes = sum(1 for b in all_bets if b.get("result") == "push")
     staked = sum(b.get("recommended_stake", 0) for b in all_bets)
     pnl = sum(b.get("pnl", 0) for b in all_bets)
+    win_rate = round(wins / total, 4) if total > 0 else 0.0
+    roi = round(pnl / staked, 4) if staked > 0 else 0.0
+
+    # Compute max drawdown from cumulative P&L across days
+    max_dd = 0.0
+    if settlements:
+        peak = 0.0
+        for s in settlements:
+            cp = s.get("summary", {}).get("cumulative_pnl", 0.0)
+            peak = max(peak, cp)
+            dd = (peak - cp) / max(peak, 1) if peak > 0 else 0
+            max_dd = max(max_dd, dd)
 
     return PerformanceResponse(
         period=f"{start_date or 'season_start'} to {end_date or 'today'}",
+        total_bets=total,
+        wins=wins,
+        losses=losses,
+        pushes=pushes,
+        win_rate=win_rate,
+        total_staked=round(staked, 2),
+        total_pnl=round(pnl, 2),
+        roi=roi,
+        max_drawdown=round(max_dd, 4),
         total_games=total,
-        accuracy=round(wins / total, 4) if total > 0 else 0.0,
-        brier_score=0.0,
-        auc_roc=0.0,
-        roi_flat=round(pnl / staked, 4) if staked > 0 else 0.0,
-        roi_kelly=round(pnl / staked, 4) if staked > 0 else 0.0,
-        high_confidence_accuracy=0.0,
-        calibration_error=0.0,
+        accuracy=win_rate,
+        roi_flat=roi,
+        roi_kelly=roi,
     )
 
 

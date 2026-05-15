@@ -69,18 +69,30 @@ class PredictionService:
     def __init__(self, model_dir: str | Path = "models"):
         self.model_dir = Path(model_dir)
         self.pipeline: TrainingPipeline | None = None
-        self.runs_model: TrainingPipeline | None = None
+        # Runs regression model (loaded from joblib artifacts)
+        self._runs_regressor: object | None = None
+        self._runs_scaler: object | None = None
+        self._runs_feature_names: list[str] | None = None
 
     def load(self):
         """Load trained models from disk."""
+        import joblib
+
         self.pipeline = TrainingPipeline()
         self.pipeline.load(self.model_dir / "win_model")
 
-        # Run prediction model (optional — may not exist yet)
+        # Runs regression model (optional — may not exist yet)
         runs_path = self.model_dir / "runs_model"
-        if runs_path.exists():
-            self.runs_model = TrainingPipeline()
-            self.runs_model.load(runs_path)
+        regressor_file = runs_path / "runs_regressor.joblib"
+        if regressor_file.exists():
+            try:
+                self._runs_regressor = joblib.load(regressor_file)
+                self._runs_scaler = joblib.load(runs_path / "runs_scaler.joblib")
+                self._runs_feature_names = joblib.load(runs_path / "runs_feature_names.joblib")
+                logger.info("Runs regression model loaded from %s", runs_path)
+            except Exception as e:
+                logger.warning("Failed to load runs model: %s", e)
+                self._runs_regressor = None
 
         logger.info("Prediction service loaded")
 
@@ -169,15 +181,33 @@ class PredictionService:
     ) -> tuple[float, float]:
         """Predict runs for each team.
 
-        If a runs model is trained, use it. Otherwise, estimate from
-        offensive features and win probability.
+        If a runs regression model is loaded, use it for differentiated
+        totals (Coors games 10+, pitcher duels 6-7, etc.) and split by
+        win probability.  Falls back to a heuristic if no model exists.
         """
-        if self.runs_model is not None:
-            features_df = pd.DataFrame([game_fv.features])
-            # Runs model would predict total runs; split by win prob
-            total = float(self.runs_model.predict(features_df)[0])
-            home_share = 0.45 + home_win_prob * 0.10  # Winner scores slightly more
-            return total * home_share, total * (1 - home_share)
+        if self._runs_regressor is not None and self._runs_feature_names is not None:
+            # Build a feature row matching the training feature set
+            fv = game_fv.features
+            row = {col: fv.get(col, 0.0) for col in self._runs_feature_names}
+            X = np.array([[row[c] for c in self._runs_feature_names]], dtype=float)
+            X = np.nan_to_num(X, nan=0.0)
+
+            if self._runs_scaler is not None:
+                X = self._runs_scaler.transform(X)
+
+            total = float(self._runs_regressor.predict(X)[0])
+            # Clamp to reasonable MLB range
+            total = max(3.0, min(total, 30.0))
+
+            # Split home/away: predicted winner gets a larger share.
+            # At 50/50 the split is 45/55-ish (slight away edge),
+            # each 10% of win-prob shifts ~3% of runs.
+            home_share = 0.45 + (home_win_prob - 0.5) * 0.3
+            home_share = max(0.30, min(home_share, 0.70))
+
+            home_runs = total * home_share
+            away_runs = total * (1 - home_share)
+            return round(max(0.5, home_runs), 1), round(max(0.5, away_runs), 1)
 
         # Heuristic estimation from feature scores
         # Average MLB game: ~4.5 runs per team, ~9 total

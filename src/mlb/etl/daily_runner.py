@@ -54,6 +54,7 @@ class DailyRunner:
         self.prediction_service = PredictionService(model_dir)
         self.betting_engine = BettingEngine()
         self.alert_service = AlertService()
+        self._sp_rest_cache: dict[int, int] = {}
 
     async def run(self, target_date: date | None = None) -> dict[str, Any]:
         """Run the full daily pipeline.
@@ -98,6 +99,9 @@ class DailyRunner:
 
             # 4. Fetch starting pitcher stats
             sp_stats = await self._fetch_sp_stats(scheduled, target_date.year)
+
+            # 4a. Fetch SP rest days (days since last start)
+            await self._fetch_sp_rest_days(scheduled, target_date)
 
             # 4b. Fetch lineups and compute lineup/platoon features
             lineup_features = await self._fetch_lineup_features(
@@ -438,6 +442,76 @@ class DailyRunner:
         logger.info("Computed lineup features for %d games", len(result))
         return result
 
+    async def _fetch_sp_rest_days(
+        self, games: list[dict], target_date: date,
+    ) -> dict[int, int]:
+        """Fetch rest days for all probable starters by checking their game logs.
+
+        Populates and returns self._sp_rest_cache: {pitcher_id: rest_days}.
+        """
+        pitcher_ids: list[int] = []
+        for game in games:
+            for side in ("home_probable_pitcher", "away_probable_pitcher"):
+                pitcher = game.get(side)
+                if pitcher and pitcher.get("player_id"):
+                    pitcher_ids.append(pitcher["player_id"])
+
+        # Deduplicate and skip already-cached pitchers
+        pitcher_ids = [
+            pid for pid in set(pitcher_ids) if pid not in self._sp_rest_cache
+        ]
+        if not pitcher_ids:
+            return self._sp_rest_cache
+
+        logger.info("Fetching rest days for %d probable starters...", len(pitcher_ids))
+        season = target_date.year
+
+        for pid in pitcher_ids:
+            try:
+                game_log = await self.mlb_client.get_pitcher_game_log(pid, season)
+                rest = self._compute_rest_days(game_log, target_date)
+                self._sp_rest_cache[pid] = rest
+                await asyncio.sleep(0.1)  # Rate limit
+            except Exception as e:
+                logger.debug("Failed to fetch game log for SP %d: %s", pid, e)
+                self._sp_rest_cache[pid] = 5  # default on failure
+
+        logger.info(
+            "Got rest days for %d starters", len(self._sp_rest_cache),
+        )
+        return self._sp_rest_cache
+
+    @staticmethod
+    def _compute_rest_days(game_log: list[dict], target_date: date) -> int:
+        """Compute days since the pitcher's most recent appearance.
+
+        Walks the game log entries (which contain a ``date`` string in
+        ``YYYY-MM-DD`` format) and returns the number of days between
+        *target_date* and the most recent entry.  Returns 5 (normal rest)
+        when no entries are found.
+        """
+        last_start: date | None = None
+        for entry in game_log:
+            date_str = entry.get("date", "")
+            if not date_str:
+                continue
+            try:
+                game_date = date.fromisoformat(date_str)
+            except ValueError:
+                continue
+            if game_date >= target_date:
+                continue
+            if last_start is None or game_date > last_start:
+                last_start = game_date
+
+        if last_start is None:
+            return 5
+        return (target_date - last_start).days
+
+    def _get_sp_rest_days(self, pitcher_id: int, target_date: date) -> int:
+        """Return cached rest days for a pitcher, defaulting to 5."""
+        return self._sp_rest_cache.get(pitcher_id, 5)
+
     def _predict_game(
         self,
         game: dict,
@@ -566,11 +640,12 @@ class DailyRunner:
         features["a_sp_k_minus_bb"] = a_k_minus_bb
         features["diff_sp_k_minus_bb"] = h_k_minus_bb - a_k_minus_bb
 
-        # Pitcher rest days (days since SP last started)
-        # Default to 5 (normal rest); can be enhanced with live lookup later
-        features["h_sp_rest_days"] = 5
-        features["a_sp_rest_days"] = 5
-        features["diff_sp_rest_days"] = 0
+        # Pitcher rest days (days since SP last started) — live lookup
+        h_rest = self._get_sp_rest_days(home_sp["player_id"], target_date) if home_sp else 5
+        a_rest = self._get_sp_rest_days(away_sp["player_id"], target_date) if away_sp else 5
+        features["h_sp_rest_days"] = h_rest
+        features["a_sp_rest_days"] = a_rest
+        features["diff_sp_rest_days"] = h_rest - a_rest
 
         # Lineup and platoon features
         lf = (lineup_features or {}).get(game["game_id"], {})
@@ -619,6 +694,20 @@ class DailyRunner:
         # Day/night classification
         game_time_str = game.get("game_time", "")
         features["is_day_game"] = _classify_day_game(game_time_str, home)
+
+        # ── Feature 1: Umpire Assignment ──
+        # Default to neutral; can be enhanced with real umpire K-rate data later
+        features["ump_k_rate_effect"] = 0.0
+
+        # ── Feature 2: Run Differential Trends (7-game) ──
+        features["h_rd_7d"] = home_feat.get("rd_7d", 0.0)
+        features["a_rd_7d"] = away_feat.get("rd_7d", 0.0)
+        features["diff_rd_7d"] = features["h_rd_7d"] - features["a_rd_7d"]
+
+        # ── Feature 3: Defensive Metrics Proxy ──
+        features["h_def_proxy"] = home_feat.get("def_proxy", 0.0)
+        features["a_def_proxy"] = away_feat.get("def_proxy", 0.0)
+        features["diff_def_proxy"] = features["h_def_proxy"] - features["a_def_proxy"]
 
         # Compute composite scores from features
         home_off_score = _compute_offense_score(home_feat)

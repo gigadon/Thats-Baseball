@@ -218,6 +218,11 @@ class TrainingDataBuilder:
             row["away_team"] = away
             row["home_win"] = 1 if game["home_score"] > game["away_score"] else 0
 
+            # Regression targets (not features — dropped before feature selection)
+            row["home_score"] = int(game["home_score"])
+            row["away_score"] = int(game["away_score"])
+            row["total_runs"] = int(game["home_score"]) + int(game["away_score"])
+
             # Home features
             for k, v in home_feat.items():
                 row[f"h_{k}"] = v
@@ -363,6 +368,24 @@ class TrainingDataBuilder:
             else:
                 row["is_day_game"] = 0  # default to night (~70% of MLB games)
 
+            # ── Feature 1: Umpire Assignment ──
+            # Historical CSVs don't include umpire data, so use neutral default.
+            # The model learns the feature column exists; live predictions can
+            # inject real umpire K-rate effects later.
+            row["ump_k_rate_effect"] = 0.0
+
+            # ── Feature 2: Run Differential Trends (7-game) ──
+            row["h_rd_7d"] = home_feat.get("rd_7d", 0.0)
+            row["a_rd_7d"] = away_feat.get("rd_7d", 0.0)
+            row["diff_rd_7d"] = row["h_rd_7d"] - row["a_rd_7d"]
+
+            # ── Feature 3: Defensive Metrics Proxy ──
+            # def_proxy = ra_per_game - rolling ERA (positive = defense costing
+            # runs, negative = defense saving runs).  Invert so higher = better.
+            row["h_def_proxy"] = home_feat.get("def_proxy", 0.0)
+            row["a_def_proxy"] = away_feat.get("def_proxy", 0.0)
+            row["diff_def_proxy"] = row["h_def_proxy"] - row["a_def_proxy"]
+
             feature_rows.append(row)
 
             # Update Elo AFTER recording pre-game values
@@ -385,7 +408,7 @@ class TrainingDataBuilder:
                 logger.info("Processed %d / %d games", idx + 1, len(games_sorted))
 
         df = pd.DataFrame(feature_rows)
-        logger.info("Built %d training samples with %d features", len(df), len(df.columns) - 6)
+        logger.info("Built %d training samples with %d features", len(df), len(df.columns) - 9)
 
         # Save
         out_path = self.data_dir / output
@@ -927,6 +950,7 @@ class TrainingDataBuilder:
             results_buffer: list[dict] = []  # For rolling calculations
             home_buffer: list[dict] = []  # Last N home games (venue splits)
             away_buffer: list[dict] = []  # Last N away games (venue splits)
+            rd_7_buffer: list[int] = []  # Last 7 game run differentials
 
             for _, game in team_games.iterrows():
                 is_home = game["home_team_id"] == team_id
@@ -955,6 +979,11 @@ class TrainingDataBuilder:
                     "venue": game["home_team_id"],  # venue is always the home team
                     "bp_ip": 0.0,  # filled after pitching calc below
                 })
+
+                # Track 7-game run differential buffer
+                rd_7_buffer.append(rs - ra)
+                if len(rd_7_buffer) > 7:
+                    rd_7_buffer = rd_7_buffer[-7:]
 
                 # Track venue-specific results (last 20 home/away games)
                 venue_entry = {"won": won, "rs": rs, "ra": ra}
@@ -1132,6 +1161,8 @@ class TrainingDataBuilder:
                     # Bullpen fatigue
                     "bp_ip_3d": bp_ip_3d,
                     "bp_games_5d": bp_games_5d,
+                    # 7-game run differential
+                    "rd_7d": sum(rd_7_buffer) / len(rd_7_buffer) if rd_7_buffer else 0.0,
                 })
 
             team_stats[team_id] = stats_list
@@ -1211,6 +1242,14 @@ class TrainingDataBuilder:
             # Bullpen fatigue
             "bp_ip_3d": latest.get("bp_ip_3d", 0.0),
             "bp_games_5d": latest.get("bp_games_5d", 0),
+            # 7-game run differential
+            "rd_7d": latest.get("rd_7d", 0.0),
+            # Defensive proxy: ERA-gap (runs allowed vs pitching-predicted)
+            # Positive = defense is costing runs, Negative = defense is saving runs
+            "def_proxy": (
+                latest.get("ra_per_game", 4.5)
+                - _roll_avg(last_14, "g_era")
+            ),
             # Home/away
             "home_wpct": latest["home_wpct"],
             "away_wpct": latest["away_wpct"],

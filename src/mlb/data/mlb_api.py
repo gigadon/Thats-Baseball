@@ -99,6 +99,9 @@ class MLBApiClient:
         home_team_id = home.get("team", {}).get("id")
         away_team_id = away.get("team", {}).get("id")
 
+        # Extract home plate umpire ID from officials array if available
+        home_plate_umpire_id = self._extract_home_plate_umpire(linescore)
+
         return {
             "game_id": str(game["gamePk"]),
             "game_date": game.get("officialDate", game.get("gameDate", "")[:10]),
@@ -111,7 +114,23 @@ class MLBApiClient:
             "home_probable_pitcher": self._extract_pitcher(home),
             "away_probable_pitcher": self._extract_pitcher(away),
             "innings": linescore.get("currentInning"),
+            "home_plate_umpire_id": home_plate_umpire_id,
         }
+
+    def _extract_home_plate_umpire(self, linescore: dict) -> int | None:
+        """Extract the home plate umpire ID from the linescore officials array.
+
+        The officials array contains entries like:
+            {"official": {"id": 427072, "fullName": "Angel Hernandez"},
+             "officialType": "Home Plate"}
+        Returns the umpire ID or None if not available.
+        """
+        officials = linescore.get("officials", [])
+        for official_entry in officials:
+            if official_entry.get("officialType") == "Home Plate":
+                official = official_entry.get("official", {})
+                return official.get("id")
+        return None
 
     def _extract_pitcher(self, team_data: dict) -> dict[str, Any] | None:
         pitcher = team_data.get("probablePitcher")
@@ -339,6 +358,45 @@ class MLBApiClient:
             "era": float(stat.get("era", 4.50)),
             "innings_pitched": ip,
         }
+
+    # ── Pitcher Game Log ──────────────────────────────────────
+
+    async def get_pitcher_game_log(
+        self, pitcher_id: int, season: int
+    ) -> list[dict[str, Any]]:
+        """Get pitcher's game log for the season.
+
+        Calls the gameLog endpoint filtered to regular-season pitching and
+        returns a simplified list of dicts with date and innings pitched.
+        Returns an empty list on failure.
+        """
+        try:
+            data = await self._get(
+                f"/people/{pitcher_id}/stats",
+                params={
+                    "stats": "gameLog",
+                    "group": "pitching",
+                    "season": season,
+                    "gameType": "R",
+                },
+            )
+            splits = data.get("stats", [{}])[0].get("splits", [])
+            entries: list[dict[str, Any]] = []
+            for split in splits:
+                game_date = split.get("date", "")
+                stat = split.get("stat", {})
+                ip_raw = stat.get("inningsPitched", "0")
+                entries.append({
+                    "date": game_date,
+                    "innings_pitched": _ip(ip_raw) or 0.0,
+                })
+            return entries
+        except Exception as e:
+            logger.debug(
+                "Failed to fetch pitcher game log for %d/%d: %s",
+                pitcher_id, season, e,
+            )
+            return []
 
     # ── Standings ──────────────────────────────────────────────
 

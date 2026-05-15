@@ -57,6 +57,13 @@ class BacktestResult:
     # Model accuracy on all games (not just bet games)
     model_accuracy: float
     model_brier: float
+    model_auc: float = 0.0
+
+    # Calibration bins: list of dicts with predicted_avg, observed_avg, count
+    calibration: list[dict] = field(default_factory=list)
+
+    # Monthly accuracy breakdown (all games, not just bets)
+    monthly_accuracy: list[dict] = field(default_factory=list)
 
 
 class Backtester:
@@ -93,7 +100,7 @@ class Backtester:
         pipeline = TrainingPipeline()
         pipeline.load(self.model_dir)
 
-        meta_cols = ["game_id", "game_date", "home_team", "away_team", "home_score", "away_score", "home_win"]
+        meta_cols = ["game_id", "game_date", "home_team", "away_team", "home_score", "away_score", "home_win", "total_runs"]
         feature_cols = [c for c in df.columns if c not in meta_cols]
 
         # Generate predictions for all games
@@ -102,6 +109,40 @@ class Backtester:
 
         df["pred_home_prob"] = probs
         df["pred_correct"] = ((probs >= 0.5) & (df["home_win"] == 1)) | ((probs < 0.5) & (df["home_win"] == 0))
+
+        # Compute AUC
+        from sklearn.metrics import roc_auc_score
+        try:
+            model_auc = float(roc_auc_score(df["home_win"].values, probs))
+        except ValueError:
+            model_auc = 0.0
+
+        # Calibration bins (deciles)
+        calibration_bins = self._compute_calibration(probs, df["home_win"].values)
+
+        # Monthly accuracy breakdown (all games, not just bets)
+        df["_month"] = df["game_date"].dt.to_period("M").astype(str)
+        monthly_acc_data = (
+            df.groupby("_month")
+            .agg(
+                games=("pred_correct", "size"),
+                correct=("pred_correct", "sum"),
+                avg_pred=("pred_home_prob", "mean"),
+                actual_home_rate=("home_win", "mean"),
+            )
+            .reset_index()
+        )
+        monthly_accuracy = [
+            {
+                "month": row["_month"],
+                "games": int(row["games"]),
+                "correct": int(row["correct"]),
+                "accuracy": round(row["correct"] / row["games"], 4) if row["games"] > 0 else 0.0,
+                "avg_pred": round(float(row["avg_pred"]), 4),
+                "actual_home_rate": round(float(row["actual_home_rate"]), 4),
+            }
+            for _, row in monthly_acc_data.iterrows()
+        ]
 
         # Simulate betting
         bankroll = self.initial_bankroll
@@ -238,7 +279,31 @@ class Backtester:
             monthly=sorted(monthly_data.values(), key=lambda m: m["month"]),
             model_accuracy=float(df["pred_correct"].mean()),
             model_brier=float(((probs - df["home_win"].values) ** 2).mean()),
+            model_auc=model_auc,
+            calibration=calibration_bins,
+            monthly_accuracy=monthly_accuracy,
         )
+
+
+    def _compute_calibration(
+        self, predictions: np.ndarray, actuals: np.ndarray, n_bins: int = 10
+    ) -> list[dict]:
+        """Compute calibration bins: do predicted probabilities match observed rates?"""
+        edges = np.linspace(0, 1, n_bins + 1)
+        bins = []
+        for lo, hi in zip(edges[:-1], edges[1:]):
+            mask = (predictions >= lo) & (predictions < hi)
+            count = int(mask.sum())
+            if count == 0:
+                continue
+            bins.append({
+                "bin": f"{lo:.1f}-{hi:.1f}",
+                "predicted_avg": round(float(predictions[mask].mean()), 4),
+                "observed_avg": round(float(actuals[mask].mean()), 4),
+                "count": count,
+                "gap": round(abs(float(predictions[mask].mean()) - float(actuals[mask].mean())), 4),
+            })
+        return bins
 
 
 def _prob_to_american(prob: float) -> float:
@@ -267,11 +332,18 @@ def main():
     parser.add_argument("--bankroll", type=float, default=10000)
     parser.add_argument("--kelly", type=float, default=0.25)
     parser.add_argument("--min-edge", type=float, default=0.03)
+    parser.add_argument("--confidence-threshold", type=float, default=0.55,
+                        help="Min probability to simulate a bet (default: 0.55)")
     args = parser.parse_args()
+
+    # Support both --model-dir models and --model-dir models/win_model
+    model_dir = Path(args.model_dir)
+    if model_dir.name == "models" and (model_dir / "win_model").exists():
+        model_dir = model_dir / "win_model"
 
     bt = Backtester(
         data_dir=Path(args.data_dir),
-        model_dir=Path(args.model_dir),
+        model_dir=model_dir,
         bankroll=args.bankroll,
         kelly_fraction=args.kelly,
         min_edge=args.min_edge,
@@ -285,8 +357,11 @@ def main():
     print(f"  Games analyzed:    {result.total_games}")
     print(f"  Bets placed:       {result.games_bet}")
     print(f"  Win rate:          {result.win_rate:.1%}")
-    print(f"  Model accuracy:    {result.model_accuracy:.1%}")
-    print(f"  Model Brier:       {result.model_brier:.4f}")
+    print()
+    print(f"  MODEL METRICS")
+    print(f"  Accuracy:          {result.model_accuracy:.1%}")
+    print(f"  AUC-ROC:           {result.model_auc:.4f}")
+    print(f"  Brier score:       {result.model_brier:.4f}")
     print()
     print(f"  KELLY STRATEGY")
     print(f"  Starting bankroll: ${result.starting_bankroll:,.2f}")
@@ -301,15 +376,41 @@ def main():
     print(f"  Total P&L:         ${result.flat_bet_pnl:+,.2f}")
     print(f"  ROI:               {result.flat_bet_roi:+.2%}")
     print()
-    print(f"  MONTHLY BREAKDOWN")
+
+    # Monthly accuracy breakdown
+    if result.monthly_accuracy:
+        print(f"  MONTHLY ACCURACY (all games)")
+        print(f"  {'Month':<10} {'Games':>6} {'Correct':>8} {'Accuracy':>10} {'AvgPred':>10} {'ActualHR':>10}")
+        print(f"  {'-'*58}")
+        for m in result.monthly_accuracy:
+            print(
+                f"  {m['month']:<10} {m['games']:>6} {m['correct']:>8} "
+                f"{m['accuracy']:>9.1%} {m['avg_pred']:>10.4f} {m['actual_home_rate']:>10.4f}"
+            )
+        print()
+
+    # Monthly betting breakdown
+    print(f"  MONTHLY BETTING P&L")
     print(f"  {'Month':<10} {'Games':>6} {'Bets':>6} {'Wins':>6} {'Kelly P&L':>12} {'Flat P&L':>12}")
-    print(f"  {'-'*52}")
+    print(f"  {'-'*56}")
     for m in result.monthly:
         print(
             f"  {m['month']:<10} {m['games']:>6} {m['bets']:>6} {m['wins']:>6} "
             f"${m['pnl']:>+10,.2f} ${m['flat_pnl']:>+10,.2f}"
         )
     print()
+
+    # Calibration check
+    if result.calibration:
+        print(f"  CALIBRATION CHECK (predicted vs observed)")
+        print(f"  {'Bin':<12} {'Predicted':>10} {'Observed':>10} {'Count':>8} {'Gap':>8}")
+        print(f"  {'-'*50}")
+        for b in result.calibration:
+            print(
+                f"  {b['bin']:<12} {b['predicted_avg']:>10.4f} {b['observed_avg']:>10.4f} "
+                f"{b['count']:>8} {b['gap']:>8.4f}"
+            )
+        print()
 
 
 if __name__ == "__main__":

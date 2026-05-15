@@ -162,14 +162,24 @@ class BettingConfigRequest(BaseModel):
 
 class PerformanceResponse(BaseModel):
     period: str
-    total_games: int
-    accuracy: float
-    brier_score: float
-    auc_roc: float
-    roi_flat: float
-    roi_kelly: float
-    high_confidence_accuracy: float
-    calibration_error: float
+    total_bets: int
+    wins: int
+    losses: int
+    pushes: int
+    win_rate: float
+    total_staked: float
+    total_pnl: float
+    roi: float
+    max_drawdown: float
+    # Legacy fields kept for backwards compat
+    total_games: int = 0
+    accuracy: float = 0.0
+    brier_score: float = 0.0
+    auc_roc: float = 0.0
+    roi_flat: float = 0.0
+    roi_kelly: float = 0.0
+    high_confidence_accuracy: float = 0.0
+    calibration_error: float = 0.0
 
 
 class PnLResponse(BaseModel):

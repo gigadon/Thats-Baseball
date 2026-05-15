@@ -390,6 +390,17 @@
   .bet-edge{ font-weight: 700; color: var(--good); font-size: 13px; }
   .bet-details{ font-size: 13px; color: var(--text-2); display:flex; flex-direction:column; gap:4px; }
 
+  /* ── Result Badges ─────────────────────────────── */
+  .result-badge{
+    display:inline-flex; align-items:center; justify-content:center;
+    padding: 2px 10px; border-radius: 6px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .result-badge.win{ background: rgba(74,222,128,.15); color: var(--good); }
+  .result-badge.loss{ background: rgba(248,113,113,.15); color: var(--red); }
+  .result-badge.push{ background: rgba(110,118,137,.2); color: var(--text-3); }
+
   /* ── Loading ────────────────────────────────── */
   .loading{ text-align:center; padding: 48px; color: var(--text-3); }
   .spinner{
@@ -518,7 +529,7 @@
             <tr><th>Date</th><th>Game</th><th>Type</th><th>Pick</th><th>Odds</th><th>Stake</th><th>Score</th><th>Result</th><th>P&L</th></tr>
           </thead>
           <tbody id="history-body">
-            <tr><td colspan="9" class="loading">No settled bets yet</td></tr>
+            <tr><td colspan="9" class="loading">No betting history yet</td></tr>
           </tbody>
         </table>
         </div>
@@ -903,41 +914,144 @@ async function loadBetHistory() {
   const data = await fetchJSON(`${API}/betting/history?limit=50`);
   const tbody = document.getElementById('history-body');
   if (!data || !data.records || data.records.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="9" class="loading">No settled bets yet</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9" class="loading">No betting history yet</td></tr>';
     return;
   }
-  let rows = '';
-  for (const day of data.records.reverse()) {
+  // Flatten and sort by date descending (newest first)
+  const flat = [];
+  for (const day of data.records) {
     for (const b of day.bets) {
-      const badge = b.result === 'win'
-        ? '<span style="color:var(--good);font-weight:700">W</span>'
-        : b.result === 'loss'
-          ? '<span style="color:var(--red);font-weight:700">L</span>'
-          : '<span style="color:var(--yellow);font-weight:700">P</span>';
-      const pnlColor = b.pnl >= 0 ? 'var(--good)' : 'var(--red)';
-      rows += `<tr>
-        <td>${day.date}</td>
-        <td>${b.away_team}@${b.home_team}</td>
-        <td>${b.bet_type}</td>
-        <td>${b.selection}</td>
-        <td>${b.odds > 0 ? '+' : ''}${b.odds}</td>
-        <td>$${b.recommended_stake.toFixed(0)}</td>
-        <td>${b.actual_away_score}-${b.actual_home_score}</td>
-        <td>${badge}</td>
-        <td style="color:${pnlColor}">$${b.pnl >= 0 ? '+' : ''}${b.pnl.toFixed(2)}</td>
-      </tr>`;
+      flat.push({ date: day.date, ...b });
     }
   }
-  tbody.innerHTML = rows;
+  flat.sort((a, b) => b.date.localeCompare(a.date));
+
+  tbody.innerHTML = flat.map(b => {
+    const badgeCls = b.result === 'win' ? 'win' : b.result === 'loss' ? 'loss' : 'push';
+    const badgeLabel = b.result === 'win' ? 'W' : b.result === 'loss' ? 'L' : 'P';
+    const pnlColor = b.pnl >= 0 ? 'var(--good)' : 'var(--red)';
+    const betType = (b.bet_type || '').toUpperCase() === 'MONEYLINE' ? 'ML' : (b.bet_type || '').toUpperCase() === 'TOTAL' ? 'Total' : b.bet_type;
+    return `<tr>
+      <td>${b.date}</td>
+      <td>${b.away_team}@${b.home_team}</td>
+      <td>${betType}</td>
+      <td>${b.selection}</td>
+      <td>${b.odds > 0 ? '+' : ''}${b.odds}</td>
+      <td>$${b.recommended_stake.toFixed(0)}</td>
+      <td>${b.actual_away_score != null ? b.actual_away_score + '-' + b.actual_home_score : '--'}</td>
+      <td><span class="result-badge ${badgeCls}">${badgeLabel}</span></td>
+      <td style="color:${pnlColor};font-weight:600;font-variant-numeric:tabular-nums">$${b.pnl >= 0 ? '+' : ''}${b.pnl.toFixed(2)}</td>
+    </tr>`;
+  }).join('');
 }
 
 // ── Analytics ───────────────────────────────────────
 
 async function loadAnalytics() {
+  // Load performance stats
+  const perf = await fetchJSON(`${API}/analytics/performance`);
+  if (perf) {
+    const winRate = perf.win_rate != null ? perf.win_rate : perf.accuracy;
+    const winRateEl = document.getElementById('stat-acc');
+    winRateEl.textContent = winRate != null ? `${(winRate * 100).toFixed(1)}%` : '--%';
+
+    const roi = perf.roi != null ? perf.roi : perf.roi_kelly;
+    const roiEl = document.getElementById('stat-roi');
+    roiEl.textContent = roi != null ? `${(roi * 100).toFixed(1)}%` : '--%';
+    roiEl.className = `value ${roi > 0 ? 'positive' : roi < 0 ? 'negative' : ''}`;
+
+    if (perf.max_drawdown != null) {
+      document.getElementById('stat-drawdown').textContent = `${(perf.max_drawdown * 100).toFixed(1)}%`;
+      document.getElementById('stat-drawdown').className = 'value negative';
+    }
+  } else {
+    document.getElementById('stat-acc').textContent = '--%';
+    document.getElementById('stat-roi').textContent = '--%';
+  }
+
+  // Load P&L chart data
+  const pnl = await fetchJSON(`${API}/analytics/pnl`);
+  const chartEl = document.getElementById('pnl-chart');
+
+  if (!pnl || pnl.length === 0) {
+    chartEl.innerHTML = '<div class="loading">No performance data yet</div>';
+    document.getElementById('stat-total-pnl').textContent = '$0';
+    if (!perf || perf.max_drawdown == null) document.getElementById('stat-drawdown').textContent = '--%';
+    return;
+  }
+
+  const latest = pnl[pnl.length - 1];
+  const totalPnl = latest.cumulative_pnl;
+  const pnlEl = document.getElementById('stat-total-pnl');
+  pnlEl.textContent = `$${totalPnl >= 0 ? '+' : ''}${totalPnl.toFixed(0)}`;
+  pnlEl.className = `value ${totalPnl >= 0 ? 'positive' : 'negative'}`;
+
+  if (latest.max_drawdown != null) {
+    const ddEl = document.getElementById('stat-drawdown');
+    ddEl.textContent = `${(latest.max_drawdown * 100).toFixed(1)}%`;
+    ddEl.className = 'value negative';
+  }
+
+  // SVG P&L chart
+  const W = 600, H = 200, PAD_L = 48, PAD_R = 16, PAD_T = 20, PAD_B = 28;
+  const values = pnl.map(d => d.cumulative_pnl);
+  const minV = Math.min(0, ...values);
+  const maxV = Math.max(0, ...values);
+  const range = maxV - minV || 1;
+
+  function cx(i) { return PAD_L + (i / Math.max(values.length - 1, 1)) * (W - PAD_L - PAD_R); }
+  function cy(v) { return PAD_T + (1 - (v - minV) / range) * (H - PAD_T - PAD_B); }
+
+  const points = values.map((v, i) => `${cx(i).toFixed(1)},${cy(v).toFixed(1)}`).join(' ');
+  const zeroY = cy(0).toFixed(1);
+  const lineColor = totalPnl >= 0 ? 'var(--good)' : 'var(--red)';
+
+  // Gradient fill under the line
+  const firstX = cx(0).toFixed(1);
+  const lastX = cx(values.length - 1).toFixed(1);
+  const baseY = cy(0).toFixed(1);
+  const areaPoints = `${firstX},${baseY} ${points} ${lastX},${baseY}`;
+  const gradId = totalPnl >= 0 ? 'gradGreen' : 'gradRed';
+  const gradColor = totalPnl >= 0 ? '74,222,128' : '248,113,113';
+
+  // Date labels along X axis
+  const dateLabels = [];
+  const labelCount = Math.min(pnl.length, 5);
+  for (let li = 0; li < labelCount; li++) {
+    const idx = labelCount === 1 ? 0 : Math.round(li * (pnl.length - 1) / (labelCount - 1));
+    const anchor = li === 0 ? 'start' : li === labelCount - 1 ? 'end' : 'middle';
+    dateLabels.push(`<text x="${cx(idx).toFixed(1)}" y="${H - 4}" fill="var(--text-3)" font-size="10" text-anchor="${anchor}">${pnl[idx].date.slice(5)}</text>`);
+  }
+
+  // Render dots only when there are few enough data points
+  const dots = values.length <= 30
+    ? values.map((v, i) => `<circle cx="${cx(i).toFixed(1)}" cy="${cy(v).toFixed(1)}" r="2.5" fill="${lineColor}"/>`).join('')
+    : '';
+
+  chartEl.innerHTML = `
+    <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;max-height:200px;" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="rgba(${gradColor},.25)"/>
+          <stop offset="100%" stop-color="rgba(${gradColor},.02)"/>
+        </linearGradient>
+      </defs>
+      <polygon points="${areaPoints}" fill="url(#${gradId})"/>
+      <line x1="${PAD_L}" y1="${zeroY}" x2="${W - PAD_R}" y2="${zeroY}" stroke="var(--line-2)" stroke-dasharray="4"/>
+      <text x="${PAD_L - 6}" y="${zeroY}" fill="var(--text-3)" font-size="10" text-anchor="end" dominant-baseline="middle">$0</text>
+      <text x="${PAD_L - 6}" y="${cy(maxV).toFixed(1)}" fill="var(--good)" font-size="10" text-anchor="end" dominant-baseline="middle">$${maxV.toFixed(0)}</text>
+      ${minV < 0 ? `<text x="${PAD_L - 6}" y="${cy(minV).toFixed(1)}" fill="var(--red)" font-size="10" text-anchor="end" dominant-baseline="middle">$${minV.toFixed(0)}</text>` : ''}
+      <polyline points="${points}" fill="none" stroke="${lineColor}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+      ${dots}
+      ${dateLabels.join('')}
+    </svg>
+  `;
+
+  // Load stadiums
   const stadiums = await fetchJSON(`${API}/analytics/stadiums`);
-  const tbody = document.getElementById('stadiums-body');
+  const stBody = document.getElementById('stadiums-body');
   if (stadiums && stadiums.length) {
-    tbody.innerHTML = stadiums.map(s => `
+    stBody.innerHTML = stadiums.map(s => `
       <tr>
         <td><b>${s.team_id}</b></td>
         <td>${s.altitude_ft.toLocaleString()}</td>
@@ -947,62 +1061,6 @@ async function loadAnalytics() {
       </tr>
     `).join('');
   }
-
-  const perf = await fetchJSON(`${API}/analytics/performance`);
-  if (perf) {
-    document.getElementById('stat-acc').textContent = perf.accuracy ? `${(perf.accuracy * 100).toFixed(1)}%` : '--%';
-    document.getElementById('stat-roi').textContent = perf.roi_kelly ? `${(perf.roi_kelly * 100).toFixed(1)}%` : '--%';
-  }
-
-  const pnl = await fetchJSON(`${API}/analytics/pnl`);
-  const chartEl = document.getElementById('pnl-chart');
-
-  if (!pnl || pnl.length === 0) {
-    chartEl.innerHTML = '<div class="loading">No settlement data yet</div>';
-    document.getElementById('stat-total-pnl').textContent = '$0';
-    document.getElementById('stat-drawdown').textContent = '--%';
-    return;
-  }
-
-  const latest = pnl[pnl.length - 1];
-  const totalPnl = latest.cumulative_pnl;
-  const pnlEl = document.getElementById('stat-total-pnl');
-  pnlEl.textContent = `$${totalPnl >= 0 ? '+' : ''}${totalPnl.toFixed(0)}`;
-  pnlEl.className = `value ${totalPnl >= 0 ? 'positive' : 'negative'}`;
-  document.getElementById('stat-drawdown').textContent = `${(latest.max_drawdown * 100).toFixed(1)}%`;
-
-  const W = 600, H = 180, PAD = 40;
-  const values = pnl.map(d => d.cumulative_pnl);
-  const minV = Math.min(0, ...values);
-  const maxV = Math.max(0, ...values);
-  const range = maxV - minV || 1;
-
-  function x(i) { return PAD + (i / Math.max(values.length - 1, 1)) * (W - PAD * 2); }
-  function y(v) { return PAD + (1 - (v - minV) / range) * (H - PAD * 2); }
-
-  const points = values.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
-  const zeroY = y(0).toFixed(1);
-  const lineColor = totalPnl >= 0 ? 'var(--good)' : 'var(--red)';
-
-  const labels = [];
-  if (pnl.length >= 1) labels.push(`<text x="${PAD}" y="${H-5}" fill="var(--text-3)" font-size="10">${pnl[0].date.slice(5)}</text>`);
-  if (pnl.length >= 3) {
-    const mid = Math.floor(pnl.length / 2);
-    labels.push(`<text x="${x(mid).toFixed(1)}" y="${H-5}" fill="var(--text-3)" font-size="10" text-anchor="middle">${pnl[mid].date.slice(5)}</text>`);
-  }
-  if (pnl.length >= 2) labels.push(`<text x="${W-PAD}" y="${H-5}" fill="var(--text-3)" font-size="10" text-anchor="end">${pnl[pnl.length-1].date.slice(5)}</text>`);
-
-  chartEl.innerHTML = `
-    <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;">
-      <line x1="${PAD}" y1="${zeroY}" x2="${W-PAD}" y2="${zeroY}" stroke="var(--line)" stroke-dasharray="4"/>
-      <text x="${PAD-5}" y="${zeroY}" fill="var(--text-3)" font-size="10" text-anchor="end" dominant-baseline="middle">$0</text>
-      <text x="${PAD-5}" y="${y(maxV).toFixed(1)}" fill="var(--good)" font-size="10" text-anchor="end" dominant-baseline="middle">$${maxV.toFixed(0)}</text>
-      ${minV < 0 ? `<text x="${PAD-5}" y="${y(minV).toFixed(1)}" fill="var(--red)" font-size="10" text-anchor="end" dominant-baseline="middle">$${minV.toFixed(0)}</text>` : ''}
-      <polyline points="${points}" fill="none" stroke="${lineColor}" stroke-width="2"/>
-      ${values.map((v, i) => `<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="3" fill="${lineColor}"/>`).join('')}
-      ${labels.join('')}
-    </svg>
-  `;
 }
 
 // ── Init ────────────────────────────────────────────
