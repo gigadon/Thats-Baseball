@@ -210,8 +210,6 @@ class TrainingDataBuilder:
             row = {"game_id": game["game_id"], "game_date": game_date}
             row["home_team"] = home
             row["away_team"] = away
-            row["home_score"] = game["home_score"]
-            row["away_score"] = game["away_score"]
             row["home_win"] = 1 if game["home_score"] > game["away_score"] else 0
 
             # Home features
