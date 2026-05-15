@@ -279,6 +279,67 @@ class MLBApiClient:
             "avg_against": float(raw.get("avg", 0)),
         }
 
+    # ── Pitcher Advanced Stats (Statcast-adjacent) ─────────────
+
+    async def get_pitcher_advanced_stats(
+        self, pitcher_id: int, season: int
+    ) -> dict[str, Any] | None:
+        """Get pitcher's advanced/Statcast-adjacent stats for the season.
+
+        Fetches from the MLB Stats API and derives Statcast proxy metrics:
+        - k_rate: strikeout percentage (strong Statcast proxy)
+        - bb_rate: walk percentage
+        - k_minus_bb: K% - BB% (one of the best predictive stats)
+        - gb_ao_ratio: groundouts-to-airouts (proxy for groundball tendency)
+        - hr_per_9: home runs per 9 innings
+        - whip: walks + hits per inning pitched
+        - era: earned run average
+        """
+        data = await self._get(
+            f"/people/{pitcher_id}/stats",
+            params={
+                "stats": "statsSingleSeason",
+                "group": "pitching",
+                "season": season,
+                "gameType": "R",
+            },
+        )
+        splits = data.get("stats", [{}])[0].get("splits", [])
+        if not splits:
+            return None
+
+        stat = splits[0].get("stat", {})
+        ip = _ip(stat.get("inningsPitched", "0")) or 0.0
+        if ip == 0.0:
+            return None
+
+        # Parse percentage strings (e.g. ".285" -> 28.5%)
+        k_pct_raw = stat.get("strikeoutPercentage", stat.get("strikeoutsPer9Inn"))
+        bb_pct_raw = stat.get("walkPercentage", stat.get("walksPer9Inn"))
+
+        # strikeoutPercentage/walkPercentage come as decimals like ".285"
+        try:
+            k_rate = float(k_pct_raw) * 100 if float(k_pct_raw) < 1.0 else float(k_pct_raw)
+        except (TypeError, ValueError):
+            k_rate = float(stat.get("strikeoutsPer9Inn", 8.0))
+
+        try:
+            bb_rate = float(bb_pct_raw) * 100 if float(bb_pct_raw) < 1.0 else float(bb_pct_raw)
+        except (TypeError, ValueError):
+            bb_rate = float(stat.get("walksPer9Inn", 3.0))
+
+        return {
+            "player_id": pitcher_id,
+            "k_rate": k_rate,
+            "bb_rate": bb_rate,
+            "k_minus_bb": k_rate - bb_rate,
+            "gb_ao_ratio": float(stat.get("groundOutsToAirouts", 1.0)),
+            "hr_per_9": float(stat.get("homeRunsPer9Inn", 1.0)),
+            "whip": float(stat.get("whip", 1.30)),
+            "era": float(stat.get("era", 4.50)),
+            "innings_pitched": ip,
+        }
+
     # ── Standings ──────────────────────────────────────────────
 
     async def get_standings(self, season: int | None = None) -> dict[str, dict[str, Any]]:

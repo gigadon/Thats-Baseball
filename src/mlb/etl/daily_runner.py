@@ -533,6 +533,13 @@ class DailyRunner:
         features["a_rest_days"] = (target_date - a_last).days if a_last else 5
         features["rest_diff"] = features["h_rest_days"] - features["a_rest_days"]
 
+        # Venue-specific rolling features (home team's home record, away team's road record)
+        features["h_home_win_pct"] = home_feat.get("venue_home_win_pct", 0.536)
+        features["a_away_win_pct"] = away_feat.get("venue_away_win_pct", 0.464)
+        features["diff_venue_win_pct"] = features["h_home_win_pct"] - features["a_away_win_pct"]
+        features["h_home_rs_per_game"] = home_feat.get("venue_home_rs_per_game", 4.5)
+        features["a_away_rs_per_game"] = away_feat.get("venue_away_rs_per_game", 4.5)
+
         # Starting pitcher season stats — passed to model as features
         sp_data = sp_stats or {}
         home_sp = game.get("home_probable_pitcher")
@@ -550,6 +557,20 @@ class DailyRunner:
             features[f"h_{feat_key}"] = h_val
             features[f"a_{feat_key}"] = a_val
             features[f"diff_{feat_key}"] = h_val - a_val
+
+        # Derived Statcast-proxy feature: K-BB% (one of the strongest
+        # predictors of future pitcher performance)
+        h_k_minus_bb = features.get("h_sp_season_k9", 8.0) - features.get("h_sp_season_bb9", 3.0)
+        a_k_minus_bb = features.get("a_sp_season_k9", 8.0) - features.get("a_sp_season_bb9", 3.0)
+        features["h_sp_k_minus_bb"] = h_k_minus_bb
+        features["a_sp_k_minus_bb"] = a_k_minus_bb
+        features["diff_sp_k_minus_bb"] = h_k_minus_bb - a_k_minus_bb
+
+        # Pitcher rest days (days since SP last started)
+        # Default to 5 (normal rest); can be enhanced with live lookup later
+        features["h_sp_rest_days"] = 5
+        features["a_sp_rest_days"] = 5
+        features["diff_sp_rest_days"] = 0
 
         # Lineup and platoon features
         lf = (lineup_features or {}).get(game["game_id"], {})

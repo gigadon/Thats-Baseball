@@ -162,6 +162,12 @@ class TrainingDataBuilder:
         # Build SP season stats lookup
         sp_season = self._build_sp_season_stats(pitching_df)
 
+        # Build SP lookup for rest days tracking (pitcher_id per game/team)
+        sp_lookup = self._build_sp_lookup(pitching_df)
+
+        # Track each pitcher's last start date for rest days calculation
+        last_sp_start: dict[int, date] = {}  # pitcher_id -> last game_date they started
+
         # Build lineup aggregate season stats
         lineup_season = self._build_lineup_season_stats(batting_df)
 
@@ -259,6 +265,13 @@ class TrainingDataBuilder:
             row["a_rest_days"] = (game_date - a_last).days if a_last else 5
             row["rest_diff"] = row["h_rest_days"] - row["a_rest_days"]
 
+            # Venue-specific rolling features (home team's home record, away team's road record)
+            row["h_home_win_pct"] = home_feat.get("venue_home_win_pct", 0.536)
+            row["a_away_win_pct"] = away_feat.get("venue_away_win_pct", 0.464)
+            row["diff_venue_win_pct"] = row["h_home_win_pct"] - row["a_away_win_pct"]
+            row["h_home_rs_per_game"] = home_feat.get("venue_home_rs_per_game", 4.5)
+            row["a_away_rs_per_game"] = away_feat.get("venue_away_rs_per_game", 4.5)
+
             # Starting pitcher season stats (entering this game)
             h_sp = sp_season.get((game["game_id"], home))
             a_sp = sp_season.get((game["game_id"], away))
@@ -268,6 +281,23 @@ class TrainingDataBuilder:
                 row[f"h_{k}"] = h_sp[k] if h_sp else default
                 row[f"a_{k}"] = a_sp[k] if a_sp else default
                 row[f"diff_{k}"] = row[f"h_{k}"] - row[f"a_{k}"]
+
+            # Derived Statcast-proxy feature: K-BB% (one of the strongest
+            # predictors of future pitcher performance)
+            h_k_minus_bb = row["h_sp_season_k9"] - row["h_sp_season_bb9"]
+            a_k_minus_bb = row["a_sp_season_k9"] - row["a_sp_season_bb9"]
+            row["h_sp_k_minus_bb"] = h_k_minus_bb
+            row["a_sp_k_minus_bb"] = a_k_minus_bb
+            row["diff_sp_k_minus_bb"] = h_k_minus_bb - a_k_minus_bb
+
+            # Pitcher rest days (days since SP last started a game)
+            h_sp_pid = sp_lookup.get((game["game_id"], home))
+            a_sp_pid = sp_lookup.get((game["game_id"], away))
+            h_sp_last = last_sp_start.get(h_sp_pid) if h_sp_pid else None
+            a_sp_last = last_sp_start.get(a_sp_pid) if a_sp_pid else None
+            row["h_sp_rest_days"] = (game_date - h_sp_last).days if h_sp_last else 5
+            row["a_sp_rest_days"] = (game_date - a_sp_last).days if a_sp_last else 5
+            row["diff_sp_rest_days"] = row["h_sp_rest_days"] - row["a_sp_rest_days"]
 
             # Lineup aggregate season stats
             h_lineup = lineup_season.get((game["game_id"], home))
@@ -344,6 +374,12 @@ class TrainingDataBuilder:
             last_game_date[away] = game_date
             last_game_venue[home] = home  # venue is the home team's stadium
             last_game_venue[away] = home
+
+            # Update pitcher last start dates
+            if h_sp_pid:
+                last_sp_start[h_sp_pid] = game_date
+            if a_sp_pid:
+                last_sp_start[a_sp_pid] = game_date
 
             if (idx + 1) % 500 == 0:
                 logger.info("Processed %d / %d games", idx + 1, len(games_sorted))
@@ -493,6 +529,24 @@ class TrainingDataBuilder:
 
         logger.info("Built SP season stats for %d game-team pairs", len(result))
         return result
+
+    def _build_sp_lookup(
+        self, pitching_df: pd.DataFrame
+    ) -> dict[tuple, int]:
+        """Identify the starting pitcher (highest IP) for each (game_id, team_id).
+
+        Returns {(game_id, team_id): player_id}
+        """
+        if pitching_df.empty:
+            return {}
+
+        sp_lookup: dict[tuple, int] = {}
+        for (gid, tid), grp in pitching_df.groupby(["game_id", "team_id"]):
+            sp_row = grp.nlargest(1, "innings_pitched").iloc[0]
+            sp_lookup[(gid, tid)] = sp_row["player_id"]
+
+        logger.info("Built SP lookup for %d game-team pairs", len(sp_lookup))
+        return sp_lookup
 
     # ── Player Handedness Cache ─────────────────────────────
 
@@ -871,6 +925,8 @@ class TrainingDataBuilder:
             stats_list = []
             wins = losses = total_rs = total_ra = 0
             results_buffer: list[dict] = []  # For rolling calculations
+            home_buffer: list[dict] = []  # Last N home games (venue splits)
+            away_buffer: list[dict] = []  # Last N away games (venue splits)
 
             for _, game in team_games.iterrows():
                 is_home = game["home_team_id"] == team_id
@@ -899,6 +955,17 @@ class TrainingDataBuilder:
                     "venue": game["home_team_id"],  # venue is always the home team
                     "bp_ip": 0.0,  # filled after pitching calc below
                 })
+
+                # Track venue-specific results (last 20 home/away games)
+                venue_entry = {"won": won, "rs": rs, "ra": ra}
+                if is_home:
+                    home_buffer.append(venue_entry)
+                    if len(home_buffer) > 20:
+                        home_buffer = home_buffer[-20:]
+                else:
+                    away_buffer.append(venue_entry)
+                    if len(away_buffer) > 20:
+                        away_buffer = away_buffer[-20:]
 
                 gp = wins + losses
 
@@ -1034,6 +1101,23 @@ class TrainingDataBuilder:
                         sum(1 for r in results_buffer if not r["is_home"] and r["won"])
                         / max(sum(1 for r in results_buffer if not r["is_home"]), 1)
                     ),
+                    # Venue-specific rolling stats (last 20 home/away games)
+                    "venue_home_win_pct": (
+                        sum(1 for r in home_buffer if r["won"]) / len(home_buffer)
+                        if home_buffer else 0.536
+                    ),
+                    "venue_away_win_pct": (
+                        sum(1 for r in away_buffer if r["won"]) / len(away_buffer)
+                        if away_buffer else 0.464
+                    ),
+                    "venue_home_rs_per_game": (
+                        sum(r["rs"] for r in home_buffer) / len(home_buffer)
+                        if home_buffer else 4.5
+                    ),
+                    "venue_away_rs_per_game": (
+                        sum(r["rs"] for r in away_buffer) / len(away_buffer)
+                        if away_buffer else 4.5
+                    ),
                     # SP game stats
                     "sp_era": sp_er * 9 / max(sp_ip, 0.1),
                     "sp_whip": (sp_ha + sp_bb) / max(sp_ip, 0.1),
@@ -1130,6 +1214,11 @@ class TrainingDataBuilder:
             # Home/away
             "home_wpct": latest["home_wpct"],
             "away_wpct": latest["away_wpct"],
+            # Venue-specific rolling stats (last 20 home/away games)
+            "venue_home_win_pct": latest.get("venue_home_win_pct", 0.536),
+            "venue_away_win_pct": latest.get("venue_away_win_pct", 0.464),
+            "venue_home_rs_per_game": latest.get("venue_home_rs_per_game", 4.5),
+            "venue_away_rs_per_game": latest.get("venue_away_rs_per_game", 4.5),
             # Games played (proxy for sample stability)
             "gp": latest["gp"],
         }
