@@ -106,9 +106,35 @@ class PredictionService:
         model_std = float(detailed["std"][0])
         agreement = max(0.0, 1.0 - model_std * 4)  # Scale: 0.25 std → 0 agreement
 
-        # Confidence: based on distance from 0.5 and model agreement
+        # Confidence: combines prediction strength, model agreement, and data quality.
+        # In MLB, even top teams win ~60%, so a 60% prediction IS very confident.
         edge = abs(home_win_prob - 0.5)
-        confidence = min(100.0, (edge * 150 + agreement * 30))
+
+        # 1) Prediction strength (0-50 pts): rescaled so 55%→15, 60%→30, 65%→42, 70%→50
+        strength = min(50.0, edge * 300)
+
+        # 2) Model agreement (0-25 pts): all 6 models agree → 25
+        agreement_pts = agreement * 25
+
+        # 3) Data quality (0-25 pts): do we have real SP stats, weather, odds, lineup?
+        fv = game_fv.features
+        dq = 0.0
+        # SP data available (not defaults): +8 if both SPs have real IP > 0
+        if fv.get("h_sp_season_ip", 0) > 0:
+            dq += 4
+        if fv.get("a_sp_season_ip", 0) > 0:
+            dq += 4
+        # Market odds available (not default 0.5): +6
+        if fv.get("market_home_prob", 0.5) != 0.5:
+            dq += 6
+        # Weather data available (not default 72): +3
+        if fv.get("temperature", 72.0) != 72.0 or fv.get("is_outdoor", 0) == 0:
+            dq += 3
+        # Lineup/BvP data (not defaults): +4
+        if fv.get("h_bvp_ops", 0.75) != 0.75:
+            dq += 4
+
+        confidence = min(100.0, strength + agreement_pts + dq)
 
         # Run predictions
         home_runs, away_runs = self._predict_runs(game_fv, home_win_prob)
