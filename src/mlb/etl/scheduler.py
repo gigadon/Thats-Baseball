@@ -35,6 +35,7 @@ class DailyScheduler:
         predict_hour: int = 13,   # 1 PM ET
         backfill_hour: int = 6,   # 6 AM ET
         settle_hour: int = 23,    # 11 PM ET
+        retrain_day: int = 0,     # 0=Monday
         timezone: str = "America/New_York",
     ):
         self.data_dir = data_dir
@@ -42,11 +43,13 @@ class DailyScheduler:
         self.predict_hour = predict_hour
         self.backfill_hour = backfill_hour
         self.settle_hour = settle_hour
+        self.retrain_day = retrain_day
         self.tz = ZoneInfo(timezone)
         self._running = True
         self._last_backfill: date | None = None
         self._last_predict: date | None = None
         self._last_settle: date | None = None
+        self._last_retrain: date | None = None
 
     async def start(self, run_now: bool = False):
         """Start the scheduler loop."""
@@ -80,6 +83,16 @@ class DailyScheduler:
                 await self._run_settlement(today)
                 self._last_settle = today
 
+            # Weekly retrain: run on retrain_day after settlement
+            if (
+                now.weekday() == self.retrain_day
+                and now.hour >= self.settle_hour
+                and (self._last_retrain is None or (today - self._last_retrain).days >= 6)
+            ):
+                logger.info("Starting weekly model retrain...")
+                await self._run_retrain()
+                self._last_retrain = today
+
             # Sleep until the next check (every 15 minutes)
             await asyncio.sleep(900)
 
@@ -96,6 +109,11 @@ class DailyScheduler:
         await self._run_settlement(today - timedelta(days=1))
         self._last_backfill = today
         self._last_predict = today
+
+        # Retrain if today is retrain day
+        if today.weekday() == self.retrain_day:
+            await self._run_retrain()
+            self._last_retrain = today
 
     async def _run_backfill(self, today: date):
         """Backfill yesterday's completed games."""
@@ -129,8 +147,70 @@ class DailyScheduler:
                     logger.warning("Settlement alert failed: %s", e)
             else:
                 logger.info("No bets to settle for %s", target)
+
+            # Also track prediction accuracy for this date
+            try:
+                from mlb.models.accuracy import track_accuracy
+                await track_accuracy(target, data_dir=self.data_dir)
+            except Exception as e:
+                logger.warning("Accuracy tracking failed for %s: %s", target, e)
+
         except Exception:
             logger.exception("Settlement failed for %s", target)
+
+    async def _run_retrain(self):
+        """Rebuild training data and retrain all models."""
+        try:
+            from mlb.etl.build_training_data import TrainingDataBuilder
+            from mlb.models.pipeline import TrainingPipeline
+
+            logger.info("Rebuilding training data...")
+            builder = TrainingDataBuilder(data_dir=self.data_dir)
+            df = builder.build()
+            logger.info("Training data: %d rows, %d cols", len(df), len(df.columns))
+
+            meta_cols = [
+                "game_id", "game_date", "home_team_id", "away_team_id",
+                "home_win", "home_score", "away_score", "total_runs",
+                "home_team", "away_team",
+            ]
+            feature_cols = [c for c in df.columns if c not in meta_cols and df[c].dtype != "object"]
+            X = df[feature_cols]
+            y = df["home_win"]
+
+            logger.info("Training ensemble on %d features...", len(feature_cols))
+            pipeline = TrainingPipeline()
+            ensemble = pipeline.train(X, y)
+            # Pipeline auto-saves to models/ensemble during training.
+            # Copy to win_model dir so PredictionService picks them up.
+            import shutil
+            ens_src = self.model_dir / "ensemble"
+            ens_dst = self.model_dir / "win_model" / "ensemble"
+            ens_dst.mkdir(parents=True, exist_ok=True)
+            if ens_src.exists():
+                for f in ens_src.glob("*.joblib"):
+                    shutil.copy2(f, ens_dst / f.name)
+            # Also copy pipeline meta
+            meta_src = self.model_dir / "pipeline_meta.joblib"
+            if meta_src.exists():
+                shutil.copy2(meta_src, self.model_dir / "win_model" / "pipeline_meta.joblib")
+
+            logger.info("Retrain complete")
+
+            # Send Slack alert
+            try:
+                from mlb.alerts import AlertService
+                alerts = AlertService()
+                await alerts.send_alert(
+                    f"Weekly Retrain Complete\n"
+                    f"AUC: {auc:.4f} | Accuracy: {acc:.1%}\n"
+                    f"Training rows: {len(df):,} | Features: {len(feature_cols)}"
+                )
+            except Exception as e:
+                logger.warning("Retrain alert failed: %s", e)
+
+        except Exception:
+            logger.exception("Weekly retrain failed")
 
     async def _run_predictions(self, today: date):
         """Generate predictions for today's games."""

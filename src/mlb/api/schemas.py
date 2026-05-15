@@ -223,3 +223,25 @@ class BacktestResponse(BaseModel):
     max_drawdown: float
     sharpe_ratio: float
     monthly_results: list[dict]
+
+
+# ─── Accuracy ────────────────────────────────────────────────
+
+
+class AccuracyTierResponse(BaseModel):
+    tier: str
+    accuracy: float
+    games: int
+
+
+class AccuracyResponse(BaseModel):
+    overall_accuracy: float = 0.0
+    overall_games: int = 0
+    last_7d_accuracy: float = 0.0
+    last_7d_games: int = 0
+    last_30d_accuracy: float = 0.0
+    last_30d_games: int = 0
+    brier_score: float = 0.0
+    by_confidence: list[AccuracyTierResponse] = []
+    daily_series: list[dict] = []
+    calibration: list[dict] = []

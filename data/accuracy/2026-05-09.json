@@ -1,0 +1,49 @@
+{
+  "date": "2026-05-09",
+  "tracked_at": "2026-05-15T19:58:22.747310",
+  "results": [
+    {
+      "game_id": "824444",
+      "home_team": "CLE",
+      "away_team": "MIN",
+      "home_win_prob": 0.6187,
+      "confidence": 43.4,
+      "predicted_winner": "CLE",
+      "actual_home_score": 1,
+      "actual_away_score": 2,
+      "actual_winner": "MIN",
+      "correct": false
+    },
+    {
+      "game_id": "823224",
+      "home_team": "SF",
+      "away_team": "PIT",
+      "home_win_prob": 0.5303,
+      "confidence": 29.3,
+      "predicted_winner": "SF",
+      "actual_home_score": 3,
+      "actual_away_score": 13,
+      "actual_winner": "PIT",
+      "correct": false
+    },
+    {
+      "game_id": "823955",
+      "home_team": "LAD",
+      "away_team": "ATL",
+      "home_win_prob": 0.587,
+      "confidence": 37.4,
+      "predicted_winner": "LAD",
+      "actual_home_score": 2,
+      "actual_away_score": 7,
+      "actual_winner": "ATL",
+      "correct": false
+    }
+  ],
+  "summary": {
+    "total_games": 3,
+    "correct": 0,
+    "incorrect": 3,
+    "accuracy": 0.0,
+    "brier_score": 0.3362
+  }
+}

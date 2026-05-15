@@ -1,0 +1,85 @@
+{
+  "date": "2026-05-11",
+  "tracked_at": "2026-05-15T19:58:22.909813",
+  "results": [
+    {
+      "game_id": "824441",
+      "home_team": "CLE",
+      "away_team": "LAA",
+      "home_win_prob": 0.6057,
+      "confidence": 27.6,
+      "predicted_winner": "CLE",
+      "actual_home_score": 7,
+      "actual_away_score": 2,
+      "actual_winner": "CLE",
+      "correct": true
+    },
+    {
+      "game_id": "824844",
+      "home_team": "BAL",
+      "away_team": "NYY",
+      "home_win_prob": 0.4572,
+      "confidence": 22.1,
+      "predicted_winner": "NYY",
+      "actual_home_score": 3,
+      "actual_away_score": 2,
+      "actual_winner": "BAL",
+      "correct": false
+    },
+    {
+      "game_id": "822818",
+      "home_team": "TOR",
+      "away_team": "TB",
+      "home_win_prob": 0.518,
+      "confidence": 15.5,
+      "predicted_winner": "TOR",
+      "actual_home_score": 5,
+      "actual_away_score": 8,
+      "actual_winner": "TB",
+      "correct": false
+    },
+    {
+      "game_id": "822901",
+      "home_team": "TEX",
+      "away_team": "ARI",
+      "home_win_prob": 0.5879,
+      "confidence": 23.4,
+      "predicted_winner": "TEX",
+      "actual_home_score": 0,
+      "actual_away_score": 1,
+      "actual_winner": "ARI",
+      "correct": false
+    },
+    {
+      "game_id": "824199",
+      "home_team": "HOU",
+      "away_team": "SEA",
+      "home_win_prob": 0.4715,
+      "confidence": 19.6,
+      "predicted_winner": "SEA",
+      "actual_home_score": 1,
+      "actual_away_score": 3,
+      "actual_winner": "SEA",
+      "correct": true
+    },
+    {
+      "game_id": "823953",
+      "home_team": "LAD",
+      "away_team": "SF",
+      "home_win_prob": 0.659,
+      "confidence": 25.6,
+      "predicted_winner": "LAD",
+      "actual_home_score": 3,
+      "actual_away_score": 9,
+      "actual_winner": "SF",
+      "correct": false
+    }
+  ],
+  "summary": {
+    "total_games": 6,
+    "correct": 2,
+    "incorrect": 4,
+    "accuracy": 0.3333,
+    "brier_score": 0.2868
+  }
+}

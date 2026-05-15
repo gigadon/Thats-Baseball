@@ -709,6 +709,42 @@ class DailyRunner:
         features["a_def_proxy"] = away_feat.get("def_proxy", 0.0)
         features["diff_def_proxy"] = features["h_def_proxy"] - features["a_def_proxy"]
 
+        # ── Feature 4: Platoon Splits (SP handedness) ──
+        # Encode SP throws hand: 0=RHP, 1=LHP
+        h_sp_throws = 0.0
+        a_sp_throws = 0.0
+        if home_sp and home_sp.get("player_id"):
+            pi = getattr(self, '_player_info_cache', {}).get(home_sp["player_id"])
+            if pi:
+                h_sp_throws = 1.0 if pi.get("throws") == "L" else 0.0
+        if away_sp and away_sp.get("player_id"):
+            pi = getattr(self, '_player_info_cache', {}).get(away_sp["player_id"])
+            if pi:
+                a_sp_throws = 1.0 if pi.get("throws") == "L" else 0.0
+        features["h_sp_throws"] = h_sp_throws
+        features["a_sp_throws"] = a_sp_throws
+        features["platoon_advantage_home"] = 1.0 if lf.get("h_platoon_adv", 0.5) > 0.5 else 0.0
+        features["platoon_advantage_away"] = 1.0 if lf.get("a_platoon_adv", 0.5) > 0.5 else 0.0
+
+        # ── Feature 5: Recent Form Weighting (Exponential Decay) ──
+        features["h_ewm_win_pct"] = home_feat.get("ewm_win_pct", home_feat.get("win_pct", 0.500))
+        features["a_ewm_win_pct"] = away_feat.get("ewm_win_pct", away_feat.get("win_pct", 0.500))
+        features["diff_ewm_win_pct"] = features["h_ewm_win_pct"] - features["a_ewm_win_pct"]
+        features["h_ewm_rs_per_game"] = home_feat.get("ewm_rs_per_game", home_feat.get("rs_per_game", 4.5))
+        features["a_ewm_rs_per_game"] = away_feat.get("ewm_rs_per_game", away_feat.get("rs_per_game", 4.5))
+        features["diff_ewm_rs_per_game"] = features["h_ewm_rs_per_game"] - features["a_ewm_rs_per_game"]
+        features["h_ewm_ra_per_game"] = home_feat.get("ewm_ra_per_game", home_feat.get("ra_per_game", 4.5))
+        features["a_ewm_ra_per_game"] = away_feat.get("ewm_ra_per_game", away_feat.get("ra_per_game", 4.5))
+        features["diff_ewm_ra_per_game"] = features["h_ewm_ra_per_game"] - features["a_ewm_ra_per_game"]
+        features["h_momentum"] = home_feat.get("momentum", 0.0)
+        features["a_momentum"] = away_feat.get("momentum", 0.0)
+        features["diff_momentum"] = features["h_momentum"] - features["a_momentum"]
+
+        # ── Feature 6: Bullpen Fatigue Tracking ──
+        features["h_bullpen_ip_3d"] = home_feat.get("bullpen_ip_3d", home_feat.get("bp_ip_3d", 6.0))
+        features["a_bullpen_ip_3d"] = away_feat.get("bullpen_ip_3d", away_feat.get("bp_ip_3d", 6.0))
+        features["diff_bullpen_ip_3d"] = features["h_bullpen_ip_3d"] - features["a_bullpen_ip_3d"]
+
         # Compute composite scores from features
         home_off_score = _compute_offense_score(home_feat)
         away_off_score = _compute_offense_score(away_feat)

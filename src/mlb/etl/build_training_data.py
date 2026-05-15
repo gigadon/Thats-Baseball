@@ -183,6 +183,9 @@ class TrainingDataBuilder:
         # Track last venue for travel fatigue
         last_game_venue: dict[str, str] = {}  # team_id -> venue (home_team_id) of last game
 
+        # Load handedness cache for platoon splits
+        hand_cache = self._load_handedness_cache()
+
         # Check if game_time column exists for day/night classification
         has_game_time = "game_time" in games_df.columns
 
@@ -385,6 +388,47 @@ class TrainingDataBuilder:
             row["h_def_proxy"] = home_feat.get("def_proxy", 0.0)
             row["a_def_proxy"] = away_feat.get("def_proxy", 0.0)
             row["diff_def_proxy"] = row["h_def_proxy"] - row["a_def_proxy"]
+
+            # ── Feature 4: Platoon Splits (SP handedness) ──
+            # Encode starting pitcher handedness as a feature.
+            # 0 = RHP, 1 = LHP. Uses the handedness cache.
+            h_sp_hand = None
+            a_sp_hand = None
+            if h_sp_pid:
+                h_info = hand_cache.get(h_sp_pid)
+                if h_info:
+                    h_sp_hand = h_info.get("throws")
+            if a_sp_pid:
+                a_info = hand_cache.get(a_sp_pid)
+                if a_info:
+                    a_sp_hand = a_info.get("throws")
+            row["h_sp_throws"] = 1.0 if h_sp_hand == "L" else 0.0
+            row["a_sp_throws"] = 1.0 if a_sp_hand == "L" else 0.0
+            # Platoon advantage indicator: 1 if SP throws opposite hand from
+            # majority of opposing lineup (approximated by platoon_adv > 0.5),
+            # 0 otherwise. Falls back to a simple lefty-pitcher flag since
+            # lefty starters have historically different profiles.
+            row["platoon_advantage_home"] = 1.0 if row.get("h_platoon_adv", 0.5) > 0.5 else 0.0
+            row["platoon_advantage_away"] = 1.0 if row.get("a_platoon_adv", 0.5) > 0.5 else 0.0
+
+            # ── Feature 5: Recent Form Weighting (Exponential Decay) ──
+            row["h_ewm_win_pct"] = home_feat.get("ewm_win_pct", 0.500)
+            row["a_ewm_win_pct"] = away_feat.get("ewm_win_pct", 0.500)
+            row["diff_ewm_win_pct"] = row["h_ewm_win_pct"] - row["a_ewm_win_pct"]
+            row["h_ewm_rs_per_game"] = home_feat.get("ewm_rs_per_game", 4.5)
+            row["a_ewm_rs_per_game"] = away_feat.get("ewm_rs_per_game", 4.5)
+            row["diff_ewm_rs_per_game"] = row["h_ewm_rs_per_game"] - row["a_ewm_rs_per_game"]
+            row["h_ewm_ra_per_game"] = home_feat.get("ewm_ra_per_game", 4.5)
+            row["a_ewm_ra_per_game"] = away_feat.get("ewm_ra_per_game", 4.5)
+            row["diff_ewm_ra_per_game"] = row["h_ewm_ra_per_game"] - row["a_ewm_ra_per_game"]
+            row["h_momentum"] = home_feat.get("momentum", 0.0)
+            row["a_momentum"] = away_feat.get("momentum", 0.0)
+            row["diff_momentum"] = row["h_momentum"] - row["a_momentum"]
+
+            # ── Feature 6: Bullpen Fatigue Tracking ──
+            row["h_bullpen_ip_3d"] = home_feat.get("bullpen_ip_3d", 6.0)
+            row["a_bullpen_ip_3d"] = away_feat.get("bullpen_ip_3d", 6.0)
+            row["diff_bullpen_ip_3d"] = row["h_bullpen_ip_3d"] - row["a_bullpen_ip_3d"]
 
             feature_rows.append(row)
 
@@ -978,6 +1022,7 @@ class TrainingDataBuilder:
                     "is_home": is_home,
                     "venue": game["home_team_id"],  # venue is always the home team
                     "bp_ip": 0.0,  # filled after pitching calc below
+                    "win_int": 1 if won else 0,  # for EWM calculations
                 })
 
                 # Track 7-game run differential buffer
@@ -1070,6 +1115,26 @@ class TrainingDataBuilder:
                         else:
                             break
 
+                # Exponentially-weighted recent form (halflife ~10 games)
+                win_vals = [r["win_int"] for r in results_buffer]
+                rs_vals = [float(r["rs"]) for r in results_buffer]
+                ra_vals = [float(r["ra"]) for r in results_buffer]
+                if len(win_vals) >= 5:
+                    ewm_win_pct = pd.Series(win_vals).ewm(halflife=10).mean().iloc[-1]
+                    ewm_rs_per_game = pd.Series(rs_vals).ewm(halflife=10).mean().iloc[-1]
+                    ewm_ra_per_game = pd.Series(ra_vals).ewm(halflife=10).mean().iloc[-1]
+                else:
+                    ewm_win_pct = wins / max(gp, 1)
+                    ewm_rs_per_game = total_rs / max(gp, 1)
+                    ewm_ra_per_game = total_ra / max(gp, 1)
+
+                # Momentum: win rate last 5 minus last 20 (hot/cold streak)
+                last_5 = results_buffer[-5:]
+                l5_w = sum(1 for r in last_5 if r["won"])
+                l5_wpct = l5_w / max(len(last_5), 1)
+                l20_wpct = l20_w / max(len(last_20), 1)
+                momentum = l5_wpct - l20_wpct
+
                 # Pythagorean
                 rs2 = max(total_rs, 1) ** 2
                 ra2 = max(total_ra, 1) ** 2
@@ -1161,8 +1226,14 @@ class TrainingDataBuilder:
                     # Bullpen fatigue
                     "bp_ip_3d": bp_ip_3d,
                     "bp_games_5d": bp_games_5d,
+                    "bullpen_ip_3d": bp_ip_3d,  # explicit feature name for model
                     # 7-game run differential
                     "rd_7d": sum(rd_7_buffer) / len(rd_7_buffer) if rd_7_buffer else 0.0,
+                    # Exponentially-weighted recent form
+                    "ewm_win_pct": ewm_win_pct,
+                    "ewm_rs_per_game": ewm_rs_per_game,
+                    "ewm_ra_per_game": ewm_ra_per_game,
+                    "momentum": momentum,
                 })
 
             team_stats[team_id] = stats_list
@@ -1242,8 +1313,14 @@ class TrainingDataBuilder:
             # Bullpen fatigue
             "bp_ip_3d": latest.get("bp_ip_3d", 0.0),
             "bp_games_5d": latest.get("bp_games_5d", 0),
+            "bullpen_ip_3d": latest.get("bullpen_ip_3d", latest.get("bp_ip_3d", 0.0)),
             # 7-game run differential
             "rd_7d": latest.get("rd_7d", 0.0),
+            # Exponentially-weighted recent form
+            "ewm_win_pct": latest.get("ewm_win_pct", latest.get("win_pct", 0.500)),
+            "ewm_rs_per_game": latest.get("ewm_rs_per_game", latest.get("rs_per_game", 4.5)),
+            "ewm_ra_per_game": latest.get("ewm_ra_per_game", latest.get("ra_per_game", 4.5)),
+            "momentum": latest.get("momentum", 0.0),
             # Defensive proxy: ERA-gap (runs allowed vs pitching-predicted)
             # Positive = defense is costing runs, Negative = defense is saving runs
             "def_proxy": (
