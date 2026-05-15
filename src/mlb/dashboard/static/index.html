@@ -77,6 +77,17 @@
   .page-sub{
     color: var(--text-3); font-size: 13px;
   }
+  .date-nav{
+    display:inline-flex; align-items:center; gap:6px;
+  }
+  .date-nav-btn{
+    width:28px; height:28px; border-radius:50%;
+    background: var(--card); border:1px solid var(--line);
+    color: var(--text-2); cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    font-size:14px; transition: background .15s, border-color .15s;
+  }
+  .date-nav-btn:hover{ background:var(--card-2); border-color:var(--accent); color:var(--text); }
   .date-pill{
     display:inline-flex; align-items:center; gap:8px;
     padding: 6px 12px;
@@ -423,10 +434,14 @@
   <div id="tab-predictions">
     <div class="page-head">
       <div>
-        <div class="page-title">Today's Predictions</div>
+        <div class="page-title" id="pred-title">Today's Predictions</div>
         <div class="page-sub" id="pred-sub">Loading...</div>
       </div>
-      <span class="date-pill"><span class="dot" id="refresh-dot"></span> <span id="date-label"></span><span class="last-updated" id="last-updated"></span></span>
+      <span class="date-nav">
+        <button class="date-nav-btn" id="date-prev" title="Previous day">&#8249;</button>
+        <span class="date-pill"><span class="dot" id="refresh-dot"></span> <span id="date-label"></span><span class="last-updated" id="last-updated"></span></span>
+        <button class="date-nav-btn" id="date-next" title="Next day">&#8250;</button>
+      </span>
     </div>
     <div class="grid" id="predictions-grid">
       <div class="loading"><div class="spinner"></div>Loading predictions...</div>
@@ -557,11 +572,35 @@ let pollTimer = null;
 
 const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-function formatDateLabel() {
-  const d = new Date();
+let selectedDate = new Date();
+
+function formatDateLabel(d) {
+  d = d || selectedDate;
   return `${DAYS[d.getDay()]} \u00B7 ${MONTHS[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
 }
+function toISODate(d) {
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function isToday(d) {
+  const now = new Date();
+  return d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth() && d.getDate()===now.getDate();
+}
+function updateDateDisplay() {
+  document.getElementById('date-label').textContent = formatDateLabel(selectedDate);
+  const title = document.getElementById('pred-title');
+  if (title) title.textContent = isToday(selectedDate) ? "Today's Predictions" : formatDateLabel(selectedDate);
+}
 document.getElementById('date-label').textContent = formatDateLabel();
+document.getElementById('date-prev').addEventListener('click', () => {
+  selectedDate.setDate(selectedDate.getDate() - 1);
+  updateDateDisplay();
+  loadPredictions();
+});
+document.getElementById('date-next').addEventListener('click', () => {
+  selectedDate.setDate(selectedDate.getDate() + 1);
+  updateDateDisplay();
+  loadPredictions();
+});
 
 function updateLastUpdated() {
   const now = new Date();
@@ -634,7 +673,8 @@ const fmtERA = e => parseFloat(e).toFixed(2);
 // ── Predictions ─────────────────────────────────────
 
 async function loadPredictions() {
-  const data = await fetchJSON(`${API}/predictions/daily`);
+  const dateParam = toISODate(selectedDate);
+  const data = await fetchJSON(`${API}/predictions/daily?date=${dateParam}`);
   const grid = document.getElementById('predictions-grid');
 
   updateLastUpdated();
