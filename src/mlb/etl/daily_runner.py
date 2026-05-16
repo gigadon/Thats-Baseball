@@ -55,6 +55,7 @@ class DailyRunner:
         self.betting_engine = BettingEngine()
         self.alert_service = AlertService()
         self._sp_rest_cache: dict[int, int] = {}
+        self._sp_form_cache: dict[int, dict[str, float]] = {}
 
     async def run(self, target_date: date | None = None) -> dict[str, Any]:
         """Run the full daily pipeline.
@@ -475,6 +476,8 @@ class DailyRunner:
                 game_log = await self.mlb_client.get_pitcher_game_log(pid, season)
                 rest = self._compute_rest_days(game_log, target_date)
                 self._sp_rest_cache[pid] = rest
+                # Also compute recent form from the same game log
+                self._sp_form_cache[pid] = self._compute_recent_form(game_log, target_date)
                 await asyncio.sleep(0.1)  # Rate limit
             except Exception as e:
                 logger.debug("Failed to fetch game log for SP %d: %s", pid, e)
@@ -484,6 +487,53 @@ class DailyRunner:
             "Got rest days for %d starters", len(self._sp_rest_cache),
         )
         return self._sp_rest_cache
+
+    @staticmethod
+    def _compute_recent_form(
+        game_log: list[dict], target_date: date, n_starts: int = 3
+    ) -> dict[str, float]:
+        """Compute ERA, WHIP, K/9 from the pitcher's last N starts.
+
+        Only considers entries before target_date. Returns empty dict
+        if fewer than 1 qualifying start found.
+        """
+        # Filter to starts before target_date, sorted most recent first
+        past_starts = []
+        for entry in game_log:
+            date_str = entry.get("date", "")
+            if not date_str:
+                continue
+            try:
+                game_date = date.fromisoformat(date_str)
+            except ValueError:
+                continue
+            if game_date >= target_date:
+                continue
+            # Only count starts where pitcher threw at least 3 IP
+            if entry.get("innings_pitched", 0) >= 3.0:
+                past_starts.append(entry)
+
+        if not past_starts:
+            return {}
+
+        # Sort by date descending, take last N
+        past_starts.sort(key=lambda e: e["date"], reverse=True)
+        recent = past_starts[:n_starts]
+
+        total_ip = sum(e.get("innings_pitched", 0) for e in recent)
+        if total_ip == 0:
+            return {}
+
+        total_er = sum(e.get("earned_runs", 0) for e in recent)
+        total_h = sum(e.get("hits", 0) for e in recent)
+        total_bb = sum(e.get("walks", 0) for e in recent)
+        total_k = sum(e.get("strikeouts", 0) for e in recent)
+
+        era = (total_er / total_ip) * 9.0
+        whip = (total_h + total_bb) / total_ip
+        k9 = (total_k / total_ip) * 9.0
+
+        return {"era": round(era, 2), "whip": round(whip, 2), "k9": round(k9, 1)}
 
     @staticmethod
     def _compute_rest_days(game_log: list[dict], target_date: date) -> int:
@@ -515,6 +565,22 @@ class DailyRunner:
     def _get_sp_rest_days(self, pitcher_id: int, target_date: date) -> int:
         """Return cached rest days for a pitcher, defaulting to 5."""
         return self._sp_rest_cache.get(pitcher_id, 5)
+
+    def _get_sp_recent_form(self, pitcher_id: int) -> dict[str, float]:
+        """Return recent form stats (last 3 starts) from cached game log.
+
+        Computes ERA, WHIP, K/9 from the pitcher's most recent 3 game log
+        entries. The game log is already fetched by _fetch_sp_rest_days.
+        Returns empty dict if no data available.
+        """
+        if pitcher_id in self._sp_form_cache:
+            return self._sp_form_cache[pitcher_id]
+
+        # Game log was populated during _fetch_sp_rest_days
+        # Re-use the cached game log by computing from the rest cache data
+        # The game log isn't stored directly, so we return empty and let
+        # the prefetch populate this cache
+        return self._sp_form_cache.get(pitcher_id, {})
 
     async def _fetch_injury_counts(
         self, games: list[dict]
@@ -682,6 +748,19 @@ class DailyRunner:
         features["h_sp_rest_days"] = h_rest
         features["a_sp_rest_days"] = a_rest
         features["diff_sp_rest_days"] = h_rest - a_rest
+
+        # Pitcher recent form (last 3 starts) — derived from game log
+        h_recent = self._get_sp_recent_form(home_sp["player_id"]) if home_sp else {}
+        a_recent = self._get_sp_recent_form(away_sp["player_id"]) if away_sp else {}
+        features["h_sp_recent_era"] = h_recent.get("era", features.get("h_sp_season_era", 4.50))
+        features["a_sp_recent_era"] = a_recent.get("era", features.get("a_sp_season_era", 4.50))
+        features["diff_sp_recent_era"] = features["h_sp_recent_era"] - features["a_sp_recent_era"]
+        features["h_sp_recent_whip"] = h_recent.get("whip", features.get("h_sp_season_whip", 1.30))
+        features["a_sp_recent_whip"] = a_recent.get("whip", features.get("a_sp_season_whip", 1.30))
+        features["diff_sp_recent_whip"] = features["h_sp_recent_whip"] - features["a_sp_recent_whip"]
+        features["h_sp_recent_k9"] = h_recent.get("k9", features.get("h_sp_season_k9", 8.0))
+        features["a_sp_recent_k9"] = a_recent.get("k9", features.get("a_sp_season_k9", 8.0))
+        features["diff_sp_recent_k9"] = features["h_sp_recent_k9"] - features["a_sp_recent_k9"]
 
         # Lineup and platoon features
         lf = (lineup_features or {}).get(game["game_id"], {})

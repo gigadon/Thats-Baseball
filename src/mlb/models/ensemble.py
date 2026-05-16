@@ -72,7 +72,11 @@ class EnsembleModel:
         self.is_fitted = False
         self._oof_metrics: dict[str, ModelMetrics] = {}
 
-    def train(self, X: np.ndarray, y: np.ndarray, feature_names: list[str] | None = None):
+    def train(
+        self, X: np.ndarray, y: np.ndarray,
+        feature_names: list[str] | None = None,
+        sample_weight: np.ndarray | None = None,
+    ):
         """Train the full ensemble.
 
         1. Generate out-of-fold predictions from each base model
@@ -80,6 +84,7 @@ class EnsembleModel:
         3. Retrain each base model on the full dataset
         """
         self.feature_names = feature_names or [f"f{i}" for i in range(X.shape[1])]
+        self._sample_weight = sample_weight
         n_samples = X.shape[0]
         n_models = len(self.base_models)
 
@@ -108,6 +113,7 @@ class EnsembleModel:
         )
 
         # Generate OOF predictions
+        sw = self._sample_weight
         for model_idx, model in enumerate(self.base_models):
             logger.info("Generating OOF predictions for %s", model.name)
             fold_preds = np.zeros(n_samples)
@@ -115,10 +121,11 @@ class EnsembleModel:
             for fold_idx, (train_idx, val_idx) in enumerate(kf.split(X, y)):
                 X_train, X_val = X[train_idx], X[val_idx]
                 y_train = y[train_idx]
+                sw_train = sw[train_idx] if sw is not None else None
 
                 # Clone model for this fold
                 fold_model = model.__class__()
-                fold_model.train(X_train, y_train, self.feature_names)
+                fold_model.train(X_train, y_train, self.feature_names, sample_weight=sw_train)
                 fold_preds[val_idx] = fold_model.predict_proba(X_val)
 
             oof_preds[:, model_idx] = fold_preds
@@ -155,7 +162,7 @@ class EnsembleModel:
 
         # Retrain base models on full dataset
         for model in self.base_models:
-            model.train(X, y, self.feature_names)
+            model.train(X, y, self.feature_names, sample_weight=sw)
             logger.info("%s retrained on full dataset", model.name)
 
     def _train_weighted(self, X: np.ndarray, y: np.ndarray):

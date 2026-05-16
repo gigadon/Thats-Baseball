@@ -180,9 +180,19 @@ class DailyScheduler:
             X = df[feature_cols]
             y = df["home_win"]
 
+            # Compute time-decay sample weights: recent games matter more.
+            # Halflife of 365 days so older seasons still contribute but
+            # recent data gets ~2x weight per year of recency.
+            import numpy as np
+            game_dates = pd.to_datetime(df["game_date"])
+            max_date = game_dates.max()
+            days_ago = (max_date - game_dates).dt.days.values.astype(float)
+            halflife_days = 365
+            sample_weight = np.exp(-np.log(2) * days_ago / halflife_days)
+
             logger.info("Training ensemble on %d features...", len(feature_cols))
             pipeline = TrainingPipeline()
-            ensemble = pipeline.train(X, y)
+            ensemble = pipeline.train(X, y, sample_weight=sample_weight)
             # Pipeline auto-saves to models/ensemble during training.
             # Copy to win_model dir so PredictionService picks them up.
             import shutil
@@ -202,6 +212,9 @@ class DailyScheduler:
             # Send Slack alert
             try:
                 from mlb.alerts import AlertService
+                ens_metrics = pipeline.run_metrics.get("Ensemble", {})
+                auc = ens_metrics.get("auc_roc", 0.0)
+                acc = ens_metrics.get("accuracy", 0.0)
                 alerts = AlertService()
                 await alerts.send_alert(
                     f"Weekly Retrain Complete\n"

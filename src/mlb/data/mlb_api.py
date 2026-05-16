@@ -389,6 +389,10 @@ class MLBApiClient:
                 entries.append({
                     "date": game_date,
                     "innings_pitched": _ip(ip_raw) or 0.0,
+                    "earned_runs": int(stat.get("earnedRuns", 0)),
+                    "hits": int(stat.get("hits", 0)),
+                    "walks": int(stat.get("baseOnBalls", 0)),
+                    "strikeouts": int(stat.get("strikeOuts", 0)),
                 })
             return entries
         except Exception as e:

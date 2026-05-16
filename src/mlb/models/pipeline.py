@@ -64,6 +64,7 @@ class TrainingPipeline:
         features_df: pd.DataFrame,
         target: pd.Series,
         game_dates: pd.Series | None = None,
+        sample_weight: np.ndarray | None = None,
     ) -> EnsembleModel:
         """Run the full training pipeline.
 
@@ -71,6 +72,7 @@ class TrainingPipeline:
             features_df: DataFrame where each row is a game, columns are feature names.
             target: Binary series (1 = home win, 0 = away win).
             game_dates: Optional dates for time-series aware splitting.
+            sample_weight: Optional per-sample weights (e.g., time-decay).
 
         Returns:
             Trained EnsembleModel.
@@ -83,6 +85,16 @@ class TrainingPipeline:
         # 1. Split
         X_train, X_test, y_train, y_test = self._split(features_df, target, game_dates)
         logger.info("Split: %d train, %d test", len(X_train), len(X_test))
+
+        # Compute time-decay sample weights if not provided
+        if sample_weight is not None:
+            # Split weights the same way as data
+            n = len(features_df)
+            n_test = len(y_test)
+            sw_train = sample_weight[: n - n_test]
+            sw_test = sample_weight[n - n_test:]
+        else:
+            sw_train = None
 
         # 2. Impute missing values
         X_train, X_test = self._impute(X_train, X_test)
@@ -97,9 +109,9 @@ class TrainingPipeline:
         )
         logger.info("Selected %d / %d features", len(selected_names), len(feature_names))
 
-        # 5. Train ensemble
+        # 5. Train ensemble (with sample weights)
         self.ensemble = EnsembleModel(self.config.ensemble_config)
-        self.ensemble.train(X_train_selected, y_train, selected_names)
+        self.ensemble.train(X_train_selected, y_train, selected_names, sample_weight=sw_train)
 
         # 6. Evaluate
         metrics = self.ensemble.evaluate(X_test_selected, y_test)

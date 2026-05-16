@@ -109,15 +109,21 @@ class PredictionService:
 
         raw_home_prob = float(detailed["ensemble"][0])
 
-        # Post-hoc calibration: backtest showed the model undervalues home-field
-        # advantage — overconfident on away picks, underconfident on home picks.
-        # Shift predictions toward home slightly (historical home win rate ~53.5%).
-        # The adjustment is stronger near 0.5 (where calibration error is worst)
-        # and tapers off at extremes where the model is already more accurate.
-        home_bias = 0.015  # ~1.5% nudge toward home
-        distance_from_center = abs(raw_home_prob - 0.5)
-        taper = max(0.0, 1.0 - distance_from_center * 4)  # Full effect at 50%, zero at 75%+
-        home_win_prob = raw_home_prob + home_bias * taper
+        # Blend with market odds (Vegas is ~57-58% accurate and encodes info
+        # the model can't see: injuries, lineup decisions, weather, sharp money).
+        # α = model weight. Tuned empirically: model adds most value when it
+        # disagrees with the market, so we weight the market heavily.
+        market_prob = game_fv.features.get("market_home_prob", 0.5)
+        if market_prob != 0.5:  # Real odds available
+            alpha = 0.35  # 35% model, 65% market
+            home_win_prob = alpha * raw_home_prob + (1 - alpha) * market_prob
+        else:
+            # No market data — use model only with home-field calibration
+            home_bias = 0.015
+            distance_from_center = abs(raw_home_prob - 0.5)
+            taper = max(0.0, 1.0 - distance_from_center * 4)
+            home_win_prob = raw_home_prob + home_bias * taper
+
         home_win_prob = max(0.01, min(0.99, home_win_prob))
 
         model_preds = {

@@ -177,6 +177,9 @@ class TrainingDataBuilder:
         # Build lineup recent form (7-day rolling OPS)
         lineup_recent = self._build_lineup_recent_form(batting_df)
 
+        # Build SP recent form (rolling 3-start ERA/WHIP/K9)
+        sp_recent = self._build_sp_recent_form(pitching_df)
+
         # Build bullpen availability (per-pitcher usage tracking)
         bp_avail = self._build_bullpen_availability(pitching_df)
 
@@ -297,6 +300,19 @@ class TrainingDataBuilder:
             row["h_sp_k_minus_bb"] = h_k_minus_bb
             row["a_sp_k_minus_bb"] = a_k_minus_bb
             row["diff_sp_k_minus_bb"] = h_k_minus_bb - a_k_minus_bb
+
+            # SP recent form (rolling 3-start ERA/WHIP/K9)
+            h_sp_recent = sp_recent.get((game["game_id"], home))
+            a_sp_recent = sp_recent.get((game["game_id"], away))
+            row["h_sp_recent_era"] = h_sp_recent["sp_recent_era"] if h_sp_recent else row.get("h_sp_season_era", 4.50)
+            row["a_sp_recent_era"] = a_sp_recent["sp_recent_era"] if a_sp_recent else row.get("a_sp_season_era", 4.50)
+            row["diff_sp_recent_era"] = row["h_sp_recent_era"] - row["a_sp_recent_era"]
+            row["h_sp_recent_whip"] = h_sp_recent["sp_recent_whip"] if h_sp_recent else row.get("h_sp_season_whip", 1.30)
+            row["a_sp_recent_whip"] = a_sp_recent["sp_recent_whip"] if a_sp_recent else row.get("a_sp_season_whip", 1.30)
+            row["diff_sp_recent_whip"] = row["h_sp_recent_whip"] - row["a_sp_recent_whip"]
+            row["h_sp_recent_k9"] = h_sp_recent["sp_recent_k9"] if h_sp_recent else row.get("h_sp_season_k9", 8.0)
+            row["a_sp_recent_k9"] = a_sp_recent["sp_recent_k9"] if a_sp_recent else row.get("a_sp_season_k9", 8.0)
+            row["diff_sp_recent_k9"] = row["h_sp_recent_k9"] - row["a_sp_recent_k9"]
 
             # Pitcher rest days (days since SP last started a game)
             h_sp_pid = sp_lookup.get((game["game_id"], home))
@@ -615,6 +631,72 @@ class TrainingDataBuilder:
                 prev["k"] += int(row["strikeouts_recorded"])
 
         logger.info("Built SP season stats for %d game-team pairs", len(result))
+        return result
+
+    def _build_sp_recent_form(
+        self, pitching_df: pd.DataFrame, n_starts: int = 3
+    ) -> dict[tuple, dict[str, float]]:
+        """Build rolling N-start ERA/WHIP/K9 for each SP entering each game.
+
+        Returns {(game_id, team_id): {"sp_recent_era": ..., "sp_recent_whip": ..., "sp_recent_k9": ...}}
+        Only includes starts where the pitcher threw 3+ IP (quality starts filter).
+        """
+        if pitching_df.empty:
+            return {}
+
+        # Identify SP (highest IP) for each (game_id, team_id)
+        sp_lookup: dict[tuple, int] = {}
+        for (gid, tid), grp in pitching_df.groupby(["game_id", "team_id"]):
+            sp_row = grp.nlargest(1, "innings_pitched").iloc[0]
+            sp_lookup[(gid, tid)] = sp_row["player_id"]
+
+        # Process chronologically, tracking each pitcher's recent starts
+        sorted_pit = pitching_df.sort_values("game_date")
+        # pitcher_id -> deque of last N starts: [(ip, er, h, bb, k), ...]
+        from collections import deque
+        pitcher_history: dict[int, deque] = {}
+        result: dict[tuple, dict[str, float]] = {}
+
+        for _, row in sorted_pit.iterrows():
+            pid = row["player_id"]
+            gid = row["game_id"]
+            tid = row["team_id"]
+
+            # Only process if this pitcher was the SP for this game
+            if sp_lookup.get((gid, tid)) != pid:
+                continue
+
+            ip = float(row["innings_pitched"])
+
+            # Record pre-game recent form (from previous starts)
+            history = pitcher_history.get(pid)
+            if history and len(history) > 0:
+                total_ip = sum(s[0] for s in history)
+                if total_ip > 0:
+                    total_er = sum(s[1] for s in history)
+                    total_h = sum(s[2] for s in history)
+                    total_bb = sum(s[3] for s in history)
+                    total_k = sum(s[4] for s in history)
+                    result[(gid, tid)] = {
+                        "sp_recent_era": round((total_er / total_ip) * 9.0, 2),
+                        "sp_recent_whip": round((total_h + total_bb) / total_ip, 2),
+                        "sp_recent_k9": round((total_k / total_ip) * 9.0, 1),
+                    }
+
+            # Update history AFTER recording pre-game stats
+            # Only count starts with 3+ IP
+            if ip >= 3.0:
+                if pid not in pitcher_history:
+                    pitcher_history[pid] = deque(maxlen=n_starts)
+                pitcher_history[pid].append((
+                    ip,
+                    int(row["earned_runs"]),
+                    int(row["hits_allowed"]),
+                    int(row["walks_allowed"]),
+                    int(row["strikeouts_recorded"]),
+                ))
+
+        logger.info("Built SP recent form for %d game-team pairs", len(result))
         return result
 
     def _build_sp_lookup(

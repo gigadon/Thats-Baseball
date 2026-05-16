@@ -55,11 +55,18 @@ class BaseModel(ABC):
     def _create_model(self) -> Any:
         """Create the underlying model instance."""
 
-    def train(self, X: np.ndarray, y: np.ndarray, feature_names: list[str] | None = None):
+    def train(
+        self, X: np.ndarray, y: np.ndarray,
+        feature_names: list[str] | None = None,
+        sample_weight: np.ndarray | None = None,
+    ):
         """Train the model on features X and binary labels y."""
         self.feature_names = feature_names or [f"f{i}" for i in range(X.shape[1])]
         self.model = self._create_model()
-        self.model.fit(X, y)
+        if sample_weight is not None:
+            self.model.fit(X, y, sample_weight=sample_weight)
+        else:
+            self.model.fit(X, y)
         self.is_fitted = True
         logger.info("%s trained on %d samples, %d features", self.name, X.shape[0], X.shape[1])
 
@@ -293,6 +300,18 @@ class NeuralNetModel(BaseModel):
             ("scaler", StandardScaler()),
             ("mlp", MLPClassifier(**self.config.params)),
         ])
+
+    def train(
+        self, X: np.ndarray, y: np.ndarray,
+        feature_names: list[str] | None = None,
+        sample_weight: np.ndarray | None = None,
+    ):
+        """Train ignoring sample_weight (MLPClassifier doesn't support it)."""
+        self.feature_names = feature_names or [f"f{i}" for i in range(X.shape[1])]
+        self.model = self._create_model()
+        self.model.fit(X, y)
+        self.is_fitted = True
+        logger.info("%s trained on %d samples, %d features", self.name, X.shape[0], X.shape[1])
 
     def feature_importance(self) -> dict[str, float]:
         """MLP does not expose feature_importances_; return empty dict."""
