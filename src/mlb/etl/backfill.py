@@ -193,7 +193,7 @@ class HistoricalBackfill:
         logger.info("Wrote %d batting rows, %d pitching rows", len(batting_rows), len(pitching_rows))
 
     def _write_games_csv(self, games: list[dict], season: int):
-        """Write games to CSV."""
+        """Write games to CSV, merging with existing data."""
         if not games:
             return
 
@@ -203,21 +203,52 @@ class HistoricalBackfill:
             "home_score", "away_score", "status",
         ]
 
+        # Load existing and merge by game_id (new data wins for updated scores/status)
+        existing: dict[str, dict] = {}
+        if path.exists():
+            with open(path, newline="") as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    existing[row["game_id"]] = row
+
+        for g in games:
+            existing[str(g["game_id"])] = {k: g.get(k, "") for k in fields}
+
+        all_games = sorted(existing.values(), key=lambda r: (r.get("game_date", ""), r.get("game_id", "")))
+
         with open(path, "w", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=fields, extrasaction="ignore")
             writer.writeheader()
-            writer.writerows(games)
+            writer.writerows(all_games)
 
         self._games_written = len(games)
-        logger.info("Wrote %d games to %s", len(games), path)
+        logger.info("Wrote %d games (%d total) to %s", len(games), len(all_games), path)
 
     def _write_csv(self, path: Path, rows: list[dict], fields):
+        """Write rows to CSV, merging with existing data by (game_id, player_id)."""
         if not rows:
             return
+        fields = list(fields)
+
+        # Load existing and merge
+        existing: dict[tuple, dict] = {}
+        if path.exists():
+            with open(path, newline="") as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    key = (row.get("game_id", ""), row.get("player_id", ""))
+                    existing[key] = row
+
+        for r in rows:
+            key = (str(r.get("game_id", "")), str(r.get("player_id", "")))
+            existing[key] = {k: r.get(k, "") for k in fields}
+
+        all_rows = sorted(existing.values(), key=lambda r: (r.get("game_date", ""), r.get("game_id", "")))
+
         with open(path, "w", newline="") as f:
-            writer = csv.DictWriter(f, fieldnames=list(fields))
+            writer = csv.DictWriter(f, fieldnames=fields)
             writer.writeheader()
-            writer.writerows(rows)
+            writer.writerows(all_rows)
 
     def _setup_dirs(self, season: int):
         self.data_dir.mkdir(parents=True, exist_ok=True)

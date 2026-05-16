@@ -41,6 +41,11 @@ class PipelineConfig:
     retrain_interval: int = 50  # Retrain every N new games
     model_dir: str = "models"
     ensemble_config: EnsembleConfig = field(default_factory=EnsembleConfig)
+    # Features that MUST be included regardless of importance score
+    forced_features: list[str] = field(default_factory=lambda: [
+        "market_home_prob", "market_away_prob", "market_total",
+        "elo_diff", "h_elo", "a_elo",
+    ])
 
 
 class TrainingPipeline:
@@ -492,16 +497,24 @@ class TrainingPipeline:
 
         # Keep features above threshold, up to max
         keep_mask = normalized >= self.config.feature_selection_threshold
-        keep_indices = np.where(keep_mask)[0]
+        keep_indices = set(np.where(keep_mask)[0].tolist())
 
-        # If too many, take top N by importance
+        # Force critical features in regardless of importance
+        for fname in self.config.forced_features:
+            if fname in feature_names:
+                keep_indices.add(feature_names.index(fname))
+
+        keep_indices = sorted(keep_indices)
+
+        # If too many, take top N by importance (but always keep forced)
         if len(keep_indices) > self.config.max_features:
-            top_idx = np.argsort(normalized)[::-1][: self.config.max_features]
-            keep_indices = np.sort(top_idx)
+            forced_idx = {feature_names.index(f) for f in self.config.forced_features if f in feature_names}
+            top_idx = set(np.argsort(normalized)[::-1][: self.config.max_features].tolist())
+            keep_indices = sorted(top_idx | forced_idx)
 
         # Always keep at least 20 features
         if len(keep_indices) < 20:
-            keep_indices = np.argsort(normalized)[::-1][:20]
+            keep_indices = sorted(np.argsort(normalized)[::-1][:20].tolist())
 
         self.selected_features = [feature_names[i] for i in keep_indices]
 

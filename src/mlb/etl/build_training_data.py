@@ -430,6 +430,26 @@ class TrainingDataBuilder:
             row["a_bullpen_ip_3d"] = away_feat.get("bullpen_ip_3d", 6.0)
             row["diff_bullpen_ip_3d"] = row["h_bullpen_ip_3d"] - row["a_bullpen_ip_3d"]
 
+            # ── Feature 8: Injury/IL Signals ──
+            # Historical IL data not available in CSVs — use neutral defaults.
+            # The model learns this feature from live predictions where real IL data is injected.
+            row["h_il_count"] = 0.0
+            row["a_il_count"] = 0.0
+            row["diff_il_count"] = 0.0
+
+            # ── Feature 7: Interaction Features (mismatch detection) ──
+            # Elo × SP quality: big Elo edge + strong SP = dominant game
+            elo_gap = row.get("elo_diff", 0.0) / 100.0  # Normalize to ~±2 range
+            sp_gap = row.get("diff_sp_season_era", 0.0)  # Negative = home SP better
+            bp_gap = row.get("diff_bp_freshness", 0.0)
+            row["interact_elo_x_sp"] = elo_gap * (-sp_gap)  # Both favor home → positive
+            row["interact_elo_x_bp"] = elo_gap * bp_gap
+            row["interact_sp_x_bp"] = (-sp_gap) * bp_gap
+            # Triple interaction: all three align = extreme mismatch
+            row["interact_elo_sp_bp"] = elo_gap * (-sp_gap) * bp_gap
+            # Momentum × Elo: hot team with Elo edge
+            row["interact_elo_x_momentum"] = elo_gap * row.get("diff_momentum", 0.0)
+
             feature_rows.append(row)
 
             # Update Elo AFTER recording pre-game values

@@ -108,6 +108,9 @@ class DailyRunner:
                 scheduled, target_date
             )
 
+            # 4c. Fetch IL counts for all teams in today's games
+            injury_counts = await self._fetch_injury_counts(scheduled)
+
             # 5. Fetch weather for home stadiums
             home_teams = list({g["home_team_id"] for g in scheduled})
             weather_data = await self.weather_client.get_bulk_weather(home_teams)
@@ -148,6 +151,7 @@ class DailyRunner:
                         sp_stats=sp_stats,
                         lineup_features=lineup_features,
                         game_odds=matched_odds,
+                        injury_counts=injury_counts,
                     )
                     if pred:
                         predictions.append(pred)
@@ -512,6 +516,37 @@ class DailyRunner:
         """Return cached rest days for a pitcher, defaulting to 5."""
         return self._sp_rest_cache.get(pitcher_id, 5)
 
+    async def _fetch_injury_counts(
+        self, games: list[dict]
+    ) -> dict[str, int]:
+        """Fetch IL player count for each team in today's games.
+
+        Returns {team_abbrev: number_of_players_on_IL}.
+        """
+        from mlb.data.mlb_api import TEAM_IDS
+
+        teams = set()
+        for g in games:
+            teams.add(g["home_team_id"])
+            teams.add(g["away_team_id"])
+
+        counts: dict[str, int] = {}
+        for team_abbrev in teams:
+            team_numeric_id = TEAM_IDS.get(team_abbrev)
+            if not team_numeric_id:
+                counts[team_abbrev] = 0
+                continue
+            try:
+                injured = await self.mlb_client.get_injuries(team_numeric_id)
+                counts[team_abbrev] = len(injured)
+                await asyncio.sleep(0.1)
+            except Exception:
+                counts[team_abbrev] = 0
+
+        logger.info("Fetched IL counts for %d teams (avg %.1f on IL)",
+                    len(counts), sum(counts.values()) / max(len(counts), 1))
+        return counts
+
     def _predict_game(
         self,
         game: dict,
@@ -521,6 +556,7 @@ class DailyRunner:
         sp_stats: dict[int, dict] | None = None,
         lineup_features: dict[str, dict[str, float]] | None = None,
         game_odds: dict | None = None,
+        injury_counts: dict[str, int] | None = None,
     ) -> GamePrediction | None:
         """Generate a prediction for a single game."""
         home = game["home_team_id"]
@@ -744,6 +780,24 @@ class DailyRunner:
         features["h_bullpen_ip_3d"] = home_feat.get("bullpen_ip_3d", home_feat.get("bp_ip_3d", 6.0))
         features["a_bullpen_ip_3d"] = away_feat.get("bullpen_ip_3d", away_feat.get("bp_ip_3d", 6.0))
         features["diff_bullpen_ip_3d"] = features["h_bullpen_ip_3d"] - features["a_bullpen_ip_3d"]
+
+        # ── Feature 7: Interaction Features (mismatch detection) ──
+        elo_gap = features.get("elo_diff", 0.0) / 100.0
+        sp_gap = features.get("diff_sp_season_era", 0.0)
+        bp_gap = features.get("diff_bp_freshness", 0.0)
+        features["interact_elo_x_sp"] = elo_gap * (-sp_gap)
+        features["interact_elo_x_bp"] = elo_gap * bp_gap
+        features["interact_sp_x_bp"] = (-sp_gap) * bp_gap
+        features["interact_elo_sp_bp"] = elo_gap * (-sp_gap) * bp_gap
+        features["interact_elo_x_momentum"] = elo_gap * features.get("diff_momentum", 0.0)
+
+        # ── Feature 8: Injury/IL Signals ──
+        ic = injury_counts or {}
+        h_il = ic.get(home, 0)
+        a_il = ic.get(away, 0)
+        features["h_il_count"] = float(h_il)
+        features["a_il_count"] = float(a_il)
+        features["diff_il_count"] = float(h_il - a_il)
 
         # Compute composite scores from features
         home_off_score = _compute_offense_score(home_feat)

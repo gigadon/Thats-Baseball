@@ -107,7 +107,19 @@ class PredictionService:
         # Get detailed predictions from each model
         detailed = self.pipeline.predict_detailed(features_df)
 
-        home_win_prob = float(detailed["ensemble"][0])
+        raw_home_prob = float(detailed["ensemble"][0])
+
+        # Post-hoc calibration: backtest showed the model undervalues home-field
+        # advantage — overconfident on away picks, underconfident on home picks.
+        # Shift predictions toward home slightly (historical home win rate ~53.5%).
+        # The adjustment is stronger near 0.5 (where calibration error is worst)
+        # and tapers off at extremes where the model is already more accurate.
+        home_bias = 0.015  # ~1.5% nudge toward home
+        distance_from_center = abs(raw_home_prob - 0.5)
+        taper = max(0.0, 1.0 - distance_from_center * 4)  # Full effect at 50%, zero at 75%+
+        home_win_prob = raw_home_prob + home_bias * taper
+        home_win_prob = max(0.01, min(0.99, home_win_prob))
+
         model_preds = {
             name: float(vals[0])
             for name, vals in detailed.items()

@@ -459,6 +459,35 @@ class MLBApiClient:
             })
         return players
 
+    async def get_injuries(self, team_id: int) -> list[dict[str, Any]]:
+        """Fetch current injuries/IL for a team.
+
+        Uses /teams/{id}/roster?rosterType=depthChart and checks status,
+        or the injuries endpoint at /injuries.
+        Returns list of {"player_id", "name", "position", "injury", "status"}.
+        """
+        try:
+            data = await self._get(
+                f"/teams/{team_id}/roster",
+                params={"rosterType": "fullSeason"},
+            )
+            injured = []
+            for entry in data.get("roster", []):
+                status = entry.get("status", {}).get("code", "A")
+                if status in ("D10", "D15", "D60"):  # IL stints
+                    person = entry.get("person", {})
+                    pos = entry.get("position", {})
+                    injured.append({
+                        "player_id": person.get("id"),
+                        "name": person.get("fullName", ""),
+                        "position": pos.get("abbreviation", ""),
+                        "status": status,
+                    })
+            return injured
+        except Exception as e:
+            logger.debug("Injuries fetch failed for team %d: %s", team_id, e)
+            return []
+
     # ── Lineups ────────────────────────────────────────────
 
     async def get_game_lineups(
