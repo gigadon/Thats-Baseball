@@ -34,7 +34,7 @@ class DailyScheduler:
         model_dir: Path = Path("models"),
         predict_hour: int = 13,   # 1 PM ET
         backfill_hour: int = 6,   # 6 AM ET
-        settle_hour: int = 23,    # 11 PM ET
+        settle_hour: int = 1,     # 1 AM ET
         retrain_day: int = 0,     # 0=Monday
         timezone: str = "America/New_York",
     ):
@@ -78,9 +78,11 @@ class DailyScheduler:
                 self._last_predict = today
 
             # Run settlement if it's past settle_hour and hasn't run today
+            # At 1 AM we settle yesterday's games (all games should be final by then)
             if now.hour >= self.settle_hour and self._last_settle != today:
-                logger.info("Starting scheduled settlement...")
-                await self._run_settlement(today)
+                yesterday = today - timedelta(days=1)
+                logger.info("Starting scheduled settlement for %s...", yesterday)
+                await self._run_settlement(yesterday)
                 self._last_settle = today
 
             # Weekly retrain: run on retrain_day after settlement
@@ -248,7 +250,7 @@ def main():
     parser.add_argument("--run-now", action="store_true", help="Run immediately, then schedule")
     parser.add_argument("--predict-hour", type=int, default=13, help="Hour to run predictions (0-23)")
     parser.add_argument("--backfill-hour", type=int, default=6, help="Hour to run backfill (0-23)")
-    parser.add_argument("--settle-hour", type=int, default=23, help="Hour to run settlement (0-23)")
+    parser.add_argument("--settle-hour", type=int, default=1, help="Hour to run settlement (0-23)")
     parser.add_argument("--data-dir", type=str, default="data")
     parser.add_argument("--model-dir", type=str, default="models")
     args = parser.parse_args()
