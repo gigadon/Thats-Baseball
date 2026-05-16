@@ -50,20 +50,26 @@ async def settle_day(
         logger.info("No bets to settle for %s", date_str)
         return None
 
-    # Fetch final scores
-    client = OddsApiClient()
-    days_from = (date.today() - target_date).days + 1
-    scores = await client.get_scores(days_from=min(days_from, 3))
+    # Fetch final scores — try Odds API for recent, fall back to local CSV
+    score_map: dict[tuple[str, str], dict] = {}
+    days_ago = (date.today() - target_date).days
 
-    if not scores:
+    if days_ago <= 3:
+        try:
+            client = OddsApiClient()
+            scores = await client.get_scores(days_from=days_ago + 1)
+            for s in scores:
+                score_map[(s["home_team"], s["away_team"])] = s
+        except Exception as e:
+            logger.debug("Odds API scores failed: %s", e)
+
+    # Fall back to local games CSV if needed
+    if not score_map:
+        score_map = _load_scores_from_csv(target_date, data_dir)
+
+    if not score_map:
         logger.warning("No scores available for %s", date_str)
         return None
-
-    # Build lookup by (home_team, away_team)
-    score_map: dict[tuple[str, str], dict] = {}
-    for s in scores:
-        key = (s["home_team"], s["away_team"])
-        score_map[key] = s
 
     # Settle each bet
     settled_bets = []
@@ -201,6 +207,37 @@ def _compute_summary(
         "cumulative_pnl": cumulative_pnl,
         "max_drawdown": round(max_dd, 4),
     }
+
+
+def _load_scores_from_csv(
+    target_date: date, data_dir: Path
+) -> dict[tuple[str, str], dict]:
+    """Load game scores from local CSV as fallback for Odds API."""
+    import pandas as pd
+
+    csv_path = data_dir / f"games_{target_date.year}.csv"
+    if not csv_path.exists():
+        return {}
+
+    df = pd.read_csv(csv_path)
+    day_games = df[
+        (df["game_date"] == target_date.isoformat()) & (df["status"] == "Final")
+    ]
+
+    score_map: dict[tuple[str, str], dict] = {}
+    for _, row in day_games.iterrows():
+        key = (row["home_team_id"], row["away_team_id"])
+        score_map[key] = {
+            "home_team": row["home_team_id"],
+            "away_team": row["away_team_id"],
+            "home_score": int(row["home_score"]),
+            "away_score": int(row["away_score"]),
+            "completed": True,
+        }
+
+    if score_map:
+        logger.info("Loaded %d scores from CSV for %s", len(score_map), target_date)
+    return score_map
 
 
 # ── File I/O ─────────────────────────────────────────────────

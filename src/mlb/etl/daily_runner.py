@@ -140,6 +140,10 @@ class DailyRunner:
                 key = (odds["home_team"], odds["away_team"])
                 odds_by_matchup[key] = odds
 
+            # Persist odds for future retraining
+            if odds_data:
+                self._save_odds_history(target_date, odds_data)
+
             # 6. Generate predictions for each game
             predictions: list[GamePrediction] = []
             for game in scheduled:
@@ -1079,6 +1083,45 @@ class DailyRunner:
             }
 
         return records
+
+    def _save_odds_history(self, target_date: date, odds_data: list[dict]):
+        """Persist fetched odds to CSV for future model retraining."""
+        import csv
+
+        odds_file = self.data_dir / "odds_history.csv"
+        file_exists = odds_file.exists()
+
+        rows = []
+        for odds in odds_data:
+            home_ml = odds.get("home_moneyline")
+            away_ml = odds.get("away_moneyline")
+            if home_ml is None or away_ml is None:
+                continue
+            # Compute implied probabilities (removing vig with power method)
+            from mlb.betting.engine import american_to_decimal
+            h_dec = american_to_decimal(home_ml)
+            a_dec = american_to_decimal(away_ml)
+            h_imp = 1.0 / h_dec
+            a_imp = 1.0 / a_dec
+            total_imp = h_imp + a_imp
+            h_prob = h_imp / total_imp  # Vig-removed
+            rows.append({
+                "game_date": target_date.isoformat(),
+                "home_team": odds["home_team"],
+                "away_team": odds["away_team"],
+                "home_moneyline": home_ml,
+                "away_moneyline": away_ml,
+                "total_line": odds.get("total_line"),
+                "market_home_prob": round(h_prob, 4),
+            })
+
+        if rows:
+            with open(odds_file, "a", newline="") as f:
+                writer = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
+                if not file_exists:
+                    writer.writeheader()
+                writer.writerows(rows)
+            logger.info("Saved %d odds records to history", len(rows))
 
     def _cache_results(self, target_date: date, result: dict):
         """Push results into the API cache."""

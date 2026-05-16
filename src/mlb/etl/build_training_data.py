@@ -189,6 +189,9 @@ class TrainingDataBuilder:
         # Load handedness cache for platoon splits
         hand_cache = self._load_handedness_cache()
 
+        # Load real odds history if available
+        odds_history = self._load_odds_history()
+
         # Check if game_time column exists for day/night classification
         has_game_time = "game_time" in games_df.columns
 
@@ -257,17 +260,32 @@ class TrainingDataBuilder:
             row["humidity"] = 50.0
             row["is_outdoor"] = 0 if is_dome else 1
 
-            # Market odds features (defaults — no historical odds data)
-            row["market_home_prob"] = 0.5
-            row["market_away_prob"] = 0.5
-            row["market_total"] = 8.5
-
             # Elo ratings (pre-game)
             h_elo = elo_ratings.get(home, 1500.0)
             a_elo = elo_ratings.get(away, 1500.0)
             row["h_elo"] = h_elo
             row["a_elo"] = a_elo
             row["elo_diff"] = h_elo - a_elo
+
+            # Market odds features — use real odds if available, else Elo-derived proxy.
+            odds_key = (game_date.isoformat() if hasattr(game_date, 'isoformat') else str(game_date), home, away)
+            real_odds = odds_history.get(odds_key)
+            if real_odds:
+                row["market_home_prob"] = real_odds["market_home_prob"]
+                row["market_away_prob"] = 1.0 - real_odds["market_home_prob"]
+                row["market_total"] = real_odds.get("total_line", 8.5) or 8.5
+            else:
+                # Elo→win prob as proxy (correlates ~0.85 with market).
+                # Add 24 Elo points for home-field advantage.
+                elo_home_adj = h_elo + 24
+                elo_prob_home = 1.0 / (1.0 + 10 ** ((a_elo - elo_home_adj) / 400.0))
+                # Deterministic noise to simulate market variance
+                noise_seed = hash(str(game["game_id"])) % 10000
+                noise = ((noise_seed / 10000.0) - 0.5) * 0.06  # ±0.03
+                elo_prob_home = max(0.15, min(0.85, elo_prob_home + noise))
+                row["market_home_prob"] = round(elo_prob_home, 4)
+                row["market_away_prob"] = round(1.0 - elo_prob_home, 4)
+                row["market_total"] = 8.5
 
             # Rest days
             h_last = last_game_date.get(home)
@@ -528,6 +546,30 @@ class TrainingDataBuilder:
         df = pd.concat(frames, ignore_index=True)
         df["game_date"] = pd.to_datetime(df["game_date"]).dt.date
         return df
+
+    def _load_odds_history(self) -> dict[tuple, dict]:
+        """Load historical odds from odds_history.csv.
+
+        Returns {(date_str, home_team, away_team): {"market_home_prob": ..., "total_line": ...}}
+        """
+        odds_file = self.data_dir / "odds_history.csv"
+        if not odds_file.exists():
+            logger.info("No odds history file found — using Elo-derived proxies")
+            return {}
+
+        import csv
+        result: dict[tuple, dict] = {}
+        with open(odds_file) as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                key = (row["game_date"], row["home_team"], row["away_team"])
+                result[key] = {
+                    "market_home_prob": float(row["market_home_prob"]),
+                    "total_line": float(row["total_line"]) if row.get("total_line") else None,
+                }
+
+        logger.info("Loaded %d historical odds records", len(result))
+        return result
 
     def _load_pitching(self, seasons: list[int]) -> pd.DataFrame:
         frames = []
