@@ -444,6 +444,7 @@
     <nav class="tabs">
       <button class="tab active" onclick="showTab('predictions', this)">Today</button>
       <button class="tab" onclick="showTab('rankings', this)">Rankings</button>
+      <button class="tab" onclick="showTab('players', this)">Players</button>
       <button class="tab" onclick="showTab('betting', this)">Bets</button>
       <button class="tab" onclick="showTab('analytics', this)">Performance</button>
     </nav>
@@ -482,18 +483,55 @@
         <div class="rankings-title">Power Rankings</div>
         <div class="rankings-sub" id="rankings-sub">30 of 30 teams</div>
       </div>
-      <div class="metric-btns" id="metric-btns"></div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <div class="metric-btns" id="metric-btns"></div>
+        <button class="filter-btn" id="compare-btn" style="font-weight:600;">Compare</button>
+      </div>
     </div>
     <div class="rankings-filters" id="rankings-filters"></div>
+    <!-- Team Comparison -->
+    <div id="compare-section" class="section" style="display:none;margin-bottom:20px;">
+      <div class="table-card" style="padding:20px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+          <h2 style="font-size:16px;font-weight:700;">Team Comparison</h2>
+          <button class="filter-btn" id="close-compare" style="font-size:11px;">Close</button>
+        </div>
+        <div style="display:flex;gap:12px;align-items:center;margin-bottom:18px;flex-wrap:wrap;">
+          <select id="compare-a" class="search-input" style="width:160px;padding-left:12px;cursor:pointer;"></select>
+          <span style="color:var(--text-3);font-weight:600;">vs</span>
+          <select id="compare-b" class="search-input" style="width:160px;padding-left:12px;cursor:pointer;"></select>
+          <button class="metric-btn active" id="compare-go" style="padding:7px 18px;">Compare</button>
+        </div>
+        <div id="compare-result"></div>
+      </div>
+    </div>
+
     <div class="rankings-layout">
       <div class="rankings-table-wrap">
         <table class="rankings-table" id="rankings-table">
           <thead><tr id="rankings-thead"></tr></thead>
-          <tbody id="rankings-body"><tr><td colspan="12" class="loading">Loading rankings...</td></tr></tbody>
+          <tbody id="rankings-body"><tr><td colspan="13" class="loading">Loading rankings...</td></tr></tbody>
         </table>
         <div class="table-footer" id="rankings-footer" style="display:none;"></div>
       </div>
       <aside class="team-drawer" id="team-drawer"></aside>
+    </div>
+  </div>
+
+  <!-- PLAYERS TAB -->
+  <div id="tab-players" class="hidden">
+    <div class="rankings-header">
+      <div>
+        <div class="rankings-title">Player Rankings</div>
+        <div class="rankings-sub" id="players-sub">Select a position</div>
+      </div>
+    </div>
+    <div class="metric-btns" id="position-btns" style="margin-bottom:16px;flex-wrap:wrap;display:flex;gap:6px;"></div>
+    <div class="rankings-table-wrap">
+      <table class="rankings-table" id="players-table">
+        <thead><tr id="players-thead"></tr></thead>
+        <tbody id="players-body"><tr><td colspan="8" class="loading">Select a position above</td></tr></tbody>
+      </table>
     </div>
   </div>
 
@@ -543,6 +581,18 @@
         <div class="table-card-header"><h2>Cumulative P&L</h2></div>
         <div id="pnl-chart" style="padding:16px; min-height:200px;">
           <div class="loading">No settlement data yet</div>
+        </div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="table-card">
+        <div class="table-card-header"><h2>Daily Breakdown</h2></div>
+        <div id="daily-pnl-chart" style="padding:16px; min-height:160px;"></div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Date</th><th>Bets</th><th>Won</th><th>Win Rate</th><th>Daily P&L</th><th>Cumulative</th><th>ROI</th></tr></thead>
+            <tbody id="daily-pnl-body"><tr><td colspan="7" class="loading">No daily data yet</td></tr></tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -604,6 +654,7 @@ function renderDateStrip() {
 let activeFilter = 'all';
 let expandedCard = null;
 let currentGames = [];
+let currentSort = 'time';
 
 function renderFilters() {
   const group = document.getElementById('filter-group');
@@ -635,7 +686,7 @@ function filterGame(g) {
   if (activeFilter === 'value') return (g.edge_pct || 0) >= 3;
   if (activeFilter === 'high') return (g.confidence || 0) >= 50;
   if (activeFilter === 'bets') return !!g.bet_status;
-  if (activeFilter === 'live') return false; // no live data from API yet
+  if (activeFilter === 'live') return g.status === 'Live' || g.status === 'In Progress';
   return true;
 }
 
@@ -685,9 +736,17 @@ function updateFilterCounts() {
   });
 }
 
+function sortGames(games) {
+  const sorted = [...games];
+  if (currentSort === 'confidence') sorted.sort((a, b) => (b.confidence || 0) - (a.confidence || 0));
+  else if (currentSort === 'edge') sorted.sort((a, b) => (b.edge_pct || 0) - (a.edge_pct || 0));
+  // 'time' is default order from API
+  return sorted;
+}
+
 function renderGameCards() {
   const grid = document.getElementById('predictions-grid');
-  const visible = currentGames.filter(filterGame);
+  const visible = sortGames(currentGames.filter(filterGame));
 
   if (visible.length === 0) {
     grid.innerHTML = `<div class="loading">No predictions available${activeFilter !== 'all' ? ' for this filter' : '. Run the daily pipeline to generate predictions.'}.</div>`;
@@ -887,7 +946,7 @@ const TIER_ORDER = ['elite','contender','average','below_average','rebuilding'];
 
 function initRankingsUI() {
   // Metric buttons
-  const metrics = ['Power','Offense','Pitching','Defense','Bullpen'];
+  const metrics = ['Power','Offense','Pitching','Defense','Bullpen','Momentum'];
   document.getElementById('metric-btns').innerHTML = metrics.map(m => {
     const key = m.toLowerCase();
     return `<button class="metric-btn${_rankingsMetric===key?' active':''}" data-metric="${key}">${m}</button>`;
@@ -942,7 +1001,7 @@ async function loadRankings(type) {
   type = type || _rankingsMetric;
   const data = await fetchJSON(`${API}/rankings/teams?type=${type}`);
   if (!data || !data.rankings || data.rankings.length === 0) {
-    document.getElementById('rankings-body').innerHTML = `<tr><td colspan="12" class="loading">No rankings available yet.</td></tr>`;
+    document.getElementById('rankings-body').innerHTML = `<tr><td colspan="13" class="loading">No rankings available yet.</td></tr>`;
     document.getElementById('team-drawer').innerHTML = '';
     return;
   }
@@ -950,6 +1009,7 @@ async function loadRankings(type) {
   if (!_selectedTeam && _rankingsData.length) _selectedTeam = _rankingsData[0].team_id;
   _rankingsSort = { key: 'rank', dir: 'asc' };
   initRankingsUI();
+  initCompareUI();
   _renderRankingsTable();
   _renderRankings();
 }
@@ -994,6 +1054,7 @@ function _renderRankingsTable() {
     { id: 'pitching_score', label: 'PIT', align: 'right' },
     { id: 'defense_score', label: 'DEF', align: 'right' },
     { id: 'bullpen_score', label: 'BP', align: 'right' },
+    { id: 'momentum_score', label: 'MTM', align: 'right' },
     { id: 'record', label: 'Record', align: 'left' },
     { id: 'last_10', label: 'L10', align: 'left' },
     { id: 'streak', label: 'Streak', align: 'left' },
@@ -1016,11 +1077,11 @@ function _renderRankingsTable() {
   });
 
   // Color map for cells
-  const barColors = { offense_score: '#7faaf7', pitching_score: '#5be899', defense_score: '#f5b14a', bullpen_score: '#c084fc' };
+  const barColors = { offense_score: '#7faaf7', pitching_score: '#5be899', defense_score: '#f5b14a', bullpen_score: '#c084fc', momentum_score: '#f472b6' };
 
   // Tbody
   document.getElementById('rankings-body').innerHTML = show.length === 0
-    ? '<tr><td colspan="12" class="loading">No teams match the current filters</td></tr>'
+    ? '<tr><td colspan="13" class="loading">No teams match the current filters</td></tr>'
     : show.map(r => {
       const tc = TIER_COLORS[r.tier] || { bg: 'rgba(174,180,194,.18)', fg: '#aeb4c2', label: '?' };
       const selected = r.team_id === _selectedTeam;
@@ -1047,6 +1108,7 @@ function _renderRankingsTable() {
         <td>${cellBar(r.pitching_score, barColors.pitching_score, activeMetric==='pitching_score')}</td>
         <td>${cellBar(r.defense_score, barColors.defense_score, activeMetric==='defense_score')}</td>
         <td>${cellBar(r.bullpen_score, barColors.bullpen_score, activeMetric==='bullpen_score')}</td>
+        <td>${cellBar(r.momentum_score || 50, barColors.momentum_score, activeMetric==='momentum_score')}</td>
         <td style="font-size:12.5px;font-weight:500;color:var(--text-2)">${r.wins}-${r.losses}</td>
         <td style="font-size:12.5px;font-weight:500;color:var(--text-2)">${r.last_10_record}</td>
         <td>${_streakChip(r.streak)}</td>
@@ -1101,6 +1163,7 @@ function _renderTeamDrawer() {
     { l: 'Pitching', v: t.pitching_score, c: '#5be899' },
     { l: 'Defense',  v: t.defense_score,  c: '#f5b14a' },
     { l: 'Bullpen',  v: t.bullpen_score,  c: '#c084fc' },
+    { l: 'Momentum', v: t.momentum_score || 50, c: '#f472b6' },
   ];
 
   const winPct = t.wins + t.losses > 0 ? (t.wins / (t.wins + t.losses)).toFixed(3).replace(/^0/, '') : '.000';
@@ -1152,6 +1215,175 @@ function _renderTeamDrawer() {
   `;
 }
 
+// ── Team Comparison ───────────────────────────────
+function initCompareUI() {
+  const section = document.getElementById('compare-section');
+  const btn = document.getElementById('compare-btn');
+
+  btn.addEventListener('click', () => {
+    section.style.display = section.style.display === 'none' ? '' : 'none';
+    populateCompareDropdowns();
+  });
+
+  document.getElementById('close-compare').addEventListener('click', () => {
+    section.style.display = 'none';
+  });
+
+  document.getElementById('compare-go').addEventListener('click', runComparison);
+}
+
+function populateCompareDropdowns() {
+  const teams = _rankingsData.map(r => r.team_id).sort();
+  const optionsHtml = teams.map(t => `<option value="${t}">${t}</option>`).join('');
+  const selA = document.getElementById('compare-a');
+  const selB = document.getElementById('compare-b');
+  selA.innerHTML = optionsHtml;
+  selB.innerHTML = optionsHtml;
+  if (teams.length >= 2) { selA.value = teams[0]; selB.value = teams[1]; }
+}
+
+async function runComparison() {
+  const a = document.getElementById('compare-a').value;
+  const b = document.getElementById('compare-b').value;
+  if (!a || !b || a === b) {
+    document.getElementById('compare-result').innerHTML = '<div class="loading">Select two different teams</div>';
+    return;
+  }
+
+  const data = await fetchJSON(`${API}/rankings/teams/compare?team_a=${a}&team_b=${b}`);
+  if (!data) {
+    document.getElementById('compare-result').innerHTML = '<div class="loading">Comparison data unavailable</div>';
+    return;
+  }
+
+  const categories = [
+    { key: 'power', label: 'Power', color: 'var(--accent)' },
+    { key: 'offense', label: 'Offense', color: '#7faaf7' },
+    { key: 'pitching', label: 'Pitching', color: '#5be899' },
+    { key: 'defense', label: 'Defense', color: '#f5b14a' },
+    { key: 'bullpen', label: 'Bullpen', color: '#c084fc' },
+    { key: 'momentum', label: 'Momentum', color: '#f472b6' },
+  ];
+
+  const rows = categories.map(cat => {
+    const d = data[cat.key] || { a: 0, b: 0 };
+    const maxVal = Math.max(d.a, d.b, 1);
+    const aPct = (d.a / 100) * 100;
+    const bPct = (d.b / 100) * 100;
+    const aWins = d.a > d.b;
+    const bWins = d.b > d.a;
+    return `<div style="display:grid;grid-template-columns:80px 1fr 40px 8px 40px 1fr;align-items:center;gap:8px;padding:6px 0;">
+      <span style="font-size:12px;color:var(--text-2);font-weight:500;">${cat.label}</span>
+      <div style="display:flex;justify-content:flex-end;">
+        <div style="height:8px;border-radius:4px;background:${aWins ? cat.color : 'var(--card-2)'};width:${aPct}%;opacity:${aWins?1:0.4};transition:width .3s;"></div>
+      </div>
+      <span style="text-align:right;font-size:13px;font-weight:${aWins?'700':'500'};color:${aWins?'var(--text)':'var(--text-3)'};font-variant-numeric:tabular-nums;">${d.a.toFixed(1)}</span>
+      <span style="text-align:center;color:var(--text-3);font-size:10px;">vs</span>
+      <span style="font-size:13px;font-weight:${bWins?'700':'500'};color:${bWins?'var(--text)':'var(--text-3)'};font-variant-numeric:tabular-nums;">${d.b.toFixed(1)}</span>
+      <div>
+        <div style="height:8px;border-radius:4px;background:${bWins ? cat.color : 'var(--card-2)'};width:${bPct}%;opacity:${bWins?1:0.4};transition:width .3s;"></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const advColor = data.advantage === a ? 'var(--good)' : data.advantage === b ? 'var(--bad)' : 'var(--text-3)';
+  document.getElementById('compare-result').innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <span style="font-size:18px;font-weight:800;letter-spacing:.02em;">${a}</span>
+      <span style="font-size:12px;color:${advColor};font-weight:600;">Advantage: ${data.advantage || 'Even'}</span>
+      <span style="font-size:18px;font-weight:800;letter-spacing:.02em;">${b}</span>
+    </div>
+    ${rows}
+  `;
+}
+
+// ── Players ───────────────────────────────────────
+let _playerPos = 'SP';
+let _playerSort = { key: 'rank', dir: 'asc' };
+
+function initPlayersUI() {
+  const positions = ['SP','RP','C','1B','2B','3B','SS','OF','DH'];
+  const container = document.getElementById('position-btns');
+  container.innerHTML = positions.map(p =>
+    `<button class="metric-btn${_playerPos===p?' active':''}" data-pos="${p}">${p}</button>`
+  ).join('');
+  container.querySelectorAll('.metric-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      _playerPos = btn.dataset.pos;
+      initPlayersUI();
+      loadPlayers();
+    });
+  });
+}
+
+async function loadPlayers() {
+  const data = await fetchJSON(`${API}/rankings/players/${_playerPos}`);
+  if (!data || !data.rankings || data.rankings.length === 0) {
+    document.getElementById('players-body').innerHTML = '<tr><td colspan="8" class="loading">No player data for this position</td></tr>';
+    document.getElementById('players-sub').textContent = `${_playerPos} · 0 players`;
+    return;
+  }
+
+  let players = data.rankings;
+  document.getElementById('players-sub').textContent = `${_playerPos} · ${players.length} players`;
+
+  // Sort
+  const numericKeys = ['rank','score','games_played','rank_change'];
+  players.sort((a, b) => {
+    let va = a[_playerSort.key], vb = b[_playerSort.key];
+    if (typeof va === 'string') return _playerSort.dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+    return _playerSort.dir === 'asc' ? (va||0) - (vb||0) : (vb||0) - (va||0);
+  });
+
+  // Determine stat columns from key_stats of first player
+  const statKeys = players[0].key_stats ? Object.keys(players[0].key_stats).slice(0, 4) : [];
+
+  const cols = [
+    { id: 'rank', label: '#' },
+    { id: 'player_name', label: 'Player' },
+    { id: 'team_id', label: 'Team' },
+    { id: 'score', label: 'Score' },
+    ...statKeys.map(k => ({ id: 'stat_' + k, label: k.toUpperCase().replace('_',' ') })),
+    { id: 'games_played', label: 'GP' },
+    { id: 'tier', label: 'Tier' },
+  ];
+
+  document.getElementById('players-thead').innerHTML = cols.map(c => {
+    const sorted = _playerSort.key === c.id;
+    return `<th class="${sorted?'sorted':''}" data-psort="${c.id}" style="text-align:${c.id==='rank'||c.id==='games_played'?'center':'left'}">${c.label}${sorted ? ` <span style="font-size:9px">${_playerSort.dir==='asc'?'▲':'▼'}</span>` : ''}</th>`;
+  }).join('');
+
+  document.querySelectorAll('[data-psort]').forEach(th => {
+    th.addEventListener('click', () => {
+      const key = th.dataset.psort;
+      if (_playerSort.key === key) _playerSort.dir = _playerSort.dir === 'asc' ? 'desc' : 'asc';
+      else _playerSort = { key, dir: numericKeys.includes(key) ? 'asc' : 'desc' };
+      loadPlayers();
+    });
+  });
+
+  document.getElementById('players-body').innerHTML = players.map(p => {
+    const tc = TIER_COLORS[p.tier] || { bg: 'rgba(174,180,194,.18)', fg: '#aeb4c2', label: '?' };
+    const trendHtml = p.rank_change > 0 ? `<span class="trend-arrow trend-up">▲${p.rank_change}</span>` :
+                      p.rank_change < 0 ? `<span class="trend-arrow trend-down">▼${Math.abs(p.rank_change)}</span>` :
+                      '';
+    const statCells = statKeys.map(k => {
+      const val = p.key_stats[k];
+      return `<td style="font-variant-numeric:tabular-nums">${val != null ? (typeof val === 'number' ? (val < 1 && val > -1 ? val.toFixed(3).replace(/^0/,'') : val.toFixed(2)) : val) : '--'}</td>`;
+    }).join('');
+
+    return `<tr>
+      <td style="text-align:center;font-weight:600;color:var(--text-3)">${p.rank}</td>
+      <td><span style="font-weight:600">${p.player_name}</span> ${trendHtml}</td>
+      <td><span class="team-abbr-cell">${p.team_id}</span></td>
+      <td style="font-weight:700">${p.score.toFixed(1)}</td>
+      ${statCells}
+      <td style="text-align:center">${p.games_played}</td>
+      <td><span class="tier-badge" style="background:${tc.bg};color:${tc.fg}">${tc.label}</span></td>
+    </tr>`;
+  }).join('');
+}
+
 // ── Betting ────────────────────────────────────────
 async function loadBetting() {
   const data = await fetchJSON(`${API}/betting/recommendations`);
@@ -1173,8 +1405,8 @@ async function loadBetting() {
           <span class="bet-edge">+${b.edge_pct.toFixed(1)}% edge</span>
         </div>
         <div class="bet-details">
-          <span>${b.away_team} @ ${b.home_team}</span>
-          <span>Odds: ${b.odds > 0 ? '+' : ''}${b.odds} | Model: ${(b.model_prob * 100).toFixed(1)}% vs Market: ${(b.implied_prob * 100).toFixed(1)}%</span>
+          <span>${b.away_team} @ ${b.home_team}${b.total_line != null ? ' · O/U ' + b.total_line : ''}</span>
+          <span>Odds: ${b.odds > 0 ? '+' : ''}${b.odds}${b.decimal_odds ? ' (' + b.decimal_odds.toFixed(2) + ')' : ''} | Model: ${(b.model_prob * 100).toFixed(1)}% vs Market: ${(b.implied_prob * 100).toFixed(1)}%</span>
           <span>Stake: $${b.recommended_stake.toFixed(0)} | EV: $${(b.ev_per_dollar * b.recommended_stake).toFixed(2)}</span>
         </div>
       </div>
@@ -1292,6 +1524,63 @@ async function loadAnalytics() {
       ${dateLabels.join('')}
     </svg>
   `;
+
+  // Daily P&L bar chart
+  const dailyChartEl = document.getElementById('daily-pnl-chart');
+  const dW = 600, dH = 140, dPL = 48, dPR = 16, dPT = 16, dPB = 24;
+  const dailyVals = pnl.map(d => d.daily_pnl);
+  const dMin = Math.min(0, ...dailyVals);
+  const dMax = Math.max(0, ...dailyVals);
+  const dRange = dMax - dMin || 1;
+  const barW = Math.max(4, Math.min(20, (dW - dPL - dPR) / pnl.length - 2));
+  const dZeroY = (dPT + (1 - (0 - dMin) / dRange) * (dH - dPT - dPB)).toFixed(1);
+
+  const bars = pnl.map((d, i) => {
+    const x = dPL + (i / Math.max(pnl.length - 1, 1)) * (dW - dPL - dPR) - barW / 2;
+    const val = d.daily_pnl;
+    const y = val >= 0
+      ? dPT + (1 - (val - dMin) / dRange) * (dH - dPT - dPB)
+      : parseFloat(dZeroY);
+    const h = Math.abs(val) / dRange * (dH - dPT - dPB);
+    const color = val >= 0 ? 'var(--good)' : 'var(--bad)';
+    return `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW}" height="${Math.max(1, h).toFixed(1)}" fill="${color}" opacity="0.7" rx="2"/>`;
+  }).join('');
+
+  const dDateLabels = [];
+  const dLabelCount = Math.min(pnl.length, 6);
+  for (let li = 0; li < dLabelCount; li++) {
+    const idx = dLabelCount === 1 ? 0 : Math.round(li * (pnl.length - 1) / (dLabelCount - 1));
+    const bx = dPL + (idx / Math.max(pnl.length - 1, 1)) * (dW - dPL - dPR);
+    const anchor = li === 0 ? 'start' : li === dLabelCount - 1 ? 'end' : 'middle';
+    dDateLabels.push(`<text x="${bx.toFixed(1)}" y="${dH - 4}" fill="var(--text-3)" font-size="10" text-anchor="${anchor}">${pnl[idx].date.slice(5)}</text>`);
+  }
+
+  dailyChartEl.innerHTML = `
+    <svg viewBox="0 0 ${dW} ${dH}" style="width:100%;height:auto;max-height:140px;" preserveAspectRatio="xMidYMid meet">
+      <line x1="${dPL}" y1="${dZeroY}" x2="${dW - dPR}" y2="${dZeroY}" stroke="var(--line-2)" stroke-dasharray="4"/>
+      <text x="${dPL - 6}" y="${dZeroY}" fill="var(--text-3)" font-size="10" text-anchor="end" dominant-baseline="middle">$0</text>
+      ${bars}
+      ${dDateLabels.join('')}
+    </svg>
+  `;
+
+  // Daily P&L table
+  const dailyBody = document.getElementById('daily-pnl-body');
+  const reversed = [...pnl].reverse();
+  dailyBody.innerHTML = reversed.map(d => {
+    const winRate = d.bets_placed > 0 ? ((d.bets_won / d.bets_placed) * 100).toFixed(0) + '%' : '--';
+    const pnlColor = d.daily_pnl >= 0 ? 'var(--good)' : 'var(--bad)';
+    const cumColor = d.cumulative_pnl >= 0 ? 'var(--good)' : 'var(--bad)';
+    return `<tr>
+      <td>${d.date}</td>
+      <td>${d.bets_placed}</td>
+      <td>${d.bets_won}</td>
+      <td>${winRate}</td>
+      <td style="color:${pnlColor};font-weight:600;font-variant-numeric:tabular-nums">$${d.daily_pnl >= 0 ? '+' : ''}${d.daily_pnl.toFixed(2)}</td>
+      <td style="color:${cumColor};font-weight:600;font-variant-numeric:tabular-nums">$${d.cumulative_pnl >= 0 ? '+' : ''}${d.cumulative_pnl.toFixed(2)}</td>
+      <td>${(d.roi * 100).toFixed(1)}%</td>
+    </tr>`;
+  }).join('');
 }
 
 // ── Rail ───────────────────────────────────────────
@@ -1340,6 +1629,7 @@ function showTab(tab, btn) {
   currentTab = tab;
   if (tab === 'predictions') loadPredictions();
   if (tab === 'rankings') loadRankings();
+  if (tab === 'players') { initPlayersUI(); loadPlayers(); }
   if (tab === 'betting') loadBetting();
   if (tab === 'analytics') loadAnalytics();
   startPolling();
@@ -1350,6 +1640,7 @@ function startPolling() {
   pollTimer = setInterval(() => {
     if (currentTab === 'predictions') loadPredictions();
     else if (currentTab === 'rankings') loadRankings();
+    else if (currentTab === 'players') loadPlayers();
     else if (currentTab === 'betting') loadBetting();
     else if (currentTab === 'analytics') loadAnalytics();
   }, 60000);
@@ -1378,6 +1669,17 @@ function formatGameTime(isoStr) {
 // ── Init ───────────────────────────────────────────
 renderDateStrip();
 renderFilters();
+
+// Sort button handler
+document.getElementById('sort-btn').addEventListener('click', () => {
+  const cycle = ['time', 'confidence', 'edge'];
+  const labels = { time: 'Sort: Time', confidence: 'Sort: Confidence', edge: 'Sort: Edge' };
+  const idx = (cycle.indexOf(currentSort) + 1) % cycle.length;
+  currentSort = cycle[idx];
+  document.getElementById('sort-btn').textContent = labels[currentSort];
+  renderGameCards();
+});
+
 loadPredictions();
 startPolling();
 </script>
