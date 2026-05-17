@@ -22,13 +22,15 @@ _CACHE_DIR = Path("data/predictions")
 
 
 def _load_rankings_from_file(date_str: str, category: str) -> dict | None:
+    from mlb.api.fileutil import safe_json_read
+
     cache_key = f"{date_str}_{category}"
     if cache_key in _team_rankings_cache:
         return _team_rankings_cache[cache_key]
 
     path = _CACHE_DIR / f"{date_str}.json"
     if path.exists():
-        data = json.loads(path.read_text())
+        data = safe_json_read(path)
         rankings = data.get("rankings", {}).get(category)
         if rankings:
             _team_rankings_cache[cache_key] = rankings
@@ -79,9 +81,11 @@ async def get_player_rankings(
         return PlayerRankingsResponse(**cached)
 
     # Try loading from file
+    from mlb.api.fileutil import safe_json_read
+
     path = _CACHE_DIR / f"{target_date}.json"
     if path.exists():
-        data = json.loads(path.read_text())
+        data = safe_json_read(path)
         player_data = data.get("player_rankings", {}).get(pos)
         if player_data:
             _player_rankings_cache[cache_key] = player_data
@@ -148,30 +152,46 @@ async def compare_teams(
 
 
 def cache_team_rankings(date_str: str, category: str, data: dict):
+    from mlb.api.fileutil import safe_json_read, safe_json_merge, safe_json_write
+
     _team_rankings_cache[f"{date_str}_{category}"] = data
 
-    # Persist to file
-    _CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    # Persist — atomic read-modify-write with locking
     path = _CACHE_DIR / f"{date_str}.json"
-    existing = {}
-    if path.exists():
-        existing = json.loads(path.read_text())
-    rankings = existing.get("rankings", {})
-    rankings[category] = data
-    existing["rankings"] = rankings
-    path.write_text(json.dumps(existing, default=str))
+    import fcntl
+    path.parent.mkdir(parents=True, exist_ok=True)
+    lock_path = path.with_suffix(".lock")
+    lock_path.touch(exist_ok=True)
+    with open(lock_path, "r") as lock_file:
+        fcntl.flock(lock_file, fcntl.LOCK_EX)
+        try:
+            existing = safe_json_read(path)
+            rankings = existing.get("rankings", {})
+            rankings[category] = data
+            existing["rankings"] = rankings
+            safe_json_write(path, existing)
+        finally:
+            fcntl.flock(lock_file, fcntl.LOCK_UN)
 
 
 def cache_player_rankings(date_str: str, position: str, data: dict):
+    from mlb.api.fileutil import safe_json_read, safe_json_write
+
     _player_rankings_cache[f"{date_str}_{position}"] = data
 
-    # Persist to file
-    _CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    # Persist — atomic read-modify-write with locking
     path = _CACHE_DIR / f"{date_str}.json"
-    existing = {}
-    if path.exists():
-        existing = json.loads(path.read_text())
-    player_rankings = existing.get("player_rankings", {})
-    player_rankings[position] = data
-    existing["player_rankings"] = player_rankings
-    path.write_text(json.dumps(existing, default=str))
+    import fcntl
+    path.parent.mkdir(parents=True, exist_ok=True)
+    lock_path = path.with_suffix(".lock")
+    lock_path.touch(exist_ok=True)
+    with open(lock_path, "r") as lock_file:
+        fcntl.flock(lock_file, fcntl.LOCK_EX)
+        try:
+            existing = safe_json_read(path)
+            player_rankings = existing.get("player_rankings", {})
+            player_rankings[position] = data
+            existing["player_rankings"] = player_rankings
+            safe_json_write(path, existing)
+        finally:
+            fcntl.flock(lock_file, fcntl.LOCK_UN)

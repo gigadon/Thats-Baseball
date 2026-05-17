@@ -29,9 +29,11 @@ async def get_recommendations(
 
     # Try loading from file if not in memory
     if not cached:
+        from mlb.api.fileutil import safe_json_read
+
         path = _CACHE_DIR / f"{target_date}.json"
         if path.exists():
-            data = json.loads(path.read_text())
+            data = safe_json_read(path)
             cached = data.get("betting_slip")
             if cached:
                 _betting_cache[target_date] = cached
@@ -113,13 +115,10 @@ async def get_betting_history(
 
 
 def cache_betting_slip(date_str: str, data: dict):
+    from mlb.api.fileutil import safe_json_merge
+
     _betting_cache[date_str] = data
 
-    # Persist — merge into existing predictions file
-    _CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    # Persist — merge into existing predictions file (atomic write with locking)
     path = _CACHE_DIR / f"{date_str}.json"
-    existing = {}
-    if path.exists():
-        existing = json.loads(path.read_text())
-    existing["betting_slip"] = data
-    path.write_text(json.dumps(existing, default=str))
+    safe_json_merge(path, "betting_slip", data)

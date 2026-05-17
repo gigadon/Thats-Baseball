@@ -24,12 +24,14 @@ _CACHE_DIR = Path("data/predictions")
 
 def _load_from_file(date_str: str) -> list[dict]:
     """Load predictions from JSON file if not in memory."""
+    from mlb.api.fileutil import safe_json_read
+
     if date_str in _predictions_cache:
         return _predictions_cache[date_str]
 
     path = _CACHE_DIR / f"{date_str}.json"
     if path.exists():
-        data = json.loads(path.read_text())
+        data = safe_json_read(path)
         preds = data.get("predictions", [])
         _predictions_cache[date_str] = preds
         return preds
@@ -104,11 +106,13 @@ def _today() -> str:
 
 def _enrich_with_betting(date_str: str, games: list[dict]) -> list[dict]:
     """Merge betting slip data into prediction game dicts."""
+    from mlb.api.fileutil import safe_json_read
+
     path = _CACHE_DIR / f"{date_str}.json"
     if not path.exists():
         return games
 
-    data = json.loads(path.read_text())
+    data = safe_json_read(path)
     slip = data.get("betting_slip")
     if not slip or not slip.get("bets"):
         return games
@@ -178,9 +182,11 @@ async def get_line_movement_data(
 
 def cache_predictions(date_str: str, predictions: list[dict]):
     """Store predictions in memory and write to JSON file."""
+    from mlb.api.fileutil import safe_json_merge
+
     _predictions_cache[date_str] = predictions
 
-    # Persist to file so the API server can read them
-    _CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    # Persist — merge into existing file (atomic write with locking)
     path = _CACHE_DIR / f"{date_str}.json"
-    path.write_text(json.dumps({"date": date_str, "predictions": predictions}, default=str))
+    safe_json_merge(path, "date", date_str)
+    safe_json_merge(path, "predictions", predictions)
