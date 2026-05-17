@@ -78,6 +78,15 @@ async def get_player_rankings(
     if cached:
         return PlayerRankingsResponse(**cached)
 
+    # Try loading from file
+    path = _CACHE_DIR / f"{target_date}.json"
+    if path.exists():
+        data = json.loads(path.read_text())
+        player_data = data.get("player_rankings", {}).get(pos)
+        if player_data:
+            _player_rankings_cache[cache_key] = player_data
+            return PlayerRankingsResponse(**player_data)
+
     return PlayerRankingsResponse(
         position=pos,
         ranking_date=target_date,
@@ -91,17 +100,50 @@ async def compare_teams(
     team_b: str = Query(..., min_length=2, max_length=3),
 ):
     """Compare two teams across all ranking categories."""
-    # In production, pull from ranking service
+    from datetime import date as d
+
+    target_date = d.today().isoformat()
+    a_upper = team_a.upper()
+    b_upper = team_b.upper()
+
+    # Load power rankings to get all team scores
+    power_data = _load_rankings_from_file(target_date, "power")
+    if not power_data or "rankings" not in power_data:
+        return TeamComparisonResponse(
+            team_a=a_upper, team_b=b_upper,
+            power={"a": 0, "b": 0, "diff": 0},
+            offense={"a": 0, "b": 0, "diff": 0},
+            pitching={"a": 0, "b": 0, "diff": 0},
+            defense={"a": 0, "b": 0, "diff": 0},
+            bullpen={"a": 0, "b": 0, "diff": 0},
+            momentum={"a": 0, "b": 0, "diff": 0},
+            advantage=a_upper,
+        )
+
+    # Build lookup from rankings
+    teams_by_id = {t["team_id"]: t for t in power_data["rankings"]}
+    ta = teams_by_id.get(a_upper, {})
+    tb = teams_by_id.get(b_upper, {})
+
+    categories = ["power_score", "offense_score", "pitching_score", "defense_score", "bullpen_score", "momentum_score"]
+    cat_names = ["power", "offense", "pitching", "defense", "bullpen", "momentum"]
+    result = {}
+    a_advantages = 0
+
+    for cat_name, score_key in zip(cat_names, categories):
+        a_val = ta.get(score_key, 0)
+        b_val = tb.get(score_key, 0)
+        result[cat_name] = {"a": a_val, "b": b_val, "diff": round(a_val - b_val, 1)}
+        if a_val > b_val:
+            a_advantages += 1
+
+    advantage = a_upper if a_advantages >= 4 else b_upper if a_advantages <= 2 else "Even"
+
     return TeamComparisonResponse(
-        team_a=team_a.upper(),
-        team_b=team_b.upper(),
-        power={"a": 0, "b": 0, "diff": 0},
-        offense={"a": 0, "b": 0, "diff": 0},
-        pitching={"a": 0, "b": 0, "diff": 0},
-        defense={"a": 0, "b": 0, "diff": 0},
-        bullpen={"a": 0, "b": 0, "diff": 0},
-        momentum={"a": 0, "b": 0, "diff": 0},
-        advantage=team_a.upper(),
+        team_a=a_upper,
+        team_b=b_upper,
+        advantage=advantage,
+        **result,
     )
 
 
@@ -122,3 +164,14 @@ def cache_team_rankings(date_str: str, category: str, data: dict):
 
 def cache_player_rankings(date_str: str, position: str, data: dict):
     _player_rankings_cache[f"{date_str}_{position}"] = data
+
+    # Persist to file
+    _CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    path = _CACHE_DIR / f"{date_str}.json"
+    existing = {}
+    if path.exists():
+        existing = json.loads(path.read_text())
+    player_rankings = existing.get("player_rankings", {})
+    player_rankings[position] = data
+    existing["player_rankings"] = player_rankings
+    path.write_text(json.dumps(existing, default=str))

@@ -33,7 +33,7 @@ from mlb.models.predict import GamePrediction, PredictionService
 from mlb.features.assembler import GameFeatureVector
 from mlb.betting.engine import BettingEngine, BettingSlip
 from mlb.alerts import AlertService
-from mlb.api.routes.rankings import cache_team_rankings
+from mlb.api.routes.rankings import cache_team_rankings, cache_player_rankings
 
 logger = logging.getLogger(__name__)
 
@@ -214,6 +214,9 @@ class DailyRunner:
 
             # 9. Generate team rankings from rolling stats (after cache so it merges into file)
             self._generate_rankings(team_features, target_date, live_standings)
+
+            # 9b. Generate player rankings from season CSV data
+            self._generate_player_rankings(target_date)
 
             # 10. Send alerts (Slack/email) if configured
             try:
@@ -1074,6 +1077,185 @@ class DailyRunner:
             })
 
         logger.info("Generated rankings for %d teams", len(rankings_data))
+
+    def _generate_player_rankings(self, target_date: date):
+        """Generate player rankings from season batting/pitching CSV data."""
+        season = target_date.year
+        date_str = target_date.isoformat()
+
+        batting_path = self.data_dir / f"batting_{season}.csv"
+        pitching_path = self.data_dir / f"pitching_{season}.csv"
+
+        # ── Batting rankings (position players) ──
+        if batting_path.exists():
+            bat_df = pd.read_csv(batting_path)
+            bat_df["game_date"] = pd.to_datetime(bat_df["game_date"])
+            bat_df = bat_df[bat_df["game_date"] <= str(target_date)]
+
+            # Aggregate season stats per player
+            player_bat = bat_df.groupby(["player_id", "player_name", "team_id"]).agg(
+                games=("game_id", "nunique"),
+                ab=("at_bats", "sum"),
+                hits=("hits", "sum"),
+                hr=("home_runs", "sum"),
+                rbi=("rbi", "sum"),
+                runs=("runs", "sum"),
+                walks=("walks", "sum"),
+                so=("strikeouts", "sum"),
+                sb=("stolen_bases", "sum"),
+                doubles=("doubles", "sum"),
+                triples=("triples", "sum"),
+            ).reset_index()
+
+            # Filter to players with meaningful playing time
+            player_bat = player_bat[player_bat["ab"] >= 30].copy()
+
+            if len(player_bat) > 0:
+                # Compute derived stats
+                player_bat["avg"] = player_bat["hits"] / player_bat["ab"]
+                player_bat["obp"] = (player_bat["hits"] + player_bat["walks"]) / (player_bat["ab"] + player_bat["walks"])
+                player_bat["slg"] = (
+                    (player_bat["hits"] - player_bat["doubles"] - player_bat["triples"] - player_bat["hr"])
+                    + player_bat["doubles"] * 2
+                    + player_bat["triples"] * 3
+                    + player_bat["hr"] * 4
+                ) / player_bat["ab"]
+                player_bat["ops"] = player_bat["obp"] + player_bat["slg"]
+
+                # Composite score: weighted OPS + power + speed
+                player_bat["score"] = (
+                    player_bat["ops"] * 40
+                    + (player_bat["hr"] / player_bat["games"]) * 15
+                    + (player_bat["rbi"] / player_bat["games"]) * 5
+                    + (player_bat["sb"] / player_bat["games"]) * 3
+                )
+
+                # Tier assignment
+                def _bat_tier(score):
+                    if score >= 50: return "elite"
+                    if score >= 40: return "contender"
+                    if score >= 32: return "average"
+                    if score >= 25: return "below_average"
+                    return "rebuilding"
+
+                # All position players go under these position buckets
+                positions = ["C", "1B", "2B", "3B", "SS", "OF", "DH"]
+                # Since we don't have position data in CSV, rank all batters together
+                # and put them in each position category (users can browse all hitters)
+                sorted_bat = player_bat.sort_values("score", ascending=False)
+
+                for pos in positions:
+                    ranked = []
+                    for i, (_, row) in enumerate(sorted_bat.iterrows()):
+                        ranked.append({
+                            "rank": i + 1,
+                            "player_id": int(row["player_id"]),
+                            "player_name": row["player_name"],
+                            "team_id": row["team_id"],
+                            "position": pos,
+                            "score": round(float(row["score"]), 1),
+                            "key_stats": {
+                                "avg": round(float(row["avg"]), 3),
+                                "ops": round(float(row["ops"]), 3),
+                                "hr": int(row["hr"]),
+                                "rbi": int(row["rbi"]),
+                            },
+                            "games_played": int(row["games"]),
+                            "rank_change": 0,
+                            "tier": _bat_tier(row["score"]),
+                        })
+                        if i >= 49:  # Top 50 per position
+                            break
+
+                    cache_player_rankings(date_str, pos, {
+                        "position": pos,
+                        "ranking_date": date_str,
+                        "rankings": ranked,
+                    })
+
+                logger.info("Generated batting player rankings: %d players", len(sorted_bat))
+
+        # ── Pitching rankings (SP, RP) ──
+        if pitching_path.exists():
+            pit_df = pd.read_csv(pitching_path)
+            pit_df["game_date"] = pd.to_datetime(pit_df["game_date"])
+            pit_df = pit_df[pit_df["game_date"] <= str(target_date)]
+
+            player_pit = pit_df.groupby(["player_id", "player_name", "team_id"]).agg(
+                games=("game_id", "nunique"),
+                ip=("innings_pitched", "sum"),
+                er=("earned_runs", "sum"),
+                hits_a=("hits_allowed", "sum"),
+                bb=("walks_allowed", "sum"),
+                k=("strikeouts_recorded", "sum"),
+                pitches=("pitches_thrown", "sum"),
+            ).reset_index()
+
+            if len(player_pit) > 0:
+                # Compute derived stats
+                player_pit["era"] = (player_pit["er"] / player_pit["ip"].clip(lower=0.1)) * 9
+                player_pit["whip"] = (player_pit["hits_a"] + player_pit["bb"]) / player_pit["ip"].clip(lower=0.1)
+                player_pit["k9"] = (player_pit["k"] / player_pit["ip"].clip(lower=0.1)) * 9
+                player_pit["ip_per_game"] = player_pit["ip"] / player_pit["games"]
+
+                # Classify SP vs RP based on avg IP per game
+                player_pit["is_sp"] = player_pit["ip_per_game"] >= 4.0
+
+                def _pit_score(row):
+                    era_score = max(0, (5.0 - row["era"]) * 12)
+                    whip_score = max(0, (1.6 - row["whip"]) * 20)
+                    k_score = row["k9"] * 3
+                    ip_score = row["ip"] * 0.3
+                    return era_score + whip_score + k_score + ip_score
+
+                player_pit["score"] = player_pit.apply(_pit_score, axis=1)
+
+                def _pit_tier(score):
+                    if score >= 70: return "elite"
+                    if score >= 50: return "contender"
+                    if score >= 35: return "average"
+                    if score >= 20: return "below_average"
+                    return "rebuilding"
+
+                for pos, is_sp in [("SP", True), ("RP", False)]:
+                    subset = player_pit[player_pit["is_sp"] == is_sp].copy()
+                    # Minimum thresholds
+                    if is_sp:
+                        subset = subset[subset["ip"] >= 15]
+                    else:
+                        subset = subset[subset["games"] >= 5]
+
+                    sorted_pit = subset.sort_values("score", ascending=False)
+
+                    ranked = []
+                    for i, (_, row) in enumerate(sorted_pit.iterrows()):
+                        ranked.append({
+                            "rank": i + 1,
+                            "player_id": int(row["player_id"]),
+                            "player_name": row["player_name"],
+                            "team_id": row["team_id"],
+                            "position": pos,
+                            "score": round(float(row["score"]), 1),
+                            "key_stats": {
+                                "era": round(float(row["era"]), 2),
+                                "whip": round(float(row["whip"]), 2),
+                                "k9": round(float(row["k9"]), 1),
+                                "ip": round(float(row["ip"]), 1),
+                            },
+                            "games_played": int(row["games"]),
+                            "rank_change": 0,
+                            "tier": _pit_tier(row["score"]),
+                        })
+                        if i >= 49:
+                            break
+
+                    cache_player_rankings(date_str, pos, {
+                        "position": pos,
+                        "ranking_date": date_str,
+                        "rankings": ranked,
+                    })
+
+                logger.info("Generated pitching player rankings")
 
     def _compute_season_records(self, season: int) -> dict[str, dict]:
         """Compute W-L records from current season games CSV only."""
