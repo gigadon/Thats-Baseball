@@ -125,8 +125,8 @@ async def _fetch_scores(date_str: str) -> list[dict]:
         return cached["scores"]
 
     try:
-        from mlb.data.mlb_api import MLBStatsClient
-        client = MLBStatsClient()
+        from mlb.data.mlb_api import MLBApiClient
+        client = MLBApiClient()
         games = await client.get_schedule(d.fromisoformat(date_str))
         scores = []
         for g in games:

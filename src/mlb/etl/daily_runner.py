@@ -216,7 +216,7 @@ class DailyRunner:
             self._generate_rankings(team_features, target_date, live_standings)
 
             # 9b. Generate player rankings from season CSV data
-            self._generate_player_rankings(target_date)
+            await self._generate_player_rankings(target_date)
 
             # 10. Send alerts (Slack/email) if configured
             try:
@@ -1078,7 +1078,7 @@ class DailyRunner:
 
         logger.info("Generated rankings for %d teams", len(rankings_data))
 
-    def _generate_player_rankings(self, target_date: date):
+    async def _generate_player_rankings(self, target_date: date):
         """Generate player rankings from season batting/pitching CSV data."""
         season = target_date.year
         date_str = target_date.isoformat()
@@ -1187,31 +1187,13 @@ class DailyRunner:
             pit_df["game_date"] = pd.to_datetime(pit_df["game_date"])
             pit_df = pit_df[pit_df["game_date"] <= str(target_date)]
 
-            # Derive W/L decisions: pitcher with most IP on winning/losing team gets decision
-            games_path = self.data_dir / f"games_{season}.csv"
-            pitcher_decisions: dict[int, dict] = {}  # player_id -> {wins, losses}
-            if games_path.exists():
-                games_df = pd.read_csv(games_path)
-                games_df = games_df[games_df["status"] == "Final"] if "status" in games_df.columns else games_df
-                for _, game in games_df.iterrows():
-                    gid = game["game_id"]
-                    home_won = game["home_score"] > game["away_score"]
-                    game_pitching = pit_df[pit_df["game_id"] == gid]
-                    if game_pitching.empty:
-                        continue
-                    for side, won in [("home", home_won), ("away", not home_won)]:
-                        side_pitchers = game_pitching[game_pitching["side"] == side]
-                        if side_pitchers.empty:
-                            continue
-                        # Pitcher with most IP on that side gets the decision
-                        top_pitcher = side_pitchers.loc[side_pitchers["innings_pitched"].idxmax()]
-                        pid = int(top_pitcher["player_id"])
-                        if pid not in pitcher_decisions:
-                            pitcher_decisions[pid] = {"wins": 0, "losses": 0}
-                        if won:
-                            pitcher_decisions[pid]["wins"] += 1
-                        else:
-                            pitcher_decisions[pid]["losses"] += 1
+            # Fetch official W-L records from MLB Stats API
+            pitcher_records: dict[int, dict] = {}
+            try:
+                pitcher_records = await self.mlb_client.get_all_pitcher_records(season)
+                logger.info("Fetched official pitcher records for %d pitchers", len(pitcher_records))
+            except Exception as e:
+                logger.warning("Could not fetch pitcher records from API: %s", e)
 
             player_pit = pit_df.groupby(["player_id", "player_name", "team_id"]).agg(
                 games=("game_id", "nunique"),
@@ -1233,12 +1215,15 @@ class DailyRunner:
                 player_pit["h9"] = (player_pit["hits_a"] / player_pit["ip"].clip(lower=0.1)) * 9
                 player_pit["bb9"] = (player_pit["bb"] / player_pit["ip"].clip(lower=0.1)) * 9
 
-                # Add W/L from decisions
+                # Add official W/L from MLB Stats API
                 player_pit["wins"] = player_pit["player_id"].map(
-                    lambda pid: pitcher_decisions.get(pid, {}).get("wins", 0)
+                    lambda pid: pitcher_records.get(pid, {}).get("wins", 0)
                 )
                 player_pit["losses"] = player_pit["player_id"].map(
-                    lambda pid: pitcher_decisions.get(pid, {}).get("losses", 0)
+                    lambda pid: pitcher_records.get(pid, {}).get("losses", 0)
+                )
+                player_pit["saves"] = player_pit["player_id"].map(
+                    lambda pid: pitcher_records.get(pid, {}).get("saves", 0)
                 )
 
                 # Classify SP vs RP based on avg IP per game
@@ -1282,6 +1267,7 @@ class DailyRunner:
                             "key_stats": {
                                 "w": int(row["wins"]),
                                 "l": int(row["losses"]),
+                                "sv": int(row["saves"]),
                                 "era": round(float(row["era"]), 2),
                                 "ip": round(float(row["ip"]), 1),
                                 "k9": round(float(row["k9"]), 1),
@@ -1289,7 +1275,6 @@ class DailyRunner:
                                 "h": int(row["hits_a"]),
                                 "bb": int(row["bb"]),
                                 "k": int(row["k"]),
-                                "hr": 0,  # Not available in raw data
                             },
                             "games_played": int(row["games"]),
                             "rank_change": 0,

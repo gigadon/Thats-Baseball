@@ -567,7 +567,43 @@ class MLBApiClient:
             "at_bats": ab,
         }
 
-    # ── Batter vs Pitcher ──────────────────────────────────────
+    async def get_all_pitcher_records(self, season: int) -> dict[int, dict[str, int]]:
+        """Fetch official W-L-SV records for all MLB pitchers in a season.
+
+        Uses the /stats/leaders endpoint which returns all qualified pitchers.
+        Returns {player_id: {"wins": int, "losses": int, "saves": int}}.
+        """
+        records: dict[int, dict[str, int]] = {}
+        try:
+            # Fetch wins leaders (returns up to 1000 pitchers)
+            data = await self._get(
+                "/stats",
+                params={
+                    "stats": "season",
+                    "group": "pitching",
+                    "season": season,
+                    "sportId": 1,
+                    "limit": 800,
+                    "offset": 0,
+                    "sortStat": "gamesPlayed",
+                    "order": "desc",
+                },
+            )
+            for split in data.get("stats", [{}])[0].get("splits", []):
+                player = split.get("player", {})
+                pid = player.get("id")
+                stat = split.get("stat", {})
+                if pid:
+                    records[pid] = {
+                        "wins": _int(stat.get("wins")) or 0,
+                        "losses": _int(stat.get("losses")) or 0,
+                        "saves": _int(stat.get("saves")) or 0,
+                    }
+        except Exception as e:
+            logger.warning("Failed to fetch pitcher records: %s", e)
+        return records
+
+    # ─�� Batter vs Pitcher ──────────────────────────────────────
 
     async def get_batter_vs_pitcher(
         self, batter_id: int, pitcher_id: int
