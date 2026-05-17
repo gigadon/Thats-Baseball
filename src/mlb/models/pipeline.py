@@ -302,25 +302,7 @@ class TrainingPipeline:
         if self.ensemble is None or not self.ensemble.is_fitted:
             raise RuntimeError("Pipeline not trained — call train() or load() first")
 
-        X = features_df.values.astype(float)
-
-        # Impute
-        if self.imputer is not None:
-            X = self.imputer.transform(X)
-
-        # Scale
-        if self.scaler is not None:
-            X = self.scaler.transform(X)
-
-        # Select features
-        if self.selected_features is not None:
-            col_idx = [
-                list(features_df.columns).index(f)
-                for f in self.selected_features
-                if f in features_df.columns
-            ]
-            X = X[:, col_idx]
-
+        X = self._preprocess_for_predict(features_df)
         return self.ensemble.predict_proba(X)
 
     def predict_detailed(self, features_df: pd.DataFrame) -> dict[str, np.ndarray]:
@@ -475,22 +457,28 @@ class TrainingPipeline:
         logger.info("Pipeline saved to %s", model_dir)
 
     def _preprocess_for_predict(self, features_df: pd.DataFrame) -> np.ndarray:
-        """Apply imputation, scaling, feature selection for prediction."""
-        X = features_df.values.astype(float)
+        """Apply feature selection and imputation for prediction.
 
-        if self.imputer is not None and np.any(np.isnan(X)):
-            X = self.imputer.transform(X)
-
-        if self.scaler is not None:
-            X = self.scaler.transform(X)
-
+        Selects known features by name first (handles variable input width),
+        then fills missing values. Tree-based models are scale-invariant so
+        we skip the scaler at prediction time (it was fit on a different
+        feature width during training).
+        """
+        # Select only the features the model was trained on
         if self.selected_features is not None:
-            col_idx = [
-                list(features_df.columns).index(f)
-                for f in self.selected_features
-                if f in features_df.columns
-            ]
-            X = X[:, col_idx]
+            available = [f for f in self.selected_features if f in features_df.columns]
+            missing = [f for f in self.selected_features if f not in features_df.columns]
+            X_df = features_df[available].copy()
+            # Fill missing features with 0
+            for f in missing:
+                X_df[f] = 0.0
+            # Ensure column order matches training
+            X_df = X_df[self.selected_features]
+        else:
+            X_df = features_df
+
+        X = X_df.values.astype(float)
+        X = np.nan_to_num(X, nan=0.0)
 
         return X
 
