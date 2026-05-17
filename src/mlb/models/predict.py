@@ -268,10 +268,11 @@ class PredictionService:
 
     def _get_top_factors(
         self, game_fv: GameFeatureVector, n: int = 10
-    ) -> list[tuple[str, float]]:
+    ) -> list[list]:
         """Identify top factors driving the prediction.
 
         Uses feature importance from ensemble weighted by feature values.
+        Returns list of [label, detail, signed_impact] for the dashboard.
         """
         if self.pipeline is None or self.pipeline.ensemble is None:
             return []
@@ -280,13 +281,101 @@ class PredictionService:
         if not importance:
             return []
 
-        # Score each feature by importance × deviation from neutral
+        # Score each feature by importance × signed value (direction matters)
         scored = []
         for feat, imp in importance.items():
             val = game_fv.features.get(feat, 0.0)
-            # Features centered around 0 after scaling; larger magnitude = more impact
-            contribution = imp * abs(val)
-            scored.append((feat, round(contribution, 4)))
+            # Signed contribution: positive = favors home, negative = favors away
+            contribution = imp * val
+            scored.append((feat, contribution, val))
 
-        scored.sort(key=lambda x: -x[1])
-        return scored[:n]
+        scored.sort(key=lambda x: -abs(x[1]))
+
+        # Humanize the top N
+        result = []
+        for feat, contribution, raw_val in scored[:n]:
+            label, detail = _humanize_factor(feat, raw_val, game_fv)
+            # Scale to approximate percentage impact (multiply by ~20 for interpretability)
+            impact = round(contribution * 20, 1)
+            result.append([label, detail, impact])
+
+        return result
+
+
+# ── Factor humanization ─────────────────────────────────────────────
+
+_FACTOR_LABELS: dict[str, tuple[str, str]] = {
+    # Pitching
+    "diff_sp_season_era": ("Pitcher ERA", "Season ERA"),
+    "diff_sp_recent_era": ("Pitcher Recent ERA", "Last 3 starts ERA"),
+    "diff_sp_season_whip": ("Pitcher WHIP", "Season WHIP"),
+    "diff_sp_recent_whip": ("Pitcher Recent WHIP", "Last 3 starts WHIP"),
+    "diff_sp_season_k9": ("Pitcher K rate", "Strikeouts per 9"),
+    "diff_sp_recent_k9": ("Pitcher Recent K/9", "Last 3 starts K/9"),
+    "diff_sp_k_minus_bb": ("Pitcher K-BB", "K/9 minus BB/9 gap"),
+    "diff_sp_rest_days": ("Pitcher rest", "Days since last start"),
+    # Batting
+    "diff_bat_avg": ("Batting average", "Team BA"),
+    "diff_bat_obp": ("On-base pct", "Team OBP"),
+    "diff_bat_slg": ("Slugging", "Team SLG"),
+    "diff_bat_ops": ("OPS", "Team OPS"),
+    "diff_bat_hr_rate": ("HR rate", "Home runs per AB"),
+    "diff_bat_bb_rate": ("Walk rate", "Walks per PA"),
+    "diff_bat_k_rate": ("Strikeout rate", "K's per PA"),
+    # Bullpen
+    "diff_bp_era": ("Bullpen ERA", "Relief ERA"),
+    "diff_bp_freshness": ("Bullpen freshness", "Recent RP usage"),
+    "diff_bullpen_ip_3d": ("Bullpen workload", "IP last 3 days"),
+    # Momentum / form
+    "diff_ewm_win_pct": ("Recent form", "Exp-weighted win %"),
+    "diff_momentum": ("Momentum", "Weighted recent results"),
+    "diff_ewm_rs_per_game": ("Runs scored trend", "Recent scoring"),
+    "diff_ewm_ra_per_game": ("Runs allowed trend", "Recent pitching"),
+    # Elo
+    "h_elo": ("Home Elo", "Home team rating"),
+    "a_elo": ("Away Elo", "Away team rating"),
+    "diff_elo": ("Elo gap", "Rating differential"),
+    # Market
+    "market_odds_implied_home": ("Market odds", "Implied home probability"),
+    # Venue / travel
+    "diff_venue_win_pct": ("Venue advantage", "Home/away win %"),
+    "diff_travel_fatigue": ("Travel fatigue", "Recent travel load"),
+    "h_home_win_pct": ("Home record", "Home team at home"),
+    # Platoon
+    "diff_platoon_adv": ("Platoon advantage", "Handedness matchup"),
+    "h_sp_throws": ("Home SP handedness", "L=1, R=0"),
+    "a_sp_throws": ("Away SP handedness", "L=1, R=0"),
+    # Defense
+    "diff_def_proxy": ("Defense", "Defensive rating"),
+    # Run differential
+    "diff_rd_7d": ("Run diff L7", "7-day run differential"),
+    # Interactions
+    "interact_elo_x_sp": ("Elo × Pitching", "Combined team + SP edge"),
+    "interact_elo_x_momentum": ("Elo × Momentum", "Rating × recent form"),
+    "interact_sp_x_bp": ("SP × Bullpen", "Pitching depth"),
+}
+
+
+def _humanize_factor(
+    feat: str, raw_val: float, game_fv: "GameFeatureVector"
+) -> tuple[str, str]:
+    """Convert a raw feature name to (label, detail_string)."""
+    if feat in _FACTOR_LABELS:
+        label, base_detail = _FACTOR_LABELS[feat]
+        # Add directional context
+        if feat.startswith("diff_"):
+            if raw_val > 0.1:
+                detail = f"Home edge · {base_detail}"
+            elif raw_val < -0.1:
+                detail = f"Away edge · {base_detail}"
+            else:
+                detail = f"Even · {base_detail}"
+        else:
+            detail = base_detail
+        return label, detail
+
+    # Fallback: clean up the raw name
+    label = feat.replace("_", " ").replace("diff ", "").title()
+    if len(label) > 25:
+        label = label[:25]
+    return label, ""

@@ -44,6 +44,9 @@ async def get_daily_predictions(
     target_date = date or _today()
     games = _load_from_file(target_date)
 
+    # Enrich with betting data from the same file
+    games = _enrich_with_betting(target_date, games)
+
     return DailyPredictionsResponse(
         date=target_date,
         games=[GamePredictionResponse(**g) for g in games],
@@ -93,6 +96,41 @@ async def get_prediction(game_id: str):
 def _today() -> str:
     from datetime import date as d
     return d.today().isoformat()
+
+
+def _enrich_with_betting(date_str: str, games: list[dict]) -> list[dict]:
+    """Merge betting slip data into prediction game dicts."""
+    path = _CACHE_DIR / f"{date_str}.json"
+    if not path.exists():
+        return games
+
+    data = json.loads(path.read_text())
+    slip = data.get("betting_slip")
+    if not slip or not slip.get("bets"):
+        return games
+
+    # Index bets by game_id
+    bets_by_game: dict[str, list[dict]] = {}
+    for b in slip["bets"]:
+        gid = b.get("game_id", "")
+        bets_by_game.setdefault(gid, []).append(b)
+
+    enriched = []
+    for g in games:
+        g = dict(g)  # shallow copy
+        game_bets = bets_by_game.get(g.get("game_id"), [])
+        if game_bets:
+            # Use the highest-edge bet for display
+            best = max(game_bets, key=lambda b: b.get("edge_pct", 0))
+            g["edge_pct"] = best.get("edge_pct", 0)
+            g["market_implied"] = best.get("implied_prob", 0)
+            g["bet_status"] = {
+                "side": f"{best.get('selection', '')}",
+                "odds": f"{'+' if best.get('odds', 0) > 0 else ''}{best.get('odds', 0):.0f}",
+                "stake": best.get("recommended_stake", 0),
+            }
+        enriched.append(g)
+    return enriched
 
 
 def cache_predictions(date_str: str, predictions: list[dict]):

@@ -40,6 +40,9 @@ class GamePredictionResponse(BaseModel):
     away_sp_wins: int | None = None
     away_sp_losses: int | None = None
     game_time: str = ""
+    edge_pct: float = 0.0
+    market_implied: float = 0.0
+    bet_status: dict | None = None
 
 
 class PredictionRequest(BaseModel):
