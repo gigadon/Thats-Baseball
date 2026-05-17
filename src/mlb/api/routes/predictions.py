@@ -99,6 +99,50 @@ async def get_prediction(game_id: str):
     raise HTTPException(status_code=404, detail=f"Prediction not found: {game_id}")
 
 
+@router.get("/scores")
+async def get_live_scores(
+    date: str = Query(default=None, description="Date in YYYY-MM-DD format"),
+):
+    """Fetch live scores for today's games from MLB API."""
+    from datetime import date as d
+
+    target_date = date or d.today().isoformat()
+    scores = await _fetch_scores(target_date)
+    return {"date": target_date, "scores": scores}
+
+
+# Scores cache: refreshed every 60s
+_scores_cache: dict[str, dict] = {}  # date_str -> {timestamp, scores}
+
+
+async def _fetch_scores(date_str: str) -> list[dict]:
+    """Fetch scores from MLB API with 60s cache."""
+    import time
+    from datetime import date as d
+
+    cached = _scores_cache.get(date_str)
+    if cached and (time.time() - cached["timestamp"]) < 60:
+        return cached["scores"]
+
+    try:
+        from mlb.data.mlb_api import MLBStatsClient
+        client = MLBStatsClient()
+        games = await client.get_schedule(d.fromisoformat(date_str))
+        scores = []
+        for g in games:
+            scores.append({
+                "game_id": g["game_id"],
+                "status": g["status"],
+                "home_score": g.get("home_score"),
+                "away_score": g.get("away_score"),
+                "inning": g.get("innings"),
+            })
+        _scores_cache[date_str] = {"timestamp": time.time(), "scores": scores}
+        return scores
+    except Exception:
+        return _scores_cache.get(date_str, {}).get("scores", [])
+
+
 def _today() -> str:
     from datetime import date as d
     return d.today().isoformat()
@@ -181,12 +225,31 @@ async def get_line_movement_data(
 
 
 def cache_predictions(date_str: str, predictions: list[dict]):
-    """Store predictions in memory and write to JSON file."""
-    from mlb.api.fileutil import safe_json_merge
+    """Store predictions in memory and write to JSON file.
 
-    _predictions_cache[date_str] = predictions
+    Merges by game_id so re-running mid-day doesn't drop finished games.
+    """
+    import fcntl
+    from mlb.api.fileutil import safe_json_read, safe_json_write
 
-    # Persist — merge into existing file (atomic write with locking)
     path = _CACHE_DIR / f"{date_str}.json"
-    safe_json_merge(path, "date", date_str)
-    safe_json_merge(path, "predictions", predictions)
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    lock_path = path.with_suffix(".lock")
+    lock_path.touch(exist_ok=True)
+    with open(lock_path, "r") as lock_file:
+        fcntl.flock(lock_file, fcntl.LOCK_EX)
+        try:
+            existing = safe_json_read(path)
+            # Merge: keep existing games, update/add from new predictions
+            existing_preds = {g["game_id"]: g for g in existing.get("predictions", [])}
+            for g in predictions:
+                existing_preds[g["game_id"]] = g
+            merged = list(existing_preds.values())
+            existing["date"] = date_str
+            existing["predictions"] = merged
+            safe_json_write(path, existing)
+        finally:
+            fcntl.flock(lock_file, fcntl.LOCK_UN)
+
+    _predictions_cache[date_str] = merged
