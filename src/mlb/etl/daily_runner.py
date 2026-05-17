@@ -1170,7 +1170,7 @@ class DailyRunner:
                             "rank_change": 0,
                             "tier": _bat_tier(row["score"]),
                         })
-                        if i >= 49:  # Top 50 per position
+                        if i >= 149:  # Top 150 per position
                             break
 
                     cache_player_rankings(date_str, pos, {
@@ -1280,7 +1280,7 @@ class DailyRunner:
                             "rank_change": 0,
                             "tier": _pit_tier(row["score"]),
                         })
-                        if i >= 49:
+                        if i >= 149:
                             break
 
                     cache_player_rankings(date_str, pos, {
