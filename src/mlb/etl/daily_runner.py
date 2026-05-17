@@ -1156,9 +1156,15 @@ class DailyRunner:
                             "score": round(float(row["score"]), 1),
                             "key_stats": {
                                 "avg": round(float(row["avg"]), 3),
+                                "obp": round(float(row["obp"]), 3),
+                                "slg": round(float(row["slg"]), 3),
                                 "ops": round(float(row["ops"]), 3),
                                 "hr": int(row["hr"]),
                                 "rbi": int(row["rbi"]),
+                                "r": int(row["runs"]),
+                                "h": int(row["hits"]),
+                                "sb": int(row["sb"]),
+                                "so": int(row["so"]),
                             },
                             "games_played": int(row["games"]),
                             "rank_change": 0,
@@ -1181,6 +1187,32 @@ class DailyRunner:
             pit_df["game_date"] = pd.to_datetime(pit_df["game_date"])
             pit_df = pit_df[pit_df["game_date"] <= str(target_date)]
 
+            # Derive W/L decisions: pitcher with most IP on winning/losing team gets decision
+            games_path = self.data_dir / f"games_{season}.csv"
+            pitcher_decisions: dict[int, dict] = {}  # player_id -> {wins, losses}
+            if games_path.exists():
+                games_df = pd.read_csv(games_path)
+                games_df = games_df[games_df["status"] == "Final"] if "status" in games_df.columns else games_df
+                for _, game in games_df.iterrows():
+                    gid = game["game_id"]
+                    home_won = game["home_score"] > game["away_score"]
+                    game_pitching = pit_df[pit_df["game_id"] == gid]
+                    if game_pitching.empty:
+                        continue
+                    for side, won in [("home", home_won), ("away", not home_won)]:
+                        side_pitchers = game_pitching[game_pitching["side"] == side]
+                        if side_pitchers.empty:
+                            continue
+                        # Pitcher with most IP on that side gets the decision
+                        top_pitcher = side_pitchers.loc[side_pitchers["innings_pitched"].idxmax()]
+                        pid = int(top_pitcher["player_id"])
+                        if pid not in pitcher_decisions:
+                            pitcher_decisions[pid] = {"wins": 0, "losses": 0}
+                        if won:
+                            pitcher_decisions[pid]["wins"] += 1
+                        else:
+                            pitcher_decisions[pid]["losses"] += 1
+
             player_pit = pit_df.groupby(["player_id", "player_name", "team_id"]).agg(
                 games=("game_id", "nunique"),
                 ip=("innings_pitched", "sum"),
@@ -1189,6 +1221,7 @@ class DailyRunner:
                 bb=("walks_allowed", "sum"),
                 k=("strikeouts_recorded", "sum"),
                 pitches=("pitches_thrown", "sum"),
+                runs_a=("runs_allowed", "sum"),
             ).reset_index()
 
             if len(player_pit) > 0:
@@ -1197,6 +1230,16 @@ class DailyRunner:
                 player_pit["whip"] = (player_pit["hits_a"] + player_pit["bb"]) / player_pit["ip"].clip(lower=0.1)
                 player_pit["k9"] = (player_pit["k"] / player_pit["ip"].clip(lower=0.1)) * 9
                 player_pit["ip_per_game"] = player_pit["ip"] / player_pit["games"]
+                player_pit["h9"] = (player_pit["hits_a"] / player_pit["ip"].clip(lower=0.1)) * 9
+                player_pit["bb9"] = (player_pit["bb"] / player_pit["ip"].clip(lower=0.1)) * 9
+
+                # Add W/L from decisions
+                player_pit["wins"] = player_pit["player_id"].map(
+                    lambda pid: pitcher_decisions.get(pid, {}).get("wins", 0)
+                )
+                player_pit["losses"] = player_pit["player_id"].map(
+                    lambda pid: pitcher_decisions.get(pid, {}).get("losses", 0)
+                )
 
                 # Classify SP vs RP based on avg IP per game
                 player_pit["is_sp"] = player_pit["ip_per_game"] >= 4.0
@@ -1237,10 +1280,16 @@ class DailyRunner:
                             "position": pos,
                             "score": round(float(row["score"]), 1),
                             "key_stats": {
+                                "w": int(row["wins"]),
+                                "l": int(row["losses"]),
                                 "era": round(float(row["era"]), 2),
-                                "whip": round(float(row["whip"]), 2),
-                                "k9": round(float(row["k9"]), 1),
                                 "ip": round(float(row["ip"]), 1),
+                                "k9": round(float(row["k9"]), 1),
+                                "whip": round(float(row["whip"]), 2),
+                                "h": int(row["hits_a"]),
+                                "bb": int(row["bb"]),
+                                "k": int(row["k"]),
+                                "hr": 0,  # Not available in raw data
                             },
                             "games_played": int(row["games"]),
                             "rank_change": 0,
