@@ -254,11 +254,8 @@ class TrainingDataBuilder:
             row["is_dome"] = 1 if is_dome else 0
             row["game_month"] = game_date.month
 
-            # Real weather features (defaults — no historical weather data)
-            row["temperature"] = 72.0
-            row["wind_speed"] = 5.0
-            row["humidity"] = 50.0
-            row["is_outdoor"] = 0 if is_dome else 1
+            # Weather features — historical defaults are not useful (constant),
+            # so we skip them for training. Live predictions inject real weather.
 
             # Elo ratings (pre-game)
             h_elo = elo_ratings.get(home, 1500.0)
@@ -267,25 +264,62 @@ class TrainingDataBuilder:
             row["a_elo"] = a_elo
             row["elo_diff"] = h_elo - a_elo
 
-            # Market odds features — use real odds if available, else Elo-derived proxy.
+            # Market odds features — use real odds if available, else
+            # a multi-factor synthetic proxy that's intentionally different
+            # from raw Elo (which is already a feature) to avoid collinearity.
             odds_key = (game_date.isoformat() if hasattr(game_date, 'isoformat') else str(game_date), home, away)
             real_odds = odds_history.get(odds_key)
             if real_odds:
                 row["market_home_prob"] = real_odds["market_home_prob"]
-                row["market_away_prob"] = 1.0 - real_odds["market_home_prob"]
-                row["market_total"] = real_odds.get("total_line", 8.5) or 8.5
             else:
-                # Elo→win prob as proxy (correlates ~0.85 with market).
-                # Add 24 Elo points for home-field advantage.
+                # Multi-factor proxy blending several independent signals:
+                #   40% Elo, 20% recent form, 20% SP matchup, 10% bullpen, 10% momentum
+                # This creates a market-like composite that differs from raw Elo.
+
+                # 1) Elo component (with HFA)
                 elo_home_adj = h_elo + 24
-                elo_prob_home = 1.0 / (1.0 + 10 ** ((a_elo - elo_home_adj) / 400.0))
-                # Deterministic noise to simulate market variance
+                elo_comp = 1.0 / (1.0 + 10 ** ((a_elo - elo_home_adj) / 400.0))
+
+                # 2) Recent form component (EWM win pct)
+                h_ewm = home_feat.get("ewm_win_pct", 0.500)
+                a_ewm = away_feat.get("ewm_win_pct", 0.500)
+                form_comp = h_ewm / (h_ewm + a_ewm) if (h_ewm + a_ewm) > 0 else 0.5
+
+                # 3) SP matchup component (ERA → win prob adjustment)
+                h_sp_era = row.get("h_sp_season_era", 4.50)
+                a_sp_era = row.get("a_sp_season_era", 4.50)
+                # Transform ERA difference to a probability-like score
+                era_diff = a_sp_era - h_sp_era  # positive = home SP better
+                sp_comp = 1.0 / (1.0 + np.exp(-era_diff * 0.5))
+
+                # 4) Bullpen component
+                h_bp_era = home_feat.get("bp_era", 4.00)
+                a_bp_era = away_feat.get("bp_era", 4.00)
+                bp_diff = a_bp_era - h_bp_era
+                bp_comp = 1.0 / (1.0 + np.exp(-bp_diff * 0.3))
+
+                # 5) Momentum component
+                h_mom = home_feat.get("momentum", 0.0)
+                a_mom = away_feat.get("momentum", 0.0)
+                mom_diff = h_mom - a_mom
+                mom_comp = 1.0 / (1.0 + np.exp(-mom_diff * 0.5))
+
+                # Weighted blend — Elo kept low to avoid collinearity with elo_diff feature.
+                # SP matchup is the strongest differentiator vs raw Elo.
+                market_prob = (
+                    elo_comp * 0.25 +
+                    form_comp * 0.20 +
+                    sp_comp * 0.30 +
+                    bp_comp * 0.15 +
+                    mom_comp * 0.10
+                )
+
+                # Deterministic jitter
                 noise_seed = hash(str(game["game_id"])) % 10000
-                noise = ((noise_seed / 10000.0) - 0.5) * 0.06  # ±0.03
-                elo_prob_home = max(0.15, min(0.85, elo_prob_home + noise))
-                row["market_home_prob"] = round(elo_prob_home, 4)
-                row["market_away_prob"] = round(1.0 - elo_prob_home, 4)
-                row["market_total"] = 8.5
+                noise = ((noise_seed / 10000.0) - 0.5) * 0.03  # ±0.015
+                market_prob = max(0.15, min(0.85, market_prob + noise))
+
+                row["market_home_prob"] = round(market_prob, 4)
 
             # Rest days
             h_last = last_game_date.get(home)
@@ -294,12 +328,10 @@ class TrainingDataBuilder:
             row["a_rest_days"] = (game_date - a_last).days if a_last else 5
             row["rest_diff"] = row["h_rest_days"] - row["a_rest_days"]
 
-            # Venue-specific rolling features (home team's home record, away team's road record)
-            row["h_home_win_pct"] = home_feat.get("venue_home_win_pct", 0.536)
-            row["a_away_win_pct"] = away_feat.get("venue_away_win_pct", 0.464)
-            row["diff_venue_win_pct"] = row["h_home_win_pct"] - row["a_away_win_pct"]
-            row["h_home_rs_per_game"] = home_feat.get("venue_home_rs_per_game", 4.5)
-            row["a_away_rs_per_game"] = away_feat.get("venue_away_rs_per_game", 4.5)
+            # Venue-specific win pct differential (already in h_/a_ from rolling stats)
+            h_home_wpct = home_feat.get("venue_home_win_pct", 0.536)
+            a_away_wpct = away_feat.get("venue_away_win_pct", 0.464)
+            row["diff_venue_win_pct"] = h_home_wpct - a_away_wpct
 
             # Starting pitcher season stats (entering this game)
             h_sp = sp_season.get((game["game_id"], home))
@@ -366,13 +398,8 @@ class TrainingDataBuilder:
                 row[f"a_{k}"] = a_recent[k] if a_recent else default
                 row[f"diff_{k}"] = row[f"h_{k}"] - row[f"a_{k}"]
 
-            # Batter-vs-pitcher matchup OPS (default to league average;
-            # historical BvP data not available in CSVs, but the model
-            # learns the feature exists and weights it when live data is
-            # provided at prediction time)
-            row["h_bvp_ops"] = 0.750
-            row["a_bvp_ops"] = 0.750
-            row["diff_bvp_ops"] = 0.0
+            # BvP matchup OPS — historical data not in CSVs, so omitted from
+            # training. Live predictions inject real BvP data when available.
 
             # Bullpen availability
             h_bp_avail = bp_avail.get((game["game_id"], home))
@@ -398,18 +425,14 @@ class TrainingDataBuilder:
             )
             row["diff_travel_fatigue"] = row["h_travel_fatigue"] - row["a_travel_fatigue"]
 
-            # Day/night game classification
+            # Day/night — only useful if game_time is in the CSV.
+            # Omit entirely when constant to avoid noise.
             if has_game_time:
                 game_time_str = game.get("game_time", "")
                 row["is_day_game"] = _classify_day_game(game_time_str, home)
-            else:
-                row["is_day_game"] = 0  # default to night (~70% of MLB games)
 
-            # ── Feature 1: Umpire Assignment ──
-            # Historical CSVs don't include umpire data, so use neutral default.
-            # The model learns the feature column exists; live predictions can
-            # inject real umpire K-rate effects later.
-            row["ump_k_rate_effect"] = 0.0
+            # Umpire data — not in historical CSVs, omitted from training.
+            # Live predictions inject real umpire effects when available.
 
             # ── Feature 2: Run Differential Trends (7-game) ──
             row["h_rd_7d"] = home_feat.get("rd_7d", 0.0)
@@ -460,29 +483,45 @@ class TrainingDataBuilder:
             row["diff_momentum"] = row["h_momentum"] - row["a_momentum"]
 
             # ── Feature 6: Bullpen Fatigue Tracking ──
-            row["h_bullpen_ip_3d"] = home_feat.get("bullpen_ip_3d", 6.0)
-            row["a_bullpen_ip_3d"] = away_feat.get("bullpen_ip_3d", 6.0)
-            row["diff_bullpen_ip_3d"] = row["h_bullpen_ip_3d"] - row["a_bullpen_ip_3d"]
+            # Bullpen IP is already in h_bp_ip_3d / a_bp_ip_3d from rolling stats
 
-            # ── Feature 8: Injury/IL Signals ──
-            # Historical IL data not available in CSVs — use neutral defaults.
-            # The model learns this feature from live predictions where real IL data is injected.
-            row["h_il_count"] = 0.0
-            row["a_il_count"] = 0.0
-            row["diff_il_count"] = 0.0
+            # IL signals — not in historical CSVs, omitted from training.
+            # Live predictions inject real IL data when available.
 
-            # ── Feature 7: Interaction Features (mismatch detection) ──
-            # Elo × SP quality: big Elo edge + strong SP = dominant game
-            elo_gap = row.get("elo_diff", 0.0) / 100.0  # Normalize to ~±2 range
-            sp_gap = row.get("diff_sp_season_era", 0.0)  # Negative = home SP better
-            bp_gap = row.get("diff_bp_freshness", 0.0)
-            row["interact_elo_x_sp"] = elo_gap * (-sp_gap)  # Both favor home → positive
-            row["interact_elo_x_bp"] = elo_gap * bp_gap
-            row["interact_sp_x_bp"] = (-sp_gap) * bp_gap
-            # Triple interaction: all three align = extreme mismatch
-            row["interact_elo_sp_bp"] = elo_gap * (-sp_gap) * bp_gap
-            # Momentum × Elo: hot team with Elo edge
-            row["interact_elo_x_momentum"] = elo_gap * row.get("diff_momentum", 0.0)
+            # ── Interaction Features (mismatch detection) ──
+            # Normalized component diffs for interaction terms
+            elo_gap = row.get("elo_diff", 0.0) / 100.0  # ~±2 range
+            sp_era_gap = row.get("diff_sp_season_era", 0.0)  # Negative = home SP better ERA
+            bp_fresh = row.get("diff_bp_freshness", 0.0)
+            mom_gap = row.get("diff_momentum", 0.0)
+            form_gap = row.get("diff_ewm_win_pct", 0.0) * 10  # Scale up
+
+            # Core interactions
+            row["interact_elo_x_sp"] = elo_gap * (-sp_era_gap)  # Both favor home → positive
+            row["interact_elo_x_bp"] = elo_gap * bp_fresh
+            row["interact_sp_x_bp"] = (-sp_era_gap) * bp_fresh
+            row["interact_elo_x_momentum"] = elo_gap * mom_gap
+
+            # NEW: SP quality × opposing offense (mismatch detector)
+            h_off_ops = home_feat.get("ops_14", 0.720)
+            a_off_ops = away_feat.get("ops_14", 0.720)
+            row["interact_hsp_vs_aoff"] = (-sp_era_gap) * (a_off_ops - 0.720) * 10
+            row["interact_asp_vs_hoff"] = sp_era_gap * (h_off_ops - 0.720) * 10
+
+            # NEW: Rest × form (rested team on a hot streak)
+            rest_gap = row.get("rest_diff", 0.0)
+            row["interact_rest_x_form"] = rest_gap * form_gap
+
+            # NEW: Park factor × SP quality (elite SP in hitter park)
+            pf = park["runs"]
+            row["interact_park_x_sp"] = (pf - 1.0) * 10 * (-sp_era_gap)
+
+            # NEW: Bullpen fatigue × close-game likelihood
+            # If both SPs are good (low ERA), game likely close → bullpen matters more
+            h_sp_era_val = row.get("h_sp_season_era", 4.50)
+            a_sp_era_val = row.get("a_sp_season_era", 4.50)
+            pitching_duel = max(0, (9.0 - h_sp_era_val - a_sp_era_val) / 4.0)
+            row["interact_bp_x_duel"] = bp_fresh * pitching_duel
 
             feature_rows.append(row)
 
@@ -1370,7 +1409,6 @@ class TrainingDataBuilder:
                     # Bullpen fatigue
                     "bp_ip_3d": bp_ip_3d,
                     "bp_games_5d": bp_games_5d,
-                    "bullpen_ip_3d": bp_ip_3d,  # explicit feature name for model
                     # 7-game run differential
                     "rd_7d": sum(rd_7_buffer) / len(rd_7_buffer) if rd_7_buffer else 0.0,
                     # Exponentially-weighted recent form
@@ -1457,7 +1495,6 @@ class TrainingDataBuilder:
             # Bullpen fatigue
             "bp_ip_3d": latest.get("bp_ip_3d", 0.0),
             "bp_games_5d": latest.get("bp_games_5d", 0),
-            "bullpen_ip_3d": latest.get("bullpen_ip_3d", latest.get("bp_ip_3d", 0.0)),
             # 7-game run differential
             "rd_7d": latest.get("rd_7d", 0.0),
             # Exponentially-weighted recent form

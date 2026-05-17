@@ -33,5 +33,18 @@ app.include_router(dashboard_router, tags=["dashboard"])
 
 
 @app.get("/api/health")
+@app.get("/api/v1/health")
 async def health():
-    return {"status": "ok", "service": "thats-baseball"}
+    """Health check — used by Docker HEALTHCHECK and load balancers."""
+    from datetime import date
+    from pathlib import Path
+
+    today = date.today().isoformat()
+    has_predictions = (Path("data/predictions") / f"{today}.json").exists()
+
+    return {
+        "status": "ok",
+        "service": "thats-baseball",
+        "date": today,
+        "predictions_ready": has_predictions,
+    }

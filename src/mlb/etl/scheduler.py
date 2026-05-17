@@ -50,6 +50,7 @@ class DailyScheduler:
         self._last_predict: date | None = None
         self._last_settle: date | None = None
         self._last_retrain: date | None = None
+        self._last_snapshot_hour: int | None = None
 
     async def start(self, run_now: bool = False):
         """Start the scheduler loop."""
@@ -84,6 +85,12 @@ class DailyScheduler:
                 logger.info("Starting scheduled settlement for %s...", yesterday)
                 await self._run_settlement(yesterday)
                 self._last_settle = today
+
+            # Capture line movement snapshot every 3 hours (10 AM, 1 PM, 4 PM, 7 PM ET)
+            if now.hour >= 10 and now.hour != self._last_snapshot_hour:
+                if now.hour in (10, 13, 16, 19):
+                    await self._capture_line_snapshot()
+                    self._last_snapshot_hour = now.hour
 
             # Weekly retrain: run on retrain_day after settlement
             if (
@@ -157,6 +164,9 @@ class DailyScheduler:
             except Exception as e:
                 logger.warning("Accuracy tracking failed for %s: %s", target, e)
 
+            # Check for model drift after accuracy is updated
+            await self._check_drift(target)
+
         except Exception:
             logger.exception("Settlement failed for %s", target)
 
@@ -226,6 +236,67 @@ class DailyScheduler:
 
         except Exception:
             logger.exception("Weekly retrain failed")
+
+    async def _capture_line_snapshot(self):
+        """Capture a line movement snapshot (current odds)."""
+        try:
+            from mlb.data.line_movement import capture_snapshot
+
+            n = await capture_snapshot(data_dir=self.data_dir)
+            if n > 0:
+                logger.info("Line snapshot captured: %d games", n)
+        except Exception:
+            logger.exception("Line snapshot capture failed")
+
+    async def _check_drift(self, today: date):
+        """Check for model drift and alert if accuracy drops below threshold."""
+        try:
+            from mlb.models.accuracy import load_all_accuracy
+
+            records = load_all_accuracy(self.data_dir)
+            if not records:
+                return
+
+            # Look at last 7 days of accuracy
+            cutoff = today - timedelta(days=7)
+            recent = [
+                r for r in records
+                if date.fromisoformat(r["date"]) >= cutoff
+            ]
+            if not recent:
+                return
+
+            all_results = [r for rec in recent for r in rec.get("results", [])]
+            total = len(all_results)
+            if total < 10:
+                return  # Not enough data to judge
+
+            correct = sum(1 for r in all_results if r.get("correct"))
+            accuracy = correct / total
+
+            if accuracy < 0.52:
+                logger.warning(
+                    "MODEL DRIFT DETECTED: 7d accuracy %.1f%% (%d/%d) — below 52%% threshold",
+                    accuracy * 100, correct, total,
+                )
+                try:
+                    from mlb.alerts import AlertService
+                    alerts = AlertService()
+                    await alerts.send_alert(
+                        f":warning: *Model Drift Alert*\n"
+                        f"7-day accuracy: *{accuracy:.1%}* ({correct}/{total} correct)\n"
+                        f"Threshold: 52% — consider early retrain"
+                    )
+                except Exception as e:
+                    logger.warning("Drift alert failed: %s", e)
+
+                # Trigger early retrain if it hasn't run in the last 3 days
+                if self._last_retrain is None or (today - self._last_retrain).days >= 3:
+                    logger.info("Triggering early retrain due to drift...")
+                    await self._run_retrain()
+                    self._last_retrain = today
+        except Exception:
+            logger.exception("Drift check failed")
 
     async def _run_predictions(self, today: date):
         """Generate predictions for today's games."""

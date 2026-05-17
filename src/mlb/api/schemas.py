@@ -43,6 +43,8 @@ class GamePredictionResponse(BaseModel):
     edge_pct: float = 0.0
     market_implied: float = 0.0
     bet_status: dict | None = None
+    line_movement: list[float] = []
+    weather: dict | None = None
 
 
 class PredictionRequest(BaseModel):

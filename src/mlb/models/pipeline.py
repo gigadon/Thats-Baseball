@@ -15,9 +15,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 from sklearn.impute import KNNImputer
-from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
-from sklearn.neural_network import MLPClassifier
-from sklearn.pipeline import Pipeline as SklearnPipeline
+from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.model_selection import TimeSeriesSplit, train_test_split
 from sklearn.preprocessing import StandardScaler
 
@@ -27,6 +25,12 @@ logger = logging.getLogger(__name__)
 
 MODEL_DIR = Path("models")
 
+# Columns that are NOT features — must be excluded before training
+NON_FEATURE_COLS = {
+    "game_id", "game_date", "home_team", "away_team",
+    "home_win", "home_score", "away_score", "total_runs", "season",
+}
+
 
 @dataclass
 class PipelineConfig:
@@ -34,8 +38,8 @@ class PipelineConfig:
 
     test_size: float = 0.20
     val_size: float = 0.10
-    feature_selection_threshold: float = 0.001  # Min importance to keep
-    max_features: int = 200  # Cap features after selection
+    feature_selection_threshold: float = 0.002  # Min importance to keep
+    max_features: int = 120  # Cap features — fewer = less overfitting
     impute_strategy: str = "knn"  # "knn" or "median"
     knn_neighbors: int = 5
     retrain_interval: int = 50  # Retrain every N new games
@@ -43,8 +47,9 @@ class PipelineConfig:
     ensemble_config: EnsembleConfig = field(default_factory=EnsembleConfig)
     # Features that MUST be included regardless of importance score
     forced_features: list[str] = field(default_factory=lambda: [
-        "market_home_prob", "market_away_prob", "market_total",
-        "elo_diff", "h_elo", "a_elo",
+        "market_home_prob", "elo_diff",
+        "diff_sp_season_era", "diff_ewm_win_pct",
+        "diff_momentum", "park_runs_factor",
     ])
 
 
@@ -242,76 +247,6 @@ class TrainingPipeline:
         study_catboost.optimize(catboost_objective, n_trials=n_trials)
         logger.info("CatBoost best AUC: %.4f", study_catboost.best_value)
 
-        # Tune RandomForest
-        def rf_objective(trial):
-            params = {
-                "n_estimators": trial.suggest_int("n_estimators", 200, 800),
-                "max_depth": trial.suggest_int("max_depth", 5, 20),
-                "min_samples_leaf": trial.suggest_int("min_samples_leaf", 3, 30),
-                "max_features": trial.suggest_categorical("max_features", ["sqrt", "log2"]),
-                "random_state": 42, "n_jobs": -1,
-            }
-            return _cv_auc(RandomForestClassifier, params)
-
-        study_rf = optuna.create_study(direction="maximize")
-        study_rf.optimize(rf_objective, n_trials=n_trials)
-        logger.info("RandomForest best AUC: %.4f", study_rf.best_value)
-
-        # Tune NeuralNet (MLP wrapped in StandardScaler pipeline)
-        def nn_objective(trial):
-            layer_config = trial.suggest_categorical(
-                "layer_config",
-                ["128_64_32", "256_128_64", "128_64", "256_128", "64_32"],
-            )
-            layer_map = {
-                "128_64_32": (128, 64, 32),
-                "256_128_64": (256, 128, 64),
-                "128_64": (128, 64),
-                "256_128": (256, 128),
-                "64_32": (64, 32),
-            }
-            hidden_layers = layer_map[layer_config]
-            params = {
-                "hidden_layer_sizes": hidden_layers,
-                "activation": "relu",
-                "solver": "adam",
-                "learning_rate": "adaptive",
-                "learning_rate_init": trial.suggest_float(
-                    "learning_rate_init", 0.0001, 0.01, log=True
-                ),
-                "alpha": trial.suggest_float("alpha", 1e-5, 1e-2, log=True),
-                "max_iter": 500,
-                "early_stopping": True,
-                "validation_fraction": 0.1,
-                "random_state": 42,
-            }
-            # MLP needs scaled features — use a pipeline for CV evaluation
-            aucs = []
-            for tr_idx, va_idx in cv.split(X_train_sel, y_train):
-                pipe = SklearnPipeline([
-                    ("scaler", StandardScaler()),
-                    ("mlp", MLPClassifier(**params)),
-                ])
-                pipe.fit(X_train_sel[tr_idx], y_train[tr_idx])
-                preds = pipe.predict_proba(X_train_sel[va_idx])[:, 1]
-                aucs.append(roc_auc_score(y_train[va_idx], preds))
-            return np.mean(aucs)
-
-        study_nn = optuna.create_study(direction="maximize")
-        study_nn.optimize(nn_objective, n_trials=n_trials)
-        logger.info("NeuralNet best AUC: %.4f", study_nn.best_value)
-
-        # Resolve best hidden_layer_sizes from categorical label
-        nn_best = dict(study_nn.best_params)
-        layer_map = {
-            "128_64_32": (128, 64, 32),
-            "256_128_64": (256, 128, 64),
-            "128_64": (128, 64),
-            "256_128": (256, 128),
-            "64_32": (64, 32),
-        }
-        nn_best["hidden_layer_sizes"] = layer_map[nn_best.pop("layer_config")]
-
         # Apply best params to the base models
         from mlb.models.base import ModelConfig
         best_configs = [
@@ -333,25 +268,10 @@ class TrainingPipeline:
                 **study_catboost.best_params,
                 "random_seed": 42, "verbose": 0,
             }),
-            ModelConfig(name="RandomForest", params={
-                **study_rf.best_params,
-                "random_state": 42, "n_jobs": -1,
-            }),
-            ModelConfig(name="NeuralNet", params={
-                **nn_best,
-                "activation": "relu",
-                "solver": "adam",
-                "learning_rate": "adaptive",
-                "max_iter": 500,
-                "early_stopping": True,
-                "validation_fraction": 0.1,
-                "random_state": 42,
-            }),
         ]
 
         from mlb.models.base import (
             XGBoostModel, GradientBoostingModel, LightGBMModel, CatBoostModel,
-            RandomForestModel, NeuralNetModel,
         )
         self.ensemble = EnsembleModel(self.config.ensemble_config)
         self.ensemble.base_models = [
@@ -359,8 +279,6 @@ class TrainingPipeline:
             GradientBoostingModel(best_configs[1]),
             LightGBMModel(best_configs[2]),
             CatBoostModel(best_configs[3]),
-            RandomForestModel(best_configs[4]),
-            NeuralNetModel(best_configs[5]),
         ]
 
         # Train ensemble with tuned models
@@ -575,3 +493,23 @@ class TrainingPipeline:
             X = X[:, col_idx]
 
         return X
+
+    @staticmethod
+    def load_training_data(
+        path: str | Path = "data/training_data.parquet",
+    ) -> tuple[pd.DataFrame, pd.Series, pd.Series, np.ndarray]:
+        """Load training parquet and return (features, target, dates, sample_weights).
+
+        Drops non-feature columns (scores, IDs) and computes time-decay weights.
+        """
+        df = pd.read_parquet(path)
+        feature_cols = [c for c in df.columns if c not in NON_FEATURE_COLS]
+        X = df[feature_cols]
+        y = df["home_win"]
+        dates = pd.to_datetime(df["game_date"])
+
+        max_date = dates.max()
+        days_ago = (max_date - dates).dt.days.values
+        sample_weight = np.exp(-np.log(2) * days_ago / 365)
+
+        return X, y, dates, sample_weight

@@ -13,6 +13,7 @@ from mlb.api.schemas import (
     GamePredictionResponse,
     PredictionRequest,
 )
+from mlb.data.line_movement import get_all_line_movements
 
 router = APIRouter()
 
@@ -46,6 +47,9 @@ async def get_daily_predictions(
 
     # Enrich with betting data from the same file
     games = _enrich_with_betting(target_date, games)
+
+    # Enrich with line movement data
+    games = _enrich_with_line_movement(target_date, games)
 
     return DailyPredictionsResponse(
         date=target_date,
@@ -131,6 +135,45 @@ def _enrich_with_betting(date_str: str, games: list[dict]) -> list[dict]:
             }
         enriched.append(g)
     return enriched
+
+
+def _enrich_with_line_movement(date_str: str, games: list[dict]) -> list[dict]:
+    """Add line movement sparkline data to each game."""
+    movements = get_all_line_movements(date_str)
+    if not movements:
+        return games
+
+    enriched = []
+    for g in games:
+        g = dict(g)
+        key = (g.get("home_team", ""), g.get("away_team", ""))
+        probs = movements.get(key, [])
+        if probs:
+            g["line_movement"] = probs
+        enriched.append(g)
+    return enriched
+
+
+@router.get("/line-movement")
+async def get_line_movement_data(
+    date: str = Query(default=None),
+):
+    """Get line movement data for all games on a date."""
+    target_date = date or _today()
+    movements = get_all_line_movements(target_date)
+
+    result = []
+    for (home, away), probs in movements.items():
+        result.append({
+            "home_team": home,
+            "away_team": away,
+            "snapshots": probs,
+            "open": probs[0] if probs else None,
+            "current": probs[-1] if probs else None,
+            "movement": round(probs[-1] - probs[0], 4) if len(probs) >= 2 else 0,
+        })
+
+    return {"date": target_date, "games": result}
 
 
 def cache_predictions(date_str: str, predictions: list[dict]):

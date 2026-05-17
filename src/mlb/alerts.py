@@ -45,6 +45,18 @@ class AlertService:
     def email_enabled(self) -> bool:
         return bool(self.email_to and self.smtp_user and self.smtp_password)
 
+    async def send_alert(self, text: str):
+        """Send a generic text alert to Slack."""
+        if self.slack_enabled:
+            payload = {
+                "blocks": [
+                    {"type": "section", "text": {"type": "mrkdwn", "text": text}},
+                ],
+            }
+            await self._send_slack(payload)
+        else:
+            logger.info("Alert (no Slack): %s", text)
+
     async def send_betting_alert(self, result: dict[str, Any]):
         """Send alerts for today's predictions and value bets."""
         preds = result.get("predictions", [])

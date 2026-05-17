@@ -180,6 +180,7 @@ class DailyRunner:
                     p, game_lookup.get(p.game_id, {}),
                     sp_stats=sp_stats,
                     live_standings=live_standings,
+                    weather_data=weather_data,
                 )
                 for p in predictions
             ]
@@ -684,20 +685,15 @@ class DailyRunner:
                     abs(h_ml) / (abs(h_ml) + 100) if h_ml < 0
                     else 100 / (h_ml + 100)
                 )
+                features["has_real_odds"] = True
             else:
                 features["market_home_prob"] = 0.5
-            if a_ml is not None and a_ml != 0:
-                features["market_away_prob"] = (
-                    abs(a_ml) / (abs(a_ml) + 100) if a_ml < 0
-                    else 100 / (a_ml + 100)
-                )
-            else:
-                features["market_away_prob"] = 0.5
+                features["has_real_odds"] = False
             features["market_total"] = game_odds.get("total_line", 8.5) or 8.5
         else:
             features["market_home_prob"] = 0.5
-            features["market_away_prob"] = 0.5
             features["market_total"] = 8.5
+            features["has_real_odds"] = False
 
         # Elo ratings
         h_elo = self._elo_ratings.get(home, 1500.0)
@@ -860,19 +856,42 @@ class DailyRunner:
         features["diff_momentum"] = features["h_momentum"] - features["a_momentum"]
 
         # ── Feature 6: Bullpen Fatigue Tracking ──
-        features["h_bullpen_ip_3d"] = home_feat.get("bullpen_ip_3d", home_feat.get("bp_ip_3d", 6.0))
-        features["a_bullpen_ip_3d"] = away_feat.get("bullpen_ip_3d", away_feat.get("bp_ip_3d", 6.0))
-        features["diff_bullpen_ip_3d"] = features["h_bullpen_ip_3d"] - features["a_bullpen_ip_3d"]
+        features["h_bp_ip_3d"] = home_feat.get("bp_ip_3d", home_feat.get("bullpen_ip_3d", 6.0))
+        features["a_bp_ip_3d"] = away_feat.get("bp_ip_3d", away_feat.get("bullpen_ip_3d", 6.0))
+        features["diff_bp_ip_3d"] = features["h_bp_ip_3d"] - features["a_bp_ip_3d"]
 
         # ── Feature 7: Interaction Features (mismatch detection) ──
         elo_gap = features.get("elo_diff", 0.0) / 100.0
         sp_gap = features.get("diff_sp_season_era", 0.0)
         bp_gap = features.get("diff_bp_freshness", 0.0)
+        mom_gap = features.get("diff_momentum", 0.0)
+        form_gap = features.get("diff_ewm_win_pct", 0.0) * 10
+
         features["interact_elo_x_sp"] = elo_gap * (-sp_gap)
         features["interact_elo_x_bp"] = elo_gap * bp_gap
         features["interact_sp_x_bp"] = (-sp_gap) * bp_gap
-        features["interact_elo_sp_bp"] = elo_gap * (-sp_gap) * bp_gap
-        features["interact_elo_x_momentum"] = elo_gap * features.get("diff_momentum", 0.0)
+        features["interact_elo_x_momentum"] = elo_gap * mom_gap
+
+        # SP quality × opposing offense
+        h_off_ops = home_feat.get("ops_14", 0.720)
+        a_off_ops = away_feat.get("ops_14", 0.720)
+        features["interact_hsp_vs_aoff"] = (-sp_gap) * (a_off_ops - 0.720) * 10
+        features["interact_asp_vs_hoff"] = sp_gap * (h_off_ops - 0.720) * 10
+
+        # Rest × form
+        rest_gap = features.get("rest_diff", 0.0)
+        features["interact_rest_x_form"] = rest_gap * form_gap
+
+        # Park factor × SP quality
+        park = PARK_FACTORS.get(home, PARK_DEFAULT)
+        pf = park["runs"]
+        features["interact_park_x_sp"] = (pf - 1.0) * 10 * (-sp_gap)
+
+        # Bullpen × pitching duel likelihood
+        h_sp_era_val = features.get("h_sp_season_era", 4.50)
+        a_sp_era_val = features.get("a_sp_season_era", 4.50)
+        pitching_duel = max(0, (9.0 - h_sp_era_val - a_sp_era_val) / 4.0)
+        features["interact_bp_x_duel"] = bp_gap * pitching_duel
 
         # ── Feature 8: Injury/IL Signals ──
         ic = injury_counts or {}
@@ -1143,6 +1162,7 @@ class DailyRunner:
         game: dict = None,
         sp_stats: dict[int, dict] | None = None,
         live_standings: dict[str, dict] | None = None,
+        weather_data: dict | None = None,
     ) -> dict:
         game = game or {}
         home_sp = game.get("home_probable_pitcher") or {}
@@ -1158,7 +1178,7 @@ class DailyRunner:
         h_sp_data = sp_stats.get(home_sp.get("player_id")) if home_sp else None
         a_sp_data = sp_stats.get(away_sp.get("player_id")) if away_sp else None
 
-        return {
+        result = {
             "game_id": pred.game_id,
             "game_date": pred.game_date,
             "home_team": pred.home_team_id,
@@ -1190,7 +1210,20 @@ class DailyRunner:
             "away_sp_wins": a_sp_data.get("wins") if a_sp_data else None,
             "away_sp_losses": a_sp_data.get("losses") if a_sp_data else None,
             "game_time": game.get("game_time", ""),
+            "weather": None,
         }
+        # Add weather if available
+        weather_data = weather_data or {}
+        wx = weather_data.get(pred.home_team_id)
+        if wx:
+            result["weather"] = {
+                "temp": wx.temperature_f,
+                "wind": wx.wind_speed_mph,
+                "wind_dir": wx.wind_direction,
+                "humidity": wx.humidity_pct,
+                "is_dome": wx.is_dome,
+            }
+        return result
 
     @staticmethod
     def _slip_to_dict(slip: BettingSlip) -> dict:

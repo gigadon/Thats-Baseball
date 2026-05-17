@@ -180,6 +180,16 @@ async def get_accuracy():
     )
 
 
+@router.get("/clv")
+async def get_clv(
+    days: int = Query(30, ge=1, le=365),
+):
+    """Get Closing Line Value summary over the last N days."""
+    from mlb.betting.clv import compute_clv_summary
+
+    return compute_clv_summary(days=days)
+
+
 @router.get("/stadium/{team_id}", response_model=StadiumAnalysisResponse)
 async def get_stadium_analysis(team_id: str):
     """Get stadium factors and analysis for a team."""

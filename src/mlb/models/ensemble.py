@@ -1,8 +1,7 @@
 """Stacking ensemble with logistic regression meta-learner.
 
 Architecture:
-    Layer 1: XGBoost (0.22), GBM (0.18), LightGBM (0.22), CatBoost (0.18),
-             RF (0.08), NeuralNet (0.12)
+    Layer 1: XGBoost (0.28), LightGBM (0.28), CatBoost (0.22), GBM (0.22)
     Layer 2: Logistic Regression meta-model trained on OOF predictions
 
 Supports both weighted average and stacking modes.
@@ -33,6 +32,8 @@ from mlb.models.base import (
     _expected_calibration_error,
 )
 
+# NeuralNetModel and RandomForestModel still imported for load() compatibility
+
 logger = logging.getLogger(__name__)
 
 
@@ -42,12 +43,10 @@ class EnsembleConfig:
 
     mode: str = "stacking"  # "stacking" or "weighted_average"
     weights: dict[str, float] = field(default_factory=lambda: {
-        "XGBoost": 0.22,
-        "GradientBoosting": 0.18,
-        "LightGBM": 0.22,
-        "CatBoost": 0.18,
-        "RandomForest": 0.08,
-        "NeuralNet": 0.12,
+        "XGBoost": 0.28,
+        "LightGBM": 0.28,
+        "CatBoost": 0.22,
+        "GradientBoosting": 0.22,
     })
     cv_folds: int = 5
     random_state: int = 42
@@ -63,8 +62,6 @@ class EnsembleModel:
             GradientBoostingModel(),
             LightGBMModel(),
             CatBoostModel(),
-            RandomForestModel(),
-            NeuralNetModel(),
         ]
         self.meta_model: LogisticRegression | None = None
         self.calibrator: CalibratedClassifierCV | None = None

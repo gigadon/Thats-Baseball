@@ -109,17 +109,21 @@ class PredictionService:
 
         raw_home_prob = float(detailed["ensemble"][0])
 
-        # Blend with market odds (Vegas is ~57-58% accurate and encodes info
-        # the model can't see: injuries, lineup decisions, weather, sharp money).
-        # α = model weight. Tuned empirically: model adds most value when it
-        # disagrees with the market, so we weight the market heavily.
+        # Blend with REAL market odds (Vegas encodes info the model can't see:
+        # injuries, lineup decisions, weather, sharp money).
+        # Only apply when we have genuine market odds — NOT the Elo-derived
+        # proxy used in training (which is already an input feature).
         market_prob = game_fv.features.get("market_home_prob", 0.5)
-        if market_prob != 0.5:  # Real odds available
-            alpha = 0.35  # 35% model, 65% market
+        has_real_odds = game_fv.features.get("has_real_odds", False)
+
+        if has_real_odds and market_prob != 0.5:
+            # Real Vegas odds: blend 40% model, 60% market
+            alpha = 0.40
             home_win_prob = alpha * raw_home_prob + (1 - alpha) * market_prob
         else:
-            # No market data — use model only with home-field calibration
-            home_bias = 0.015
+            # No real market data (proxy or missing) — use model output
+            # with a small home-field calibration nudge
+            home_bias = 0.012
             distance_from_center = abs(raw_home_prob - 0.5)
             taper = max(0.0, 1.0 - distance_from_center * 4)
             home_win_prob = raw_home_prob + home_bias * taper
@@ -325,7 +329,7 @@ _FACTOR_LABELS: dict[str, tuple[str, str]] = {
     # Bullpen
     "diff_bp_era": ("Bullpen ERA", "Relief ERA"),
     "diff_bp_freshness": ("Bullpen freshness", "Recent RP usage"),
-    "diff_bullpen_ip_3d": ("Bullpen workload", "IP last 3 days"),
+    "diff_bp_ip_3d": ("Bullpen workload", "IP last 3 days"),
     # Momentum / form
     "diff_ewm_win_pct": ("Recent form", "Exp-weighted win %"),
     "diff_momentum": ("Momentum", "Weighted recent results"),
@@ -353,6 +357,19 @@ _FACTOR_LABELS: dict[str, tuple[str, str]] = {
     "interact_elo_x_sp": ("Elo × Pitching", "Combined team + SP edge"),
     "interact_elo_x_momentum": ("Elo × Momentum", "Rating × recent form"),
     "interact_sp_x_bp": ("SP × Bullpen", "Pitching depth"),
+    "interact_hsp_vs_aoff": ("SP vs Offense", "Home SP quality vs away offense"),
+    "interact_asp_vs_hoff": ("SP vs Offense", "Away SP quality vs home offense"),
+    "interact_rest_x_form": ("Rest × Form", "Rested team on hot streak"),
+    "interact_park_x_sp": ("Park × Pitching", "Stadium factor × SP edge"),
+    "interact_bp_x_duel": ("Bullpen × Duel", "Bullpen edge in low-scoring game"),
+    # Weather
+    "temperature": ("Temperature", "Game-time temp (°F)"),
+    "wind_speed": ("Wind speed", "Wind at stadium (mph)"),
+    "humidity": ("Humidity", "Stadium humidity %"),
+    "is_outdoor": ("Outdoor game", "Open-air stadium"),
+    "is_dome": ("Dome game", "Retractable/dome roof"),
+    # Run differential
+    "diff_rd_per_game": ("Run diff/game", "Per-game run differential"),
 }
 
 
