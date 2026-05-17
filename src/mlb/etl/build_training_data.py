@@ -1445,6 +1445,9 @@ class TrainingDataBuilder:
             vals = [e.get(field, 0) for e in entries]
             return sum(vals) / len(vals) if vals else 0
 
+        # Season-long averages (all games to date)
+        all_games = candidates
+
         features = {
             # Season
             "win_pct": latest["win_pct"],
@@ -1460,6 +1463,19 @@ class TrainingDataBuilder:
             "streak": latest["streak"],
             "rs_last_10": latest["rs_last_10"],
             "ra_last_10": latest["ra_last_10"],
+            # Season-long batting averages
+            "ops_season": _roll_avg(all_games, "g_ops"),
+            "obp_season": _roll_avg(all_games, "g_obp"),
+            "slg_season": _roll_avg(all_games, "g_slg"),
+            "avg_season": _roll_avg(all_games, "g_avg"),
+            "hr_season": _roll_avg(all_games, "g_hr"),
+            # Season-long pitching averages
+            "sp_era_season": _roll_avg(all_games, "sp_era"),
+            "sp_whip_season": _roll_avg(all_games, "sp_whip"),
+            "sp_k9_season": _roll_avg(all_games, "sp_k9"),
+            "bp_era_season": _roll_avg(all_games, "bp_era"),
+            "bp_whip_season": _roll_avg(all_games, "bp_whip"),
+            "bp_k9_season": _roll_avg(all_games, "bp_k9"),
             # Rolling batting (7-game)
             "avg_7": _roll_avg(last_7, "g_avg"),
             "obp_7": _roll_avg(last_7, "g_obp"),

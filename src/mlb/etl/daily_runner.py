@@ -1346,10 +1346,10 @@ def _compute_sp_score(era: float, whip: float, k9: float) -> float:
 
 
 def _compute_offense_score(feat: dict[str, float]) -> float:
-    """Quick offense composite from rolling stats (0-100)."""
-    ops = feat.get("ops_7", 0.700)
+    """Offense composite from season-long stats (0-100)."""
+    ops = feat.get("ops_season", feat.get("ops_14", 0.700))
     rs = feat.get("rs_per_game", 4.5)
-    hr = feat.get("hr_7", 1.0)
+    hr = feat.get("hr_season", feat.get("hr_7", 1.0))
     # Normalize: OPS .700 = 50, RS 4.5 = 50, HR 1.0 = 50
     ops_score = min(100, max(0, (ops - 0.500) / 0.400 * 100))
     rs_score = min(100, max(0, rs / 9.0 * 100))
@@ -1358,12 +1358,12 @@ def _compute_offense_score(feat: dict[str, float]) -> float:
 
 
 def _compute_pitching_score(feat: dict[str, float]) -> float:
-    """Quick pitching composite from SP + bullpen rolling stats (0-100, higher = better)."""
-    sp_era = feat.get("sp_era_7", 4.50)
-    sp_whip = feat.get("sp_whip_7", 1.30)
-    bp_era = feat.get("bp_era_7", 4.50)
-    bp_whip = feat.get("bp_whip_7", 1.30)
-    k9 = feat.get("sp_k9_7", 8.0)
+    """Pitching composite from season-long stats (0-100, higher = better)."""
+    sp_era = feat.get("sp_era_season", feat.get("sp_era_14", 4.50))
+    sp_whip = feat.get("sp_whip_season", feat.get("sp_whip_14", 1.30))
+    bp_era = feat.get("bp_era_season", feat.get("bp_era_14", 4.50))
+    bp_whip = feat.get("bp_whip_season", feat.get("bp_whip_14", 1.30))
+    k9 = feat.get("sp_k9_season", feat.get("sp_k9_14", 8.0))
     # Weighted: SP 60%, bullpen 40%
     era = sp_era * 0.6 + bp_era * 0.4
     whip = sp_whip * 0.6 + bp_whip * 0.4
@@ -1375,30 +1375,29 @@ def _compute_pitching_score(feat: dict[str, float]) -> float:
 
 
 def _compute_bullpen_score(feat: dict[str, float]) -> float:
-    """Bullpen quality from rolling stats (0-100, higher = better)."""
-    bp_era = feat.get("bp_era_7", 4.50)
-    bp_whip = feat.get("bp_whip_7", 1.30)
-    bp_k9 = feat.get("bp_k9_7", 8.0)
-    fatigue = feat.get("bp_ip_3d", 6.0)
+    """Bullpen quality from season-long stats (0-100, higher = better)."""
+    bp_era = feat.get("bp_era_season", feat.get("bp_era_14", 4.50))
+    bp_whip = feat.get("bp_whip_season", feat.get("bp_whip_14", 1.30))
+    bp_k9 = feat.get("bp_k9_season", feat.get("bp_k9_14", 8.0))
     era_score = min(100, max(0, (7.0 - bp_era) / 7.0 * 100))
     whip_score = min(100, max(0, (2.0 - bp_whip) / 2.0 * 100))
     k9_score = min(100, max(0, bp_k9 / 14.0 * 100))
-    # Penalize heavy recent usage (>10 IP in 3 days = overworked)
-    fatigue_penalty = max(0, (fatigue - 10) * 3)
-    return round(max(0, era_score * 0.4 + whip_score * 0.35 + k9_score * 0.25 - fatigue_penalty), 1)
+    return round(era_score * 0.4 + whip_score * 0.35 + k9_score * 0.25, 1)
 
 
 def _compute_defense_score(feat: dict[str, float]) -> float:
-    """Defense proxy from runs allowed vs pitching quality (0-100).
+    """Defense proxy from season runs allowed vs pitching quality (0-100).
 
     Teams that allow fewer runs than their pitching stats suggest have good defense.
     """
     ra = feat.get("ra_per_game", 4.5)
-    pit_era = feat.get("sp_era_7", 4.50) * 0.6 + feat.get("bp_era_7", 4.50) * 0.4
+    sp_era = feat.get("sp_era_season", feat.get("sp_era_14", 4.50))
+    bp_era = feat.get("bp_era_season", feat.get("bp_era_14", 4.50))
+    pit_era = sp_era * 0.6 + bp_era * 0.4
     # Runs allowed score (lower = better)
     ra_score = min(100, max(0, (7.0 - ra) / 7.0 * 100))
     # Defensive efficiency: if RA < expected from ERA, defense is helping
-    era_ra_diff = (pit_era / 9 * 9) - ra  # positive = defense saving runs
+    era_ra_diff = pit_era - ra  # positive = defense saving runs
     def_bonus = max(-15, min(15, era_ra_diff * 10))
     return round(min(100, max(0, ra_score + def_bonus)), 1)
 
