@@ -82,17 +82,18 @@ class DailyRunner:
             return result
 
         try:
-            # 2. Fetch today's schedule
+            # 2. Fetch today's schedule (all games, regardless of status)
             games = await self.mlb_client.get_schedule(target_date)
+            all_games = [g for g in games if g.get("game_id")]
+            # Only generate new predictions for games not yet final
             scheduled = [
-                g for g in games
-                if g["status"] in ("Scheduled", "Pre-Game", "Warmup", "In Progress")
-                or g["status"] == "Preview"
+                g for g in all_games
+                if g["status"] in ("Scheduled", "Pre-Game", "Warmup", "In Progress", "Preview")
             ]
-            logger.info("Found %d scheduled games for %s", len(scheduled), target_date)
+            logger.info("Found %d games for %s (%d predictable)", len(all_games), target_date, len(scheduled))
 
-            if not scheduled:
-                logger.info("No games scheduled for %s", target_date)
+            if not all_games:
+                logger.info("No games found for %s", target_date)
                 return result
 
             # 3. Build rolling team stats from CSV data
@@ -165,7 +166,7 @@ class DailyRunner:
                     result["errors"].append(f"Game {game['game_id']}: {e}")
 
             logger.info("Generated %d predictions", len(predictions))
-            game_lookup = {g["game_id"]: g for g in scheduled}
+            game_lookup = {g["game_id"]: g for g in all_games}
 
             # Fetch live standings for current records/streaks
             try:
@@ -187,6 +188,44 @@ class DailyRunner:
                 )
                 for p in predictions
             ]
+
+            # Add stub entries for games already started/finished (not predicted)
+            # so they still show up on the dashboard
+            predicted_ids = {p.game_id for p in predictions}
+            for game in all_games:
+                gid = game["game_id"]
+                if gid not in predicted_ids:
+                    home_id = game.get("home_team_id", "")
+                    away_id = game.get("away_team_id", "")
+                    h_std = live_standings.get(home_id, {})
+                    a_std = live_standings.get(away_id, {})
+                    result["predictions"].append({
+                        "game_id": gid,
+                        "game_date": target_date.isoformat(),
+                        "home_team": home_id,
+                        "away_team": away_id,
+                        "home_win_prob": 0.5,
+                        "away_win_prob": 0.5,
+                        "predicted_home_runs": 0.0,
+                        "predicted_away_runs": 0.0,
+                        "predicted_total": 0.0,
+                        "confidence": 0.0,
+                        "model_agreement": 0.0,
+                        "predicted_winner": home_id,
+                        "model_predictions": {},
+                        "top_factors": [],
+                        "home_wins": h_std.get("wins", 0),
+                        "home_losses": h_std.get("losses", 0),
+                        "away_wins": a_std.get("wins", 0),
+                        "away_losses": a_std.get("losses", 0),
+                        "home_streak": h_std.get("streak", ""),
+                        "away_streak": a_std.get("streak", ""),
+                        "game_time": game.get("game_time", ""),
+                        "home_moneyline": odds_by_matchup.get((home_id, away_id), {}).get("home_moneyline"),
+                        "away_moneyline": odds_by_matchup.get((home_id, away_id), {}).get("away_moneyline"),
+                        "total_line": odds_by_matchup.get((home_id, away_id), {}).get("total_line"),
+                        "status": game.get("status", ""),
+                    })
 
             # 7. Generate betting slip from already-fetched odds
             try:
