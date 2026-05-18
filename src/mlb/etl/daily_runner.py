@@ -1122,6 +1122,12 @@ class DailyRunner:
 
     async def _generate_player_rankings(self, target_date: date):
         """Generate player rankings from season batting/pitching CSV data."""
+        try:
+            await self._generate_player_rankings_inner(target_date)
+        except Exception:
+            logger.exception("Player rankings generation failed")
+
+    async def _generate_player_rankings_inner(self, target_date: date):
         season = target_date.year
         date_str = target_date.isoformat()
 
@@ -1189,17 +1195,23 @@ class DailyRunner:
                     return "rebuilding"
 
                 # Assign real positions from API roster data
-                player_bat["position"] = player_bat["player_id"].map(
-                    lambda pid: position_map.get(pid, "DH")
-                )
-                # Exclude pitchers from batting rankings
-                player_bat = player_bat[~player_bat["position"].isin(["P", "SP", "RP"])].copy()
+                has_positions = len(position_map) > 0
+                if has_positions:
+                    player_bat["position"] = player_bat["player_id"].map(
+                        lambda pid: position_map.get(pid, "DH")
+                    )
+                    # Exclude pitchers from batting rankings
+                    player_bat = player_bat[~player_bat["position"].isin(["P", "SP", "RP"])].copy()
 
-                # Group by position and rank within each
                 positions = ["C", "1B", "2B", "3B", "SS", "OF", "DH"]
+                sorted_bat = player_bat.sort_values("score", ascending=False)
+
                 for pos in positions:
-                    pos_players = player_bat[player_bat["position"] == pos].copy()
-                    pos_players = pos_players.sort_values("score", ascending=False)
+                    if has_positions:
+                        pos_players = sorted_bat[sorted_bat["position"] == pos]
+                    else:
+                        # Fallback: show all batters under every position
+                        pos_players = sorted_bat
 
                     ranked = []
                     for i, (_, row) in enumerate(pos_players.iterrows()):
@@ -1208,7 +1220,7 @@ class DailyRunner:
                             "player_id": int(row["player_id"]),
                             "player_name": row["player_name"],
                             "team_id": row["team_id"],
-                            "position": pos,
+                            "position": row.get("position", pos) if has_positions else pos,
                             "score": round(float(row["score"]), 1),
                             "key_stats": {
                                 "avg": round(float(row["avg"]), 3),
