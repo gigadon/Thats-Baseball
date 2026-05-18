@@ -227,9 +227,20 @@ class PredictionService:
             home_share = 0.45 + (home_win_prob - 0.5) * 0.3
             home_share = max(0.30, min(home_share, 0.70))
 
-            home_runs = total * home_share
-            away_runs = total * (1 - home_share)
-            return round(max(0.5, home_runs), 1), round(max(0.5, away_runs), 1)
+            home_runs = max(0.5, total * home_share)
+            away_runs = max(0.5, total * (1 - home_share))
+
+            # Ensure runs agree with win probability direction
+            if home_win_prob > 0.5 and home_runs <= away_runs:
+                avg = (home_runs + away_runs) / 2
+                home_runs = avg + 0.1
+                away_runs = avg - 0.1
+            elif home_win_prob < 0.5 and away_runs <= home_runs:
+                avg = (home_runs + away_runs) / 2
+                away_runs = avg + 0.1
+                home_runs = avg - 0.1
+
+            return round(home_runs, 1), round(away_runs, 1)
 
         # Heuristic estimation from feature scores
         # Average MLB game: ~4.5 runs per team, ~9 total
