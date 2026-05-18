@@ -844,9 +844,20 @@ function buildGameCard(g) {
     ? `<span style="font-weight:700;font-size:14px;font-variant-numeric:tabular-nums;margin-left:8px">${g.away_score_actual} - ${g.home_score_actual}</span>`
     : '';
 
+  // Odds line: favorite + moneyline + O/U
+  let oddsHtml = '';
+  if (g.home_moneyline != null && g.away_moneyline != null) {
+    const homeFav = g.home_moneyline < g.away_moneyline;
+    const favTeam = homeFav ? g.home_team : g.away_team;
+    const favOdds = homeFav ? g.home_moneyline : g.away_moneyline;
+    const fmtOdds = favOdds > 0 ? '+' + favOdds : favOdds;
+    const totalPart = g.total_line ? ` · O/U ${g.total_line}` : '';
+    oddsHtml = `<span style="color:var(--text-2);font-size:12px;font-weight:500;margin-left:10px">${favTeam} ${fmtOdds}${totalPart}</span>`;
+  }
+
   return `<article class="${cls}">
     <div class="card-status">
-      <div class="card-time">${statusHtml}${scoreHtml}</div>
+      <div class="card-time">${statusHtml}${scoreHtml}${oddsHtml}</div>
       <div class="card-badges">
         ${gameResult ? `<span class="badge ${gameResult==='win'?'badge-win':'badge-loss'}">${gameResult==='win'?'CORRECT':'WRONG'}</span>` : ''}
         ${edge >= 3 ? `<span class="badge badge-edge">EDGE +${edge.toFixed(1)}%</span>` : ''}

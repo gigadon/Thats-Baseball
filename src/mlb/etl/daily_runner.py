@@ -181,6 +181,9 @@ class DailyRunner:
                     sp_stats=sp_stats,
                     live_standings=live_standings,
                     weather_data=weather_data,
+                    game_odds=odds_by_matchup.get(
+                        (p.home_team_id, p.away_team_id)
+                    ),
                 )
                 for p in predictions
             ]
@@ -1379,11 +1382,13 @@ class DailyRunner:
         sp_stats: dict[int, dict] | None = None,
         live_standings: dict[str, dict] | None = None,
         weather_data: dict | None = None,
+        game_odds: dict | None = None,
     ) -> dict:
         game = game or {}
         home_sp = game.get("home_probable_pitcher") or {}
         away_sp = game.get("away_probable_pitcher") or {}
         sp_stats = sp_stats or {}
+        game_odds = game_odds or {}
         live_standings = live_standings or {}
 
         # Live team records and streaks from MLB API standings
@@ -1426,6 +1431,11 @@ class DailyRunner:
             "away_sp_wins": a_sp_data.get("wins") if a_sp_data else None,
             "away_sp_losses": a_sp_data.get("losses") if a_sp_data else None,
             "game_time": game.get("game_time", ""),
+            "home_moneyline": game_odds.get("home_moneyline"),
+            "away_moneyline": game_odds.get("away_moneyline"),
+            "total_line": game_odds.get("total_line"),
+            "over_odds": game_odds.get("over_odds"),
+            "under_odds": game_odds.get("under_odds"),
             "weather": None,
         }
         # Add weather if available

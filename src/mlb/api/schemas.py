@@ -40,6 +40,11 @@ class GamePredictionResponse(BaseModel):
     away_sp_wins: int | None = None
     away_sp_losses: int | None = None
     game_time: str = ""
+    home_moneyline: int | None = None
+    away_moneyline: int | None = None
+    total_line: float | None = None
+    over_odds: int | None = None
+    under_odds: int | None = None
     status: str = "Scheduled"
     home_score_actual: int | None = None
     away_score_actual: int | None = None
