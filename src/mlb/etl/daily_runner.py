@@ -1089,6 +1089,14 @@ class DailyRunner:
         batting_path = self.data_dir / f"batting_{season}.csv"
         pitching_path = self.data_dir / f"pitching_{season}.csv"
 
+        # Fetch real positions from MLB API rosters
+        position_map: dict[int, str] = {}
+        try:
+            position_map = await self.mlb_client.get_all_player_positions()
+            logger.info("Fetched positions for %d players from rosters", len(position_map))
+        except Exception as e:
+            logger.warning("Could not fetch player positions: %s", e)
+
         # ── Batting rankings (position players) ──
         if batting_path.exists():
             bat_df = pd.read_csv(batting_path)
@@ -1141,15 +1149,21 @@ class DailyRunner:
                     if score >= 25: return "below_average"
                     return "rebuilding"
 
-                # All position players go under these position buckets
-                positions = ["C", "1B", "2B", "3B", "SS", "OF", "DH"]
-                # Since we don't have position data in CSV, rank all batters together
-                # and put them in each position category (users can browse all hitters)
-                sorted_bat = player_bat.sort_values("score", ascending=False)
+                # Assign real positions from API roster data
+                player_bat["position"] = player_bat["player_id"].map(
+                    lambda pid: position_map.get(pid, "DH")
+                )
+                # Exclude pitchers from batting rankings
+                player_bat = player_bat[~player_bat["position"].isin(["P", "SP", "RP"])].copy()
 
+                # Group by position and rank within each
+                positions = ["C", "1B", "2B", "3B", "SS", "OF", "DH"]
                 for pos in positions:
+                    pos_players = player_bat[player_bat["position"] == pos].copy()
+                    pos_players = pos_players.sort_values("score", ascending=False)
+
                     ranked = []
-                    for i, (_, row) in enumerate(sorted_bat.iterrows()):
+                    for i, (_, row) in enumerate(pos_players.iterrows()):
                         ranked.append({
                             "rank": i + 1,
                             "player_id": int(row["player_id"]),
@@ -1173,7 +1187,7 @@ class DailyRunner:
                             "rank_change": 0,
                             "tier": _bat_tier(row["score"]),
                         })
-                        if i >= 149:  # Top 150 per position
+                        if i >= 149:
                             break
 
                     cache_player_rankings(date_str, pos, {

@@ -463,6 +463,31 @@ class MLBApiClient:
             })
         return players
 
+    async def get_all_player_positions(self) -> dict[int, str]:
+        """Fetch positions for all MLB players by iterating team rosters.
+
+        Returns {player_id: position_abbreviation} e.g. {12345: "SS", 67890: "CF"}.
+        Normalizes OF positions (LF/CF/RF -> OF).
+        """
+        positions: dict[int, str] = {}
+        for team_abbr, team_id in TEAM_IDS.items():
+            try:
+                roster = await self.get_roster(team_id, roster_type="fullSeason")
+                for player in roster:
+                    pid = player.get("player_id")
+                    pos = player.get("position", "")
+                    if pid and pos:
+                        # Normalize outfield positions
+                        if pos in ("LF", "CF", "RF"):
+                            pos = "OF"
+                        # Normalize TWP/UT to DH
+                        if pos in ("TWP", "UT", "PH", "PR"):
+                            pos = "DH"
+                        positions[pid] = pos
+            except Exception:
+                continue
+        return positions
+
     async def get_injuries(self, team_id: int) -> list[dict[str, Any]]:
         """Fetch current injuries/IL for a team.
 
