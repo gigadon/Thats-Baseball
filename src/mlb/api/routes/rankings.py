@@ -67,7 +67,7 @@ async def get_player_rankings(
     """Get player rankings by position (SP, RP, C, 1B, 2B, 3B, SS, OF, DH)."""
     from datetime import date as d
 
-    valid_positions = {"SP", "RP", "C", "1B", "2B", "3B", "SS", "OF", "DH"}
+    valid_positions = {"SP", "RP", "C", "1B", "2B", "3B", "SS", "OF", "DH", "ALL_BAT", "ALL_PIT"}
     pos = position.upper()
     if pos not in valid_positions:
         from fastapi import HTTPException

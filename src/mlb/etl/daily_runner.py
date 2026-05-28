@@ -424,6 +424,22 @@ class DailyRunner:
                     [batting_stats[p["id"]]["slg"] for p in players if p["id"] in batting_stats]
                 ) if any(p["id"] in batting_stats for p in players) else 0.400
 
+                # Position-weighted OPS (players come in batting order from API)
+                pos_weights = [1.0, 0.95, 0.90, 0.85, 0.80, 0.75, 0.70, 0.65, 0.60]
+                if ops_vals:
+                    starters = ops_vals[:9]
+                    wts = pos_weights[:len(starters)]
+                    game_feats[f"{prefix}_lineup_wt_ops"] = (
+                        sum(w * o for w, o in zip(wts, starters)) / sum(wts)
+                    )
+                    game_feats[f"{prefix}_lineup_top4_ops"] = (
+                        np.mean(starters[:4]) if len(starters) >= 4
+                        else np.mean(starters)
+                    )
+                else:
+                    game_feats[f"{prefix}_lineup_wt_ops"] = 0.720
+                    game_feats[f"{prefix}_lineup_top4_ops"] = 0.750
+
                 # Platoon advantage vs opposing SP
                 opp_side = "away" if side == "home" else "home"
                 sp_key = f"{opp_side}_probable_pitcher"
@@ -436,16 +452,30 @@ class DailyRunner:
 
                 adv_count = 0
                 total = 0
+                ops_weighted_adv = 0.0
+                ops_total_plat = 0.0
                 for p in players:
                     pi = player_info.get(p["id"])
                     if not pi:
                         continue
                     total += 1
                     bats = pi.get("bats", "R")
-                    if bats == "S" or (bats == "L" and sp_throws == "R") or (bats == "R" and sp_throws == "L"):
+                    b_ops = batting_stats.get(p["id"], {}).get("ops", 0.720)
+                    ops_total_plat += b_ops
+                    has_adv = (
+                        bats == "S"
+                        or (bats == "L" and sp_throws == "R")
+                        or (bats == "R" and sp_throws == "L")
+                    )
+                    if has_adv:
                         adv_count += 1
+                        ops_weighted_adv += b_ops
 
                 game_feats[f"{prefix}_platoon_adv"] = adv_count / total if total >= 3 else 0.5
+                game_feats[f"{prefix}_platoon_wt_adv"] = (
+                    ops_weighted_adv / ops_total_plat
+                    if ops_total_plat > 0 and total >= 3 else 0.5
+                )
 
             # Batter-vs-pitcher matchup OPS
             for prefix, side in [("h", "home"), ("a", "away")]:
@@ -488,7 +518,9 @@ class DailyRunner:
                 game_feats[f"{prefix}_lineup_hot_pct"] = hot / len(ops_vals) if ops_vals else 0.4
 
             # Differentials
-            for k in ("lineup_ops", "lineup_obp", "lineup_slg", "platoon_adv",
+            for k in ("lineup_ops", "lineup_obp", "lineup_slg",
+                       "lineup_wt_ops", "lineup_top4_ops",
+                       "platoon_adv", "platoon_wt_adv",
                        "lineup_ops_7d", "lineup_hot_pct"):
                 game_feats[f"diff_{k}"] = game_feats[f"h_{k}"] - game_feats[f"a_{k}"]
 
@@ -712,6 +744,7 @@ class DailyRunner:
         # Weather proxy features
         features["is_dome"] = 1 if home in DOME_TEAMS or home in RETRACTABLE_TEAMS else 0
         features["game_month"] = target_date.month
+        features["day_of_week"] = target_date.weekday()
 
         # Real weather features
         is_dome = home in DOME_TEAMS or home in RETRACTABLE_TEAMS
@@ -779,14 +812,6 @@ class DailyRunner:
             features[f"a_{feat_key}"] = a_val
             features[f"diff_{feat_key}"] = h_val - a_val
 
-        # Derived Statcast-proxy feature: K-BB% (one of the strongest
-        # predictors of future pitcher performance)
-        h_k_minus_bb = features.get("h_sp_season_k9", 8.0) - features.get("h_sp_season_bb9", 3.0)
-        a_k_minus_bb = features.get("a_sp_season_k9", 8.0) - features.get("a_sp_season_bb9", 3.0)
-        features["h_sp_k_minus_bb"] = h_k_minus_bb
-        features["a_sp_k_minus_bb"] = a_k_minus_bb
-        features["diff_sp_k_minus_bb"] = h_k_minus_bb - a_k_minus_bb
-
         # Pitcher rest days (days since SP last started) — live lookup
         h_rest = self._get_sp_rest_days(home_sp["player_id"], target_date) if home_sp else 5
         a_rest = self._get_sp_rest_days(away_sp["player_id"], target_date) if away_sp else 5
@@ -809,9 +834,14 @@ class DailyRunner:
 
         # Lineup and platoon features
         lf = (lineup_features or {}).get(game["game_id"], {})
-        for k in ("lineup_ops", "lineup_obp", "lineup_slg", "platoon_adv"):
-            features[f"h_{k}"] = lf.get(f"h_{k}", 0.720 if "ops" in k else 0.320 if "obp" in k else 0.400 if "slg" in k else 0.5)
-            features[f"a_{k}"] = lf.get(f"a_{k}", 0.720 if "ops" in k else 0.320 if "obp" in k else 0.400 if "slg" in k else 0.5)
+        _lineup_defaults = {
+            "lineup_ops": 0.720, "lineup_obp": 0.320, "lineup_slg": 0.400,
+            "lineup_wt_ops": 0.720, "lineup_top4_ops": 0.750,
+            "platoon_adv": 0.5, "platoon_wt_adv": 0.5,
+        }
+        for k, default in _lineup_defaults.items():
+            features[f"h_{k}"] = lf.get(f"h_{k}", default)
+            features[f"a_{k}"] = lf.get(f"a_{k}", default)
             features[f"diff_{k}"] = features[f"h_{k}"] - features[f"a_{k}"]
 
         # Lineup recent form (7-day OPS)
@@ -1142,6 +1172,14 @@ class DailyRunner:
         except Exception as e:
             logger.warning("Could not fetch player positions: %s", e)
 
+        # Fetch fielding stats for defensive score
+        fielding_stats: dict[int, dict[str, float]] = {}
+        try:
+            fielding_stats = await self.mlb_client.get_all_fielding_stats(season)
+            logger.info("Fetched fielding stats for %d players", len(fielding_stats))
+        except Exception as e:
+            logger.warning("Could not fetch fielding stats: %s", e)
+
         # ── Batting rankings (position players) ──
         if batting_path.exists():
             bat_df = pd.read_csv(batting_path)
@@ -1185,6 +1223,33 @@ class DailyRunner:
                     + (player_bat["rbi"] / player_bat["games"]) * 5
                     + (player_bat["sb"] / player_bat["games"]) * 3
                 )
+
+                # Defensive score from fielding stats
+                def _compute_def_score(row):
+                    pid = int(row["player_id"])
+                    fs = fielding_stats.get(pid)
+                    if not fs or fs.get("innings", 0) < 50:
+                        return 0.0
+                    # Fielding %: .970→0, .995→40
+                    fpct = fs.get("fielding_pct", 0.970)
+                    fpct_score = max(0, min(40, (fpct - 0.970) / 0.025 * 40))
+                    # Range factor: 0→0, 5.0→30
+                    rf = fs.get("range_factor", 0)
+                    rf_score = max(0, min(30, rf / 5.0 * 30))
+                    # Error rate (per 9 inn, inverted): 3.0→0, 0→20
+                    innings = max(fs.get("innings", 1), 1)
+                    errors = fs.get("errors", 0)
+                    err_rate = errors / (innings / 9.0)
+                    err_score = max(0, min(20, (3.0 - err_rate) / 3.0 * 20))
+                    # Position difficulty bonus
+                    pos = row.get("position", "DH") if len(position_map) > 0 else "DH"
+                    pos_bonus = {"C": 8, "SS": 6, "2B": 4, "3B": 4, "OF": 3, "1B": 0, "DH": 0}.get(pos, 0)
+                    return round(fpct_score + rf_score + err_score + pos_bonus, 1)
+
+                if len(fielding_stats) > 0:
+                    player_bat["def_score"] = player_bat.apply(_compute_def_score, axis=1)
+                else:
+                    player_bat["def_score"] = 0.0
 
                 # Tier assignment
                 def _bat_tier(score):
@@ -1233,6 +1298,7 @@ class DailyRunner:
                                 "h": int(row["hits"]),
                                 "sb": int(row["sb"]),
                                 "so": int(row["so"]),
+                                "def": round(float(row.get("def_score", 0)), 1),
                             },
                             "games_played": int(row["games"]),
                             "rank_change": 0,
@@ -1246,6 +1312,42 @@ class DailyRunner:
                         "ranking_date": date_str,
                         "rankings": ranked,
                     })
+
+                # ── ALL_BAT: all batters combined ──
+                all_bat_ranked = []
+                for i, (_, row) in enumerate(sorted_bat.iterrows()):
+                    all_bat_ranked.append({
+                        "rank": i + 1,
+                        "player_id": int(row["player_id"]),
+                        "player_name": row["player_name"],
+                        "team_id": row["team_id"],
+                        "position": row.get("position", "DH") if has_positions else "DH",
+                        "score": round(float(row["score"]), 1),
+                        "key_stats": {
+                            "avg": round(float(row["avg"]), 3),
+                            "obp": round(float(row["obp"]), 3),
+                            "slg": round(float(row["slg"]), 3),
+                            "ops": round(float(row["ops"]), 3),
+                            "hr": int(row["hr"]),
+                            "rbi": int(row["rbi"]),
+                            "r": int(row["runs"]),
+                            "h": int(row["hits"]),
+                            "sb": int(row["sb"]),
+                            "so": int(row["so"]),
+                            "def": round(float(row.get("def_score", 0)), 1),
+                        },
+                        "games_played": int(row["games"]),
+                        "rank_change": 0,
+                        "tier": _bat_tier(row["score"]),
+                    })
+                    if i >= 149:
+                        break
+
+                cache_player_rankings(date_str, "ALL_BAT", {
+                    "position": "ALL_BAT",
+                    "ranking_date": date_str,
+                    "rankings": all_bat_ranked,
+                })
 
                 logger.info("Generated batting player rankings: %d players", len(sorted_bat))
 
@@ -1356,6 +1458,44 @@ class DailyRunner:
                         "ranking_date": date_str,
                         "rankings": ranked,
                     })
+
+                # ── ALL_PIT: all pitchers combined ──
+                all_pit = player_pit[(player_pit["ip"] >= 10) & (player_pit["games"] >= 3)]
+                sorted_all_pit = all_pit.sort_values("score", ascending=False)
+
+                all_pit_ranked = []
+                for i, (_, row) in enumerate(sorted_all_pit.iterrows()):
+                    all_pit_ranked.append({
+                        "rank": i + 1,
+                        "player_id": int(row["player_id"]),
+                        "player_name": row["player_name"],
+                        "team_id": row["team_id"],
+                        "position": "SP" if row["is_sp"] else "RP",
+                        "score": round(float(row["score"]), 1),
+                        "key_stats": {
+                            "w": int(row["wins"]),
+                            "l": int(row["losses"]),
+                            "sv": int(row["saves"]),
+                            "era": round(float(row["era"]), 2),
+                            "ip": round(float(row["ip"]), 1),
+                            "k9": round(float(row["k9"]), 1),
+                            "whip": round(float(row["whip"]), 2),
+                            "h": int(row["hits_a"]),
+                            "bb": int(row["bb"]),
+                            "k": int(row["k"]),
+                        },
+                        "games_played": int(row["games"]),
+                        "rank_change": 0,
+                        "tier": _pit_tier(row["score"]),
+                    })
+                    if i >= 149:
+                        break
+
+                cache_player_rankings(date_str, "ALL_PIT", {
+                    "position": "ALL_PIT",
+                    "ranking_date": date_str,
+                    "rankings": all_pit_ranked,
+                })
 
                 logger.info("Generated pitching player rankings")
 

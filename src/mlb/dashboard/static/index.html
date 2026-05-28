@@ -1370,11 +1370,17 @@ let _playerPos = 'SP';
 let _playerSort = { key: 'rank', dir: 'asc' };
 
 function initPlayersUI() {
-  const positions = ['SP','RP','C','1B','2B','3B','SS','OF','DH'];
+  const posGroups = [
+    { label: 'Batters', key: 'ALL_BAT' },
+    { label: 'Pitchers', key: 'ALL_PIT' },
+    { sep: true },
+    ...['SP','RP','C','1B','2B','3B','SS','OF','DH'].map(p => ({ label: p, key: p })),
+  ];
   const container = document.getElementById('position-btns');
-  container.innerHTML = positions.map(p =>
-    `<button class="metric-btn${_playerPos===p?' active':''}" data-pos="${p}">${p}</button>`
-  ).join('');
+  container.innerHTML = posGroups.map(g => {
+    if (g.sep) return '<div class="filter-sep"></div>';
+    return `<button class="metric-btn${_playerPos===g.key?' active':''}" data-pos="${g.key}">${g.label}</button>`;
+  }).join('');
   container.querySelectorAll('.metric-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       _playerPos = btn.dataset.pos;
@@ -1390,19 +1396,21 @@ async function loadPlayers() {
   const data = await fetchJSON(`${API}/rankings/players/${_playerPos}`);
   if (!data || !data.rankings || data.rankings.length === 0) {
     document.getElementById('players-body').innerHTML = '<tr><td colspan="12" class="loading">No player data for this position</td></tr>';
-    document.getElementById('players-sub').textContent = `${_playerPos} · 0 players`;
+    const emptyLabel = _playerPos === 'ALL_BAT' ? 'All Batters' : _playerPos === 'ALL_PIT' ? 'All Pitchers' : _playerPos;
+    document.getElementById('players-sub').textContent = `${emptyLabel} · 0 players`;
     _playersData = [];
     return;
   }
 
   _playersData = data.rankings;
-  document.getElementById('players-sub').textContent = `${_playerPos} · ${_playersData.length} players`;
+  const posLabel = _playerPos === 'ALL_BAT' ? 'All Batters' : _playerPos === 'ALL_PIT' ? 'All Pitchers' : _playerPos;
+  document.getElementById('players-sub').textContent = `${posLabel} · ${_playersData.length} players`;
   _renderPlayersTable();
 }
 
 function _renderPlayersTable() {
   const players = [..._playersData];
-  const isPitcher = _playerPos === 'SP' || _playerPos === 'RP';
+  const isPitcher = _playerPos === 'SP' || _playerPos === 'RP' || _playerPos === 'ALL_PIT';
 
   // Determine stat columns from key_stats
   const statKeys = players[0] && players[0].key_stats ? Object.keys(players[0].key_stats) : [];
@@ -1428,7 +1436,7 @@ function _renderPlayersTable() {
     w: 'W', l: 'L', sv: 'SV', era: 'ERA', ip: 'IP', k9: 'K/9', whip: 'WHIP',
     h: 'H', bb: 'BB', k: 'K', hr: 'HR',
     avg: 'AVG', obp: 'OBP', slg: 'SLG', ops: 'OPS',
-    rbi: 'RBI', r: 'R', sb: 'SB', so: 'SO',
+    rbi: 'RBI', r: 'R', sb: 'SB', so: 'SO', def: 'DEF',
   };
 
   const cols = [
@@ -1470,7 +1478,7 @@ function _renderPlayersTable() {
     if (typeof val !== 'number') return val;
     if (['avg','obp','slg','ops'].includes(key)) return val.toFixed(3).replace(/^0/, '');
     if (['era','whip'].includes(key)) return val.toFixed(2);
-    if (['k9','h9','bb9'].includes(key)) return val.toFixed(1);
+    if (['k9','h9','bb9','def'].includes(key)) return val.toFixed(1);
     if (['ip'].includes(key)) return val.toFixed(1);
     return val.toString();
   }

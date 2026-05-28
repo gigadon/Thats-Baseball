@@ -628,6 +628,51 @@ class MLBApiClient:
             logger.warning("Failed to fetch pitcher records: %s", e)
         return records
 
+    async def get_all_fielding_stats(self, season: int) -> dict[int, dict[str, float]]:
+        """Fetch season fielding stats for all MLB position players.
+
+        Uses the /stats endpoint with group=fielding to bulk-fetch.
+        Returns {player_id: {fielding_pct, errors, assists, put_outs,
+        range_factor, innings}}.  When a player has multiple position
+        entries, the one with the most innings is kept.
+        """
+        stats: dict[int, dict[str, float]] = {}
+        try:
+            data = await self._get(
+                "/stats",
+                params={
+                    "stats": "season",
+                    "group": "fielding",
+                    "season": season,
+                    "sportId": 1,
+                    "limit": 800,
+                    "offset": 0,
+                    "sortStat": "gamesPlayed",
+                    "order": "desc",
+                },
+            )
+            for split in data.get("stats", [{}])[0].get("splits", []):
+                player = split.get("player", {})
+                pid = player.get("id")
+                stat = split.get("stat", {})
+                if not pid:
+                    continue
+                innings = float(stat.get("innings", 0) or 0)
+                # Keep entry with most innings for multi-position players
+                if pid in stats and stats[pid]["innings"] >= innings:
+                    continue
+                stats[pid] = {
+                    "fielding_pct": float(stat.get("fielding", 0) or 0),
+                    "errors": float(_int(stat.get("errors")) or 0),
+                    "assists": float(_int(stat.get("assists")) or 0),
+                    "put_outs": float(_int(stat.get("putOuts")) or 0),
+                    "range_factor": float(stat.get("rangeFactorPerGame", 0) or 0),
+                    "innings": innings,
+                }
+        except Exception as e:
+            logger.warning("Failed to fetch fielding stats: %s", e)
+        return stats
+
     # ─�� Batter vs Pitcher ──────────────────────────────────────
 
     async def get_batter_vs_pitcher(
