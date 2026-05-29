@@ -25,6 +25,7 @@ from mlb.models.base import (
     CatBoostModel,
     GradientBoostingModel,
     LightGBMModel,
+    LogisticRegressionModel,
     ModelMetrics,
     NeuralNetModel,
     RandomForestModel,
@@ -32,7 +33,7 @@ from mlb.models.base import (
     _expected_calibration_error,
 )
 
-# NeuralNetModel and RandomForestModel still imported for load() compatibility
+# NeuralNetModel and GradientBoostingModel still imported for load() compatibility
 
 logger = logging.getLogger(__name__)
 
@@ -43,10 +44,11 @@ class EnsembleConfig:
 
     mode: str = "stacking"  # "stacking" or "weighted_average"
     weights: dict[str, float] = field(default_factory=lambda: {
-        "XGBoost": 0.28,
-        "LightGBM": 0.28,
-        "CatBoost": 0.22,
-        "GradientBoosting": 0.22,
+        "XGBoost": 0.25,
+        "LightGBM": 0.25,
+        "CatBoost": 0.20,
+        "RandomForest": 0.15,
+        "LogisticRegression": 0.15,
     })
     cv_folds: int = 5
     random_state: int = 42
@@ -59,15 +61,20 @@ class EnsembleModel:
         self.config = config or EnsembleConfig()
         self.base_models: list[BaseModel] = [
             XGBoostModel(),
-            GradientBoostingModel(),
             LightGBMModel(),
             CatBoostModel(),
+            RandomForestModel(),
+            LogisticRegressionModel(),
         ]
         self.meta_model: LogisticRegression | None = None
         self.calibrator: CalibratedClassifierCV | None = None
         self.feature_names: list[str] = []
         self.is_fitted = False
         self._oof_metrics: dict[str, ModelMetrics] = {}
+        # Fold-trained models: fold_models[model_idx][fold_idx] = BaseModel
+        # Used at inference to average predictions (bagging), avoiding
+        # the leakage of retraining on full data after OOF stacking.
+        self.fold_models: list[list[BaseModel]] = []
 
     def train(
         self, X: np.ndarray, y: np.ndarray,
@@ -98,7 +105,12 @@ class EnsembleModel:
         self.is_fitted = True
 
     def _train_stacking(self, X: np.ndarray, y: np.ndarray):
-        """Train with stacking: OOF predictions → meta-learner."""
+        """Train with stacking: OOF predictions → meta-learner.
+
+        Fold-trained models are kept for inference (bagged predictions)
+        instead of retraining on full data, which would cause leakage
+        between the meta-learner's calibration and the base model outputs.
+        """
         n_samples = X.shape[0]
         n_models = len(self.base_models)
         oof_preds = np.zeros((n_samples, n_models))
@@ -109,8 +121,10 @@ class EnsembleModel:
             random_state=self.config.random_state,
         )
 
-        # Generate OOF predictions
+        # Generate OOF predictions and store fold-trained models
         sw = self._sample_weight
+        self.fold_models = [[] for _ in range(n_models)]
+
         for model_idx, model in enumerate(self.base_models):
             logger.info("Generating OOF predictions for %s", model.name)
             fold_preds = np.zeros(n_samples)
@@ -120,10 +134,11 @@ class EnsembleModel:
                 y_train = y[train_idx]
                 sw_train = sw[train_idx] if sw is not None else None
 
-                # Clone model for this fold
+                # Clone model for this fold and keep it
                 fold_model = model.__class__()
                 fold_model.train(X_train, y_train, self.feature_names, sample_weight=sw_train)
                 fold_preds[val_idx] = fold_model.predict_proba(X_val)
+                self.fold_models[model_idx].append(fold_model)
 
             oof_preds[:, model_idx] = fold_preds
 
@@ -146,21 +161,38 @@ class EnsembleModel:
                 self._oof_metrics[model.name].auc_roc,
             )
 
-        # Train meta-learner on OOF predictions
+        # Tune meta-learner regularization via CV on OOF predictions
+        from sklearn.metrics import brier_score_loss
+        best_c = 1.0
+        best_score = float("inf")
+        for c_val in [0.001, 0.01, 0.05, 0.1, 0.5, 1.0, 2.0, 5.0, 10.0]:
+            cv_briers = []
+            for tr_idx, val_idx in StratifiedKFold(
+                n_splits=5, shuffle=True, random_state=42
+            ).split(oof_preds, y):
+                lr = LogisticRegression(
+                    C=c_val, max_iter=1000, random_state=self.config.random_state
+                )
+                sw_tr = sw[tr_idx] if sw is not None else None
+                lr.fit(oof_preds[tr_idx], y[tr_idx], sample_weight=sw_tr)
+                probs = lr.predict_proba(oof_preds[val_idx])[:, 1]
+                cv_briers.append(brier_score_loss(y[val_idx], probs))
+            mean_brier = np.mean(cv_briers)
+            if mean_brier < best_score:
+                best_score = mean_brier
+                best_c = c_val
+        logger.info("Meta-learner tuned: C=%.4f (Brier=%.4f)", best_c, best_score)
+
+        # Train meta-learner on OOF predictions with best C
         self.meta_model = LogisticRegression(
-            C=1.0, max_iter=1000, random_state=self.config.random_state
+            C=best_c, max_iter=1000, random_state=self.config.random_state
         )
-        self.meta_model.fit(oof_preds, y)
-        logger.info("Meta-model trained on %d OOF predictions", n_samples)
+        self.meta_model.fit(oof_preds, y, sample_weight=sw)
+        logger.info("Meta-model trained on %d OOF predictions (C=%.4f)", n_samples, best_c)
 
         # Calibrate: fit isotonic regression on meta-model OOF outputs
         meta_probs = self.meta_model.predict_proba(oof_preds)[:, 1]
         self._fit_calibrator(meta_probs, y)
-
-        # Retrain base models on full dataset
-        for model in self.base_models:
-            model.train(X, y, self.feature_names, sample_weight=sw)
-            logger.info("%s retrained on full dataset", model.name)
 
     def _train_weighted(self, X: np.ndarray, y: np.ndarray):
         """Train with simple weighted average (no meta-learner)."""
@@ -220,17 +252,26 @@ class EnsembleModel:
 
     def evaluate(self, X: np.ndarray, y: np.ndarray) -> dict[str, ModelMetrics]:
         """Evaluate ensemble and each base model."""
+        from sklearn.metrics import brier_score_loss, log_loss, roc_auc_score
+
         results: dict[str, ModelMetrics] = {}
 
-        # Individual models
-        for model in self.base_models:
-            results[model.name] = model.evaluate(X, y)
+        # Individual models (use bagged fold predictions)
+        base_preds = self._get_base_predictions(X)
+        for i, model in enumerate(self.base_models):
+            probs = base_preds[:, i]
+            preds = (probs >= 0.5).astype(int)
+            results[model.name] = ModelMetrics(
+                accuracy=float(np.mean(preds == y)),
+                brier_score=float(brier_score_loss(y, probs)),
+                log_loss=float(log_loss(y, np.clip(probs, 1e-7, 1 - 1e-7))),
+                auc_roc=float(roc_auc_score(y, probs)),
+                calibration_error=_expected_calibration_error(y, probs),
+            )
 
         # Ensemble
         probs = self.predict_proba(X)
         preds = (probs >= 0.5).astype(int)
-        from sklearn.metrics import brier_score_loss, log_loss, roc_auc_score
-
         results["Ensemble"] = ModelMetrics(
             accuracy=float(np.mean(preds == y)),
             brier_score=float(brier_score_loss(y, probs)),
@@ -246,9 +287,20 @@ class EnsembleModel:
         weights = self.config.weights
         combined: dict[str, float] = {}
 
-        for model in self.base_models:
+        for model_idx, model in enumerate(self.base_models):
             w = weights.get(model.name, 0.25)
-            imp = model.feature_importance()
+            if self.fold_models and model_idx < len(self.fold_models):
+                # Average importance across fold models
+                fold_imps: list[dict[str, float]] = [
+                    fm.feature_importance() for fm in self.fold_models[model_idx]
+                ]
+                merged: dict[str, float] = {}
+                for fi in fold_imps:
+                    for feat, val in fi.items():
+                        merged[feat] = merged.get(feat, 0.0) + val / len(fold_imps)
+                imp = merged
+            else:
+                imp = model.feature_importance()
             for feat, val in imp.items():
                 combined[feat] = combined.get(feat, 0.0) + val * w
 
@@ -261,8 +313,14 @@ class EnsembleModel:
         directory = Path(directory)
         directory.mkdir(parents=True, exist_ok=True)
 
-        for model in self.base_models:
-            model.save(directory / f"{model.name}.joblib")
+        # Save fold-trained models (preferred) or single models (fallback)
+        if self.fold_models:
+            for model_idx, model in enumerate(self.base_models):
+                for fold_idx, fold_model in enumerate(self.fold_models[model_idx]):
+                    fold_model.save(directory / f"{model.name}_fold{fold_idx}.joblib")
+        else:
+            for model in self.base_models:
+                model.save(directory / f"{model.name}.joblib")
 
         if self.meta_model is not None:
             joblib.dump(self.meta_model, directory / "meta_model.joblib")
@@ -270,11 +328,13 @@ class EnsembleModel:
         if self.calibrator is not None:
             joblib.dump(self.calibrator, directory / "calibrator.joblib")
 
+        n_folds = len(self.fold_models[0]) if self.fold_models else 0
         joblib.dump(
             {
                 "config": self.config,
                 "feature_names": self.feature_names,
                 "oof_metrics": self._oof_metrics,
+                "n_folds": n_folds,
             },
             directory / "ensemble_meta.joblib",
         )
@@ -288,9 +348,25 @@ class EnsembleModel:
         self.config = meta["config"]
         self.feature_names = meta["feature_names"]
         self._oof_metrics = meta.get("oof_metrics", {})
+        n_folds = meta.get("n_folds", 0)
 
-        for model in self.base_models:
-            model.load(directory / f"{model.name}.joblib")
+        # Try loading fold-trained models first, fall back to single models
+        if n_folds > 0:
+            self.fold_models = []
+            for model in self.base_models:
+                folds = []
+                for k in range(n_folds):
+                    fold_model = model.__class__()
+                    fold_model.load(directory / f"{model.name}_fold{k}.joblib")
+                    folds.append(fold_model)
+                self.fold_models.append(folds)
+        else:
+            # Backward compat: load single models
+            self.fold_models = []
+            for model in self.base_models:
+                path = directory / f"{model.name}.joblib"
+                if path.exists():
+                    model.load(path)
 
         meta_path = directory / "meta_model.joblib"
         if meta_path.exists():
@@ -310,8 +386,17 @@ class EnsembleModel:
     def _get_base_predictions(self, X: np.ndarray) -> np.ndarray:
         n_models = len(self.base_models)
         base_preds = np.zeros((X.shape[0], n_models))
-        for i, model in enumerate(self.base_models):
-            base_preds[:, i] = model.predict_proba(X)
+
+        if self.fold_models:
+            # Average predictions from all K fold-trained models (bagging)
+            for i in range(n_models):
+                fold_preds = np.array([m.predict_proba(X) for m in self.fold_models[i]])
+                base_preds[:, i] = fold_preds.mean(axis=0)
+        else:
+            # Backward compat: single model per slot (old format)
+            for i, model in enumerate(self.base_models):
+                base_preds[:, i] = model.predict_proba(X)
+
         return base_preds
 
     def _weighted_average(self, base_preds: np.ndarray) -> np.ndarray:

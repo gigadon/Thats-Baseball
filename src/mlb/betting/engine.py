@@ -133,8 +133,8 @@ class PnLRecord:
 class BettingConfig:
     """Betting engine configuration."""
 
-    min_edge: float = 0.02  # Minimum 2% edge to bet
-    kelly_fraction: float = 0.25  # Quarter Kelly
+    min_edge: float = 0.01  # Minimum 1% edge to bet
+    kelly_fraction: float = 0.35  # ~Third Kelly
     max_bet_pct: float = 0.05  # Max 5% of bankroll per bet
     max_daily_exposure: float = 0.20  # Max 20% of bankroll at risk per day
     min_confidence: float = 50.0  # Minimum model confidence to bet
@@ -154,6 +154,7 @@ class BettingEngine:
         predictions: list[GamePrediction],
         odds_data: list[dict[str, Any]],
         bankroll: float = 10000.0,
+        line_movement: dict[str, dict] | None = None,
     ) -> BettingSlip:
         """Identify all value bets from today's predictions.
 
@@ -163,6 +164,8 @@ class BettingEngine:
                 game_id, home_moneyline, away_moneyline,
                 total_line, over_odds, under_odds
             bankroll: Current bankroll.
+            line_movement: Optional dict of game_id → {opening_home_prob, current_home_prob}.
+                If a line has moved >3% against the model's side, the bet is skipped.
 
         Returns:
             BettingSlip with recommended bets.
@@ -183,13 +186,25 @@ class BettingEngine:
             total_bets = self._evaluate_total(pred, odds, bankroll)
             opportunities.extend(total_bets)
 
-        # Filter by minimum edge and confidence
-        value_bets = [
-            b for b in opportunities
-            if b.edge >= self.config.min_edge
-            and b.confidence >= self.config.min_confidence
-            and b.ev_per_dollar > 0
-        ]
+        # Filter by minimum edge, confidence, and CLV
+        value_bets = []
+        for b in opportunities:
+            if b.edge < self.config.min_edge:
+                continue
+            if b.confidence < self.config.min_confidence:
+                continue
+            if b.ev_per_dollar <= 0:
+                continue
+            # CLV filter: skip if line moved against our side
+            lm = line_movement.get(b.game_id) if line_movement else None
+            if not self._passes_clv_filter(b, lm):
+                logger.info(
+                    "CLV filter: skipping %s %s (%s) — line moved against",
+                    b.selection, b.home_team if b.selection == "home" else b.away_team,
+                    b.bet_type,
+                )
+                continue
+            value_bets.append(b)
 
         # Sort by EV (best first)
         value_bets.sort(key=lambda b: b.ev_per_dollar, reverse=True)
@@ -353,11 +368,12 @@ class BettingEngine:
         if total_line is None:
             return bets
 
-        # Estimate over/under probability from predicted total
+        # Estimate over/under probability from predicted total.
+        # Residual std of the runs model is ~4.1 runs (R²≈0.15),
+        # so that is the true prediction uncertainty.
         diff = pred.predicted_total - total_line
-        # Use a simple normal approximation (std ~2.5 runs for game totals)
         from scipy.stats import norm
-        over_prob = float(norm.sf(-diff / 2.5))  # P(actual > line)
+        over_prob = float(norm.sf(-diff / 4.1))  # P(actual > line)
         under_prob = 1.0 - over_prob
 
         true_over, true_under = remove_vig(over_odds, under_odds)
@@ -460,6 +476,33 @@ class BettingEngine:
             total += bet.recommended_stake
 
         return accepted
+
+    def _passes_clv_filter(
+        self, bet: BetOpportunity, line_movement: dict | None
+    ) -> bool:
+        """Return True if the bet passes CLV filtering (should be placed).
+
+        If the line has moved >3% against the model's side since open,
+        the market is signaling information the model may not have.
+        """
+        if line_movement is None:
+            return True
+
+        opening = line_movement.get("opening_home_prob")
+        current = line_movement.get("current_home_prob")
+        if opening is None or current is None:
+            return True
+
+        # For away bets, invert to get the bet-side probability
+        if bet.selection == "away":
+            opening = 1 - opening
+            current = 1 - current
+
+        # If the line moved against our side by >3%, skip
+        movement = current - opening
+        if movement < -0.03:
+            return False
+        return True
 
     def _odds_in_range(self, odds: float) -> bool:
         return self.config.min_odds <= odds <= self.config.max_odds

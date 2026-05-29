@@ -47,9 +47,10 @@ class PipelineConfig:
     ensemble_config: EnsembleConfig = field(default_factory=EnsembleConfig)
     # Features that MUST be included regardless of importance score
     forced_features: list[str] = field(default_factory=lambda: [
-        "market_home_prob", "elo_diff",
+        "elo_diff",
         "diff_sp_season_era", "diff_ewm_win_pct",
         "diff_momentum", "park_runs_factor",
+        "has_real_odds",
     ])
 
 
@@ -110,7 +111,8 @@ class TrainingPipeline:
         # 4. Feature selection (train a quick model, keep important features)
         feature_names = list(features_df.columns)
         X_train_selected, X_test_selected, selected_names = self._select_features(
-            X_train_scaled, X_test_scaled, y_train, feature_names
+            X_train_scaled, X_test_scaled, y_train, feature_names,
+            sample_weight=sw_train,
         )
         logger.info("Selected %d / %d features", len(selected_names), len(feature_names))
 
@@ -138,6 +140,7 @@ class TrainingPipeline:
         features_df: pd.DataFrame,
         target: pd.Series,
         game_dates: pd.Series | None = None,
+        sample_weight: np.ndarray | None = None,
         n_trials: int = 50,
     ) -> EnsembleModel:
         """Run Optuna hyperparameter tuning, then train with best params."""
@@ -151,22 +154,36 @@ class TrainingPipeline:
 
         # Preprocess once
         X_train, X_test, y_train, y_test = self._split(features_df, target, game_dates)
+
+        # Split sample weights
+        if sample_weight is not None:
+            n = len(features_df)
+            n_test = len(y_test)
+            sw_train = sample_weight[: n - n_test]
+        else:
+            sw_train = None
+
         X_train, X_test = self._impute(X_train, X_test)
         X_train_scaled, X_test_scaled = self._scale(X_train, X_test)
         feature_names = list(features_df.columns)
         X_train_sel, X_test_sel, selected_names = self._select_features(
-            X_train_scaled, X_test_scaled, y_train, feature_names
+            X_train_scaled, X_test_scaled, y_train, feature_names,
+            sample_weight=sw_train,
         )
         logger.info("Selected %d / %d features", len(selected_names), len(feature_names))
 
         cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 
-        def _cv_auc(model_cls, params):
+        def _cv_auc(model_cls, params, use_sw=True):
             """Manual CV to avoid sklearn tags compatibility issues."""
             aucs = []
             for tr_idx, va_idx in cv.split(X_train_sel, y_train):
                 m = model_cls(**params)
-                m.fit(X_train_sel[tr_idx], y_train[tr_idx])
+                if use_sw and sw_train is not None:
+                    m.fit(X_train_sel[tr_idx], y_train[tr_idx],
+                          sample_weight=sw_train[tr_idx])
+                else:
+                    m.fit(X_train_sel[tr_idx], y_train[tr_idx])
                 preds = m.predict_proba(X_train_sel[va_idx])[:, 1]
                 aucs.append(roc_auc_score(y_train[va_idx], preds))
             return np.mean(aucs)
@@ -213,23 +230,6 @@ class TrainingPipeline:
         study_lgbm.optimize(lgbm_objective, n_trials=n_trials)
         logger.info("LightGBM best AUC: %.4f", study_lgbm.best_value)
 
-        # Tune GradientBoosting
-        def gb_objective(trial):
-            params = {
-                "n_estimators": trial.suggest_int("n_estimators", 100, 500),
-                "max_depth": trial.suggest_int("max_depth", 3, 7),
-                "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.15, log=True),
-                "subsample": trial.suggest_float("subsample", 0.6, 1.0),
-                "min_samples_leaf": trial.suggest_int("min_samples_leaf", 5, 30),
-                "max_features": "sqrt",
-                "random_state": 42,
-            }
-            return _cv_auc(GradientBoostingClassifier, params)
-
-        study_gb = optuna.create_study(direction="maximize")
-        study_gb.optimize(gb_objective, n_trials=n_trials)
-        logger.info("GradientBoosting best AUC: %.4f", study_gb.best_value)
-
         # Tune CatBoost
         def catboost_objective(trial):
             from catboost import CatBoostClassifier
@@ -247,17 +247,69 @@ class TrainingPipeline:
         study_catboost.optimize(catboost_objective, n_trials=n_trials)
         logger.info("CatBoost best AUC: %.4f", study_catboost.best_value)
 
+        # Tune RandomForest
+        def rf_objective(trial):
+            from sklearn.ensemble import RandomForestClassifier
+            params = {
+                "n_estimators": trial.suggest_int("n_estimators", 200, 800),
+                "max_depth": trial.suggest_int("max_depth", 5, 15),
+                "min_samples_leaf": trial.suggest_int("min_samples_leaf", 5, 30),
+                "max_features": trial.suggest_categorical("max_features", ["sqrt", "log2", 0.3]),
+                "random_state": 42, "n_jobs": -1,
+            }
+            return _cv_auc(RandomForestClassifier, params)
+
+        study_rf = optuna.create_study(direction="maximize")
+        study_rf.optimize(rf_objective, n_trials=n_trials)
+        logger.info("RandomForest best AUC: %.4f", study_rf.best_value)
+
+        # Tune LogisticRegression (inside Pipeline with scaler)
+        def lr_objective(trial):
+            from sklearn.linear_model import LogisticRegression as LR
+            from sklearn.pipeline import Pipeline as SKPipeline
+            from sklearn.preprocessing import StandardScaler as SS
+
+            C = trial.suggest_float("C", 0.01, 100.0, log=True)
+            penalty = trial.suggest_categorical("penalty", ["l1", "l2", "elasticnet"])
+            solver = "saga"
+            params = {
+                "C": C, "penalty": penalty, "solver": solver,
+                "max_iter": 2000, "random_state": 42,
+            }
+            if penalty == "elasticnet":
+                params["l1_ratio"] = trial.suggest_float("l1_ratio", 0.0, 1.0)
+
+            # CV with pipeline (scaler + LR)
+            aucs = []
+            for tr_idx, va_idx in cv.split(X_train_sel, y_train):
+                pipe = SKPipeline([("scaler", SS()), ("lr", LR(**params))])
+                if sw_train is not None:
+                    pipe.fit(X_train_sel[tr_idx], y_train[tr_idx],
+                             lr__sample_weight=sw_train[tr_idx])
+                else:
+                    pipe.fit(X_train_sel[tr_idx], y_train[tr_idx])
+                preds = pipe.predict_proba(X_train_sel[va_idx])[:, 1]
+                aucs.append(roc_auc_score(y_train[va_idx], preds))
+            return np.mean(aucs)
+
+        study_lr = optuna.create_study(direction="maximize")
+        study_lr.optimize(lr_objective, n_trials=n_trials)
+        logger.info("LogisticRegression best AUC: %.4f", study_lr.best_value)
+
         # Apply best params to the base models
-        from mlb.models.base import ModelConfig
+        from mlb.models.base import (
+            ModelConfig, XGBoostModel, LightGBMModel, CatBoostModel,
+            RandomForestModel, LogisticRegressionModel,
+        )
+
+        lr_params = {k: v for k, v in study_lr.best_params.items()}
+        lr_params.update({"solver": "saga", "max_iter": 2000, "random_state": 42})
+
         best_configs = [
             ModelConfig(name="XGBoost", params={
                 **study_xgb.best_params,
                 "random_state": 42, "n_jobs": -1,
                 "objective": "binary:logistic", "eval_metric": "logloss",
-            }),
-            ModelConfig(name="GradientBoosting", params={
-                **study_gb.best_params,
-                "max_features": "sqrt", "random_state": 42,
             }),
             ModelConfig(name="LightGBM", params={
                 **study_lgbm.best_params,
@@ -268,21 +320,24 @@ class TrainingPipeline:
                 **study_catboost.best_params,
                 "random_seed": 42, "verbose": 0,
             }),
+            ModelConfig(name="RandomForest", params={
+                **study_rf.best_params,
+                "random_state": 42, "n_jobs": -1,
+            }),
+            ModelConfig(name="LogisticRegression", params=lr_params),
         ]
 
-        from mlb.models.base import (
-            XGBoostModel, GradientBoostingModel, LightGBMModel, CatBoostModel,
-        )
         self.ensemble = EnsembleModel(self.config.ensemble_config)
         self.ensemble.base_models = [
             XGBoostModel(best_configs[0]),
-            GradientBoostingModel(best_configs[1]),
-            LightGBMModel(best_configs[2]),
-            CatBoostModel(best_configs[3]),
+            LightGBMModel(best_configs[1]),
+            CatBoostModel(best_configs[2]),
+            RandomForestModel(best_configs[3]),
+            LogisticRegressionModel(best_configs[4]),
         ]
 
         # Train ensemble with tuned models
-        self.ensemble.train(X_train_sel, y_train, selected_names)
+        self.ensemble.train(X_train_sel, y_train, selected_names, sample_weight=sw_train)
 
         # Evaluate
         metrics = self.ensemble.evaluate(X_test_sel, y_test)
@@ -388,6 +443,7 @@ class TrainingPipeline:
         X_test: np.ndarray,
         y_train: np.ndarray,
         feature_names: list[str],
+        sample_weight: np.ndarray | None = None,
     ) -> tuple[np.ndarray, np.ndarray, list[str]]:
         """Select top features using a quick LightGBM importance scan."""
         import lightgbm as lgb
@@ -400,7 +456,10 @@ class TrainingPipeline:
             random_state=42,
             n_jobs=-1,
         )
-        selector.fit(X_train, y_train)
+        if sample_weight is not None:
+            selector.fit(X_train, y_train, sample_weight=sample_weight)
+        else:
+            selector.fit(X_train, y_train)
         importances = selector.feature_importances_
 
         # Normalize

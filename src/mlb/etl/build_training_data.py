@@ -192,6 +192,9 @@ class TrainingDataBuilder:
         # Load real odds history if available
         odds_history = self._load_odds_history()
 
+        # Load historical weather data (from Open-Meteo backfill)
+        weather_history = self._load_weather_history()
+
         # Check if game_time column exists for day/night classification
         has_game_time = "game_time" in games_df.columns
 
@@ -249,13 +252,37 @@ class TrainingDataBuilder:
             row["park_runs_factor"] = park["runs"]
             row["park_hr_factor"] = park["hr"]
 
-            # Weather proxy features (available historically)
+            # Weather proxy features
             is_dome = home in DOME_TEAMS or home in RETRACTABLE_TEAMS
             row["is_dome"] = 1 if is_dome else 0
             row["game_month"] = game_date.month
+            row["day_of_week"] = game_date.weekday()
 
-            # Weather features — historical defaults are not useful (constant),
-            # so we skip them for training. Live predictions inject real weather.
+            # Real historical weather (from Open-Meteo backfill)
+            date_str = game_date.isoformat() if hasattr(game_date, "isoformat") else str(game_date)
+            weather_rec = weather_history.get((date_str, home))
+            is_outdoor = home not in DOME_TEAMS
+            if is_outdoor and weather_rec:
+                temp = weather_rec["temperature"]
+                wind = weather_rec["wind_speed"]
+                hum = weather_rec["humidity"]
+                # Retractable roofs close in extreme weather
+                if home in RETRACTABLE_TEAMS and (temp < 55 or temp > 95 or wind > 20):
+                    row["temperature"] = 72.0
+                    row["wind_speed"] = 5.0
+                    row["humidity"] = 0.50
+                    row["is_outdoor"] = 0
+                else:
+                    row["temperature"] = temp
+                    row["wind_speed"] = wind
+                    row["humidity"] = hum
+                    row["is_outdoor"] = 1
+            else:
+                # Dome or missing weather data — neutral defaults
+                row["temperature"] = 72.0
+                row["wind_speed"] = 5.0
+                row["humidity"] = 0.50
+                row["is_outdoor"] = 0 if home in DOME_TEAMS else 1
 
             # Elo ratings (pre-game)
             h_elo = elo_ratings.get(home, 1500.0)
@@ -264,62 +291,19 @@ class TrainingDataBuilder:
             row["a_elo"] = a_elo
             row["elo_diff"] = h_elo - a_elo
 
-            # Market odds features — use real odds if available, else
-            # a multi-factor synthetic proxy that's intentionally different
-            # from raw Elo (which is already a feature) to avoid collinearity.
+            # Market odds features — use real odds when available, NaN otherwise.
+            # The old synthetic Elo-derived proxy was collinear with existing
+            # features and didn't match the real odds seen at inference time.
             odds_key = (game_date.isoformat() if hasattr(game_date, 'isoformat') else str(game_date), home, away)
             real_odds = odds_history.get(odds_key)
             if real_odds:
                 row["market_home_prob"] = real_odds["market_home_prob"]
+                row["has_real_odds"] = 1.0
+                row["market_total"] = real_odds["total_line"] if real_odds["total_line"] else np.nan
             else:
-                # Multi-factor proxy blending several independent signals:
-                #   40% Elo, 20% recent form, 20% SP matchup, 10% bullpen, 10% momentum
-                # This creates a market-like composite that differs from raw Elo.
-
-                # 1) Elo component (with HFA)
-                elo_home_adj = h_elo + 24
-                elo_comp = 1.0 / (1.0 + 10 ** ((a_elo - elo_home_adj) / 400.0))
-
-                # 2) Recent form component (EWM win pct)
-                h_ewm = home_feat.get("ewm_win_pct", 0.500)
-                a_ewm = away_feat.get("ewm_win_pct", 0.500)
-                form_comp = h_ewm / (h_ewm + a_ewm) if (h_ewm + a_ewm) > 0 else 0.5
-
-                # 3) SP matchup component (ERA → win prob adjustment)
-                h_sp_era = row.get("h_sp_season_era", 4.50)
-                a_sp_era = row.get("a_sp_season_era", 4.50)
-                # Transform ERA difference to a probability-like score
-                era_diff = a_sp_era - h_sp_era  # positive = home SP better
-                sp_comp = 1.0 / (1.0 + np.exp(-era_diff * 0.5))
-
-                # 4) Bullpen component
-                h_bp_era = home_feat.get("bp_era", 4.00)
-                a_bp_era = away_feat.get("bp_era", 4.00)
-                bp_diff = a_bp_era - h_bp_era
-                bp_comp = 1.0 / (1.0 + np.exp(-bp_diff * 0.3))
-
-                # 5) Momentum component
-                h_mom = home_feat.get("momentum", 0.0)
-                a_mom = away_feat.get("momentum", 0.0)
-                mom_diff = h_mom - a_mom
-                mom_comp = 1.0 / (1.0 + np.exp(-mom_diff * 0.5))
-
-                # Weighted blend — Elo kept low to avoid collinearity with elo_diff feature.
-                # SP matchup is the strongest differentiator vs raw Elo.
-                market_prob = (
-                    elo_comp * 0.25 +
-                    form_comp * 0.20 +
-                    sp_comp * 0.30 +
-                    bp_comp * 0.15 +
-                    mom_comp * 0.10
-                )
-
-                # Deterministic jitter
-                noise_seed = hash(str(game["game_id"])) % 10000
-                noise = ((noise_seed / 10000.0) - 0.5) * 0.03  # ±0.015
-                market_prob = max(0.15, min(0.85, market_prob + noise))
-
-                row["market_home_prob"] = round(market_prob, 4)
+                row["market_home_prob"] = np.nan
+                row["has_real_odds"] = 0.0
+                row["market_total"] = np.nan
 
             # Rest days
             h_last = last_game_date.get(home)
@@ -342,14 +326,6 @@ class TrainingDataBuilder:
                 row[f"h_{k}"] = h_sp[k] if h_sp else default
                 row[f"a_{k}"] = a_sp[k] if a_sp else default
                 row[f"diff_{k}"] = row[f"h_{k}"] - row[f"a_{k}"]
-
-            # Derived Statcast-proxy feature: K-BB% (one of the strongest
-            # predictors of future pitcher performance)
-            h_k_minus_bb = row["h_sp_season_k9"] - row["h_sp_season_bb9"]
-            a_k_minus_bb = row["a_sp_season_k9"] - row["a_sp_season_bb9"]
-            row["h_sp_k_minus_bb"] = h_k_minus_bb
-            row["a_sp_k_minus_bb"] = a_k_minus_bb
-            row["diff_sp_k_minus_bb"] = h_k_minus_bb - a_k_minus_bb
 
             # SP recent form (rolling 3-start ERA/WHIP/K9)
             h_sp_recent = sp_recent.get((game["game_id"], home))
@@ -376,18 +352,22 @@ class TrainingDataBuilder:
             # Lineup aggregate season stats
             h_lineup = lineup_season.get((game["game_id"], home))
             a_lineup = lineup_season.get((game["game_id"], away))
-            lineup_defaults = {"lineup_ops": 0.720, "lineup_obp": 0.320, "lineup_slg": 0.400}
+            lineup_defaults = {
+                "lineup_ops": 0.720, "lineup_obp": 0.320, "lineup_slg": 0.400,
+                "lineup_wt_ops": 0.720, "lineup_top4_ops": 0.750,
+            }
             for k, default in lineup_defaults.items():
-                row[f"h_{k}"] = h_lineup[k] if h_lineup else default
-                row[f"a_{k}"] = a_lineup[k] if a_lineup else default
+                row[f"h_{k}"] = h_lineup.get(k, default) if h_lineup else default
+                row[f"a_{k}"] = a_lineup.get(k, default) if a_lineup else default
                 row[f"diff_{k}"] = row[f"h_{k}"] - row[f"a_{k}"]
 
             # Platoon advantage
             h_platoon = platoon.get((game["game_id"], home))
             a_platoon = platoon.get((game["game_id"], away))
-            row["h_platoon_adv"] = h_platoon["platoon_adv"] if h_platoon else 0.5
-            row["a_platoon_adv"] = a_platoon["platoon_adv"] if a_platoon else 0.5
-            row["diff_platoon_adv"] = row["h_platoon_adv"] - row["a_platoon_adv"]
+            for pk, pdefault in {"platoon_adv": 0.5, "platoon_wt_adv": 0.5}.items():
+                row[f"h_{pk}"] = h_platoon.get(pk, pdefault) if h_platoon else pdefault
+                row[f"a_{pk}"] = a_platoon.get(pk, pdefault) if a_platoon else pdefault
+                row[f"diff_{pk}"] = row[f"h_{pk}"] - row[f"a_{pk}"]
 
             # Lineup recent form (7-day rolling OPS)
             h_recent = lineup_recent.get((game["game_id"], home))
@@ -544,6 +524,11 @@ class TrainingDataBuilder:
             if (idx + 1) % 500 == 0:
                 logger.info("Processed %d / %d games", idx + 1, len(games_sorted))
 
+        # Drop rows missing market_total to avoid noisy training signal
+        before = len(feature_rows)
+        feature_rows = [r for r in feature_rows if not (r.get("market_total") is None or (isinstance(r.get("market_total"), float) and np.isnan(r["market_total"])))]
+        logger.info("Dropped %d rows with missing market_total (%d remaining)", before - len(feature_rows), len(feature_rows))
+
         df = pd.DataFrame(feature_rows)
         logger.info("Built %d training samples with %d features", len(df), len(df.columns) - 9)
 
@@ -608,6 +593,30 @@ class TrainingDataBuilder:
                 }
 
         logger.info("Loaded %d historical odds records", len(result))
+        return result
+
+    def _load_weather_history(self) -> dict[tuple, dict]:
+        """Load historical weather from weather_history.csv.
+
+        Returns {(date_str, team_id): {"temperature": F, "wind_speed": mph, "humidity": 0-1}}
+        """
+        weather_file = self.data_dir / "weather_history.csv"
+        if not weather_file.exists():
+            logger.info("No weather history file — weather features will use defaults")
+            return {}
+
+        import csv
+        result: dict[tuple, dict] = {}
+        with open(weather_file) as f:
+            for row in csv.DictReader(f):
+                key = (row["date"], row["team"])
+                result[key] = {
+                    "temperature": float(row["temperature"]),
+                    "wind_speed": float(row["wind_speed"]),
+                    "humidity": float(row["humidity"]),
+                }
+
+        logger.info("Loaded %d weather history records", len(result))
         return result
 
     def _load_pitching(self, seasons: list[int]) -> pd.DataFrame:
@@ -850,6 +859,42 @@ class TrainingDataBuilder:
             ]["side"].iloc[0]
             game_teams[gid][side] = tid
 
+        # Build cumulative batter OPS for OPS-weighted platoon advantage
+        sorted_bat = batting_df.sort_values("game_date")
+        batter_totals: dict[tuple, dict] = {}  # (player_id, year) -> cumulative
+        batter_ops_entering: dict[tuple, float] = {}  # (player_id, game_id) -> OPS
+
+        for _, brow in sorted_bat.iterrows():
+            pid = brow["player_id"]
+            gid_b = brow["game_id"]
+            ab = int(brow["at_bats"])
+            if ab == 0:
+                continue
+            year = brow["game_date"].year
+            key = (pid, year)
+            prev = batter_totals.get(key)
+
+            if prev and prev["ab"] >= 20:
+                p_ab, p_h, p_bb = prev["ab"], prev["h"], prev["bb"]
+                p_2b, p_3b, p_hr = prev["2b"], prev["3b"], prev["hr"]
+                obp = (p_h + p_bb) / (p_ab + p_bb) if (p_ab + p_bb) > 0 else 0
+                slg = (p_h + p_2b + 2 * p_3b + 3 * p_hr) / p_ab
+                batter_ops_entering[(pid, gid_b)] = obp + slg
+
+            if prev is None:
+                batter_totals[key] = {
+                    "ab": ab, "h": int(brow["hits"]), "bb": int(brow["walks"]),
+                    "2b": int(brow["doubles"]), "3b": int(brow["triples"]),
+                    "hr": int(brow["home_runs"]),
+                }
+            else:
+                prev["ab"] += ab
+                prev["h"] += int(brow["hits"])
+                prev["bb"] += int(brow["walks"])
+                prev["2b"] += int(brow["doubles"])
+                prev["3b"] += int(brow["triples"])
+                prev["hr"] += int(brow["home_runs"])
+
         result: dict[tuple, dict[str, float]] = {}
 
         for (gid, tid), grp in batting_df.groupby(["game_id", "team_id"]):
@@ -870,9 +915,11 @@ class TrainingDataBuilder:
                 continue
             sp_throws = sp_hand_info.get("throws", "R")
 
-            # Count lineup batters with platoon advantage
+            # Count lineup batters with platoon advantage + OPS-weighted version
             adv_count = 0
             total = 0
+            ops_weighted_adv = 0.0
+            ops_total = 0.0
             for _, row in grp.iterrows():
                 if int(row["at_bats"]) == 0:
                     continue
@@ -882,13 +929,23 @@ class TrainingDataBuilder:
                     continue
                 bats = batter_info.get("bats", "R")
                 total += 1
-                # Platoon advantage: LHB vs RHP, RHB vs LHP, switch hitters always have it
-                if bats == "S" or (bats == "L" and sp_throws == "R") or (bats == "R" and sp_throws == "L"):
+
+                b_ops = batter_ops_entering.get((pid, gid), 0.720)
+                ops_total += b_ops
+
+                has_adv = (
+                    bats == "S"
+                    or (bats == "L" and sp_throws == "R")
+                    or (bats == "R" and sp_throws == "L")
+                )
+                if has_adv:
                     adv_count += 1
+                    ops_weighted_adv += b_ops
 
             if total >= 5:
                 result[(gid, tid)] = {
                     "platoon_adv": adv_count / total,
+                    "platoon_wt_adv": ops_weighted_adv / ops_total if ops_total > 0 else 0.5,
                 }
 
         logger.info("Built platoon features for %d game-team pairs", len(result))
@@ -962,11 +1019,27 @@ class TrainingDataBuilder:
                     prev["bb"] += int(row["walks"])
 
             if len(lineup_ops_vals) >= 5:
+                # Cap at 9 starters (CSV row order ≈ batting order)
+                starters = lineup_ops_vals[:9]
                 result[(gid, tid)] = {
-                    "lineup_ops": np.mean([v["ops"] for v in lineup_ops_vals]),
-                    "lineup_obp": np.mean([v["obp"] for v in lineup_ops_vals]),
-                    "lineup_slg": np.mean([v["slg"] for v in lineup_ops_vals]),
+                    "lineup_ops": np.mean([v["ops"] for v in starters]),
+                    "lineup_obp": np.mean([v["obp"] for v in starters]),
+                    "lineup_slg": np.mean([v["slg"] for v in starters]),
                 }
+
+                # Position-weighted OPS (top of order weighted more)
+                pos_weights = [1.0, 0.95, 0.90, 0.85, 0.80, 0.75, 0.70, 0.65, 0.60]
+                weights = pos_weights[:len(starters)]
+                wt_ops = sum(w * s["ops"] for w, s in zip(weights, starters))
+                result[(gid, tid)]["lineup_wt_ops"] = wt_ops / sum(weights)
+
+                # Top-4 hitters OPS (cleanup hitters drive run production)
+                if len(starters) >= 4:
+                    result[(gid, tid)]["lineup_top4_ops"] = np.mean(
+                        [v["ops"] for v in starters[:4]]
+                    )
+                else:
+                    result[(gid, tid)]["lineup_top4_ops"] = result[(gid, tid)]["lineup_ops"]
 
         logger.info("Built lineup season stats for %d game-team pairs", len(result))
         return result

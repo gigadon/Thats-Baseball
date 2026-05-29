@@ -1,0 +1,742 @@
+date,time,away_team,home_team,away_odds,home_odds,away_score,home_score
+"Today, 28 May",17:40,Chicago Cubs,Pittsburgh Pirates,+145,-169,,
+"Today, 28 May",17:35,Toronto Blue Jays,Baltimore Orioles,+110,-130,,
+"Today, 28 May",15:10,Atlanta Braves,Boston Red Sox,-135,+114,,
+"Today, 28 May",13:10,Minnesota Twins,Chicago White Sox,+145,-169,,
+"Today, 28 May",,Los Angeles Angels,Detroit Tigers,+114,-130,0,0
+"Yesterday, 27 May",,Colorado Rockies,Los Angeles Dodgers,+350,-455,1,4
+"Yesterday, 27 May",,Houston Astros,Texas Rangers,+125,-149,4,3
+"Yesterday, 27 May",,Minnesota Twins,Chicago White Sox,-110,-110,2,15
+"Yesterday, 27 May",,New York Yankees,Kansas City Royals,-156,+135,7,0
+"Yesterday, 27 May",,Cincinnati Reds,New York Mets,+104,-123,2,4
+"Yesterday, 27 May",,Atlanta Braves,Boston Red Sox,-105,-115,0,8
+"Yesterday, 27 May",,Chicago Cubs,Pittsburgh Pirates,+104,-125,10,4
+"Yesterday, 27 May",,Los Angeles Angels,Detroit Tigers,-105,-110,0,4
+"Yesterday, 27 May",,Tampa Bay Rays,Baltimore Orioles,-125,+110,2,11
+"Yesterday, 27 May",,Philadelphia Phillies,San Diego Padres,-135,+123,3,0
+"Yesterday, 27 May",,Arizona Diamondbacks,San Francisco Giants,-115,-105,3,2
+"Yesterday, 27 May",,Seattle Mariners,Athletics,-118,+100,9,1
+"Yesterday, 27 May",,St.Louis Cardinals,Milwaukee Brewers,+150,-179,1,2
+"Yesterday, 27 May",,Washington Nationals,Cleveland Guardians,+150,-175,2,3
+"Yesterday, 27 May",,Miami Marlins,Toronto Blue Jays,+125,-149,1,2
+26 May 2026,,Colorado Rockies,Los Angeles Dodgers,+200,-238,6,15
+26 May 2026,,Arizona Diamondbacks,San Francisco Giants,-105,-115,7,5
+26 May 2026,,Seattle Mariners,Athletics,+100,-112,4,1
+26 May 2026,,Philadelphia Phillies,San Diego Padres,-110,-110,4,3
+26 May 2026,,Houston Astros,Texas Rangers,+110,-130,7,10
+26 May 2026,,Minnesota Twins,Chicago White Sox,-115,-105,5,3
+26 May 2026,,New York Yankees,Kansas City Royals,-200,+165,15,1
+26 May 2026,,St.Louis Cardinals,Milwaukee Brewers,+179,-222,0,6
+26 May 2026,,Cincinnati Reds,New York Mets,-120,+100,7,2
+26 May 2026,,Miami Marlins,Toronto Blue Jays,+104,-123,1,8
+26 May 2026,,Atlanta Braves,Boston Red Sox,-105,-105,7,6
+26 May 2026,,Chicago Cubs,Pittsburgh Pirates,+120,-141,1,12
+26 May 2026,,Los Angeles Angels,Detroit Tigers,+120,-139,10,6
+26 May 2026,,Tampa Bay Rays,Baltimore Orioles,-115,-105,1,6
+26 May 2026,,Washington Nationals,Cleveland Guardians,+110,-130,6,3
+25 May 2026,,Seattle Mariners,Athletics,-105,-110,9,2
+25 May 2026,,Colorado Rockies,Los Angeles Dodgers,+265,-333,3,5
+25 May 2026,,Miami Marlins,Toronto Blue Jays,+127,-149,8,2
+25 May 2026,,Houston Astros,Texas Rangers,+100,-118,9,0
+25 May 2026,,Philadelphia Phillies,San Diego Padres,-115,-102,3,0
+25 May 2026,,Washington Nationals,Cleveland Guardians,+140,-164,10,2
+25 May 2026,,Arizona Diamondbacks,San Francisco Giants,+110,-130,6,2
+25 May 2026,,Cincinnati Reds,New York Mets,+110,-130,7,2
+25 May 2026,,New York Yankees,Kansas City Royals,-128,+114,4,3
+25 May 2026,,Minnesota Twins,Chicago White Sox,-108,-110,1,3
+25 May 2026,,St.Louis Cardinals,Milwaukee Brewers,+200,-233,1,5
+25 May 2026,,Tampa Bay Rays,Baltimore Orioles,-115,-105,7,9
+25 May 2026,,Chicago Cubs,Pittsburgh Pirates,-125,+104,1,2
+24 May 2026,,Texas Rangers,Los Angeles Angels,+104,-125,1,2
+24 May 2026,,Detroit Tigers,Baltimore Orioles,+110,-128,4,1
+24 May 2026,,Colorado Rockies,Arizona Diamondbacks,+168,-200,1,9
+24 May 2026,,Athletics,San Diego Padres,+145,-169,5,2
+24 May 2026,,Washington Nationals,Atlanta Braves,+135,-154,2,1
+24 May 2026,,Chicago White Sox,San Francisco Giants,+110,-125,5,8
+24 May 2026,,Houston Astros,Chicago Cubs,+145,-169,8,5
+24 May 2026,,Seattle Mariners,Kansas City Royals,-120,+106,6,8
+24 May 2026,,Los Angeles Dodgers,Milwaukee Brewers,-145,+129,5,1
+24 May 2026,,New York Mets,Miami Marlins,+110,-130,0,4
+24 May 2026,,Minnesota Twins,Boston Red Sox,+145,-169,6,5
+24 May 2026,,Cleveland Guardians,Philadelphia Phillies,-115,-102,3,1
+24 May 2026,,Tampa Bay Rays,New York Yankees,+120,-141,0,2
+24 May 2026,,Detroit Tigers,Baltimore Orioles,+104,-125,3,5
+24 May 2026,,Pittsburgh Pirates,Toronto Blue Jays,+150,-175,4,1
+23 May 2026,,Colorado Rockies,Arizona Diamondbacks,+160,-189,4,5
+23 May 2026,,Texas Rangers,Los Angeles Angels,-133,+114,2,5
+23 May 2026,,Athletics,San Diego Padres,-133,+114,0,2
+23 May 2026,,St.Louis Cardinals,Cincinnati Reds,-105,-115,6,7
+23 May 2026,,Los Angeles Dodgers,Milwaukee Brewers,-115,-105,11,3
+23 May 2026,,Washington Nationals,Atlanta Braves,+143,-164,2,0
+23 May 2026,,Minnesota Twins,Boston Red Sox,+110,-125,4,2
+23 May 2026,,Seattle Mariners,Kansas City Royals,-130,+110,0,5
+23 May 2026,,New York Mets,Miami Marlins,-109,-110,1,4
+23 May 2026,,Chicago White Sox,San Francisco Giants,-103,-110,3,10
+23 May 2026,,Cleveland Guardians,Philadelphia Phillies,+145,-169,0,3
+23 May 2026,,Pittsburgh Pirates,Toronto Blue Jays,-141,+120,2,5
+23 May 2026,,Houston Astros,Chicago Cubs,+125,-143,3,0
+23 May 2026,,St.Louis Cardinals,Cincinnati Reds,-105,-115,8,1
+22 May 2026,,Chicago White Sox,San Francisco Giants,-120,+100,9,4
+22 May 2026,,Colorado Rockies,Arizona Diamondbacks,+195,-233,3,2
+22 May 2026,,Athletics,San Diego Padres,+104,-120,3,7
+22 May 2026,,Texas Rangers,Los Angeles Angels,-164,+140,6,9
+22 May 2026,,Seattle Mariners,Kansas City Royals,-115,+100,2,0
+22 May 2026,,Los Angeles Dodgers,Milwaukee Brewers,-108,-110,1,5
+22 May 2026,,Washington Nationals,Atlanta Braves,+160,-189,4,5
+22 May 2026,,Detroit Tigers,Baltimore Orioles,+110,-128,4,7
+22 May 2026,,Minnesota Twins,Boston Red Sox,+129,-149,8,6
+22 May 2026,,New York Mets,Miami Marlins,-101,-115,1,2
+22 May 2026,,Pittsburgh Pirates,Toronto Blue Jays,+140,-161,2,6
+22 May 2026,,Tampa Bay Rays,New York Yankees,+127,-149,4,2
+22 May 2026,,Cleveland Guardians,Philadelphia Phillies,+154,-185,1,0
+22 May 2026,,Houston Astros,Chicago Cubs,+125,-149,4,2
+21 May 2026,,Colorado Rockies,Arizona Diamondbacks,+179,-222,1,2
+21 May 2026,,Athletics,Los Angeles Angels,+100,-118,3,2
+21 May 2026,,Toronto Blue Jays,New York Yankees,+124,-141,2,0
+21 May 2026,,Atlanta Braves,Miami Marlins,-133,+114,9,3
+21 May 2026,,New York Mets,Washington Nationals,-110,-109,2,1
+21 May 2026,,Pittsburgh Pirates,St.Louis Cardinals,-120,+100,6,2
+21 May 2026,,Cleveland Guardians,Detroit Tigers,+112,-130,3,1
+20 May 2026,,Athletics,Los Angeles Angels,-125,+110,6,5
+20 May 2026,,Los Angeles Dodgers,San Diego Padres,-200,+165,4,0
+20 May 2026,,Pittsburgh Pirates,St.Louis Cardinals,+100,-110,7,0
+20 May 2026,,Boston Red Sox,Kansas City Royals,-105,-115,4,3
+20 May 2026,,Milwaukee Brewers,Chicago Cubs,+104,-110,5,0
+20 May 2026,,Toronto Blue Jays,New York Yankees,+145,-169,2,1
+20 May 2026,,New York Mets,Washington Nationals,-125,+104,4,8
+20 May 2026,,Atlanta Braves,Miami Marlins,-182,+154,9,1
+20 May 2026,,Cleveland Guardians,Detroit Tigers,-116,+100,3,2
+20 May 2026,,Chicago White Sox,Seattle Mariners,+125,-143,4,5
+20 May 2026,,San Francisco Giants,Arizona Diamondbacks,-108,-110,3,6
+20 May 2026,,Texas Rangers,Colorado Rockies,-120,+104,5,4
+20 May 2026,,Houston Astros,Minnesota Twins,+119,-135,1,4
+20 May 2026,,Baltimore Orioles,Tampa Bay Rays,+100,-118,3,5
+20 May 2026,,Cincinnati Reds,Philadelphia Phillies,+129,-149,9,4
+19 May 2026,,San Francisco Giants,Arizona Diamondbacks,+104,-125,3,5
+19 May 2026,,Chicago White Sox,Seattle Mariners,+114,-135,2,1
+19 May 2026,,Los Angeles Dodgers,San Diego Padres,-169,+145,5,4
+19 May 2026,,Athletics,Los Angeles Angels,+120,-141,14,6
+19 May 2026,,Texas Rangers,Colorado Rockies,-109,-110,10,0
+19 May 2026,,Pittsburgh Pirates,St.Louis Cardinals,-105,-111,6,9
+19 May 2026,,Boston Red Sox,Kansas City Royals,-135,+114,7,1
+19 May 2026,,Milwaukee Brewers,Chicago Cubs,-125,+104,5,2
+19 May 2026,,Houston Astros,Minnesota Twins,+114,-135,2,1
+19 May 2026,,Toronto Blue Jays,New York Yankees,+114,-130,4,5
+19 May 2026,,New York Mets,Washington Nationals,-141,+120,6,9
+19 May 2026,,Baltimore Orioles,Tampa Bay Rays,-101,-115,1,4
+19 May 2026,,Cincinnati Reds,Philadelphia Phillies,+124,-141,4,1
+19 May 2026,,Cleveland Guardians,Detroit Tigers,-159,+135,4,3
+19 May 2026,,Atlanta Braves,Miami Marlins,-141,+120,8,4
+18 May 2026,,San Francisco Giants,Arizona Diamondbacks,+114,-135,2,12
+18 May 2026,,Chicago White Sox,Seattle Mariners,+135,-159,1,6
+18 May 2026,,Los Angeles Dodgers,San Diego Padres,-143,+125,0,1
+18 May 2026,,Athletics,Los Angeles Angels,-130,+110,1,2
+18 May 2026,,Texas Rangers,Colorado Rockies,-135,+114,6,7
+18 May 2026,,Milwaukee Brewers,Chicago Cubs,+135,-159,9,3
+18 May 2026,,Houston Astros,Minnesota Twins,-105,-115,3,6
+18 May 2026,,Boston Red Sox,Kansas City Royals,-111,-102,3,1
+18 May 2026,,Toronto Blue Jays,New York Yankees,+146,-164,6,7
+18 May 2026,,New York Mets,Washington Nationals,-125,+104,16,7
+18 May 2026,,Atlanta Braves,Miami Marlins,-105,-110,0,12
+18 May 2026,,Baltimore Orioles,Tampa Bay Rays,+120,-139,6,16
+18 May 2026,,Cincinnati Reds,Philadelphia Phillies,+104,-125,4,5
+18 May 2026,,Cleveland Guardians,Detroit Tigers,+134,-149,8,2
+17 May 2026,,San Diego Padres,Seattle Mariners,+129,-149,8,3
+17 May 2026,,Los Angeles Dodgers,Los Angeles Angels,-149,+125,10,1
+17 May 2026,,San Francisco Giants,Athletics,+125,-149,10,1
+17 May 2026,,Arizona Diamondbacks,Colorado Rockies,-143,+125,8,6
+17 May 2026,,Kansas City Royals,St.Louis Cardinals,+100,-120,2,0
+17 May 2026,,Chicago Cubs,Chicago White Sox,-125,+110,8,9
+17 May 2026,,Texas Rangers,Houston Astros,-125,+104,8,0
+17 May 2026,,Milwaukee Brewers,Minnesota Twins,-130,+120,4,5
+17 May 2026,,Cincinnati Reds,Cleveland Guardians,+135,-159,3,10
+17 May 2026,,Toronto Blue Jays,Detroit Tigers,-115,-102,4,1
+17 May 2026,,New York Yankees,New York Mets,+110,-115,6,7
+17 May 2026,,Boston Red Sox,Atlanta Braves,+125,-143,1,8
+17 May 2026,,Baltimore Orioles,Washington Nationals,-118,+100,7,3
+17 May 2026,,Philadelphia Phillies,Pittsburgh Pirates,+110,-130,6,0
+17 May 2026,,Miami Marlins,Tampa Bay Rays,+125,-149,3,6
+16 May 2026,,San Francisco Giants,Athletics,+114,-133,6,4
+16 May 2026,,Los Angeles Dodgers,Los Angeles Angels,-133,+114,15,2
+16 May 2026,,Boston Red Sox,Atlanta Braves,+106,-120,3,2
+16 May 2026,,New York Yankees,New York Mets,-120,+104,3,6
+16 May 2026,,San Diego Padres,Seattle Mariners,+145,-169,7,4
+16 May 2026,,Chicago Cubs,Chicago White Sox,-110,-108,3,8
+16 May 2026,,Texas Rangers,Houston Astros,-154,+129,1,4
+16 May 2026,,Milwaukee Brewers,Minnesota Twins,-130,+110,2,1
+16 May 2026,,Cincinnati Reds,Cleveland Guardians,+125,-149,4,7
+16 May 2026,,Miami Marlins,Tampa Bay Rays,+114,-133,10,5
+16 May 2026,,Baltimore Orioles,Washington Nationals,-110,-108,3,13
+16 May 2026,,Philadelphia Phillies,Pittsburgh Pirates,-169,+145,6,0
+16 May 2026,,Arizona Diamondbacks,Colorado Rockies,-141,+120,2,4
+16 May 2026,,Kansas City Royals,St.Louis Cardinals,-105,-110,2,4
+16 May 2026,,Toronto Blue Jays,Detroit Tigers,-101,-115,2,1
+15 May 2026,,San Francisco Giants,Athletics,+114,-133,2,5
+15 May 2026,,San Diego Padres,Seattle Mariners,+114,-133,2,0
+15 May 2026,,Los Angeles Dodgers,Los Angeles Angels,-182,+160,6,0
+15 May 2026,,Arizona Diamondbacks,Colorado Rockies,-118,+100,9,1
+15 May 2026,,Kansas City Royals,St.Louis Cardinals,-111,-105,4,5
+15 May 2026,,Texas Rangers,Houston Astros,-115,-105,0,2
+15 May 2026,,Chicago Cubs,Chicago White Sox,-125,+104,10,5
+15 May 2026,,Boston Red Sox,Atlanta Braves,+125,-145,2,3
+15 May 2026,,New York Yankees,New York Mets,-143,+129,5,2
+15 May 2026,,Cincinnati Reds,Cleveland Guardians,+120,-141,7,6
+15 May 2026,,Miami Marlins,Tampa Bay Rays,+106,-120,2,7
+15 May 2026,,Milwaukee Brewers,Minnesota Twins,-110,-110,3,2
+15 May 2026,,Baltimore Orioles,Washington Nationals,-141,+120,2,3
+15 May 2026,,Toronto Blue Jays,Detroit Tigers,-125,+104,2,3
+15 May 2026,,Philadelphia Phillies,Pittsburgh Pirates,+114,-135,11,9
+14 May 2026,,San Francisco Giants,Los Angeles Dodgers,+152,-179,2,5
+14 May 2026,,Kansas City Royals,Chicago White Sox,-130,+112,2,6
+14 May 2026,,Chicago Cubs,Atlanta Braves,+175,-189,2,0
+14 May 2026,,Philadelphia Phillies,Boston Red Sox,+102,-118,3,1
+14 May 2026,,St.Louis Cardinals,Athletics,+104,-120,5,4
+14 May 2026,,Seattle Mariners,Houston Astros,-115,-102,8,3
+14 May 2026,,Miami Marlins,Minnesota Twins,-110,-105,1,9
+14 May 2026,,San Diego Padres,Milwaukee Brewers,+120,-133,1,7
+14 May 2026,,Detroit Tigers,New York Mets,+135,-159,4,9
+14 May 2026,,Washington Nationals,Cincinnati Reds,+135,-149,1,15
+14 May 2026,,Colorado Rockies,Pittsburgh Pirates,+148,-169,2,7
+13 May 2026,,San Francisco Giants,Los Angeles Dodgers,+210,-250,0,4
+13 May 2026,,St.Louis Cardinals,Athletics,+120,-139,2,6
+13 May 2026,,Seattle Mariners,Houston Astros,-132,+120,3,4
+13 May 2026,,Arizona Diamondbacks,Texas Rangers,-110,-105,5,6
+13 May 2026,,Kansas City Royals,Chicago White Sox,-115,-105,5,6
+13 May 2026,,Miami Marlins,Minnesota Twins,-130,+110,9,5
+13 May 2026,,San Diego Padres,Milwaukee Brewers,+140,-164,3,1
+13 May 2026,,Chicago Cubs,Atlanta Braves,-132,+114,1,4
+13 May 2026,,Detroit Tigers,New York Mets,+104,-115,2,3
+13 May 2026,,Tampa Bay Rays,Toronto Blue Jays,+125,-143,3,5
+13 May 2026,,Philadelphia Phillies,Boston Red Sox,+110,-130,1,3
+13 May 2026,,Washington Nationals,Cincinnati Reds,+152,-175,8,7
+13 May 2026,,Colorado Rockies,Pittsburgh Pirates,+154,-182,10,4
+13 May 2026,,Los Angeles Angels,Cleveland Guardians,+135,-149,2,4
+13 May 2026,,New York Yankees,Baltimore Orioles,-159,+140,0,7
+12 May 2026,,San Francisco Giants,Los Angeles Dodgers,+273,-333,6,2
+12 May 2026,,St.Louis Cardinals,Athletics,+140,-156,6,4
+12 May 2026,,Seattle Mariners,Houston Astros,-182,+170,10,2
+12 May 2026,,Arizona Diamondbacks,Texas Rangers,+108,-125,4,7
+12 May 2026,,Kansas City Royals,Chicago White Sox,-115,-102,5,6
+12 May 2026,,Miami Marlins,Minnesota Twins,-110,-105,0,3
+12 May 2026,,San Diego Padres,Milwaukee Brewers,+125,-149,4,6
+12 May 2026,,Chicago Cubs,Atlanta Braves,+102,-118,2,5
+12 May 2026,,Detroit Tigers,New York Mets,+125,-145,2,10
+12 May 2026,,Tampa Bay Rays,Toronto Blue Jays,-119,+100,7,6
+12 May 2026,,Philadelphia Phillies,Boston Red Sox,-135,+118,2,1
+12 May 2026,,Washington Nationals,Cincinnati Reds,+124,-141,10,4
+12 May 2026,,Colorado Rockies,Pittsburgh Pirates,+240,-294,1,3
+12 May 2026,,New York Yankees,Baltimore Orioles,-135,+119,6,2
+12 May 2026,,Los Angeles Angels,Cleveland Guardians,+118,-135,2,3
+11 May 2026,,San Francisco Giants,Los Angeles Dodgers,+160,-189,9,3
+11 May 2026,,Seattle Mariners,Houston Astros,-149,+129,3,1
+11 May 2026,,Arizona Diamondbacks,Texas Rangers,-105,-110,1,0
+11 May 2026,,Tampa Bay Rays,Toronto Blue Jays,+100,-118,8,5
+11 May 2026,,New York Yankees,Baltimore Orioles,-149,+129,2,3
+11 May 2026,,Los Angeles Angels,Cleveland Guardians,+145,-169,2,7
+10 May 2026,,Detroit Tigers,Kansas City Royals,+110,-130,6,3
+10 May 2026,,New York Mets,Arizona Diamondbacks,-105,-115,1,5
+10 May 2026,,Atlanta Braves,Los Angeles Dodgers,+120,-139,7,2
+10 May 2026,,St.Louis Cardinals,San Diego Padres,+114,-130,2,3
+10 May 2026,,Pittsburgh Pirates,San Francisco Giants,+104,-125,6,7
+10 May 2026,,Chicago Cubs,Texas Rangers,+102,-120,0,3
+10 May 2026,,Seattle Mariners,Chicago White Sox,-133,+120,1,2
+10 May 2026,,New York Yankees,Milwaukee Brewers,+100,-115,3,4
+10 May 2026,,Houston Astros,Cincinnati Reds,+100,-110,0,5
+10 May 2026,,Minnesota Twins,Cleveland Guardians,+140,-164,5,4
+10 May 2026,,Los Angeles Angels,Toronto Blue Jays,+100,-118,6,1
+10 May 2026,,Athletics,Baltimore Orioles,-102,-102,1,2
+10 May 2026,,Tampa Bay Rays,Boston Red Sox,+129,-149,4,1
+10 May 2026,,Colorado Rockies,Philadelphia Phillies,+250,-303,0,6
+10 May 2026,,Washington Nationals,Miami Marlins,+114,-135,2,5
+09 May 2026,,Atlanta Braves,Los Angeles Dodgers,+154,-185,7,2
+09 May 2026,,Pittsburgh Pirates,San Francisco Giants,-110,-110,13,3
+09 May 2026,,New York Mets,Arizona Diamondbacks,-110,-110,1,2
+09 May 2026,,St.Louis Cardinals,San Diego Padres,+120,-139,2,4
+09 May 2026,,Seattle Mariners,Chicago White Sox,-125,+110,1,6
+09 May 2026,,Detroit Tigers,Kansas City Royals,+114,-132,1,5
+09 May 2026,,New York Yankees,Milwaukee Brewers,-133,+114,3,4
+09 May 2026,,Chicago Cubs,Texas Rangers,-130,+110,0,6
+09 May 2026,,Minnesota Twins,Cleveland Guardians,+102,-120,2,1
+09 May 2026,,Colorado Rockies,Philadelphia Phillies,+156,-185,3,9
+09 May 2026,,Houston Astros,Cincinnati Reds,+140,-159,1,3
+09 May 2026,,Washington Nationals,Miami Marlins,+140,-159,7,8
+09 May 2026,,Athletics,Baltimore Orioles,+104,-120,6,2
+09 May 2026,,Los Angeles Angels,Toronto Blue Jays,+154,-182,1,14
+08 May 2026,,Pittsburgh Pirates,San Francisco Giants,-102,-110,2,5
+08 May 2026,,Atlanta Braves,Los Angeles Dodgers,-110,-110,1,3
+08 May 2026,,St.Louis Cardinals,San Diego Padres,+125,-143,6,0
+08 May 2026,,New York Mets,Arizona Diamondbacks,-123,+104,3,1
+08 May 2026,,Chicago Cubs,Texas Rangers,-128,+110,7,1
+08 May 2026,,Seattle Mariners,Chicago White Sox,-135,+114,12,8
+08 May 2026,,Detroit Tigers,Kansas City Royals,+125,-149,3,4
+08 May 2026,,New York Yankees,Milwaukee Brewers,-120,+106,0,6
+08 May 2026,,Minnesota Twins,Cleveland Guardians,+125,-149,4,6
+08 May 2026,,Tampa Bay Rays,Boston Red Sox,+114,-130,0,2
+08 May 2026,,Washington Nationals,Miami Marlins,+120,-141,3,2
+08 May 2026,,Los Angeles Angels,Toronto Blue Jays,+135,-156,0,2
+08 May 2026,,Athletics,Baltimore Orioles,+118,-130,4,3
+08 May 2026,,Colorado Rockies,Philadelphia Phillies,+190,-233,9,7
+08 May 2026,,Houston Astros,Cincinnati Reds,+110,-128,10,0
+07 May 2026,,St.Louis Cardinals,San Diego Padres,+140,-161,2,1
+07 May 2026,,Tampa Bay Rays,Boston Red Sox,+100,-110,8,4
+07 May 2026,,Athletics,Philadelphia Phillies,+114,-130,12,1
+07 May 2026,,Baltimore Orioles,Miami Marlins,+104,-125,3,4
+07 May 2026,,Pittsburgh Pirates,Arizona Diamondbacks,-103,-115,4,2
+07 May 2026,,New York Mets,Colorado Rockies,-143,+125,2,6
+07 May 2026,,Cincinnati Reds,Chicago Cubs,+169,-200,3,8
+07 May 2026,,Cleveland Guardians,Kansas City Royals,+110,-130,8,5
+07 May 2026,,Minnesota Twins,Washington Nationals,+104,-125,5,7
+07 May 2026,,Texas Rangers,New York Yankees,+131,-149,2,9
+06 May 2026,,Pittsburgh Pirates,Arizona Diamondbacks,-125,+110,1,0
+06 May 2026,,New York Mets,Colorado Rockies,-154,+133,10,5
+06 May 2026,,Cincinnati Reds,Chicago Cubs,+145,-169,6,7
+06 May 2026,,Cleveland Guardians,Kansas City Royals,+120,-135,3,1
+06 May 2026,,Texas Rangers,New York Yankees,+145,-169,6,1
+06 May 2026,,Minnesota Twins,Washington Nationals,-120,+104,2,15
+06 May 2026,,Athletics,Philadelphia Phillies,+145,-164,3,6
+06 May 2026,,Baltimore Orioles,Miami Marlins,+118,-130,7,4
+06 May 2026,,Boston Red Sox,Detroit Tigers,-110,-110,4,0
+06 May 2026,,Atlanta Braves,Seattle Mariners,+117,-130,1,3
+06 May 2026,,Chicago White Sox,Los Angeles Angels,-114,-105,2,8
+06 May 2026,,San Diego Padres,San Francisco Giants,+100,-115,5,1
+06 May 2026,,Los Angeles Dodgers,Houston Astros,-222,+179,12,2
+06 May 2026,,Milwaukee Brewers,St.Louis Cardinals,-110,-105,6,2
+06 May 2026,,Toronto Blue Jays,Tampa Bay Rays,+124,-130,0,3
+05 May 2026,,San Diego Padres,San Francisco Giants,+125,-139,10,5
+05 May 2026,,Pittsburgh Pirates,Arizona Diamondbacks,+114,-130,0,9
+05 May 2026,,Atlanta Braves,Seattle Mariners,+110,-130,3,2
+05 May 2026,,Chicago White Sox,Los Angeles Angels,-103,-110,3,4
+05 May 2026,,Los Angeles Dodgers,Houston Astros,-222,+184,1,2
+05 May 2026,,Cincinnati Reds,Chicago Cubs,+140,-164,2,3
+05 May 2026,,Cleveland Guardians,Kansas City Royals,-115,-102,3,5
+05 May 2026,,Texas Rangers,New York Yankees,+114,-130,4,7
+05 May 2026,,Minnesota Twins,Washington Nationals,-115,+100,11,3
+05 May 2026,,Athletics,Philadelphia Phillies,+179,-200,1,9
+05 May 2026,,Baltimore Orioles,Miami Marlins,+125,-139,9,7
+05 May 2026,,Boston Red Sox,Detroit Tigers,+133,-149,10,3
+05 May 2026,,Toronto Blue Jays,Tampa Bay Rays,+104,-120,3,4
+04 May 2026,,San Diego Padres,San Francisco Giants,-130,+110,2,3
+04 May 2026,,Atlanta Braves,Seattle Mariners,+120,-133,4,5
+04 May 2026,,Chicago White Sox,Los Angeles Angels,+133,-149,6,0
+04 May 2026,,Los Angeles Dodgers,Houston Astros,-200,+170,8,3
+04 May 2026,,Milwaukee Brewers,St.Louis Cardinals,-125,+110,3,6
+04 May 2026,,Cincinnati Reds,Chicago Cubs,+185,-222,4,5
+04 May 2026,,Cleveland Guardians,Kansas City Royals,-102,-115,2,6
+04 May 2026,,Baltimore Orioles,New York Yankees,+195,-222,1,12
+04 May 2026,,Boston Red Sox,Detroit Tigers,-125,+104,5,4
+04 May 2026,,Philadelphia Phillies,Miami Marlins,-105,-110,1,0
+04 May 2026,,Toronto Blue Jays,Tampa Bay Rays,+110,-125,1,5
+04 May 2026,,New York Mets,Colorado Rockies,-135,+125,4,2
+03 May 2026,,Texas Rangers,Detroit Tigers,+100,-120,1,7
+03 May 2026,,Chicago White Sox,San Diego Padres,+145,-161,3,4
+03 May 2026,,Kansas City Royals,Seattle Mariners,-105,-112,4,1
+03 May 2026,,New York Mets,Los Angeles Angels,-130,+114,5,1
+03 May 2026,,Cleveland Guardians,Athletics,-125,+104,1,7
+03 May 2026,,Atlanta Braves,Colorado Rockies,-139,+120,11,6
+03 May 2026,,Arizona Diamondbacks,Chicago Cubs,+129,-149,4,8
+03 May 2026,,Los Angeles Dodgers,St.Louis Cardinals,-135,+120,4,1
+03 May 2026,,Philadelphia Phillies,Miami Marlins,-139,+120,7,2
+03 May 2026,,San Francisco Giants,Tampa Bay Rays,+106,-120,1,2
+03 May 2026,,Baltimore Orioles,New York Yankees,+240,-294,3,11
+03 May 2026,,Houston Astros,Boston Red Sox,+150,-179,3,1
+03 May 2026,,Cincinnati Reds,Pittsburgh Pirates,+104,-120,0,1
+03 May 2026,,Milwaukee Brewers,Washington Nationals,-143,+129,2,3
+03 May 2026,,Toronto Blue Jays,Minnesota Twins,-105,-110,3,4
+02 May 2026,,Kansas City Royals,Seattle Mariners,+120,-139,3,2
+02 May 2026,,New York Mets,Los Angeles Angels,-120,+104,3,4
+02 May 2026,,Chicago White Sox,San Diego Padres,+156,-179,4,0
+02 May 2026,,Atlanta Braves,Colorado Rockies,-222,+185,9,1
+02 May 2026,,Texas Rangers,Detroit Tigers,+114,-130,1,5
+02 May 2026,,Los Angeles Dodgers,St.Louis Cardinals,-130,+114,2,3
+02 May 2026,,San Francisco Giants,Tampa Bay Rays,-114,-105,1,5
+02 May 2026,,Houston Astros,Boston Red Sox,+120,-139,6,3
+02 May 2026,,Philadelphia Phillies,Miami Marlins,+114,-130,0,4
+02 May 2026,,Cleveland Guardians,Athletics,+114,-130,14,6
+02 May 2026,,Cincinnati Reds,Pittsburgh Pirates,+120,-135,7,17
+02 May 2026,,Milwaukee Brewers,Washington Nationals,-130,+114,4,1
+02 May 2026,,Arizona Diamondbacks,Chicago Cubs,+145,-169,0,2
+02 May 2026,,Toronto Blue Jays,Minnesota Twins,-139,+120,11,4
+02 May 2026,,Baltimore Orioles,New York Yankees,+145,-169,4,9
+01 May 2026,,Kansas City Royals,Seattle Mariners,+120,-135,7,6
+01 May 2026,,Cleveland Guardians,Athletics,-115,+100,8,5
+01 May 2026,,Chicago White Sox,San Diego Padres,+125,-143,8,2
+01 May 2026,,New York Mets,Los Angeles Angels,-105,-110,4,3
+01 May 2026,,Atlanta Braves,Colorado Rockies,-169,+145,8,6
+01 May 2026,,Los Angeles Dodgers,St.Louis Cardinals,-169,+145,2,7
+01 May 2026,,Toronto Blue Jays,Minnesota Twins,-105,-110,7,3
+01 May 2026,,Houston Astros,Boston Red Sox,+104,-120,1,3
+01 May 2026,,Philadelphia Phillies,Miami Marlins,-115,-105,6,5
+01 May 2026,,San Francisco Giants,Tampa Bay Rays,+118,-135,0,3
+01 May 2026,,Baltimore Orioles,New York Yankees,+160,-185,2,7
+01 May 2026,,Cincinnati Reds,Pittsburgh Pirates,+117,-135,1,9
+01 May 2026,,Milwaukee Brewers,Washington Nationals,-159,+135,6,1
+01 May 2026,,Texas Rangers,Detroit Tigers,+102,-115,5,4
+01 May 2026,,Arizona Diamondbacks,Chicago Cubs,+125,-143,5,6
+30 Apr 2026,,Toronto Blue Jays,Minnesota Twins,-132,+114,1,7
+30 Apr 2026,,San Francisco Giants,Philadelphia Phillies,+120,-143,5,6
+30 Apr 2026,,Houston Astros,Baltimore Orioles,+114,-133,11,5
+30 Apr 2026,,Kansas City Royals,Athletics,+104,-125,3,6
+30 Apr 2026,,Arizona Diamondbacks,Milwaukee Brewers,+114,-120,1,13
+30 Apr 2026,,Washington Nationals,New York Mets,+170,-185,5,4
+30 Apr 2026,,Colorado Rockies,Cincinnati Reds,+140,-159,4,6
+30 Apr 2026,,Houston Astros,Baltimore Orioles,+114,-137,3,10
+30 Apr 2026,,San Francisco Giants,Philadelphia Phillies,+129,-149,2,3
+30 Apr 2026,,St.Louis Cardinals,Pittsburgh Pirates,+204,-227,10,5
+30 Apr 2026,,Detroit Tigers,Atlanta Braves,+104,-125,5,2
+29 Apr 2026,,Kansas City Royals,Athletics,+100,-120,2,5
+29 Apr 2026,,Arizona Diamondbacks,Milwaukee Brewers,+114,-130,6,2
+29 Apr 2026,,Detroit Tigers,Atlanta Braves,-141,+120,3,4
+29 Apr 2026,,Washington Nationals,New York Mets,+140,-159,14,2
+29 Apr 2026,,Colorado Rockies,Cincinnati Reds,+138,-149,13,2
+29 Apr 2026,,St.Louis Cardinals,Pittsburgh Pirates,+114,-130,5,4
+29 Apr 2026,,Chicago Cubs,San Diego Padres,+100,-110,5,4
+29 Apr 2026,,Miami Marlins,Los Angeles Dodgers,+220,-270,3,2
+29 Apr 2026,,Boston Red Sox,Toronto Blue Jays,+100,-112,1,8
+29 Apr 2026,,New York Yankees,Texas Rangers,-114,-105,0,3
+29 Apr 2026,,Seattle Mariners,Minnesota Twins,-130,+114,5,3
+29 Apr 2026,,Los Angeles Angels,Chicago White Sox,-115,+104,2,3
+29 Apr 2026,,Tampa Bay Rays,Cleveland Guardians,-102,-115,1,3
+28 Apr 2026,,Miami Marlins,Los Angeles Dodgers,+240,-286,2,1
+28 Apr 2026,,Kansas City Royals,Athletics,-110,-110,4,1
+28 Apr 2026,,Chicago Cubs,San Diego Padres,-119,+100,8,3
+28 Apr 2026,,New York Yankees,Texas Rangers,-120,+100,3,2
+28 Apr 2026,,Arizona Diamondbacks,Milwaukee Brewers,+118,-128,2,13
+28 Apr 2026,,Los Angeles Angels,Chicago White Sox,-130,+114,2,5
+28 Apr 2026,,Seattle Mariners,Minnesota Twins,-125,+110,7,1
+28 Apr 2026,,Detroit Tigers,Atlanta Braves,+104,-123,2,5
+28 Apr 2026,,Washington Nationals,New York Mets,+154,-179,0,8
+28 Apr 2026,,Boston Red Sox,Toronto Blue Jays,-105,-115,0,3
+28 Apr 2026,,Colorado Rockies,Cincinnati Reds,+163,-189,2,7
+28 Apr 2026,,San Francisco Giants,Philadelphia Phillies,+135,-156,0,7
+28 Apr 2026,,St.Louis Cardinals,Pittsburgh Pirates,+140,-154,11,7
+28 Apr 2026,,Houston Astros,Baltimore Orioles,+114,-135,3,5
+28 Apr 2026,,Tampa Bay Rays,Cleveland Guardians,+110,-130,1,0
+27 Apr 2026,,Miami Marlins,Los Angeles Dodgers,+240,-294,4,5
+27 Apr 2026,,Chicago Cubs,San Diego Padres,+100,-120,7,9
+27 Apr 2026,,New York Yankees,Texas Rangers,-164,+140,4,2
+27 Apr 2026,,Los Angeles Angels,Chicago White Sox,+100,-110,7,8
+27 Apr 2026,,Seattle Mariners,Minnesota Twins,-123,+104,4,11
+27 Apr 2026,,Boston Red Sox,Toronto Blue Jays,+120,-135,5,0
+27 Apr 2026,,St.Louis Cardinals,Pittsburgh Pirates,-102,-115,4,2
+27 Apr 2026,,Tampa Bay Rays,Cleveland Guardians,+120,-139,3,2
+26 Apr 2026,,Los Angeles Angels,Kansas City Royals,,,9,11
+26 Apr 2026,,Colorado Rockies,New York Mets,,,3,0
+26 Apr 2026,,Chicago Cubs,Los Angeles Dodgers,+106,-120,0,6
+26 Apr 2026,,San Diego Padres,Arizona Diamondbacks,-130,+114,7,12
+26 Apr 2026,,Miami Marlins,San Francisco Giants,+104,-123,3,6
+26 Apr 2026,,Athletics,Texas Rangers,+102,-120,2,1
+26 Apr 2026,,Seattle Mariners,St.Louis Cardinals,-130,+110,3,2
+26 Apr 2026,,Washington Nationals,Chicago White Sox,+102,-120,2,1
+26 Apr 2026,,New York Yankees,Houston Astros,-133,+114,4,7
+26 Apr 2026,,Pittsburgh Pirates,Milwaukee Brewers,+100,-120,0,5
+26 Apr 2026,,Detroit Tigers,Cincinnati Reds,-110,-109,8,3
+26 Apr 2026,,Colorado Rockies,New York Mets,+220,-189,3,1
+26 Apr 2026,,Minnesota Twins,Tampa Bay Rays,+125,-143,2,4
+26 Apr 2026,,Cleveland Guardians,Toronto Blue Jays,+104,-125,2,4
+26 Apr 2026,,Philadelphia Phillies,Atlanta Braves,+185,-222,2,6
+26 Apr 2026,,Boston Red Sox,Baltimore Orioles,+120,-133,5,3
+25 Apr 2026,,Philadelphia Phillies,Atlanta Braves,+114,-135,8,5
+25 Apr 2026,,Chicago Cubs,Los Angeles Dodgers,+108,-125,4,12
+25 Apr 2026,,Detroit Tigers,Cincinnati Reds,-110,-109,2,9
+25 Apr 2026,,New York Yankees,Houston Astros,-149,+135,8,3
+25 Apr 2026,,Los Angeles Angels,Kansas City Royals,+118,-132,1,12
+25 Apr 2026,,Pittsburgh Pirates,Milwaukee Brewers,+125,-139,6,3
+25 Apr 2026,,Athletics,Texas Rangers,+110,-125,3,4
+25 Apr 2026,,San Diego Padres,Arizona Diamondbacks,-105,-112,6,4
+25 Apr 2026,,Washington Nationals,Chicago White Sox,+120,-139,6,3
+25 Apr 2026,,Minnesota Twins,Tampa Bay Rays,+120,-130,1,6
+25 Apr 2026,,Miami Marlins,San Francisco Giants,-109,-110,2,6
+25 Apr 2026,,Cleveland Guardians,Toronto Blue Jays,+125,-149,3,5
+25 Apr 2026,,Seattle Mariners,St.Louis Cardinals,-149,+125,11,9
+25 Apr 2026,,Boston Red Sox,Baltimore Orioles,+110,-120,17,1
+21 Apr 2026,,Milwaukee Brewers,Detroit Tigers,-105,-110,12,4
+21 Apr 2026,,St.Louis Cardinals,Miami Marlins,+104,-118,5,3
+21 Apr 2026,,Houston Astros,Cleveland Guardians,+129,-149,5,8
+20 Apr 2026,,Athletics,Seattle Mariners,+125,-149,6,4
+20 Apr 2026,,Toronto Blue Jays,Los Angeles Angels,-115,-105,5,2
+20 Apr 2026,,Los Angeles Dodgers,Colorado Rockies,-204,+170,12,3
+20 Apr 2026,,Baltimore Orioles,Kansas City Royals,-115,-105,7,5
+20 Apr 2026,,Philadelphia Phillies,Chicago Cubs,-105,-110,1,5
+20 Apr 2026,,Atlanta Braves,Washington Nationals,-149,+129,9,4
+20 Apr 2026,,Cincinnati Reds,Tampa Bay Rays,+114,-125,6,1
+20 Apr 2026,,St.Louis Cardinals,Miami Marlins,+120,-135,3,5
+20 Apr 2026,,Houston Astros,Cleveland Guardians,+114,-135,9,2
+20 Apr 2026,,Detroit Tigers,Boston Red Sox,+114,-133,6,8
+19 Apr 2026,,Atlanta Braves,Philadelphia Phillies,-115,-105,4,2
+19 Apr 2026,,Detroit Tigers,Boston Red Sox,+120,-139,6,2
+19 Apr 2026,,Toronto Blue Jays,Arizona Diamondbacks,-120,+100,10,4
+19 Apr 2026,,Texas Rangers,Seattle Mariners,+120,-139,2,5
+19 Apr 2026,,San Diego Padres,Los Angeles Angels,-149,+129,2,1
+19 Apr 2026,,Chicago White Sox,Athletics,+140,-159,7,4
+19 Apr 2026,,Los Angeles Dodgers,Colorado Rockies,-208,+179,6,9
+19 Apr 2026,,New York Mets,Chicago Cubs,+120,-139,1,2
+19 Apr 2026,,Cincinnati Reds,Minnesota Twins,+104,-115,7,4
+19 Apr 2026,,St.Louis Cardinals,Houston Astros,+120,-135,7,5
+19 Apr 2026,,Baltimore Orioles,Cleveland Guardians,+100,-120,4,8
+19 Apr 2026,,Milwaukee Brewers,Miami Marlins,-105,-110,3,5
+19 Apr 2026,,Kansas City Royals,New York Yankees,+125,-149,0,7
+19 Apr 2026,,Tampa Bay Rays,Pittsburgh Pirates,-105,-105,3,6
+19 Apr 2026,,San Francisco Giants,Washington Nationals,-135,+120,0,3
+18 Apr 2026,,San Diego Padres,Los Angeles Angels,-115,-105,4,1
+18 Apr 2026,,Toronto Blue Jays,Arizona Diamondbacks,+125,-149,2,6
+18 Apr 2026,,Los Angeles Dodgers,Colorado Rockies,-294,+240,3,4
+18 Apr 2026,,Atlanta Braves,Philadelphia Phillies,+100,-120,3,1
+18 Apr 2026,,Texas Rangers,Seattle Mariners,+120,-139,3,7
+18 Apr 2026,,St.Louis Cardinals,Houston Astros,+120,-141,7,5
+18 Apr 2026,,Baltimore Orioles,Cleveland Guardians,+125,-143,2,4
+18 Apr 2026,,Detroit Tigers,Boston Red Sox,-143,+125,4,1
+18 Apr 2026,,Milwaukee Brewers,Miami Marlins,+100,-115,5,2
+18 Apr 2026,,Chicago White Sox,Athletics,+140,-164,6,7
+18 Apr 2026,,San Francisco Giants,Washington Nationals,-110,-110,7,6
+18 Apr 2026,,Tampa Bay Rays,Pittsburgh Pirates,+125,-149,8,7
+18 Apr 2026,,New York Mets,Chicago Cubs,+100,-118,2,4
+18 Apr 2026,,Cincinnati Reds,Minnesota Twins,+110,-130,5,4
+18 Apr 2026,,Kansas City Royals,New York Yankees,+140,-161,4,13
+17 Apr 2026,,Toronto Blue Jays,Arizona Diamondbacks,+120,-139,3,6
+17 Apr 2026,,Chicago White Sox,Athletics,+135,-159,9,2
+17 Apr 2026,,Texas Rangers,Seattle Mariners,+110,-115,5,0
+17 Apr 2026,,San Diego Padres,Los Angeles Angels,+110,-130,0,8
+17 Apr 2026,,Los Angeles Dodgers,Colorado Rockies,-323,+260,7,1
+17 Apr 2026,,Cincinnati Reds,Minnesota Twins,+145,-169,2,1
+17 Apr 2026,,St.Louis Cardinals,Houston Astros,+104,-125,9,4
+13 Apr 2026,,Cleveland Guardians,St.Louis Cardinals,-115,+104,9,3
+13 Apr 2026,,Boston Red Sox,Minnesota Twins,-164,+140,6,13
+13 Apr 2026,,Miami Marlins,Atlanta Braves,+129,-143,10,4
+13 Apr 2026,,Los Angeles Angels,New York Yankees,+165,-179,10,11
+13 Apr 2026,,Chicago Cubs,Philadelphia Phillies,+145,-169,7,13
+13 Apr 2026,,Washington Nationals,Pittsburgh Pirates,+185,-222,5,16
+13 Apr 2026,,Arizona Diamondbacks,Baltimore Orioles,+110,-130,7,9
+13 Apr 2026,,Houston Astros,Seattle Mariners,+150,-175,2,6
+12 Apr 2026,,Cleveland Guardians,Atlanta Braves,+165,-200,1,13
+12 Apr 2026,,Colorado Rockies,San Diego Padres,+185,-227,2,7
+12 Apr 2026,,Houston Astros,Seattle Mariners,+160,-189,1,6
+12 Apr 2026,,Texas Rangers,Los Angeles Dodgers,+110,-125,5,2
+12 Apr 2026,,Pittsburgh Pirates,Chicago Cubs,+114,-130,6,7
+12 Apr 2026,,Boston Red Sox,St.Louis Cardinals,-115,-102,9,3
+12 Apr 2026,,Chicago White Sox,Kansas City Royals,+154,-179,6,5
+12 Apr 2026,,Washington Nationals,Milwaukee Brewers,+185,-222,8,6
+12 Apr 2026,,Athletics,New York Mets,+145,-164,1,0
+12 Apr 2026,,Los Angeles Angels,Cincinnati Reds,-110,-105,9,6
+12 Apr 2026,,Miami Marlins,Detroit Tigers,+145,-169,2,8
+12 Apr 2026,,New York Yankees,Tampa Bay Rays,-135,+114,4,5
+12 Apr 2026,,Minnesota Twins,Toronto Blue Jays,+114,-130,8,2
+12 Apr 2026,,Arizona Diamondbacks,Philadelphia Phillies,+120,-130,4,3
+12 Apr 2026,,San Francisco Giants,Baltimore Orioles,+104,-120,2,6
+11 Apr 2026,,Houston Astros,Seattle Mariners,+135,-135,7,8
+11 Apr 2026,,Texas Rangers,Los Angeles Dodgers,+154,-185,3,6
+11 Apr 2026,,Colorado Rockies,San Diego Padres,+140,-164,5,9
+11 Apr 2026,,Cleveland Guardians,Atlanta Braves,+100,-118,6,0
+11 Apr 2026,,San Francisco Giants,Baltimore Orioles,-120,+100,2,6
+11 Apr 2026,,Boston Red Sox,St.Louis Cardinals,-139,+120,7,1
+11 Apr 2026,,Washington Nationals,Milwaukee Brewers,+154,-179,3,1
+11 Apr 2026,,New York Yankees,Tampa Bay Rays,-169,+145,4,5
+11 Apr 2026,,Athletics,New York Mets,+135,-159,11,6
+11 Apr 2026,,Chicago White Sox,Kansas City Royals,+160,-189,0,2
+11 Apr 2026,,Los Angeles Angels,Cincinnati Reds,+110,-130,3,7
+11 Apr 2026,,Minnesota Twins,Toronto Blue Jays,+104,-120,7,4
+11 Apr 2026,,Pittsburgh Pirates,Chicago Cubs,+129,-145,4,3
+11 Apr 2026,,Miami Marlins,Detroit Tigers,+114,-135,1,6
+11 Apr 2026,,Arizona Diamondbacks,Philadelphia Phillies,+104,-120,3,4
+10 Apr 2026,,Texas Rangers,Los Angeles Dodgers,+200,-227,7,8
+10 Apr 2026,,Colorado Rockies,San Diego Padres,+145,-169,2,5
+10 Apr 2026,,Houston Astros,Seattle Mariners,+120,-130,6,9
+10 Apr 2026,,Boston Red Sox,St.Louis Cardinals,-135,+118,2,3
+10 Apr 2026,,Chicago White Sox,Kansas City Royals,+150,-179,0,2
+10 Apr 2026,,Washington Nationals,Milwaukee Brewers,+170,-200,7,3
+10 Apr 2026,,Cleveland Guardians,Atlanta Braves,+120,-139,5,11
+10 Apr 2026,,San Francisco Giants,Baltimore Orioles,+104,-125,6,3
+10 Apr 2026,,Athletics,New York Mets,+125,-143,4,0
+10 Apr 2026,,New York Yankees,Tampa Bay Rays,-115,+100,3,5
+10 Apr 2026,,Minnesota Twins,Toronto Blue Jays,+135,-154,4,10
+10 Apr 2026,,Los Angeles Angels,Cincinnati Reds,+165,-179,10,2
+10 Apr 2026,,Arizona Diamondbacks,Philadelphia Phillies,+150,-179,5,4
+10 Apr 2026,,Miami Marlins,Detroit Tigers,+114,-130,0,2
+10 Apr 2026,,Pittsburgh Pirates,Chicago Cubs,+135,-149,2,0
+09 Apr 2026,,Colorado Rockies,San Diego Padres,+154,-185,3,7
+09 Apr 2026,,Chicago White Sox,Kansas City Royals,+150,-179,2,0
+09 Apr 2026,,Arizona Diamondbacks,New York Mets,+154,-182,7,1
+09 Apr 2026,,Detroit Tigers,Minnesota Twins,-130,+120,1,3
+09 Apr 2026,,Athletics,New York Yankees,+165,-189,1,0
+09 Apr 2026,,Cincinnati Reds,Miami Marlins,+104,-120,1,8
+08 Apr 2026,,Detroit Tigers,Minnesota Twins,-149,+129,6,8
+08 Apr 2026,,Athletics,New York Yankees,+165,-200,3,2
+08 Apr 2026,,Chicago Cubs,Tampa Bay Rays,+100,-110,6,2
+08 Apr 2026,,Cincinnati Reds,Miami Marlins,+110,-125,4,7
+08 Apr 2026,,Arizona Diamondbacks,New York Mets,+114,-125,7,2
+08 Apr 2026,,Atlanta Braves,Los Angeles Angels,-125,+104,8,2
+08 Apr 2026,,St.Louis Cardinals,Washington Nationals,-120,+100,6,1
+08 Apr 2026,,Philadelphia Phillies,San Francisco Giants,-135,+114,0,5
+08 Apr 2026,,Houston Astros,Colorado Rockies,-135,+114,1,9
+08 Apr 2026,,Los Angeles Dodgers,Toronto Blue Jays,-154,+135,3,4
+08 Apr 2026,,Seattle Mariners,Texas Rangers,-120,+100,0,3
+08 Apr 2026,,Baltimore Orioles,Chicago White Sox,-149,+125,5,3
+08 Apr 2026,,Milwaukee Brewers,Boston Red Sox,+120,-135,0,5
+08 Apr 2026,,Kansas City Royals,Cleveland Guardians,-125,+114,2,10
+08 Apr 2026,,San Diego Padres,Pittsburgh Pirates,-120,+104,8,2
+07 Apr 2026,,Philadelphia Phillies,San Francisco Giants,-154,+129,0,6
+07 Apr 2026,,Atlanta Braves,Los Angeles Angels,-130,+110,7,2
+07 Apr 2026,,Houston Astros,Colorado Rockies,-164,+140,1,5
+07 Apr 2026,,Seattle Mariners,Texas Rangers,-115,+104,2,3
+07 Apr 2026,,Detroit Tigers,Minnesota Twins,-164,+140,2,4
+07 Apr 2026,,Los Angeles Dodgers,Toronto Blue Jays,-154,+129,4,1
+07 Apr 2026,,Athletics,New York Yankees,+220,-270,3,5
+07 Apr 2026,,Milwaukee Brewers,Boston Red Sox,+135,-159,2,3
+07 Apr 2026,,St.Louis Cardinals,Washington Nationals,-105,-115,7,6
+07 Apr 2026,,Chicago Cubs,Tampa Bay Rays,+100,-120,9,2
+07 Apr 2026,,Cincinnati Reds,Miami Marlins,+120,-135,6,3
+07 Apr 2026,,San Diego Padres,Pittsburgh Pirates,+125,-149,1,7
+07 Apr 2026,,Arizona Diamondbacks,New York Mets,+125,-149,3,4
+07 Apr 2026,,Baltimore Orioles,Chicago White Sox,-149,+125,4,2
+07 Apr 2026,,Kansas City Royals,Cleveland Guardians,+104,-125,1,2
+06 Apr 2026,,Philadelphia Phillies,San Francisco Giants,-120,+100,6,4
+06 Apr 2026,,Atlanta Braves,Los Angeles Angels,-175,+150,2,6
+06 Apr 2026,,Houston Astros,Colorado Rockies,-149,+125,7,9
+06 Apr 2026,,Seattle Mariners,Texas Rangers,+100,-111,1,2
+06 Apr 2026,,Baltimore Orioles,Chicago White Sox,-133,+120,2,1
+06 Apr 2026,,Detroit Tigers,Minnesota Twins,+104,-125,3,7
+06 Apr 2026,,Los Angeles Dodgers,Toronto Blue Jays,-125,+104,14,2
+06 Apr 2026,,Milwaukee Brewers,Boston Red Sox,-130,+114,8,6
+06 Apr 2026,,St.Louis Cardinals,Washington Nationals,-110,-105,6,9
+06 Apr 2026,,Cincinnati Reds,Miami Marlins,+125,-130,2,0
+06 Apr 2026,,San Diego Padres,Pittsburgh Pirates,+120,-141,5,0
+06 Apr 2026,,Cincinnati Reds,Miami Marlins,+125,-130,2,0
+06 Apr 2026,,Kansas City Royals,Cleveland Guardians,-102,-115,4,2
+06 Apr 2026,,Chicago Cubs,Tampa Bay Rays,+104,-120,4,6
+05 Apr 2026,,St.Louis Cardinals,Detroit Tigers,+120,-141,5,3
+05 Apr 2026,,Atlanta Braves,Arizona Diamondbacks,-110,-105,5,6
+05 Apr 2026,,Chicago Cubs,Cleveland Guardians,-130,+110,5,6
+05 Apr 2026,,Seattle Mariners,Los Angeles Angels,-169,+145,7,8
+05 Apr 2026,,Houston Astros,Athletics,-130,+118,10,12
+05 Apr 2026,,New York Mets,San Francisco Giants,+104,-115,5,2
+05 Apr 2026,,Philadelphia Phillies,Colorado Rockies,-154,+129,1,4
+05 Apr 2026,,Cincinnati Reds,Texas Rangers,+104,-125,2,1
+05 Apr 2026,,Toronto Blue Jays,Chicago White Sox,-167,+145,0,3
+05 Apr 2026,,Milwaukee Brewers,Kansas City Royals,+104,-120,8,5
+05 Apr 2026,,Tampa Bay Rays,Minnesota Twins,-110,-110,4,1
+05 Apr 2026,,Baltimore Orioles,Pittsburgh Pirates,+104,-120,2,8
+05 Apr 2026,,San Diego Padres,Boston Red Sox,+135,-154,8,6
+05 Apr 2026,,Los Angeles Dodgers,Washington Nationals,-169,+145,8,6
+05 Apr 2026,,Miami Marlins,New York Yankees,+240,-294,7,6
+05 Apr 2026,,Chicago Cubs,Cleveland Guardians,-130,+110,1,0
+04 Apr 2026,,Seattle Mariners,Los Angeles Angels,-159,+140,0,1
+04 Apr 2026,,New York Mets,San Francisco Giants,+100,-118,9,0
+04 Apr 2026,,Philadelphia Phillies,Colorado Rockies,-250,+210,2,1
+04 Apr 2026,,Atlanta Braves,Arizona Diamondbacks,-102,-110,1,2
+04 Apr 2026,,Milwaukee Brewers,Kansas City Royals,,,2,8
+04 Apr 2026,,Tampa Bay Rays,Minnesota Twins,-118,+100,7,1
+04 Apr 2026,,Cincinnati Reds,Texas Rangers,+120,-139,2,0
+04 Apr 2026,,Miami Marlins,New York Yankees,+165,-200,7,9
+04 Apr 2026,,San Diego Padres,Boston Red Sox,+125,-149,3,2
+04 Apr 2026,,Houston Astros,Athletics,+100,-115,11,0
+04 Apr 2026,,Baltimore Orioles,Pittsburgh Pirates,-105,-115,2,3
+04 Apr 2026,,Los Angeles Dodgers,Washington Nationals,-303,+245,10,5
+04 Apr 2026,,Toronto Blue Jays,Chicago White Sox,-149,+129,3,6
+04 Apr 2026,,Milwaukee Brewers,Kansas City Royals,-120,+100,5,2
+04 Apr 2026,,St.Louis Cardinals,Detroit Tigers,+145,-169,6,11
+03 Apr 2026,,New York Mets,San Francisco Giants,-130,+110,10,3
+03 Apr 2026,,Atlanta Braves,Arizona Diamondbacks,-110,-105,2,0
+03 Apr 2026,,Houston Astros,Athletics,-110,-105,4,11
+03 Apr 2026,,Seattle Mariners,Los Angeles Angels,-159,+135,3,1
+03 Apr 2026,,Baltimore Orioles,Pittsburgh Pirates,-115,+104,4,5
+03 Apr 2026,,Chicago Cubs,Cleveland Guardians,-110,+100,1,4
+03 Apr 2026,,Philadelphia Phillies,Colorado Rockies,-185,+154,10,1
+03 Apr 2026,,Tampa Bay Rays,Minnesota Twins,-110,-110,4,10
+03 Apr 2026,,Cincinnati Reds,Texas Rangers,+145,-164,5,3
+03 Apr 2026,,San Diego Padres,Boston Red Sox,+104,-120,2,5
+03 Apr 2026,,Toronto Blue Jays,Chicago White Sox,-200,+170,4,5
+03 Apr 2026,,Miami Marlins,New York Yankees,+140,-164,2,8
+03 Apr 2026,,St.Louis Cardinals,Detroit Tigers,+154,-175,0,4
+03 Apr 2026,,Los Angeles Dodgers,Washington Nationals,-278,+229,13,6
+02 Apr 2026,,New York Mets,San Francisco Giants,-120,+100,2,7
+02 Apr 2026,,Atlanta Braves,Arizona Diamondbacks,-105,-105,17,2
+01 Apr 2026,,Cleveland Guardians,Los Angeles Dodgers,+250,-303,4,1
+01 Apr 2026,,Minnesota Twins,Kansas City Royals,-115,-105,9,13
+01 Apr 2026,,New York Yankees,Seattle Mariners,+100,-120,5,3
+01 Apr 2026,,San Francisco Giants,San Diego Padres,+129,-149,1,7
+01 Apr 2026,,Detroit Tigers,Arizona Diamondbacks,-143,+129,0,1
+01 Apr 2026,,Los Angeles Angels,Chicago Cubs,+145,-161,2,6
+01 Apr 2026,,Boston Red Sox,Houston Astros,-139,+120,4,6
+01 Apr 2026,,Tampa Bay Rays,Milwaukee Brewers,+120,-135,2,8
+01 Apr 2026,,New York Mets,St.Louis Cardinals,-164,+140,1,2
+01 Apr 2026,,Chicago White Sox,Miami Marlins,+125,-149,0,10
+01 Apr 2026,,Colorado Rockies,Toronto Blue Jays,+225,-278,2,1
+01 Apr 2026,,Washington Nationals,Philadelphia Phillies,+229,-278,5,6
+01 Apr 2026,,Pittsburgh Pirates,Cincinnati Reds,-139,+120,8,3
+01 Apr 2026,,Texas Rangers,Baltimore Orioles,+100,-115,3,8
+01 Apr 2026,,Athletics,Atlanta Braves,+195,-222,1,5
+31 Mar 2026,,Cleveland Guardians,Los Angeles Dodgers,+229,-278,1,4
+31 Mar 2026,,Detroit Tigers,Arizona Diamondbacks,-110,-110,5,7
+31 Mar 2026,,New York Yankees,Seattle Mariners,-110,+100,5,0
+31 Mar 2026,,San Francisco Giants,San Diego Padres,-130,+110,9,3
+31 Mar 2026,,Boston Red Sox,Houston Astros,+125,-139,2,9
+31 Mar 2026,,New York Mets,St.Louis Cardinals,-149,+129,0,3
+31 Mar 2026,,Los Angeles Angels,Chicago Cubs,+120,-141,2,0
+31 Mar 2026,,Tampa Bay Rays,Milwaukee Brewers,+104,-125,2,6
+31 Mar 2026,,Athletics,Atlanta Braves,+129,-149,5,2
+31 Mar 2026,,Colorado Rockies,Toronto Blue Jays,+225,-270,1,5
+31 Mar 2026,,Chicago White Sox,Miami Marlins,+135,-149,2,9
+31 Mar 2026,,Pittsburgh Pirates,Cincinnati Reds,-120,+100,8,3
+31 Mar 2026,,Washington Nationals,Philadelphia Phillies,+160,-189,2,3
+31 Mar 2026,,Texas Rangers,Baltimore Orioles,-120,+104,8,5
+30 Mar 2026,,Detroit Tigers,Arizona Diamondbacks,+104,-115,6,9
+30 Mar 2026,,Cleveland Guardians,Los Angeles Dodgers,+165,-169,4,2
+30 Mar 2026,,New York Yankees,Seattle Mariners,-118,+100,1,2
+30 Mar 2026,,San Francisco Giants,San Diego Padres,+100,-118,3,2
+30 Mar 2026,,Boston Red Sox,Houston Astros,-130,+114,1,8
+30 Mar 2026,,New York Mets,St.Louis Cardinals,-149,+129,4,2
+30 Mar 2026,,Los Angeles Angels,Chicago Cubs,+160,-189,2,7
+30 Mar 2026,,Tampa Bay Rays,Milwaukee Brewers,+140,-159,3,2
+30 Mar 2026,,Athletics,Atlanta Braves,+110,-125,0,4
+30 Mar 2026,,Colorado Rockies,Toronto Blue Jays,+240,-294,14,5
+30 Mar 2026,,Chicago White Sox,Miami Marlins,+125,-149,9,4
+30 Mar 2026,,Pittsburgh Pirates,Cincinnati Reds,+114,-133,0,2
+30 Mar 2026,,Washington Nationals,Philadelphia Phillies,+145,-169,13,2
+30 Mar 2026,,Texas Rangers,Baltimore Orioles,+114,-125,5,2
+30 Mar 2026,,Minnesota Twins,Kansas City Royals,+140,-164,1,3
+29 Mar 2026,,Cleveland Guardians,Seattle Mariners,+125,-149,0,8
+29 Mar 2026,,Washington Nationals,Chicago Cubs,+210,-250,6,3
+29 Mar 2026,,Tampa Bay Rays,St.Louis Cardinals,-115,+104,11,7
+29 Mar 2026,,Chicago White Sox,Milwaukee Brewers,+140,-164,7,9
+29 Mar 2026,,Los Angeles Angels,Houston Astros,+150,-169,7,9
+29 Mar 2026,,Boston Red Sox,Cincinnati Reds,-135,+118,2,3
+29 Mar 2026,,Colorado Rockies,Miami Marlins,+160,-189,3,4
+29 Mar 2026,,Pittsburgh Pirates,New York Mets,+154,-179,4,3
+29 Mar 2026,,Athletics,Toronto Blue Jays,+135,-149,2,5
+29 Mar 2026,,Kansas City Royals,Atlanta Braves,+125,-149,4,1
+29 Mar 2026,,Minnesota Twins,Baltimore Orioles,+135,-154,6,8
+29 Mar 2026,,Texas Rangers,Philadelphia Phillies,+140,-159,8,3
+28 Mar 2026,,Cleveland Guardians,Seattle Mariners,+150,-179,6,5
+28 Mar 2026,,Arizona Diamondbacks,Los Angeles Dodgers,+204,-250,2,3
+28 Mar 2026,,Detroit Tigers,San Diego Padres,+100,-105,0,3
+28 Mar 2026,,Kansas City Royals,Atlanta Braves,+125,-149,2,6
+28 Mar 2026,,New York Yankees,San Francisco Giants,-135,+114,3,1
+28 Mar 2026,,Chicago White Sox,Milwaukee Brewers,+165,-200,1,6
+28 Mar 2026,,Los Angeles Angels,Houston Astros,+118,-128,9,11
+28 Mar 2026,,Boston Red Sox,Cincinnati Reds,-135,+114,5,6
+28 Mar 2026,,Colorado Rockies,Miami Marlins,+165,-189,3,4
+28 Mar 2026,,Pittsburgh Pirates,New York Mets,+145,-169,2,4
+28 Mar 2026,,Minnesota Twins,Baltimore Orioles,+145,-167,4,1
+28 Mar 2026,,Texas Rangers,Philadelphia Phillies,+125,-149,5,4
+28 Mar 2026,,Athletics,Toronto Blue Jays,+165,-189,7,8
+28 Mar 2026,,Washington Nationals,Chicago Cubs,+204,-250,2,10
+28 Mar 2026,,Tampa Bay Rays,St.Louis Cardinals,-115,+100,5,6
+27 Mar 2026,,Arizona Diamondbacks,Los Angeles Dodgers,+200,-238,4,5
+27 Mar 2026,,Cleveland Guardians,Seattle Mariners,+145,-169,1,5
+27 Mar 2026,,Detroit Tigers,San Diego Padres,+118,-128,5,2
+27 Mar 2026,,Los Angeles Angels,Houston Astros,+145,-169,6,2
+27 Mar 2026,,Kansas City Royals,Atlanta Braves,+120,-141,0,6
+27 Mar 2026,,Colorado Rockies,Miami Marlins,+165,-189,1,2
+27 Mar 2026,,Athletics,Toronto Blue Jays,+150,-179,2,3
+27 Mar 2026,,New York Yankees,San Francisco Giants,-130,+114,3,0
+26 Mar 2026,,Cleveland Guardians,Seattle Mariners,+154,-185,6,4
+26 Mar 2026,,Arizona Diamondbacks,Los Angeles Dodgers,+229,-250,2,8
+26 Mar 2026,,Texas Rangers,Philadelphia Phillies,+140,-159,3,5
+26 Mar 2026,,Tampa Bay Rays,St.Louis Cardinals,-130,+114,7,9
+26 Mar 2026,,Boston Red Sox,Cincinnati Reds,-159,+135,3,0
+26 Mar 2026,,Detroit Tigers,San Diego Padres,-125,+110,8,2
+26 Mar 2026,,Los Angeles Angels,Houston Astros,+160,-175,3,0
+26 Mar 2026,,Minnesota Twins,Baltimore Orioles,+125,-133,1,2
+26 Mar 2026,,Washington Nationals,Chicago Cubs,+175,-208,10,4
+26 Mar 2026,,Chicago White Sox,Milwaukee Brewers,+165,-200,2,14
+26 Mar 2026,,Pittsburgh Pirates,New York Mets,+104,-115,7,11
+25 Mar 2026,,New York Yankees,San Francisco Giants,-120,+110,7,0

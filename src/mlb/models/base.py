@@ -268,6 +268,60 @@ class RandomForestModel(BaseModel):
         return RandomForestClassifier(**self.config.params)
 
 
+class LogisticRegressionModel(BaseModel):
+    """Logistic Regression — linear counterpoint to tree-based ensemble.
+
+    Wraps sklearn's LogisticRegression inside a Pipeline with StandardScaler
+    since LR is scale-sensitive unlike tree models.
+    """
+
+    def __init__(self, config: ModelConfig | None = None):
+        default = ModelConfig(
+            name="LogisticRegression",
+            params={
+                "C": 1.0,
+                "max_iter": 1000,
+                "solver": "lbfgs",
+                "random_state": 42,
+            },
+        )
+        if config:
+            default.params.update(config.params)
+            default.name = config.name or default.name
+        super().__init__(default)
+
+    def _create_model(self):
+        from sklearn.linear_model import LogisticRegression
+        return SklearnPipeline([
+            ("scaler", StandardScaler()),
+            ("lr", LogisticRegression(**self.config.params)),
+        ])
+
+    def train(
+        self, X: np.ndarray, y: np.ndarray,
+        feature_names: list[str] | None = None,
+        sample_weight: np.ndarray | None = None,
+    ):
+        """Train with sample_weight routed to the LR step inside the Pipeline."""
+        self.feature_names = feature_names or [f"f{i}" for i in range(X.shape[1])]
+        self.model = self._create_model()
+        if sample_weight is not None:
+            self.model.fit(X, y, lr__sample_weight=sample_weight)
+        else:
+            self.model.fit(X, y)
+        self.is_fitted = True
+        logger.info("%s trained on %d samples, %d features", self.name, X.shape[0], X.shape[1])
+
+    def feature_importance(self) -> dict[str, float]:
+        """Return absolute coefficient magnitudes as importances."""
+        if not self.is_fitted:
+            return {}
+        lr = self.model.named_steps["lr"]
+        coefs = np.abs(lr.coef_[0])
+        total = coefs.sum() or 1.0
+        return dict(zip(self.feature_names, coefs / total))
+
+
 class NeuralNetModel(BaseModel):
     """Neural network (MLP) model. Weight: 0.12 in ensemble.
 

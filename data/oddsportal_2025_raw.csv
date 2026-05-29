@@ -1,0 +1,2429 @@
+date,time,away_team,home_team,away_odds,home_odds,away_score,home_score
+01 Nov 2025,,Los Angeles Dodgers,Toronto Blue Jays,-135,+120,5,4
+31 Oct 2025,,Los Angeles Dodgers,Toronto Blue Jays,-141,+120,3,1
+29 Oct 2025,,Toronto Blue Jays,Los Angeles Dodgers,+170,-200,6,1
+28 Oct 2025,,Toronto Blue Jays,Los Angeles Dodgers,+170,-200,6,2
+27 Oct 2025,,Toronto Blue Jays,Los Angeles Dodgers,+165,-200,5,6
+25 Oct 2025,,Los Angeles Dodgers,Toronto Blue Jays,,,5,1
+24 Oct 2025,,Los Angeles Dodgers,Toronto Blue Jays,-149,+129,4,11
+20 Oct 2025,,Seattle Mariners,Toronto Blue Jays,+114,-130,3,4
+19 Oct 2025,,Seattle Mariners,Toronto Blue Jays,+100,-120,2,6
+17 Oct 2025,,Milwaukee Brewers,Los Angeles Dodgers,+170,-204,1,5
+17 Oct 2025,,Toronto Blue Jays,Seattle Mariners,-110,-105,2,6
+16 Oct 2025,,Toronto Blue Jays,Seattle Mariners,+114,-130,8,2
+16 Oct 2025,,Milwaukee Brewers,Los Angeles Dodgers,+140,-164,1,3
+15 Oct 2025,,Toronto Blue Jays,Seattle Mariners,+114,-130,13,4
+14 Oct 2025,,Los Angeles Dodgers,Milwaukee Brewers,-120,+100,5,1
+13 Oct 2025,,Los Angeles Dodgers,Milwaukee Brewers,-154,+129,2,1
+13 Oct 2025,,Seattle Mariners,Toronto Blue Jays,+104,-125,10,3
+12 Oct 2025,,Seattle Mariners,Toronto Blue Jays,+145,-167,3,1
+11 Oct 2025,,Chicago Cubs,Milwaukee Brewers,+114,-135,1,3
+10 Oct 2025,,Detroit Tigers,Seattle Mariners,-120,+100,2,3
+09 Oct 2025,,Milwaukee Brewers,Chicago Cubs,-115,+100,0,6
+09 Oct 2025,,Philadelphia Phillies,Los Angeles Dodgers,+120,-135,1,2
+08 Oct 2025,,Philadelphia Phillies,Los Angeles Dodgers,+154,-182,8,2
+08 Oct 2025,,Toronto Blue Jays,New York Yankees,+145,-169,5,2
+08 Oct 2025,,Milwaukee Brewers,Chicago Cubs,-105,-110,3,4
+08 Oct 2025,,Seattle Mariners,Detroit Tigers,-110,-110,3,9
+07 Oct 2025,,Toronto Blue Jays,New York Yankees,+145,-169,6,9
+07 Oct 2025,,Seattle Mariners,Detroit Tigers,-135,+120,8,4
+06 Oct 2025,,Chicago Cubs,Milwaukee Brewers,+120,-135,3,7
+06 Oct 2025,,Los Angeles Dodgers,Philadelphia Phillies,-110,-110,4,3
+05 Oct 2025,,Detroit Tigers,Seattle Mariners,-149,+125,2,3
+05 Oct 2025,,New York Yankees,Toronto Blue Jays,-154,+129,7,13
+04 Oct 2025,,Detroit Tigers,Seattle Mariners,+165,-189,3,2
+04 Oct 2025,,Los Angeles Dodgers,Philadelphia Phillies,-105,-115,5,3
+04 Oct 2025,,New York Yankees,Toronto Blue Jays,+100,-118,1,10
+04 Oct 2025,,Chicago Cubs,Milwaukee Brewers,+120,-141,3,9
+02 Oct 2025,,Boston Red Sox,New York Yankees,+129,-149,0,4
+02 Oct 2025,,San Diego Padres,Chicago Cubs,+100,-115,1,3
+02 Oct 2025,,Detroit Tigers,Cleveland Guardians,+110,-130,6,3
+01 Oct 2025,,Cincinnati Reds,Los Angeles Dodgers,+220,-270,4,8
+01 Oct 2025,,Boston Red Sox,New York Yankees,+179,-200,3,4
+01 Oct 2025,,San Diego Padres,Chicago Cubs,-105,-105,3,0
+01 Oct 2025,,Detroit Tigers,Cleveland Guardians,+114,-130,1,6
+30 Sep 2025,,Cincinnati Reds,Los Angeles Dodgers,+175,-200,5,10
+30 Sep 2025,,Boston Red Sox,New York Yankees,+120,-130,3,1
+30 Sep 2025,,San Diego Padres,Chicago Cubs,+114,-130,1,3
+30 Sep 2025,,Detroit Tigers,Cleveland Guardians,-169,+145,2,1
+28 Sep 2025,,St.Louis Cardinals,Chicago Cubs,+129,-149,0,2
+28 Sep 2025,,Pittsburgh Pirates,Atlanta Braves,+160,-189,1,4
+28 Sep 2025,,Texas Rangers,Cleveland Guardians,+120,-141,8,9
+28 Sep 2025,,Arizona Diamondbacks,San Diego Padres,+120,-137,4,12
+28 Sep 2025,,Cincinnati Reds,Milwaukee Brewers,+114,-135,2,4
+28 Sep 2025,,Los Angeles Dodgers,Seattle Mariners,-135,+120,6,1
+28 Sep 2025,,New York Mets,Miami Marlins,-139,+120,0,4
+28 Sep 2025,,Houston Astros,Los Angeles Angels,-120,+100,6,2
+28 Sep 2025,,Tampa Bay Rays,Toronto Blue Jays,+179,-222,4,13
+28 Sep 2025,,Kansas City Royals,Athletics,-149,+125,9,2
+28 Sep 2025,,Baltimore Orioles,New York Yankees,+150,-175,2,3
+28 Sep 2025,,Detroit Tigers,Boston Red Sox,-110,-110,3,4
+28 Sep 2025,,Chicago White Sox,Washington Nationals,-102,-115,8,0
+28 Sep 2025,,Colorado Rockies,San Francisco Giants,+250,-294,0,4
+28 Sep 2025,,Minnesota Twins,Philadelphia Phillies,+200,-244,1,2
+27 Sep 2025,,Kansas City Royals,Athletics,+104,-120,4,2
+27 Sep 2025,,Los Angeles Dodgers,Seattle Mariners,+114,-135,5,3
+27 Sep 2025,,Houston Astros,Los Angeles Angels,-141,+125,6,1
+27 Sep 2025,,Arizona Diamondbacks,San Diego Padres,+135,-159,1,5
+27 Sep 2025,,Pittsburgh Pirates,Atlanta Braves,+150,-175,3,1
+27 Sep 2025,,Cincinnati Reds,Milwaukee Brewers,+104,-125,7,4
+27 Sep 2025,,Texas Rangers,Cleveland Guardians,+135,-149,2,3
+27 Sep 2025,,Minnesota Twins,Philadelphia Phillies,+200,-222,5,0
+27 Sep 2025,,Chicago White Sox,Washington Nationals,-105,-110,5,6
+27 Sep 2025,,Detroit Tigers,Boston Red Sox,+100,-120,2,1
+27 Sep 2025,,New York Mets,Miami Marlins,-141,+120,5,0
+27 Sep 2025,,Colorado Rockies,San Francisco Giants,+200,-238,3,4
+27 Sep 2025,,Tampa Bay Rays,Toronto Blue Jays,+145,-167,1,5
+27 Sep 2025,,St.Louis Cardinals,Chicago Cubs,+150,-179,3,7
+27 Sep 2025,,Baltimore Orioles,New York Yankees,+195,-227,1,6
+26 Sep 2025,,Colorado Rockies,San Francisco Giants,+200,-244,3,6
+26 Sep 2025,,Kansas City Royals,Athletics,-125,+104,3,4
+26 Sep 2025,,Arizona Diamondbacks,San Diego Padres,+114,-130,4,7
+26 Sep 2025,,Los Angeles Dodgers,Seattle Mariners,+125,-149,3,2
+26 Sep 2025,,Houston Astros,Los Angeles Angels,-130,+114,3,4
+26 Sep 2025,,Cincinnati Reds,Milwaukee Brewers,+135,-159,3,1
+26 Sep 2025,,Pittsburgh Pirates,Atlanta Braves,+135,-159,9,3
+26 Sep 2025,,Detroit Tigers,Boston Red Sox,+100,-120,3,4
+26 Sep 2025,,Texas Rangers,Cleveland Guardians,+135,-154,7,3
+26 Sep 2025,,New York Mets,Miami Marlins,-135,+120,2,6
+26 Sep 2025,,Tampa Bay Rays,Toronto Blue Jays,+160,-182,2,4
+26 Sep 2025,,Baltimore Orioles,New York Yankees,+125,-141,4,8
+26 Sep 2025,,Chicago White Sox,Washington Nationals,+110,-130,10,9
+26 Sep 2025,,Minnesota Twins,Philadelphia Phillies,+129,-141,1,3
+26 Sep 2025,,St.Louis Cardinals,Chicago Cubs,+160,-182,1,12
+25 Sep 2025,,Colorado Rockies,Seattle Mariners,+250,-303,2,6
+25 Sep 2025,,Kansas City Royals,Los Angeles Angels,-135,+114,9,4
+25 Sep 2025,,New York Mets,Chicago Cubs,-115,-105,8,5
+25 Sep 2025,,Boston Red Sox,Toronto Blue Jays,+118,-135,1,6
+25 Sep 2025,,Chicago White Sox,New York Yankees,+260,-294,3,5
+25 Sep 2025,,Detroit Tigers,Cleveland Guardians,+140,-159,4,2
+25 Sep 2025,,Miami Marlins,Philadelphia Phillies,+140,-159,0,1
+25 Sep 2025,,Los Angeles Dodgers,Arizona Diamondbacks,-159,+140,8,0
+25 Sep 2025,,Houston Astros,Athletics,-115,-105,11,5
+25 Sep 2025,,Minnesota Twins,Texas Rangers,+125,-149,4,0
+25 Sep 2025,,Tampa Bay Rays,Baltimore Orioles,-115,-105,5,6
+25 Sep 2025,,Pittsburgh Pirates,Cincinnati Reds,+150,-169,1,2
+24 Sep 2025,,Houston Astros,Athletics,-135,+114,0,6
+24 Sep 2025,,St.Louis Cardinals,San Francisco Giants,-115,-105,3,4
+24 Sep 2025,,Los Angeles Dodgers,Arizona Diamondbacks,-149,+125,5,4
+24 Sep 2025,,Colorado Rockies,Seattle Mariners,+245,-303,2,9
+24 Sep 2025,,Kansas City Royals,Los Angeles Angels,-110,-105,2,3
+24 Sep 2025,,New York Mets,Chicago Cubs,-102,-115,3,10
+24 Sep 2025,,Minnesota Twins,Texas Rangers,+154,-179,2,4
+24 Sep 2025,,Boston Red Sox,Toronto Blue Jays,-125,+110,7,1
+24 Sep 2025,,Chicago White Sox,New York Yankees,+300,-385,1,8
+24 Sep 2025,,Miami Marlins,Philadelphia Phillies,+140,-164,1,11
+24 Sep 2025,,Pittsburgh Pirates,Cincinnati Reds,+110,-125,4,3
+24 Sep 2025,,Detroit Tigers,Cleveland Guardians,+125,-135,1,5
+24 Sep 2025,,Tampa Bay Rays,Baltimore Orioles,+104,-120,6,2
+24 Sep 2025,,Milwaukee Brewers,San Diego Padres,+125,-143,3,1
+24 Sep 2025,,Washington Nationals,Atlanta Braves,+160,-189,4,3
+23 Sep 2025,,Houston Astros,Athletics,-105,-110,1,5
+23 Sep 2025,,St.Louis Cardinals,San Francisco Giants,+165,-200,9,8
+23 Sep 2025,,Los Angeles Dodgers,Arizona Diamondbacks,-164,+140,4,5
+23 Sep 2025,,Colorado Rockies,Seattle Mariners,+245,-303,3,4
+23 Sep 2025,,Milwaukee Brewers,San Diego Padres,-130,+110,0,7
+23 Sep 2025,,Kansas City Royals,Los Angeles Angels,-164,+140,8,4
+23 Sep 2025,,Minnesota Twins,Texas Rangers,+120,-141,4,1
+23 Sep 2025,,New York Mets,Chicago Cubs,-110,-110,9,7
+23 Sep 2025,,Washington Nationals,Atlanta Braves,+170,-200,2,3
+23 Sep 2025,,Boston Red Sox,Toronto Blue Jays,+135,-159,4,1
+23 Sep 2025,,Chicago White Sox,New York Yankees,+200,-238,2,3
+23 Sep 2025,,Miami Marlins,Philadelphia Phillies,+179,-208,6,5
+23 Sep 2025,,Pittsburgh Pirates,Cincinnati Reds,+150,-179,4,2
+23 Sep 2025,,Detroit Tigers,Cleveland Guardians,-159,+135,2,5
+23 Sep 2025,,Tampa Bay Rays,Baltimore Orioles,-110,-110,0,6
+22 Sep 2025,,St.Louis Cardinals,San Francisco Giants,+129,-149,6,5
+22 Sep 2025,,Milwaukee Brewers,San Diego Padres,-110,-105,4,5
+22 Sep 2025,,Washington Nationals,Atlanta Braves,+229,-278,5,11
+21 Sep 2025,,Boston Red Sox,Tampa Bay Rays,-130,+110,3,7
+21 Sep 2025,,Seattle Mariners,Houston Astros,-149,+125,7,3
+21 Sep 2025,,Philadelphia Phillies,Arizona Diamondbacks,-130,+110,2,9
+21 Sep 2025,,San Francisco Giants,Los Angeles Dodgers,+179,-213,3,1
+21 Sep 2025,,Los Angeles Angels,Colorado Rockies,-105,-110,1,3
+21 Sep 2025,,Miami Marlins,Texas Rangers,+104,-125,4,2
+21 Sep 2025,,Milwaukee Brewers,St.Louis Cardinals,-130,+114,1,5
+21 Sep 2025,,San Diego Padres,Chicago White Sox,-179,+154,3,2
+21 Sep 2025,,Cleveland Guardians,Minnesota Twins,-141,+120,2,6
+21 Sep 2025,,Toronto Blue Jays,Kansas City Royals,-125,+104,8,5
+21 Sep 2025,,Atlanta Braves,Detroit Tigers,+100,-115,6,2
+21 Sep 2025,,Chicago Cubs,Cincinnati Reds,+104,-110,0,1
+21 Sep 2025,,Washington Nationals,New York Mets,+229,-278,3,2
+21 Sep 2025,,Athletics,Pittsburgh Pirates,+104,-120,0,11
+21 Sep 2025,,New York Yankees,Baltimore Orioles,-130,+114,7,1
+20 Sep 2025,,San Francisco Giants,Los Angeles Dodgers,+200,-238,5,7
+20 Sep 2025,,Philadelphia Phillies,Arizona Diamondbacks,-105,-115,3,4
+20 Sep 2025,,Los Angeles Angels,Colorado Rockies,-125,+104,3,0
+20 Sep 2025,,Milwaukee Brewers,St.Louis Cardinals,-141,+120,3,2
+20 Sep 2025,,San Diego Padres,Chicago White Sox,-185,+154,7,3
+20 Sep 2025,,Cleveland Guardians,Minnesota Twins,-115,-105,8,0
+20 Sep 2025,,Seattle Mariners,Houston Astros,-105,-110,6,4
+20 Sep 2025,,Toronto Blue Jays,Kansas City Royals,-130,+114,1,2
+20 Sep 2025,,New York Yankees,Baltimore Orioles,-200,+165,6,1
+20 Sep 2025,,Boston Red Sox,Tampa Bay Rays,-110,-110,6,3
+20 Sep 2025,,Miami Marlins,Texas Rangers,+125,-149,4,3
+20 Sep 2025,,Athletics,Pittsburgh Pirates,-115,-105,0,2
+20 Sep 2025,,Chicago Cubs,Cincinnati Reds,-105,-115,3,6
+20 Sep 2025,,Washington Nationals,New York Mets,+245,-278,5,3
+20 Sep 2025,,Cleveland Guardians,Minnesota Twins,+104,-120,6,0
+20 Sep 2025,,Atlanta Braves,Detroit Tigers,+104,-120,6,5
+19 Sep 2025,,San Francisco Giants,Los Angeles Dodgers,+165,-182,3,6
+19 Sep 2025,,Philadelphia Phillies,Arizona Diamondbacks,+110,-125,8,2
+19 Sep 2025,,Milwaukee Brewers,St.Louis Cardinals,-125,+104,1,7
+19 Sep 2025,,Cleveland Guardians,Minnesota Twins,-105,-105,6,2
+19 Sep 2025,,Los Angeles Angels,Colorado Rockies,-125,+104,6,7
+19 Sep 2025,,Seattle Mariners,Houston Astros,-110,-110,4,0
+19 Sep 2025,,Miami Marlins,Texas Rangers,+125,-149,6,4
+19 Sep 2025,,San Diego Padres,Chicago White Sox,-189,+160,3,4
+19 Sep 2025,,Toronto Blue Jays,Kansas City Royals,-139,+120,1,20
+19 Sep 2025,,Boston Red Sox,Tampa Bay Rays,-135,+114,11,7
+19 Sep 2025,,Washington Nationals,New York Mets,+190,-222,6,12
+19 Sep 2025,,New York Yankees,Baltimore Orioles,-115,+100,2,4
+19 Sep 2025,,Athletics,Pittsburgh Pirates,-110,-105,4,3
+19 Sep 2025,,Atlanta Braves,Detroit Tigers,+100,-110,10,1
+19 Sep 2025,,Chicago Cubs,Cincinnati Reds,-110,-105,4,7
+18 Sep 2025,,San Francisco Giants,Los Angeles Dodgers,+145,-169,1,2
+18 Sep 2025,,Los Angeles Angels,Milwaukee Brewers,+210,-250,2,5
+18 Sep 2025,,New York Yankees,Baltimore Orioles,-200,+175,7,0
+18 Sep 2025,,Chicago Cubs,Cincinnati Reds,+125,-141,0,1
+18 Sep 2025,,Miami Marlins,Colorado Rockies,-169,+145,9,7
+18 Sep 2025,,Seattle Mariners,Kansas City Royals,-120,+104,2,0
+18 Sep 2025,,Athletics,Boston Red Sox,+129,-143,5,3
+18 Sep 2025,,Cleveland Guardians,Detroit Tigers,+200,-227,3,1
+18 Sep 2025,,San Diego Padres,New York Mets,+120,-139,1,6
+18 Sep 2025,,Toronto Blue Jays,Tampa Bay Rays,-125,+110,0,4
+17 Sep 2025,,Philadelphia Phillies,Los Angeles Dodgers,+125,-149,0,5
+17 Sep 2025,,Miami Marlins,Colorado Rockies,-154,+135,8,4
+17 Sep 2025,,Texas Rangers,Houston Astros,-149,+125,2,5
+17 Sep 2025,,Seattle Mariners,Kansas City Royals,+104,-125,5,7
+17 Sep 2025,,Los Angeles Angels,Milwaukee Brewers,+210,-250,2,9
+17 Sep 2025,,New York Yankees,Minnesota Twins,-154,+135,10,5
+17 Sep 2025,,San Diego Padres,New York Mets,+110,-130,7,4
+17 Sep 2025,,Toronto Blue Jays,Tampa Bay Rays,-130,+110,1,2
+17 Sep 2025,,Athletics,Boston Red Sox,+145,-169,4,5
+17 Sep 2025,,Cleveland Guardians,Detroit Tigers,+125,-149,4,0
+17 Sep 2025,,Atlanta Braves,Washington Nationals,-149,+125,9,4
+17 Sep 2025,,San Francisco Giants,Arizona Diamondbacks,-105,-110,5,1
+17 Sep 2025,,Baltimore Orioles,Chicago White Sox,-125,+110,3,1
+17 Sep 2025,,Cincinnati Reds,St.Louis Cardinals,-120,+100,6,2
+17 Sep 2025,,Chicago Cubs,Pittsburgh Pirates,-139,+120,8,4
+16 Sep 2025,,Philadelphia Phillies,Los Angeles Dodgers,+110,-130,9,6
+16 Sep 2025,,San Francisco Giants,Arizona Diamondbacks,+104,-125,5,6
+16 Sep 2025,,Miami Marlins,Colorado Rockies,-149,+125,6,5
+16 Sep 2025,,Texas Rangers,Houston Astros,-115,-105,5,6
+16 Sep 2025,,Cincinnati Reds,St.Louis Cardinals,-125,+104,0,3
+16 Sep 2025,,Baltimore Orioles,Chicago White Sox,-110,-110,8,7
+16 Sep 2025,,Seattle Mariners,Kansas City Royals,-143,+120,12,5
+16 Sep 2025,,Los Angeles Angels,Milwaukee Brewers,+220,-278,2,9
+16 Sep 2025,,New York Yankees,Minnesota Twins,-167,+140,10,9
+16 Sep 2025,,Toronto Blue Jays,Tampa Bay Rays,-115,-105,6,5
+16 Sep 2025,,San Diego Padres,New York Mets,+100,-120,3,8
+16 Sep 2025,,Athletics,Boston Red Sox,+135,-161,2,1
+16 Sep 2025,,Atlanta Braves,Washington Nationals,-182,+150,5,0
+16 Sep 2025,,Chicago Cubs,Pittsburgh Pirates,+110,-130,4,1
+16 Sep 2025,,Cleveland Guardians,Detroit Tigers,+120,-143,7,5
+16 Sep 2025,,Atlanta Braves,Washington Nationals,-149,+125,6,3
+15 Sep 2025,,Philadelphia Phillies,Los Angeles Dodgers,+100,-120,6,5
+15 Sep 2025,,San Francisco Giants,Arizona Diamondbacks,+110,-130,1,8
+15 Sep 2025,,Texas Rangers,Houston Astros,+110,-130,3,6
+15 Sep 2025,,Cincinnati Reds,St.Louis Cardinals,-105,-115,11,6
+15 Sep 2025,,Baltimore Orioles,Chicago White Sox,-143,+120,4,1
+15 Sep 2025,,New York Yankees,Minnesota Twins,-208,+170,0,7
+15 Sep 2025,,Toronto Blue Jays,Tampa Bay Rays,-130,+110,2,1
+15 Sep 2025,,Atlanta Braves,Washington Nationals,-175,+145,11,3
+15 Sep 2025,,Chicago Cubs,Pittsburgh Pirates,-125,+104,4,0
+14 Sep 2025,,New York Yankees,Boston Red Sox,+125,-149,4,6
+14 Sep 2025,,Colorado Rockies,San Diego Padres,+260,-323,6,9
+14 Sep 2025,,Los Angeles Angels,Seattle Mariners,+200,-250,2,11
+14 Sep 2025,,Cincinnati Reds,Athletics,-115,-105,4,7
+14 Sep 2025,,Los Angeles Dodgers,San Francisco Giants,-137,+114,10,2
+14 Sep 2025,,Tampa Bay Rays,Chicago Cubs,+140,-169,3,4
+14 Sep 2025,,Arizona Diamondbacks,Minnesota Twins,+100,-120,6,4
+14 Sep 2025,,St.Louis Cardinals,Milwaukee Brewers,+170,-208,3,2
+14 Sep 2025,,Chicago White Sox,Cleveland Guardians,+140,-169,2,3
+14 Sep 2025,,Detroit Tigers,Miami Marlins,-137,+114,2,0
+14 Sep 2025,,Texas Rangers,New York Mets,+150,-179,2,5
+14 Sep 2025,,Baltimore Orioles,Toronto Blue Jays,+170,-208,2,11
+14 Sep 2025,,Houston Astros,Atlanta Braves,-135,+114,3,8
+14 Sep 2025,,Kansas City Royals,Philadelphia Phillies,+125,-149,10,3
+14 Sep 2025,,Pittsburgh Pirates,Washington Nationals,-120,+100,3,4
+13 Sep 2025,,Cincinnati Reds,Athletics,-115,-105,5,11
+13 Sep 2025,,Los Angeles Angels,Seattle Mariners,+195,-238,3,5
+13 Sep 2025,,Los Angeles Dodgers,San Francisco Giants,-105,-115,13,7
+13 Sep 2025,,Colorado Rockies,San Diego Padres,+300,-385,3,11
+13 Sep 2025,,St.Louis Cardinals,Milwaukee Brewers,+150,-182,8,9
+13 Sep 2025,,Houston Astros,Atlanta Braves,-135,+114,6,2
+13 Sep 2025,,Arizona Diamondbacks,Minnesota Twins,+114,-135,5,2
+13 Sep 2025,,Chicago White Sox,Cleveland Guardians,+140,-167,1,3
+13 Sep 2025,,Kansas City Royals,Philadelphia Phillies,+120,-141,6,8
+13 Sep 2025,,New York Yankees,Boston Red Sox,-154,+129,5,3
+13 Sep 2025,,Detroit Tigers,Miami Marlins,-130,+110,4,6
+13 Sep 2025,,Texas Rangers,New York Mets,+135,-161,3,2
+13 Sep 2025,,Pittsburgh Pirates,Washington Nationals,-110,-110,5,1
+13 Sep 2025,,Baltimore Orioles,Toronto Blue Jays,+145,-175,4,5
+13 Sep 2025,,Tampa Bay Rays,Chicago Cubs,-110,-110,5,4
+12 Sep 2025,,Los Angeles Dodgers,San Francisco Giants,-149,+125,1,5
+12 Sep 2025,,Los Angeles Angels,Seattle Mariners,+154,-189,1,2
+12 Sep 2025,,Cincinnati Reds,Athletics,-102,-118,0,3
+12 Sep 2025,,Colorado Rockies,San Diego Padres,+225,-278,4,2
+12 Sep 2025,,Arizona Diamondbacks,Minnesota Twins,+120,-143,8,9
+12 Sep 2025,,St.Louis Cardinals,Milwaukee Brewers,+150,-182,2,8
+12 Sep 2025,,Houston Astros,Atlanta Braves,+114,-135,11,3
+12 Sep 2025,,New York Yankees,Boston Red Sox,-120,+100,4,1
+12 Sep 2025,,Chicago White Sox,Cleveland Guardians,+118,-139,0,4
+12 Sep 2025,,Detroit Tigers,Miami Marlins,-200,+165,2,8
+12 Sep 2025,,Texas Rangers,New York Mets,-105,-115,8,3
+12 Sep 2025,,Baltimore Orioles,Toronto Blue Jays,+114,-135,1,6
+12 Sep 2025,,Kansas City Royals,Philadelphia Phillies,+118,-139,2,8
+12 Sep 2025,,Pittsburgh Pirates,Washington Nationals,-110,-110,5,6
+12 Sep 2025,,Tampa Bay Rays,Chicago Cubs,+135,-164,4,6
+11 Sep 2025,,Colorado Rockies,San Diego Padres,+220,-278,0,2
+11 Sep 2025,,Los Angeles Angels,Seattle Mariners,+140,-169,6,7
+11 Sep 2025,,Kansas City Royals,Cleveland Guardians,+118,-139,2,3
+11 Sep 2025,,New York Mets,Philadelphia Phillies,+100,-120,4,6
+11 Sep 2025,,Detroit Tigers,New York Yankees,+140,-169,3,9
+11 Sep 2025,,Washington Nationals,Miami Marlins,+110,-130,0,5
+11 Sep 2025,,Houston Astros,Toronto Blue Jays,+140,-167,0,6
+11 Sep 2025,,Tampa Bay Rays,Chicago White Sox,-130,+110,1,5
+11 Sep 2025,,Pittsburgh Pirates,Baltimore Orioles,+100,-120,2,3
+10 Sep 2025,,Colorado Rockies,Los Angeles Dodgers,+275,-345,0,9
+10 Sep 2025,,St.Louis Cardinals,Seattle Mariners,+185,-227,2,4
+10 Sep 2025,,Cincinnati Reds,San Diego Padres,+125,-149,2,1
+10 Sep 2025,,Tampa Bay Rays,Chicago White Sox,-130,+110,5,6
+10 Sep 2025,,Chicago Cubs,Atlanta Braves,+145,-175,3,2
+10 Sep 2025,,Houston Astros,Toronto Blue Jays,+129,-154,3,2
+10 Sep 2025,,Detroit Tigers,New York Yankees,+145,-175,11,1
+10 Sep 2025,,New York Mets,Philadelphia Phillies,+140,-169,3,11
+10 Sep 2025,,Kansas City Royals,Cleveland Guardians,-110,-110,4,3
+10 Sep 2025,,Washington Nationals,Miami Marlins,+125,-149,3,8
+10 Sep 2025,,Pittsburgh Pirates,Baltimore Orioles,-161,+135,1,2
+10 Sep 2025,,Minnesota Twins,Los Angeles Angels,+100,-120,3,4
+10 Sep 2025,,Arizona Diamondbacks,San Francisco Giants,+104,-125,5,3
+10 Sep 2025,,Boston Red Sox,Athletics,-120,+100,4,5
+10 Sep 2025,,Milwaukee Brewers,Texas Rangers,-125,+104,3,6
+09 Sep 2025,,Colorado Rockies,Los Angeles Dodgers,+260,-333,2,7
+09 Sep 2025,,Boston Red Sox,Athletics,-105,-115,6,0
+09 Sep 2025,,Arizona Diamondbacks,San Francisco Giants,+118,-143,3,5
+09 Sep 2025,,Cincinnati Reds,San Diego Padres,+154,-189,4,2
+09 Sep 2025,,St.Louis Cardinals,Seattle Mariners,+170,-208,3,5
+09 Sep 2025,,Minnesota Twins,Los Angeles Angels,-120,+100,2,12
+09 Sep 2025,,Milwaukee Brewers,Texas Rangers,-105,-115,4,5
+09 Sep 2025,,Tampa Bay Rays,Chicago White Sox,-137,+114,5,4
+09 Sep 2025,,Chicago Cubs,Atlanta Braves,-115,-105,6,1
+09 Sep 2025,,Houston Astros,Toronto Blue Jays,+125,-149,3,4
+09 Sep 2025,,Detroit Tigers,New York Yankees,+129,-154,12,2
+09 Sep 2025,,New York Mets,Philadelphia Phillies,+114,-137,3,9
+09 Sep 2025,,Kansas City Royals,Cleveland Guardians,-105,-115,0,2
+09 Sep 2025,,Washington Nationals,Miami Marlins,+104,-125,7,5
+09 Sep 2025,,Pittsburgh Pirates,Baltimore Orioles,+125,-149,2,3
+08 Sep 2025,,Colorado Rockies,Los Angeles Dodgers,+300,-385,1,3
+08 Sep 2025,,Boston Red Sox,Athletics,-167,+140,7,0
+08 Sep 2025,,Arizona Diamondbacks,San Francisco Giants,+154,-189,5,11
+08 Sep 2025,,Cincinnati Reds,San Diego Padres,+120,-141,3,4
+08 Sep 2025,,St.Louis Cardinals,Seattle Mariners,+200,-250,2,4
+08 Sep 2025,,Minnesota Twins,Los Angeles Angels,+100,-120,12,3
+08 Sep 2025,,Milwaukee Brewers,Texas Rangers,-125,+104,0,5
+08 Sep 2025,,Chicago Cubs,Atlanta Braves,-115,-105,1,4
+08 Sep 2025,,New York Mets,Philadelphia Phillies,-130,+110,0,1
+08 Sep 2025,,Kansas City Royals,Cleveland Guardians,-110,-110,2,10
+08 Sep 2025,,Washington Nationals,Miami Marlins,+104,-125,15,7
+07 Sep 2025,,Boston Red Sox,Arizona Diamondbacks,-110,-110,7,4
+07 Sep 2025,,Athletics,Los Angeles Angels,-110,-110,3,4
+07 Sep 2025,,San Diego Padres,Colorado Rockies,-250,+200,8,1
+07 Sep 2025,,Houston Astros,Texas Rangers,-133,+114,2,4
+07 Sep 2025,,Washington Nationals,Chicago Cubs,+154,-189,6,3
+07 Sep 2025,,San Francisco Giants,St.Louis Cardinals,+110,-130,3,4
+07 Sep 2025,,Minnesota Twins,Kansas City Royals,+104,-125,5,1
+07 Sep 2025,,Chicago White Sox,Detroit Tigers,+150,-182,6,4
+07 Sep 2025,,New York Mets,Cincinnati Reds,+100,-120,2,3
+07 Sep 2025,,Philadelphia Phillies,Miami Marlins,-143,+120,4,5
+07 Sep 2025,,Los Angeles Dodgers,Baltimore Orioles,-149,+125,5,2
+07 Sep 2025,,Milwaukee Brewers,Pittsburgh Pirates,-130,+110,10,2
+07 Sep 2025,,Toronto Blue Jays,New York Yankees,+145,-175,3,4
+07 Sep 2025,,Cleveland Guardians,Tampa Bay Rays,+135,-161,2,1
+07 Sep 2025,,Seattle Mariners,Atlanta Braves,-115,-105,18,2
+06 Sep 2025,,Athletics,Los Angeles Angels,+104,-125,17,4
+06 Sep 2025,,Boston Red Sox,Arizona Diamondbacks,-120,+100,1,5
+06 Sep 2025,,San Diego Padres,Colorado Rockies,-200,+165,10,8
+06 Sep 2025,,Seattle Mariners,Atlanta Braves,+104,-125,10,2
+06 Sep 2025,,Houston Astros,Texas Rangers,+100,-120,11,0
+06 Sep 2025,,Minnesota Twins,Kansas City Royals,-125,+104,2,11
+06 Sep 2025,,San Francisco Giants,St.Louis Cardinals,-130,+110,2,3
+06 Sep 2025,,Los Angeles Dodgers,Baltimore Orioles,-139,+118,3,4
+06 Sep 2025,,Cleveland Guardians,Tampa Bay Rays,+118,-139,3,2
+06 Sep 2025,,New York Mets,Cincinnati Reds,-139,+118,3,6
+06 Sep 2025,,Milwaukee Brewers,Pittsburgh Pirates,-143,+120,4,1
+06 Sep 2025,,Chicago White Sox,Detroit Tigers,+240,-303,0,6
+06 Sep 2025,,Philadelphia Phillies,Miami Marlins,-156,+129,4,2
+06 Sep 2025,,Washington Nationals,Chicago Cubs,+220,-278,2,1
+06 Sep 2025,,Toronto Blue Jays,New York Yankees,+114,-139,1,3
+05 Sep 2025,,Boston Red Sox,Arizona Diamondbacks,-130,+110,5,10
+05 Sep 2025,,Athletics,Los Angeles Angels,+125,-149,10,4
+05 Sep 2025,,San Diego Padres,Colorado Rockies,-222,+179,0,3
+05 Sep 2025,,San Francisco Giants,St.Louis Cardinals,+100,-120,8,2
+05 Sep 2025,,Houston Astros,Texas Rangers,+104,-125,3,4
+05 Sep 2025,,Minnesota Twins,Kansas City Royals,+104,-125,1,2
+05 Sep 2025,,Cleveland Guardians,Tampa Bay Rays,+129,-154,7,1
+05 Sep 2025,,Seattle Mariners,Atlanta Braves,+104,-125,1,4
+05 Sep 2025,,Philadelphia Phillies,Miami Marlins,-238,+195,9,3
+05 Sep 2025,,Los Angeles Dodgers,Baltimore Orioles,-167,+140,1,2
+05 Sep 2025,,Toronto Blue Jays,New York Yankees,+100,-120,7,1
+05 Sep 2025,,Chicago White Sox,Detroit Tigers,+165,-200,7,5
+05 Sep 2025,,New York Mets,Cincinnati Reds,-120,+100,5,4
+05 Sep 2025,,Milwaukee Brewers,Pittsburgh Pirates,-133,+114,5,2
+05 Sep 2025,,Washington Nationals,Chicago Cubs,+179,-222,5,11
+04 Sep 2025,,Chicago White Sox,Minnesota Twins,+125,-149,11,8
+04 Sep 2025,,New York Yankees,Houston Astros,-143,+120,8,4
+04 Sep 2025,,Los Angeles Angels,Kansas City Royals,+129,-154,3,4
+04 Sep 2025,,Cleveland Guardians,Tampa Bay Rays,+140,-169,2,4
+04 Sep 2025,,Los Angeles Dodgers,Pittsburgh Pirates,-115,-105,3,5
+04 Sep 2025,,Philadelphia Phillies,Milwaukee Brewers,-105,-115,2,0
+03 Sep 2025,,San Francisco Giants,Colorado Rockies,-189,+154,10,8
+03 Sep 2025,,New York Yankees,Houston Astros,-149,+125,7,8
+03 Sep 2025,,Athletics,St.Louis Cardinals,-110,-110,1,5
+03 Sep 2025,,Atlanta Braves,Chicago Cubs,+125,-149,5,1
+03 Sep 2025,,Chicago White Sox,Minnesota Twins,+145,-175,4,3
+03 Sep 2025,,Los Angeles Angels,Kansas City Royals,+145,-179,4,3
+03 Sep 2025,,Philadelphia Phillies,Milwaukee Brewers,-110,-110,3,6
+03 Sep 2025,,Seattle Mariners,Tampa Bay Rays,-137,+114,4,9
+03 Sep 2025,,Cleveland Guardians,Boston Red Sox,+125,-149,8,1
+03 Sep 2025,,Toronto Blue Jays,Cincinnati Reds,-161,+135,13,9
+03 Sep 2025,,Los Angeles Dodgers,Pittsburgh Pirates,-167,+140,0,3
+03 Sep 2025,,Baltimore Orioles,San Diego Padres,+154,-189,7,5
+03 Sep 2025,,Texas Rangers,Arizona Diamondbacks,+104,-125,0,2
+03 Sep 2025,,New York Mets,Detroit Tigers,-120,+100,2,6
+03 Sep 2025,,Miami Marlins,Washington Nationals,-149,+125,5,10
+02 Sep 2025,,Texas Rangers,Arizona Diamondbacks,-110,-110,3,5
+02 Sep 2025,,Baltimore Orioles,San Diego Padres,+150,-182,6,2
+02 Sep 2025,,San Francisco Giants,Colorado Rockies,-238,+190,7,4
+02 Sep 2025,,New York Yankees,Houston Astros,-125,+104,7,1
+02 Sep 2025,,Athletics,St.Louis Cardinals,-110,-110,1,2
+02 Sep 2025,,Los Angeles Angels,Kansas City Royals,+140,-169,5,1
+02 Sep 2025,,Atlanta Braves,Chicago Cubs,+145,-175,3,4
+02 Sep 2025,,Chicago White Sox,Minnesota Twins,+120,-143,12,3
+02 Sep 2025,,Seattle Mariners,Tampa Bay Rays,-120,+100,5,6
+02 Sep 2025,,Cleveland Guardians,Boston Red Sox,+220,-278,7,11
+02 Sep 2025,,Miami Marlins,Washington Nationals,+104,-125,2,5
+02 Sep 2025,,Toronto Blue Jays,Cincinnati Reds,-130,+110,12,9
+02 Sep 2025,,New York Mets,Detroit Tigers,-130,+110,12,5
+02 Sep 2025,,Los Angeles Dodgers,Pittsburgh Pirates,-175,+145,7,9
+01 Sep 2025,,Texas Rangers,Arizona Diamondbacks,+120,-141,7,5
+01 Sep 2025,,Seattle Mariners,Tampa Bay Rays,-110,-110,2,10
+01 Sep 2025,,Baltimore Orioles,San Diego Padres,+140,-167,4,3
+01 Sep 2025,,San Francisco Giants,Colorado Rockies,-139,+114,8,2
+01 Sep 2025,,Philadelphia Phillies,Milwaukee Brewers,+125,-149,10,8
+01 Sep 2025,,Atlanta Braves,Chicago Cubs,+104,-125,6,7
+01 Sep 2025,,Athletics,St.Louis Cardinals,+125,-149,11,3
+01 Sep 2025,,Chicago White Sox,Minnesota Twins,+154,-189,6,5
+01 Sep 2025,,Los Angeles Angels,Houston Astros,+140,-167,3,8
+01 Sep 2025,,Cleveland Guardians,Boston Red Sox,+125,-149,4,6
+01 Sep 2025,,Toronto Blue Jays,Cincinnati Reds,+104,-125,4,5
+01 Sep 2025,,New York Mets,Detroit Tigers,-115,-105,10,8
+01 Sep 2025,,Miami Marlins,Washington Nationals,-102,-118,0,2
+31 Aug 2025,,Atlanta Braves,Philadelphia Phillies,+140,-167,3,1
+31 Aug 2025,,Arizona Diamondbacks,Los Angeles Dodgers,+190,-238,4,5
+31 Aug 2025,,Texas Rangers,Athletics,-149,+125,9,6
+31 Aug 2025,,Baltimore Orioles,San Francisco Giants,+125,-149,2,13
+31 Aug 2025,,Chicago Cubs,Colorado Rockies,-250,+200,5,6
+31 Aug 2025,,New York Yankees,Chicago White Sox,-182,+150,2,3
+31 Aug 2025,,Detroit Tigers,Kansas City Royals,-175,+145,5,0
+31 Aug 2025,,Los Angeles Angels,Houston Astros,+140,-167,3,0
+31 Aug 2025,,Seattle Mariners,Cleveland Guardians,-115,-105,4,2
+31 Aug 2025,,Miami Marlins,New York Mets,+165,-200,5,1
+31 Aug 2025,,Milwaukee Brewers,Toronto Blue Jays,-115,-105,4,8
+31 Aug 2025,,Pittsburgh Pirates,Boston Red Sox,+150,-182,2,5
+31 Aug 2025,,Tampa Bay Rays,Washington Nationals,-143,+120,7,4
+31 Aug 2025,,San Diego Padres,Minnesota Twins,+100,-120,2,7
+31 Aug 2025,,St.Louis Cardinals,Cincinnati Reds,+114,-139,4,7
+30 Aug 2025,,Texas Rangers,Athletics,-135,+114,9,3
+30 Aug 2025,,Arizona Diamondbacks,Los Angeles Dodgers,+185,-227,6,1
+30 Aug 2025,,Chicago Cubs,Colorado Rockies,-200,+165,4,3
+30 Aug 2025,,Baltimore Orioles,San Francisco Giants,-118,-102,11,1
+30 Aug 2025,,Seattle Mariners,Cleveland Guardians,-154,+129,3,4
+30 Aug 2025,,Detroit Tigers,Kansas City Royals,-120,+100,1,3
+30 Aug 2025,,New York Yankees,Chicago White Sox,-208,+170,5,3
+30 Aug 2025,,Los Angeles Angels,Houston Astros,+140,-167,4,1
+30 Aug 2025,,San Diego Padres,Minnesota Twins,-154,+129,12,3
+30 Aug 2025,,St.Louis Cardinals,Cincinnati Reds,+120,-143,4,2
+30 Aug 2025,,Atlanta Braves,Philadelphia Phillies,+120,-143,2,3
+30 Aug 2025,,Pittsburgh Pirates,Boston Red Sox,+145,-175,10,3
+30 Aug 2025,,Miami Marlins,New York Mets,+145,-175,11,8
+30 Aug 2025,,Tampa Bay Rays,Washington Nationals,-161,+135,4,1
+30 Aug 2025,,Milwaukee Brewers,Toronto Blue Jays,+114,-135,4,1
+29 Aug 2025,,Baltimore Orioles,San Francisco Giants,+125,-149,8,15
+29 Aug 2025,,Arizona Diamondbacks,Los Angeles Dodgers,+185,-227,3,0
+29 Aug 2025,,Texas Rangers,Athletics,+120,-143,5,2
+29 Aug 2025,,Chicago Cubs,Colorado Rockies,-227,+185,11,7
+29 Aug 2025,,Detroit Tigers,Kansas City Royals,+100,-120,5,3
+29 Aug 2025,,Los Angeles Angels,Houston Astros,+140,-169,0,2
+29 Aug 2025,,San Diego Padres,Minnesota Twins,-130,+110,4,7
+29 Aug 2025,,New York Yankees,Chicago White Sox,-222,+179,10,2
+29 Aug 2025,,Pittsburgh Pirates,Boston Red Sox,-105,-115,4,2
+29 Aug 2025,,Seattle Mariners,Cleveland Guardians,-161,+135,4,5
+29 Aug 2025,,Miami Marlins,New York Mets,+145,-175,9,19
+29 Aug 2025,,Milwaukee Brewers,Toronto Blue Jays,+114,-135,7,2
+29 Aug 2025,,Atlanta Braves,Philadelphia Phillies,+165,-200,1,2
+29 Aug 2025,,Tampa Bay Rays,Washington Nationals,-143,+120,4,1
+29 Aug 2025,,St.Louis Cardinals,Cincinnati Reds,+114,-139,7,5
+28 Aug 2025,,New York Yankees,Chicago White Sox,-189,+154,10,4
+28 Aug 2025,,Miami Marlins,New York Mets,+220,-278,7,4
+28 Aug 2025,,Atlanta Braves,Philadelphia Phillies,+150,-182,4,19
+28 Aug 2025,,Chicago Cubs,San Francisco Giants,-105,-115,3,4
+28 Aug 2025,,Pittsburgh Pirates,St.Louis Cardinals,+100,-120,1,4
+28 Aug 2025,,Arizona Diamondbacks,Milwaukee Brewers,+135,-161,6,4
+28 Aug 2025,,Colorado Rockies,Houston Astros,+200,-250,3,4
+28 Aug 2025,,Boston Red Sox,Baltimore Orioles,-208,+170,3,2
+27 Aug 2025,,Detroit Tigers,Athletics,-130,+110,0,7
+27 Aug 2025,,Chicago Cubs,San Francisco Giants,-130,+110,3,12
+27 Aug 2025,,Cincinnati Reds,Los Angeles Dodgers,+154,-189,1,5
+27 Aug 2025,,Colorado Rockies,Houston Astros,+250,-303,0,4
+27 Aug 2025,,Los Angeles Angels,Texas Rangers,+140,-167,3,20
+27 Aug 2025,,Pittsburgh Pirates,St.Louis Cardinals,+145,-175,2,1
+27 Aug 2025,,Arizona Diamondbacks,Milwaukee Brewers,+120,-143,3,2
+27 Aug 2025,,Kansas City Royals,Chicago White Sox,-130,+110,12,1
+27 Aug 2025,,Philadelphia Phillies,New York Mets,+129,-154,0,6
+27 Aug 2025,,Minnesota Twins,Toronto Blue Jays,+154,-189,8,9
+27 Aug 2025,,Boston Red Sox,Baltimore Orioles,-143,+120,3,2
+27 Aug 2025,,San Diego Padres,Seattle Mariners,+125,-149,3,4
+27 Aug 2025,,Atlanta Braves,Miami Marlins,-120,+100,12,1
+27 Aug 2025,,Tampa Bay Rays,Cleveland Guardians,-149,+125,3,4
+27 Aug 2025,,Washington Nationals,New York Yankees,+225,-278,2,11
+26 Aug 2025,,Cincinnati Reds,Los Angeles Dodgers,+154,-189,3,6
+26 Aug 2025,,Detroit Tigers,Athletics,-130,+110,6,7
+26 Aug 2025,,Chicago Cubs,San Francisco Giants,-149,+125,2,5
+26 Aug 2025,,San Diego Padres,Seattle Mariners,-105,-115,7,6
+26 Aug 2025,,Colorado Rockies,Houston Astros,+300,-385,6,1
+26 Aug 2025,,Los Angeles Angels,Texas Rangers,-105,-115,3,7
+26 Aug 2025,,Pittsburgh Pirates,St.Louis Cardinals,+104,-125,8,3
+26 Aug 2025,,Arizona Diamondbacks,Milwaukee Brewers,+150,-182,8,9
+26 Aug 2025,,Kansas City Royals,Chicago White Sox,-120,+100,5,4
+26 Aug 2025,,Philadelphia Phillies,New York Mets,-110,-110,5,6
+26 Aug 2025,,Minnesota Twins,Toronto Blue Jays,+170,-208,7,5
+26 Aug 2025,,Washington Nationals,New York Yankees,+165,-200,1,5
+26 Aug 2025,,Atlanta Braves,Miami Marlins,-125,+104,11,2
+26 Aug 2025,,Tampa Bay Rays,Cleveland Guardians,-105,-115,0,3
+26 Aug 2025,,Boston Red Sox,Baltimore Orioles,-120,+100,5,0
+25 Aug 2025,,Cincinnati Reds,Los Angeles Dodgers,+114,-135,0,7
+25 Aug 2025,,Detroit Tigers,Athletics,-227,+185,3,8
+25 Aug 2025,,San Diego Padres,Seattle Mariners,+104,-125,6,9
+25 Aug 2025,,Los Angeles Angels,Texas Rangers,+165,-200,4,0
+25 Aug 2025,,Pittsburgh Pirates,St.Louis Cardinals,+114,-135,6,7
+25 Aug 2025,,Arizona Diamondbacks,Milwaukee Brewers,+154,-189,5,7
+25 Aug 2025,,Kansas City Royals,Chicago White Sox,-135,+114,0,7
+25 Aug 2025,,Philadelphia Phillies,New York Mets,-130,+110,3,13
+25 Aug 2025,,Minnesota Twins,Toronto Blue Jays,+125,-149,4,10
+25 Aug 2025,,Washington Nationals,New York Yankees,+200,-250,5,10
+25 Aug 2025,,Atlanta Braves,Miami Marlins,-120,+100,1,2
+25 Aug 2025,,Tampa Bay Rays,Cleveland Guardians,-102,-118,9,0
+25 Aug 2025,,Boston Red Sox,Baltimore Orioles,-118,-102,4,3
+24 Aug 2025,,Boston Red Sox,New York Yankees,+140,-167,2,7
+24 Aug 2025,,Cincinnati Reds,Arizona Diamondbacks,+114,-137,6,1
+24 Aug 2025,,Athletics,Seattle Mariners,+150,-182,4,11
+24 Aug 2025,,Los Angeles Dodgers,San Diego Padres,-110,-110,8,2
+24 Aug 2025,,Chicago Cubs,Los Angeles Angels,-143,+120,4,3
+24 Aug 2025,,Cleveland Guardians,Texas Rangers,+110,-133,0,5
+24 Aug 2025,,Minnesota Twins,Chicago White Sox,-115,-105,0,8
+24 Aug 2025,,San Francisco Giants,Milwaukee Brewers,+114,-139,4,3
+24 Aug 2025,,Kansas City Royals,Detroit Tigers,+125,-149,10,8
+24 Aug 2025,,Toronto Blue Jays,Miami Marlins,-137,+114,3,5
+24 Aug 2025,,New York Mets,Atlanta Braves,-133,+110,3,4
+24 Aug 2025,,Houston Astros,Baltimore Orioles,+114,-137,2,3
+24 Aug 2025,,Washington Nationals,Philadelphia Phillies,+220,-278,2,3
+24 Aug 2025,,St.Louis Cardinals,Tampa Bay Rays,+114,-139,2,7
+24 Aug 2025,,Colorado Rockies,Pittsburgh Pirates,+240,-303,0,4
+23 Aug 2025,,Athletics,Seattle Mariners,+145,-175,2,1
+23 Aug 2025,,Chicago Cubs,Los Angeles Angels,-154,+129,12,1
+23 Aug 2025,,Los Angeles Dodgers,San Diego Padres,-141,+120,1,5
+23 Aug 2025,,Cincinnati Reds,Arizona Diamondbacks,-120,+100,1,10
+23 Aug 2025,,New York Mets,Atlanta Braves,-125,+104,9,2
+23 Aug 2025,,Minnesota Twins,Chicago White Sox,-110,-110,3,7
+23 Aug 2025,,San Francisco Giants,Milwaukee Brewers,+120,-141,7,1
+23 Aug 2025,,Houston Astros,Baltimore Orioles,+100,-120,9,8
+23 Aug 2025,,Cleveland Guardians,Texas Rangers,+110,-130,0,10
+23 Aug 2025,,Colorado Rockies,Pittsburgh Pirates,+150,-182,1,5
+23 Aug 2025,,Kansas City Royals,Detroit Tigers,+104,-125,2,4
+23 Aug 2025,,Washington Nationals,Philadelphia Phillies,+200,-250,4,6
+23 Aug 2025,,Toronto Blue Jays,Miami Marlins,-149,+125,7,6
+23 Aug 2025,,Boston Red Sox,New York Yankees,-115,-105,12,1
+22 Aug 2025,,Athletics,Seattle Mariners,+185,-227,2,3
+22 Aug 2025,,Cincinnati Reds,Arizona Diamondbacks,+110,-130,5,6
+22 Aug 2025,,Los Angeles Dodgers,San Diego Padres,-125,+104,1,2
+22 Aug 2025,,Chicago Cubs,Los Angeles Angels,-133,+110,3,2
+22 Aug 2025,,San Francisco Giants,Milwaukee Brewers,+154,-189,4,5
+22 Aug 2025,,Cleveland Guardians,Texas Rangers,+135,-161,3,4
+22 Aug 2025,,Minnesota Twins,Chicago White Sox,-130,+110,9,7
+22 Aug 2025,,St.Louis Cardinals,Tampa Bay Rays,+120,-141,6,10
+22 Aug 2025,,New York Mets,Atlanta Braves,-105,-115,12,7
+22 Aug 2025,,Kansas City Royals,Detroit Tigers,+135,-161,5,7
+22 Aug 2025,,Toronto Blue Jays,Miami Marlins,-169,+140,5,2
+22 Aug 2025,,Houston Astros,Baltimore Orioles,-110,-110,10,7
+22 Aug 2025,,Boston Red Sox,New York Yankees,+154,-189,1,0
+22 Aug 2025,,Washington Nationals,Philadelphia Phillies,+165,-200,5,4
+22 Aug 2025,,Colorado Rockies,Pittsburgh Pirates,+179,-222,0,9
+21 Aug 2025,,St.Louis Cardinals,Tampa Bay Rays,-120,+100,7,4
+21 Aug 2025,,Houston Astros,Baltimore Orioles,+100,-120,7,2
+21 Aug 2025,,Boston Red Sox,New York Yankees,+125,-149,6,3
+21 Aug 2025,,San Francisco Giants,San Diego Padres,+154,-189,4,8
+21 Aug 2025,,New York Mets,Washington Nationals,-137,+114,3,9
+21 Aug 2025,,Los Angeles Dodgers,Colorado Rockies,-227,+185,9,5
+21 Aug 2025,,Milwaukee Brewers,Chicago Cubs,+114,-139,4,1
+21 Aug 2025,,Texas Rangers,Kansas City Royals,+100,-120,4,6
+21 Aug 2025,,Athletics,Minnesota Twins,-120,+100,8,3
+20 Aug 2025,,San Francisco Giants,San Diego Padres,+120,-141,1,8
+20 Aug 2025,,Cincinnati Reds,Los Angeles Angels,+100,-120,1,2
+20 Aug 2025,,Los Angeles Dodgers,Colorado Rockies,-303,+240,3,8
+20 Aug 2025,,Milwaukee Brewers,Chicago Cubs,-120,+100,3,4
+20 Aug 2025,,Athletics,Minnesota Twins,+104,-125,4,2
+20 Aug 2025,,Texas Rangers,Kansas City Royals,+118,-143,6,3
+20 Aug 2025,,New York Yankees,Tampa Bay Rays,-110,-110,6,4
+20 Aug 2025,,Chicago White Sox,Atlanta Braves,+145,-175,0,1
+20 Aug 2025,,New York Mets,Washington Nationals,-175,+145,4,5
+20 Aug 2025,,St.Louis Cardinals,Miami Marlins,-105,-115,2,6
+20 Aug 2025,,Cleveland Guardians,Arizona Diamondbacks,-102,-118,2,3
+20 Aug 2025,,Houston Astros,Detroit Tigers,-115,-105,2,7
+20 Aug 2025,,Seattle Mariners,Philadelphia Phillies,+125,-149,2,11
+20 Aug 2025,,Toronto Blue Jays,Pittsburgh Pirates,-149,+125,1,2
+19 Aug 2025,,Cleveland Guardians,Arizona Diamondbacks,+100,-120,5,6
+19 Aug 2025,,San Francisco Giants,San Diego Padres,+170,-208,1,5
+19 Aug 2025,,Cincinnati Reds,Los Angeles Angels,-139,+114,6,4
+19 Aug 2025,,Los Angeles Dodgers,Colorado Rockies,-250,+200,11,4
+19 Aug 2025,,Milwaukee Brewers,Chicago Cubs,-125,+104,1,4
+19 Aug 2025,,Athletics,Minnesota Twins,+120,-141,6,3
+19 Aug 2025,,Texas Rangers,Kansas City Royals,-115,-105,2,5
+19 Aug 2025,,New York Yankees,Tampa Bay Rays,-130,+110,13,3
+19 Aug 2025,,Chicago White Sox,Atlanta Braves,+135,-161,10,11
+19 Aug 2025,,Baltimore Orioles,Boston Red Sox,+125,-149,4,3
+19 Aug 2025,,New York Mets,Washington Nationals,-208,+170,8,1
+19 Aug 2025,,Seattle Mariners,Philadelphia Phillies,+165,-200,4,6
+19 Aug 2025,,Houston Astros,Detroit Tigers,+135,-161,0,1
+19 Aug 2025,,St.Louis Cardinals,Miami Marlins,+120,-143,7,4
+19 Aug 2025,,Toronto Blue Jays,Pittsburgh Pirates,-143,+120,7,3
+19 Aug 2025,,Milwaukee Brewers,Chicago Cubs,+129,-154,4,6
+18 Aug 2025,,Cleveland Guardians,Arizona Diamondbacks,+104,-125,3,1
+18 Aug 2025,,San Francisco Giants,San Diego Padres,+125,-149,4,3
+18 Aug 2025,,Cincinnati Reds,Los Angeles Angels,-115,-105,4,1
+18 Aug 2025,,Los Angeles Dodgers,Colorado Rockies,-303,+240,3,4
+18 Aug 2025,,Texas Rangers,Kansas City Royals,+110,-130,3,4
+18 Aug 2025,,Chicago White Sox,Atlanta Braves,+179,-222,13,9
+18 Aug 2025,,Baltimore Orioles,Boston Red Sox,+104,-125,6,3
+18 Aug 2025,,Seattle Mariners,Philadelphia Phillies,-105,-115,7,12
+18 Aug 2025,,Houston Astros,Detroit Tigers,+129,-154,0,10
+18 Aug 2025,,St.Louis Cardinals,Miami Marlins,+118,-139,8,3
+18 Aug 2025,,Toronto Blue Jays,Pittsburgh Pirates,-110,-110,2,5
+18 Aug 2025,,Milwaukee Brewers,Chicago Cubs,-105,-115,7,0
+17 Aug 2025,,Seattle Mariners,New York Mets,-120,+100,3,7
+17 Aug 2025,,San Diego Padres,Los Angeles Dodgers,+120,-141,4,5
+17 Aug 2025,,Los Angeles Angels,Athletics,-110,-110,11,5
+17 Aug 2025,,Tampa Bay Rays,San Francisco Giants,+114,-137,1,7
+17 Aug 2025,,Arizona Diamondbacks,Colorado Rockies,-149,+125,5,6
+17 Aug 2025,,Pittsburgh Pirates,Chicago Cubs,+160,-189,3,4
+17 Aug 2025,,New York Yankees,St.Louis Cardinals,-161,+135,8,4
+17 Aug 2025,,Baltimore Orioles,Houston Astros,+104,-125,12,0
+17 Aug 2025,,Chicago White Sox,Kansas City Royals,+145,-175,2,6
+17 Aug 2025,,Detroit Tigers,Minnesota Twins,-125,+104,1,8
+17 Aug 2025,,Atlanta Braves,Cleveland Guardians,-105,-115,5,4
+17 Aug 2025,,Milwaukee Brewers,Cincinnati Reds,+104,-125,2,3
+17 Aug 2025,,Texas Rangers,Toronto Blue Jays,+100,-120,10,4
+17 Aug 2025,,Miami Marlins,Boston Red Sox,+225,-278,5,3
+17 Aug 2025,,Philadelphia Phillies,Washington Nationals,-222,+179,11,9
+16 Aug 2025,,Los Angeles Angels,Athletics,+104,-125,2,7
+16 Aug 2025,,San Diego Padres,Los Angeles Dodgers,+104,-125,0,6
+16 Aug 2025,,Tampa Bay Rays,San Francisco Giants,-115,-105,2,1
+16 Aug 2025,,Arizona Diamondbacks,Colorado Rockies,-175,+145,7,10
+16 Aug 2025,,Detroit Tigers,Minnesota Twins,-110,-110,8,5
+16 Aug 2025,,New York Yankees,St.Louis Cardinals,-139,+114,12,8
+16 Aug 2025,,Atlanta Braves,Cleveland Guardians,-115,-105,10,1
+16 Aug 2025,,Baltimore Orioles,Houston Astros,+118,-139,4,5
+16 Aug 2025,,Chicago White Sox,Kansas City Royals,+125,-149,2,6
+16 Aug 2025,,Milwaukee Brewers,Cincinnati Reds,-125,+104,6,5
+16 Aug 2025,,Miami Marlins,Boston Red Sox,+154,-189,5,7
+16 Aug 2025,,Seattle Mariners,New York Mets,-115,-105,1,3
+16 Aug 2025,,Philadelphia Phillies,Washington Nationals,-149,+125,0,2
+16 Aug 2025,,Texas Rangers,Toronto Blue Jays,+150,-179,2,14
+16 Aug 2025,,Pittsburgh Pirates,Chicago Cubs,+179,-222,1,3
+15 Aug 2025,,Tampa Bay Rays,San Francisco Giants,-105,-115,7,6
+15 Aug 2025,,San Diego Padres,Los Angeles Dodgers,+120,-141,2,3
+15 Aug 2025,,Los Angeles Angels,Athletics,-115,-105,3,10
+15 Aug 2025,,Arizona Diamondbacks,Colorado Rockies,-200,+165,3,4
+15 Aug 2025,,New York Yankees,St.Louis Cardinals,-143,+120,4,3
+15 Aug 2025,,Baltimore Orioles,Houston Astros,+179,-222,7,0
+15 Aug 2025,,Chicago White Sox,Kansas City Royals,+145,-179,1,3
+15 Aug 2025,,Detroit Tigers,Minnesota Twins,-137,+114,7,0
+15 Aug 2025,,Atlanta Braves,Cleveland Guardians,-102,-118,2,0
+15 Aug 2025,,Miami Marlins,Boston Red Sox,+140,-167,1,2
+15 Aug 2025,,Seattle Mariners,New York Mets,+110,-130,11,9
+15 Aug 2025,,Texas Rangers,Toronto Blue Jays,-110,-110,5,6
+15 Aug 2025,,Philadelphia Phillies,Washington Nationals,-208,+170,6,2
+15 Aug 2025,,Milwaukee Brewers,Cincinnati Reds,-139,+118,10,8
+15 Aug 2025,,Pittsburgh Pirates,Chicago Cubs,+154,-189,3,2
+14 Aug 2025,,Arizona Diamondbacks,Colorado Rockies,-175,+145,8,2
+14 Aug 2025,,Detroit Tigers,Minnesota Twins,-208,+170,4,3
+14 Aug 2025,,Atlanta Braves,New York Mets,+154,-189,4,3
+14 Aug 2025,,Philadelphia Phillies,Washington Nationals,-200,+165,2,3
+14 Aug 2025,,Miami Marlins,Cleveland Guardians,+104,-125,4,9
+14 Aug 2025,,Chicago Cubs,Toronto Blue Jays,-120,+100,1,2
+14 Aug 2025,,Seattle Mariners,Baltimore Orioles,-130,+110,3,5
+13 Aug 2025,,Tampa Bay Rays,Athletics,-149,+125,8,2
+13 Aug 2025,,Los Angeles Dodgers,Los Angeles Angels,-192,+154,5,6
+13 Aug 2025,,Atlanta Braves,New York Mets,+170,-208,11,6
+13 Aug 2025,,Boston Red Sox,Houston Astros,+125,-149,1,4
+13 Aug 2025,,Chicago Cubs,Toronto Blue Jays,+114,-135,4,1
+13 Aug 2025,,Minnesota Twins,New York Yankees,+125,-149,4,1
+13 Aug 2025,,Miami Marlins,Cleveland Guardians,+114,-133,13,4
+13 Aug 2025,,Seattle Mariners,Baltimore Orioles,-143,+120,3,4
+13 Aug 2025,,Philadelphia Phillies,Cincinnati Reds,-125,+104,0,8
+13 Aug 2025,,San Diego Padres,San Francisco Giants,-143,+120,11,1
+13 Aug 2025,,Arizona Diamondbacks,Texas Rangers,+118,-143,6,4
+13 Aug 2025,,Colorado Rockies,St.Louis Cardinals,+190,-238,6,5
+13 Aug 2025,,Detroit Tigers,Chicago White Sox,-143,+120,1,0
+13 Aug 2025,,Washington Nationals,Kansas City Royals,+140,-169,8,7
+13 Aug 2025,,Pittsburgh Pirates,Milwaukee Brewers,+200,-250,5,12
+12 Aug 2025,,Tampa Bay Rays,Athletics,-110,-110,0,6
+12 Aug 2025,,San Diego Padres,San Francisco Giants,+100,-120,5,1
+12 Aug 2025,,Los Angeles Dodgers,Los Angeles Angels,-175,+145,6,7
+12 Aug 2025,,Boston Red Sox,Houston Astros,-105,-115,14,1
+12 Aug 2025,,Arizona Diamondbacks,Texas Rangers,+129,-154,3,2
+12 Aug 2025,,Colorado Rockies,St.Louis Cardinals,+170,-208,3,0
+12 Aug 2025,,Detroit Tigers,Chicago White Sox,-182,+150,6,9
+12 Aug 2025,,Washington Nationals,Kansas City Royals,+154,-189,5,8
+12 Aug 2025,,Pittsburgh Pirates,Milwaukee Brewers,+118,-139,0,14
+12 Aug 2025,,Atlanta Braves,New York Mets,+120,-143,5,13
+12 Aug 2025,,Chicago Cubs,Toronto Blue Jays,+104,-125,1,5
+12 Aug 2025,,Minnesota Twins,New York Yankees,+185,-227,1,9
+12 Aug 2025,,Philadelphia Phillies,Cincinnati Reds,-149,+125,1,6
+12 Aug 2025,,Miami Marlins,Cleveland Guardians,+118,-139,3,4
+12 Aug 2025,,Seattle Mariners,Baltimore Orioles,-161,+135,1,0
+11 Aug 2025,,Tampa Bay Rays,Athletics,-110,-110,7,4
+11 Aug 2025,,San Diego Padres,San Francisco Giants,+110,-130,4,1
+11 Aug 2025,,Los Angeles Dodgers,Los Angeles Angels,-179,+150,4,7
+11 Aug 2025,,Boston Red Sox,Houston Astros,-169,+140,6,7
+11 Aug 2025,,Arizona Diamondbacks,Texas Rangers,+140,-169,6,7
+11 Aug 2025,,Colorado Rockies,St.Louis Cardinals,+179,-222,2,3
+11 Aug 2025,,Detroit Tigers,Chicago White Sox,-149,+125,2,1
+11 Aug 2025,,Washington Nationals,Kansas City Royals,+129,-154,4,7
+11 Aug 2025,,Pittsburgh Pirates,Milwaukee Brewers,+165,-200,1,7
+11 Aug 2025,,Minnesota Twins,New York Yankees,+150,-182,2,6
+11 Aug 2025,,Philadelphia Phillies,Cincinnati Reds,+110,-130,4,1
+10 Aug 2025,,Chicago Cubs,St.Louis Cardinals,-137,+114,2,3
+10 Aug 2025,,Colorado Rockies,Arizona Diamondbacks,+229,-294,6,13
+10 Aug 2025,,Boston Red Sox,San Diego Padres,+125,-149,2,6
+10 Aug 2025,,Toronto Blue Jays,Los Angeles Dodgers,+150,-182,5,4
+10 Aug 2025,,Tampa Bay Rays,Seattle Mariners,+154,-189,3,6
+10 Aug 2025,,Washington Nationals,San Francisco Giants,+135,-161,8,0
+10 Aug 2025,,Philadelphia Phillies,Texas Rangers,-161,+135,4,2
+10 Aug 2025,,Cleveland Guardians,Chicago White Sox,-130,+110,4,6
+10 Aug 2025,,New York Mets,Milwaukee Brewers,-110,-110,6,7
+10 Aug 2025,,Los Angeles Angels,Detroit Tigers,+150,-182,5,9
+10 Aug 2025,,Athletics,Baltimore Orioles,+104,-125,3,2
+10 Aug 2025,,Miami Marlins,Atlanta Braves,+110,-130,1,7
+10 Aug 2025,,Cincinnati Reds,Pittsburgh Pirates,-110,-110,14,8
+10 Aug 2025,,Houston Astros,New York Yankees,+185,-227,7,1
+10 Aug 2025,,Kansas City Royals,Minnesota Twins,-110,-110,3,5
+09 Aug 2025,,Tampa Bay Rays,Seattle Mariners,+120,-143,4,7
+09 Aug 2025,,Toronto Blue Jays,Los Angeles Dodgers,+129,-154,1,9
+09 Aug 2025,,Boston Red Sox,San Diego Padres,+114,-135,4,5
+09 Aug 2025,,Colorado Rockies,Arizona Diamondbacks,+179,-222,5,6
+09 Aug 2025,,Miami Marlins,Atlanta Braves,-110,-110,6,8
+09 Aug 2025,,Chicago Cubs,St.Louis Cardinals,-125,+104,9,1
+09 Aug 2025,,Philadelphia Phillies,Texas Rangers,+114,-135,3,2
+09 Aug 2025,,Cleveland Guardians,Chicago White Sox,-139,+118,3,1
+09 Aug 2025,,Kansas City Royals,Minnesota Twins,-120,+100,2,0
+09 Aug 2025,,New York Mets,Milwaukee Brewers,+100,-120,4,7
+09 Aug 2025,,Athletics,Baltimore Orioles,-105,-115,11,3
+09 Aug 2025,,Cincinnati Reds,Pittsburgh Pirates,-110,-110,2,1
+09 Aug 2025,,Los Angeles Angels,Detroit Tigers,+114,-137,7,4
+09 Aug 2025,,Washington Nationals,San Francisco Giants,+140,-167,4,2
+09 Aug 2025,,Houston Astros,New York Yankees,-110,-110,4,5
+09 Aug 2025,,Miami Marlins,Atlanta Braves,-105,-115,1,7
+08 Aug 2025,,Washington Nationals,San Francisco Giants,+140,-167,0,5
+08 Aug 2025,,Toronto Blue Jays,Los Angeles Dodgers,+114,-135,1,5
+08 Aug 2025,,Colorado Rockies,Arizona Diamondbacks,+179,-222,1,6
+08 Aug 2025,,Boston Red Sox,San Diego Padres,+145,-175,10,2
+08 Aug 2025,,Tampa Bay Rays,Seattle Mariners,+110,-130,2,3
+08 Aug 2025,,Chicago Cubs,St.Louis Cardinals,-167,+140,0,5
+08 Aug 2025,,Kansas City Royals,Minnesota Twins,+114,-135,4,9
+08 Aug 2025,,New York Mets,Milwaukee Brewers,+125,-149,2,3
+08 Aug 2025,,Philadelphia Phillies,Texas Rangers,-130,+110,9,1
+08 Aug 2025,,Cleveland Guardians,Chicago White Sox,-135,+114,9,5
+08 Aug 2025,,Miami Marlins,Atlanta Braves,-125,+104,5,1
+08 Aug 2025,,Los Angeles Angels,Detroit Tigers,+240,-303,5,6
+08 Aug 2025,,Athletics,Baltimore Orioles,+104,-125,2,3
+08 Aug 2025,,Houston Astros,New York Yankees,+100,-120,5,3
+08 Aug 2025,,Cincinnati Reds,Pittsburgh Pirates,-130,+110,2,3
+07 Aug 2025,,Miami Marlins,Atlanta Braves,-141,+120,6,8
+07 Aug 2025,,Cincinnati Reds,Pittsburgh Pirates,+140,-169,0,7
+07 Aug 2025,,Chicago White Sox,Seattle Mariners,+229,-294,3,4
+07 Aug 2025,,Athletics,Washington Nationals,-149,+125,6,0
+06 Aug 2025,,San Diego Padres,Arizona Diamondbacks,-133,+110,3,2
+06 Aug 2025,,Chicago White Sox,Seattle Mariners,+220,-278,6,8
+06 Aug 2025,,Milwaukee Brewers,Atlanta Braves,+110,-130,5,4
+06 Aug 2025,,Kansas City Royals,Boston Red Sox,+118,-139,7,3
+06 Aug 2025,,Athletics,Washington Nationals,-143,+120,1,2
+06 Aug 2025,,Houston Astros,Miami Marlins,-105,-115,4,6
+06 Aug 2025,,St.Louis Cardinals,Los Angeles Dodgers,+179,-222,5,3
+06 Aug 2025,,Tampa Bay Rays,Los Angeles Angels,-120,+100,5,4
+06 Aug 2025,,Toronto Blue Jays,Colorado Rockies,-278,+220,20,1
+06 Aug 2025,,New York Yankees,Texas Rangers,-130,+110,3,2
+06 Aug 2025,,Cincinnati Reds,Chicago Cubs,+110,-130,1,6
+06 Aug 2025,,Cleveland Guardians,New York Mets,+150,-182,4,1
+06 Aug 2025,,Minnesota Twins,Detroit Tigers,+165,-200,9,4
+06 Aug 2025,,Baltimore Orioles,Philadelphia Phillies,+145,-179,5,1
+06 Aug 2025,,San Francisco Giants,Pittsburgh Pirates,-149,+125,4,2
+05 Aug 2025,,St.Louis Cardinals,Los Angeles Dodgers,+150,-182,6,12
+05 Aug 2025,,San Diego Padres,Arizona Diamondbacks,-125,+104,10,5
+05 Aug 2025,,Chicago White Sox,Seattle Mariners,+200,-250,3,8
+05 Aug 2025,,Tampa Bay Rays,Los Angeles Angels,+110,-130,7,3
+05 Aug 2025,,Toronto Blue Jays,Colorado Rockies,-238,+195,10,4
+05 Aug 2025,,Cincinnati Reds,Chicago Cubs,+154,-189,5,1
+05 Aug 2025,,New York Yankees,Texas Rangers,+110,-130,0,2
+05 Aug 2025,,Milwaukee Brewers,Atlanta Braves,-149,+125,7,2
+05 Aug 2025,,Kansas City Royals,Boston Red Sox,+200,-250,2,6
+05 Aug 2025,,Cleveland Guardians,New York Mets,+135,-161,3,2
+05 Aug 2025,,Athletics,Washington Nationals,+114,-135,16,7
+05 Aug 2025,,Baltimore Orioles,Philadelphia Phillies,+120,-143,0,5
+05 Aug 2025,,Minnesota Twins,Detroit Tigers,+125,-149,6,3
+05 Aug 2025,,Houston Astros,Miami Marlins,-115,-105,7,3
+05 Aug 2025,,San Francisco Giants,Pittsburgh Pirates,-143,+120,8,1
+04 Aug 2025,,St.Louis Cardinals,Los Angeles Dodgers,+145,-175,3,2
+04 Aug 2025,,San Diego Padres,Arizona Diamondbacks,-130,+110,2,6
+04 Aug 2025,,Tampa Bay Rays,Los Angeles Angels,-102,-118,1,5
+04 Aug 2025,,Toronto Blue Jays,Colorado Rockies,-222,+179,15,1
+04 Aug 2025,,Cincinnati Reds,Chicago Cubs,+114,-135,3,2
+04 Aug 2025,,New York Yankees,Texas Rangers,-139,+114,5,8
+04 Aug 2025,,Milwaukee Brewers,Atlanta Braves,-139,+114,3,1
+04 Aug 2025,,Kansas City Royals,Boston Red Sox,+140,-167,5,8
+04 Aug 2025,,Cleveland Guardians,New York Mets,+165,-200,7,6
+04 Aug 2025,,Baltimore Orioles,Philadelphia Phillies,+170,-208,3,13
+04 Aug 2025,,Minnesota Twins,Detroit Tigers,+154,-189,3,6
+04 Aug 2025,,Houston Astros,Miami Marlins,+114,-135,8,2
+04 Aug 2025,,San Francisco Giants,Pittsburgh Pirates,-130,+110,4,5
+03 Aug 2025,,Detroit Tigers,Philadelphia Phillies,+154,-189,0,2
+03 Aug 2025,,St.Louis Cardinals,San Diego Padres,+165,-200,3,7
+03 Aug 2025,,Texas Rangers,Seattle Mariners,-143,+120,4,5
+03 Aug 2025,,Chicago White Sox,Los Angeles Angels,+114,-135,5,8
+03 Aug 2025,,Arizona Diamondbacks,Athletics,+110,-130,6,4
+03 Aug 2025,,Pittsburgh Pirates,Colorado Rockies,-154,+129,9,5
+03 Aug 2025,,Baltimore Orioles,Chicago Cubs,+154,-189,3,5
+03 Aug 2025,,Minnesota Twins,Cleveland Guardians,+140,-169,5,4
+03 Aug 2025,,New York Yankees,Miami Marlins,-120,+100,3,7
+03 Aug 2025,,San Francisco Giants,New York Mets,+140,-167,12,4
+03 Aug 2025,,Kansas City Royals,Toronto Blue Jays,+125,-149,7,4
+03 Aug 2025,,Milwaukee Brewers,Washington Nationals,-143,+120,14,3
+03 Aug 2025,,Atlanta Braves,Cincinnati Reds,,,4,2
+03 Aug 2025,,Los Angeles Dodgers,Tampa Bay Rays,-161,+135,3,0
+03 Aug 2025,,Houston Astros,Boston Red Sox,-130,+110,1,6
+02 Aug 2025,,St.Louis Cardinals,San Diego Padres,+135,-161,8,5
+02 Aug 2025,,Chicago White Sox,Los Angeles Angels,+114,-137,1,0
+02 Aug 2025,,Arizona Diamondbacks,Athletics,+110,-130,7,2
+02 Aug 2025,,Houston Astros,Boston Red Sox,+114,-137,3,7
+02 Aug 2025,,Minnesota Twins,Cleveland Guardians,+135,-161,4,5
+02 Aug 2025,,New York Yankees,Miami Marlins,-105,-115,0,2
+02 Aug 2025,,San Francisco Giants,New York Mets,+165,-200,6,12
+02 Aug 2025,,Texas Rangers,Seattle Mariners,+110,-130,6,4
+02 Aug 2025,,Detroit Tigers,Philadelphia Phillies,-105,-115,7,5
+02 Aug 2025,,Milwaukee Brewers,Washington Nationals,-189,+154,8,2
+02 Aug 2025,,Pittsburgh Pirates,Colorado Rockies,-238,+190,5,8
+02 Aug 2025,,Kansas City Royals,Toronto Blue Jays,+120,-143,2,4
+02 Aug 2025,,Baltimore Orioles,Chicago Cubs,+195,-238,4,3
+02 Aug 2025,,Los Angeles Dodgers,Tampa Bay Rays,-118,-102,0,4
+01 Aug 2025,,Texas Rangers,Seattle Mariners,+165,-200,3,4
+01 Aug 2025,,Arizona Diamondbacks,Athletics,+114,-137,1,5
+01 Aug 2025,,St.Louis Cardinals,San Diego Padres,+170,-208,1,4
+01 Aug 2025,,Chicago White Sox,Los Angeles Angels,+114,-137,6,3
+01 Aug 2025,,Pittsburgh Pirates,Colorado Rockies,-141,+120,16,17
+01 Aug 2025,,Los Angeles Dodgers,Tampa Bay Rays,-118,-102,5,0
+01 Aug 2025,,Houston Astros,Boston Red Sox,-125,+104,1,2
+01 Aug 2025,,Minnesota Twins,Cleveland Guardians,+104,-125,2,3
+01 Aug 2025,,New York Yankees,Miami Marlins,-161,+135,12,13
+01 Aug 2025,,San Francisco Giants,New York Mets,+125,-149,4,3
+01 Aug 2025,,Kansas City Royals,Toronto Blue Jays,+129,-154,9,3
+01 Aug 2025,,Detroit Tigers,Philadelphia Phillies,+125,-149,4,5
+01 Aug 2025,,Milwaukee Brewers,Washington Nationals,-154,+129,16,9
+01 Aug 2025,,Baltimore Orioles,Chicago Cubs,+125,-149,0,1
+01 Aug 2025,,Atlanta Braves,Cincinnati Reds,+120,-143,2,3
+31 Jul 2025,,Texas Rangers,Seattle Mariners,+145,-175,0,6
+31 Jul 2025,,Atlanta Braves,Cincinnati Reds,+140,-169,12,11
+31 Jul 2025,,Tampa Bay Rays,New York Yankees,-120,+100,4,7
+30 Jul 2025,,Seattle Mariners,Athletics,-149,+125,4,5
+30 Jul 2025,,Texas Rangers,Los Angeles Angels,-130,+110,6,3
+30 Jul 2025,,Miami Marlins,St.Louis Cardinals,+120,-141,2,0
+30 Jul 2025,,Los Angeles Dodgers,Cincinnati Reds,-167,+140,2,5
+30 Jul 2025,,Tampa Bay Rays,New York Yankees,+120,-141,4,5
+30 Jul 2025,,Colorado Rockies,Cleveland Guardians,+145,-175,0,5
+30 Jul 2025,,New York Mets,San Diego Padres,+100,-120,0,5
+30 Jul 2025,,Pittsburgh Pirates,San Francisco Giants,+170,-208,2,1
+30 Jul 2025,,Atlanta Braves,Kansas City Royals,+100,-120,0,1
+30 Jul 2025,,Chicago Cubs,Milwaukee Brewers,+104,-125,10,3
+30 Jul 2025,,Philadelphia Phillies,Chicago White Sox,-143,+120,3,9
+30 Jul 2025,,Washington Nationals,Houston Astros,-110,-110,1,9
+30 Jul 2025,,Arizona Diamondbacks,Detroit Tigers,+110,-130,2,7
+30 Jul 2025,,Boston Red Sox,Minnesota Twins,+100,-120,13,1
+30 Jul 2025,,Toronto Blue Jays,Baltimore Orioles,+100,-120,9,8
+29 Jul 2025,,Seattle Mariners,Athletics,-110,-110,1,6
+29 Jul 2025,,Pittsburgh Pirates,San Francisco Giants,+140,-167,3,1
+29 Jul 2025,,New York Mets,San Diego Padres,-130,+110,1,7
+29 Jul 2025,,Texas Rangers,Los Angeles Angels,+110,-133,5,8
+29 Jul 2025,,Washington Nationals,Houston Astros,+104,-125,4,7
+29 Jul 2025,,Miami Marlins,St.Louis Cardinals,+125,-149,5,0
+29 Jul 2025,,Atlanta Braves,Kansas City Royals,+104,-125,6,9
+29 Jul 2025,,Boston Red Sox,Minnesota Twins,-125,+104,8,5
+29 Jul 2025,,Chicago Cubs,Milwaukee Brewers,+110,-130,3,9
+29 Jul 2025,,Philadelphia Phillies,Chicago White Sox,-182,+150,6,3
+29 Jul 2025,,Los Angeles Dodgers,Cincinnati Reds,-149,+125,5,4
+29 Jul 2025,,Tampa Bay Rays,New York Yankees,+160,-192,5,7
+29 Jul 2025,,Arizona Diamondbacks,Detroit Tigers,+135,-161,2,12
+29 Jul 2025,,Colorado Rockies,Cleveland Guardians,+165,-200,4,10
+29 Jul 2025,,Toronto Blue Jays,Baltimore Orioles,-125,+104,2,3
+29 Jul 2025,,Toronto Blue Jays,Baltimore Orioles,+100,-120,4,16
+28 Jul 2025,,Seattle Mariners,Athletics,-125,+104,3,1
+28 Jul 2025,,Pittsburgh Pirates,San Francisco Giants,+114,-135,6,5
+28 Jul 2025,,New York Mets,San Diego Padres,+110,-130,6,7
+28 Jul 2025,,Texas Rangers,Los Angeles Angels,-222,+179,4,6
+28 Jul 2025,,Washington Nationals,Houston Astros,+220,-278,2,1
+28 Jul 2025,,Miami Marlins,St.Louis Cardinals,+104,-125,1,7
+28 Jul 2025,,Atlanta Braves,Kansas City Royals,-169,+140,10,7
+28 Jul 2025,,Boston Red Sox,Minnesota Twins,-110,-110,4,5
+28 Jul 2025,,Chicago Cubs,Milwaukee Brewers,-115,-105,4,8
+28 Jul 2025,,Philadelphia Phillies,Chicago White Sox,-238,+195,2,6
+28 Jul 2025,,Los Angeles Dodgers,Cincinnati Reds,-149,+125,5,2
+28 Jul 2025,,Tampa Bay Rays,New York Yankees,+110,-130,4,2
+28 Jul 2025,,Arizona Diamondbacks,Detroit Tigers,+114,-135,1,5
+28 Jul 2025,,Colorado Rockies,Cleveland Guardians,+220,-278,8,6
+28 Jul 2025,,Toronto Blue Jays,Baltimore Orioles,-118,-102,4,11
+27 Jul 2025,,New York Mets,San Francisco Giants,-125,+104,5,3
+27 Jul 2025,,Seattle Mariners,Los Angeles Angels,-175,+145,1,4
+27 Jul 2025,,Atlanta Braves,Texas Rangers,+104,-125,1,8
+27 Jul 2025,,San Diego Padres,St.Louis Cardinals,+104,-125,9,2
+27 Jul 2025,,Athletics,Houston Astros,+120,-143,7,1
+27 Jul 2025,,Chicago Cubs,Chicago White Sox,-175,+145,5,4
+27 Jul 2025,,Cleveland Guardians,Kansas City Royals,+114,-133,1,4
+27 Jul 2025,,Miami Marlins,Milwaukee Brewers,+129,-154,2,3
+27 Jul 2025,,Washington Nationals,Minnesota Twins,+145,-175,7,2
+27 Jul 2025,,Tampa Bay Rays,Cincinnati Reds,-110,-110,1,2
+27 Jul 2025,,Toronto Blue Jays,Detroit Tigers,-102,-118,4,10
+27 Jul 2025,,Arizona Diamondbacks,Pittsburgh Pirates,+125,-149,0,6
+27 Jul 2025,,Colorado Rockies,Baltimore Orioles,+170,-208,1,5
+27 Jul 2025,,Los Angeles Dodgers,Boston Red Sox,-115,-105,3,4
+27 Jul 2025,,Philadelphia Phillies,New York Yankees,-133,+114,3,4
+26 Jul 2025,,Seattle Mariners,Los Angeles Angels,-133,+110,7,2
+26 Jul 2025,,New York Mets,San Francisco Giants,-105,-115,2,1
+26 Jul 2025,,Arizona Diamondbacks,Pittsburgh Pirates,-149,+125,0,2
+26 Jul 2025,,Los Angeles Dodgers,Boston Red Sox,+140,-169,2,4
+26 Jul 2025,,Cleveland Guardians,Kansas City Royals,+110,-133,6,4
+26 Jul 2025,,San Diego Padres,St.Louis Cardinals,+120,-143,3,1
+26 Jul 2025,,Athletics,Houston Astros,+150,-182,5,1
+26 Jul 2025,,Chicago Cubs,Chicago White Sox,-189,+154,6,1
+26 Jul 2025,,Miami Marlins,Milwaukee Brewers,+140,-169,7,4
+26 Jul 2025,,Washington Nationals,Minnesota Twins,+200,-250,9,3
+26 Jul 2025,,Atlanta Braves,Texas Rangers,-110,-110,5,6
+26 Jul 2025,,Colorado Rockies,Baltimore Orioles,+200,-250,0,18
+26 Jul 2025,,Tampa Bay Rays,Cincinnati Reds,+104,-125,2,6
+26 Jul 2025,,Toronto Blue Jays,Detroit Tigers,+145,-179,6,1
+26 Jul 2025,,Cleveland Guardians,Kansas City Royals,-105,-115,3,5
+26 Jul 2025,,Philadelphia Phillies,New York Yankees,-133,+110,9,4
+25 Jul 2025,,New York Mets,San Francisco Giants,+120,-141,8,1
+25 Jul 2025,,Seattle Mariners,Los Angeles Angels,-130,+110,2,3
+25 Jul 2025,,Athletics,Houston Astros,+114,-137,15,3
+25 Jul 2025,,Washington Nationals,Minnesota Twins,+140,-167,0,1
+25 Jul 2025,,Atlanta Braves,Texas Rangers,+129,-154,3,8
+25 Jul 2025,,Chicago Cubs,Chicago White Sox,-182,+150,5,12
+25 Jul 2025,,San Diego Padres,St.Louis Cardinals,-130,+110,0,3
+25 Jul 2025,,Los Angeles Dodgers,Boston Red Sox,-105,-115,5,2
+25 Jul 2025,,Tampa Bay Rays,Cincinnati Reds,-105,-115,2,7
+25 Jul 2025,,Toronto Blue Jays,Detroit Tigers,-105,-115,6,2
+25 Jul 2025,,Colorado Rockies,Baltimore Orioles,+165,-200,6,5
+25 Jul 2025,,Philadelphia Phillies,New York Yankees,+140,-169,12,5
+25 Jul 2025,,Arizona Diamondbacks,Pittsburgh Pirates,-115,-105,1,0
+25 Jul 2025,,Miami Marlins,Milwaukee Brewers,+195,-238,5,1
+24 Jul 2025,,Seattle Mariners,Los Angeles Angels,+125,-149,4,2
+24 Jul 2025,,Athletics,Houston Astros,+125,-149,5,2
+24 Jul 2025,,San Diego Padres,St.Louis Cardinals,+129,-154,7,9
+24 Jul 2025,,Toronto Blue Jays,Detroit Tigers,+120,-141,11,4
+24 Jul 2025,,Baltimore Orioles,Cleveland Guardians,+100,-120,4,3
+23 Jul 2025,,Athletics,Texas Rangers,+118,-139,1,2
+23 Jul 2025,,Chicago White Sox,Tampa Bay Rays,+185,-227,11,9
+23 Jul 2025,,New York Yankees,Toronto Blue Jays,-139,+118,4,8
+23 Jul 2025,,Boston Red Sox,Philadelphia Phillies,+135,-161,9,8
+23 Jul 2025,,Baltimore Orioles,Cleveland Guardians,+110,-130,2,3
+23 Jul 2025,,Minnesota Twins,Los Angeles Dodgers,+185,-227,3,4
+23 Jul 2025,,Houston Astros,Arizona Diamondbacks,+118,-139,4,3
+23 Jul 2025,,Milwaukee Brewers,Seattle Mariners,-105,-115,10,2
+23 Jul 2025,,St.Louis Cardinals,Colorado Rockies,-189,+154,0,6
+23 Jul 2025,,Kansas City Royals,Chicago Cubs,+150,-182,8,4
+23 Jul 2025,,Los Angeles Angels,New York Mets,+150,-179,3,6
+23 Jul 2025,,Detroit Tigers,Pittsburgh Pirates,-135,+114,1,6
+23 Jul 2025,,San Francisco Giants,Atlanta Braves,+135,-161,9,3
+23 Jul 2025,,San Diego Padres,Miami Marlins,-143,+120,2,3
+23 Jul 2025,,Cincinnati Reds,Washington Nationals,-130,+110,5,0
+22 Jul 2025,,Minnesota Twins,Los Angeles Dodgers,+170,-208,10,7
+22 Jul 2025,,Houston Astros,Arizona Diamondbacks,-120,+100,3,1
+22 Jul 2025,,Milwaukee Brewers,Seattle Mariners,+104,-125,0,1
+22 Jul 2025,,St.Louis Cardinals,Colorado Rockies,-169,+140,4,8
+22 Jul 2025,,Athletics,Texas Rangers,+195,-238,2,6
+22 Jul 2025,,Kansas City Royals,Chicago Cubs,+200,-250,0,6
+22 Jul 2025,,San Francisco Giants,Atlanta Braves,+100,-120,9,0
+22 Jul 2025,,Los Angeles Angels,New York Mets,+145,-175,2,3
+22 Jul 2025,,New York Yankees,Toronto Blue Jays,-105,-115,5,4
+22 Jul 2025,,Chicago White Sox,Tampa Bay Rays,+200,-250,3,4
+22 Jul 2025,,Boston Red Sox,Philadelphia Phillies,+154,-189,1,4
+22 Jul 2025,,Cincinnati Reds,Washington Nationals,-139,+118,1,6
+22 Jul 2025,,Baltimore Orioles,Cleveland Guardians,+140,-169,3,6
+22 Jul 2025,,Detroit Tigers,Pittsburgh Pirates,-135,+114,5,8
+22 Jul 2025,,San Diego Padres,Miami Marlins,+114,-133,3,4
+21 Jul 2025,,Minnesota Twins,Los Angeles Dodgers,+154,-189,2,5
+21 Jul 2025,,Houston Astros,Arizona Diamondbacks,+120,-143,6,3
+21 Jul 2025,,Milwaukee Brewers,Seattle Mariners,+110,-130,6,0
+21 Jul 2025,,St.Louis Cardinals,Colorado Rockies,-179,+150,6,2
+21 Jul 2025,,Athletics,Texas Rangers,+100,-120,2,7
+21 Jul 2025,,Kansas City Royals,Chicago Cubs,+125,-149,12,4
+21 Jul 2025,,Chicago White Sox,Tampa Bay Rays,+179,-222,8,3
+21 Jul 2025,,San Francisco Giants,Atlanta Braves,+114,-135,5,9
+21 Jul 2025,,Los Angeles Angels,New York Mets,+154,-189,5,7
+21 Jul 2025,,New York Yankees,Toronto Blue Jays,-120,+100,1,4
+21 Jul 2025,,Boston Red Sox,Philadelphia Phillies,+195,-238,2,3
+21 Jul 2025,,Cincinnati Reds,Washington Nationals,-125,+104,8,10
+21 Jul 2025,,Baltimore Orioles,Cleveland Guardians,+114,-137,5,10
+21 Jul 2025,,Detroit Tigers,Pittsburgh Pirates,+104,-125,0,3
+21 Jul 2025,,San Diego Padres,Miami Marlins,+120,-143,2,1
+20 Jul 2025,,Detroit Tigers,Texas Rangers,-182,+150,2,1
+20 Jul 2025,,St.Louis Cardinals,Arizona Diamondbacks,+114,-139,3,5
+20 Jul 2025,,Houston Astros,Seattle Mariners,+114,-139,11,3
+20 Jul 2025,,Milwaukee Brewers,Los Angeles Dodgers,+140,-169,6,5
+20 Jul 2025,,Minnesota Twins,Colorado Rockies,-250,+200,7,1
+20 Jul 2025,,Boston Red Sox,Chicago Cubs,-137,+114,6,1
+20 Jul 2025,,Athletics,Cleveland Guardians,-110,-110,2,8
+20 Jul 2025,,Cincinnati Reds,New York Mets,+114,-137,2,3
+20 Jul 2025,,Kansas City Royals,Miami Marlins,-120,+100,7,4
+20 Jul 2025,,New York Yankees,Atlanta Braves,+110,-130,4,2
+20 Jul 2025,,Chicago White Sox,Pittsburgh Pirates,+118,-143,7,2
+20 Jul 2025,,Los Angeles Angels,Philadelphia Phillies,+140,-169,8,2
+20 Jul 2025,,San Diego Padres,Washington Nationals,-125,+104,8,1
+20 Jul 2025,,Baltimore Orioles,Tampa Bay Rays,+100,-120,5,3
+20 Jul 2025,,San Francisco Giants,Toronto Blue Jays,-102,-118,6,8
+19 Jul 2025,,Houston Astros,Seattle Mariners,+114,-137,6,7
+19 Jul 2025,,Milwaukee Brewers,Los Angeles Dodgers,+104,-125,8,7
+19 Jul 2025,,Minnesota Twins,Colorado Rockies,-200,+165,6,10
+19 Jul 2025,,St.Louis Cardinals,Arizona Diamondbacks,-137,+114,1,10
+19 Jul 2025,,New York Yankees,Atlanta Braves,-130,+110,12,9
+19 Jul 2025,,Boston Red Sox,Chicago Cubs,+129,-154,0,6
+19 Jul 2025,,Athletics,Cleveland Guardians,+114,-139,8,2
+19 Jul 2025,,Baltimore Orioles,Tampa Bay Rays,+110,-130,3,4
+19 Jul 2025,,Detroit Tigers,Texas Rangers,-105,-115,1,4
+19 Jul 2025,,San Diego Padres,Washington Nationals,-139,+114,2,4
+19 Jul 2025,,Chicago White Sox,Pittsburgh Pirates,+114,-137,10,4
+19 Jul 2025,,Los Angeles Angels,Philadelphia Phillies,+114,-135,5,9
+19 Jul 2025,,Cincinnati Reds,New York Mets,+150,-182,5,2
+19 Jul 2025,,Kansas City Royals,Miami Marlins,-120,+100,1,3
+19 Jul 2025,,San Francisco Giants,Toronto Blue Jays,-130,+110,3,6
+18 Jul 2025,,Houston Astros,Seattle Mariners,+125,-149,1,6
+18 Jul 2025,,Milwaukee Brewers,Los Angeles Dodgers,+154,-189,2,0
+18 Jul 2025,,St.Louis Cardinals,Arizona Diamondbacks,-110,-110,3,7
+18 Jul 2025,,Minnesota Twins,Colorado Rockies,-182,+150,4,6
+18 Jul 2025,,Detroit Tigers,Texas Rangers,-105,-115,0,2
+18 Jul 2025,,Baltimore Orioles,Tampa Bay Rays,+104,-125,1,11
+18 Jul 2025,,New York Yankees,Atlanta Braves,+114,-137,3,7
+18 Jul 2025,,Athletics,Cleveland Guardians,+110,-130,6,8
+18 Jul 2025,,Cincinnati Reds,New York Mets,+135,-161,8,4
+18 Jul 2025,,Kansas City Royals,Miami Marlins,-115,-105,7,8
+18 Jul 2025,,San Francisco Giants,Toronto Blue Jays,+114,-137,0,4
+18 Jul 2025,,Los Angeles Angels,Philadelphia Phillies,+179,-222,6,5
+18 Jul 2025,,San Diego Padres,Washington Nationals,-149,+125,7,2
+18 Jul 2025,,Chicago White Sox,Pittsburgh Pirates,+129,-154,10,1
+18 Jul 2025,,Boston Red Sox,Chicago Cubs,+114,-137,1,4
+15 Jul 2025,,American League,National League,+104,-125,6,7
+13 Jul 2025,,Philadelphia Phillies,San Diego Padres,-130,+110,2,1
+13 Jul 2025,,Arizona Diamondbacks,Los Angeles Angels,+110,-130,5,1
+13 Jul 2025,,Toronto Blue Jays,Athletics,-125,+104,3,6
+13 Jul 2025,,Los Angeles Dodgers,San Francisco Giants,-139,+114,5,2
+13 Jul 2025,,Atlanta Braves,St.Louis Cardinals,+135,-161,4,5
+13 Jul 2025,,Cleveland Guardians,Chicago White Sox,-137,+114,6,5
+13 Jul 2025,,Texas Rangers,Houston Astros,+110,-133,5,1
+13 Jul 2025,,New York Mets,Kansas City Royals,-105,-115,2,3
+13 Jul 2025,,Washington Nationals,Milwaukee Brewers,+225,-278,1,8
+13 Jul 2025,,Pittsburgh Pirates,Minnesota Twins,+135,-161,2,1
+13 Jul 2025,,Colorado Rockies,Cincinnati Reds,+200,-250,2,4
+13 Jul 2025,,Seattle Mariners,Detroit Tigers,-110,-110,8,4
+13 Jul 2025,,Miami Marlins,Baltimore Orioles,+114,-139,11,1
+13 Jul 2025,,Tampa Bay Rays,Boston Red Sox,+100,-120,1,4
+13 Jul 2025,,Chicago Cubs,New York Yankees,+110,-130,4,1
+12 Jul 2025,,Toronto Blue Jays,Athletics,-143,+118,3,4
+12 Jul 2025,,Arizona Diamondbacks,Los Angeles Angels,+110,-133,5,10
+12 Jul 2025,,Texas Rangers,Houston Astros,+104,-125,4,5
+12 Jul 2025,,Philadelphia Phillies,San Diego Padres,-189,+154,4,5
+12 Jul 2025,,Tampa Bay Rays,Boston Red Sox,+154,-189,0,1
+12 Jul 2025,,Cleveland Guardians,Chicago White Sox,-143,+118,6,2
+12 Jul 2025,,Colorado Rockies,Cincinnati Reds,+240,-303,3,4
+12 Jul 2025,,New York Mets,Kansas City Royals,-133,+110,3,1
+12 Jul 2025,,Washington Nationals,Milwaukee Brewers,+220,-278,5,6
+12 Jul 2025,,Miami Marlins,Baltimore Orioles,+135,-167,6,0
+12 Jul 2025,,Los Angeles Dodgers,San Francisco Giants,-161,+135,2,1
+12 Jul 2025,,Atlanta Braves,St.Louis Cardinals,-115,-105,7,6
+12 Jul 2025,,Pittsburgh Pirates,Minnesota Twins,+110,-133,4,12
+12 Jul 2025,,Seattle Mariners,Detroit Tigers,-102,-118,15,7
+12 Jul 2025,,Chicago Cubs,New York Yankees,+140,-169,5,2
+11 Jul 2025,,Los Angeles Dodgers,San Francisco Giants,+114,-139,7,8
+11 Jul 2025,,Toronto Blue Jays,Athletics,-175,+145,7,6
+11 Jul 2025,,Philadelphia Phillies,San Diego Padres,-169,+140,2,4
+11 Jul 2025,,Arizona Diamondbacks,Los Angeles Angels,-110,-110,5,6
+11 Jul 2025,,Atlanta Braves,St.Louis Cardinals,-105,-115,6,5
+11 Jul 2025,,Cleveland Guardians,Chicago White Sox,-128,+110,4,5
+11 Jul 2025,,Texas Rangers,Houston Astros,+104,-125,7,3
+11 Jul 2025,,New York Mets,Kansas City Royals,-139,+114,8,3
+11 Jul 2025,,Washington Nationals,Milwaukee Brewers,+179,-222,3,8
+11 Jul 2025,,Pittsburgh Pirates,Minnesota Twins,+118,-143,1,2
+11 Jul 2025,,Tampa Bay Rays,Boston Red Sox,-110,-110,4,5
+11 Jul 2025,,Colorado Rockies,Cincinnati Reds,+200,-250,3,2
+11 Jul 2025,,Seattle Mariners,Detroit Tigers,+229,-294,12,3
+11 Jul 2025,,Miami Marlins,Baltimore Orioles,+118,-143,2,5
+11 Jul 2025,,Chicago Cubs,New York Yankees,+140,-169,0,11
+11 Jul 2025,,Cleveland Guardians,Chicago White Sox,-125,+104,4,2
+10 Jul 2025,,Arizona Diamondbacks,San Diego Padres,-125,+104,3,4
+10 Jul 2025,,Texas Rangers,Los Angeles Angels,-105,-115,11,4
+10 Jul 2025,,Atlanta Braves,Athletics,-200,+165,4,5
+10 Jul 2025,,Washington Nationals,St.Louis Cardinals,+120,-143,1,8
+10 Jul 2025,,Tampa Bay Rays,Boston Red Sox,-105,-115,3,4
+10 Jul 2025,,Seattle Mariners,New York Yankees,-115,-105,5,6
+10 Jul 2025,,Miami Marlins,Cincinnati Reds,+140,-169,0,6
+10 Jul 2025,,New York Mets,Baltimore Orioles,-125,+104,3,7
+10 Jul 2025,,Chicago Cubs,Minnesota Twins,-125,+104,8,1
+10 Jul 2025,,New York Mets,Baltimore Orioles,-139,+114,1,3
+09 Jul 2025,,Atlanta Braves,Athletics,-125,+104,9,2
+09 Jul 2025,,Arizona Diamondbacks,San Diego Padres,+135,-161,8,2
+09 Jul 2025,,Texas Rangers,Los Angeles Angels,-120,+100,8,11
+09 Jul 2025,,Cleveland Guardians,Houston Astros,+140,-167,4,2
+09 Jul 2025,,Washington Nationals,St.Louis Cardinals,+118,-139,8,2
+09 Jul 2025,,Chicago Cubs,Minnesota Twins,-105,-115,2,4
+09 Jul 2025,,Pittsburgh Pirates,Kansas City Royals,+154,-189,3,4
+09 Jul 2025,,Colorado Rockies,Boston Red Sox,+270,-333,2,10
+09 Jul 2025,,Miami Marlins,Cincinnati Reds,+120,-143,2,7
+09 Jul 2025,,Seattle Mariners,New York Yankees,+129,-154,6,9
+09 Jul 2025,,Tampa Bay Rays,Detroit Tigers,+125,-149,7,3
+09 Jul 2025,,Philadelphia Phillies,San Francisco Giants,-130,+110,13,0
+09 Jul 2025,,Toronto Blue Jays,Chicago White Sox,-139,+114,1,2
+09 Jul 2025,,Los Angeles Dodgers,Milwaukee Brewers,-149,+125,2,3
+08 Jul 2025,,Atlanta Braves,Athletics,-110,-110,1,10
+08 Jul 2025,,Philadelphia Phillies,San Francisco Giants,+135,-161,3,4
+08 Jul 2025,,Arizona Diamondbacks,San Diego Padres,+114,-137,0,1
+08 Jul 2025,,Texas Rangers,Los Angeles Angels,-105,-115,13,1
+08 Jul 2025,,Cleveland Guardians,Houston Astros,+170,-208,10,6
+08 Jul 2025,,Washington Nationals,St.Louis Cardinals,+200,-250,2,4
+08 Jul 2025,,Chicago Cubs,Minnesota Twins,-139,+114,1,8
+08 Jul 2025,,Toronto Blue Jays,Chicago White Sox,-189,+154,6,1
+08 Jul 2025,,Pittsburgh Pirates,Kansas City Royals,+114,-139,3,4
+08 Jul 2025,,Los Angeles Dodgers,Milwaukee Brewers,-115,-105,1,3
+08 Jul 2025,,Colorado Rockies,Boston Red Sox,+240,-303,2,10
+08 Jul 2025,,Miami Marlins,Cincinnati Reds,+104,-125,12,2
+08 Jul 2025,,Seattle Mariners,New York Yankees,+104,-125,3,10
+08 Jul 2025,,Tampa Bay Rays,Detroit Tigers,+110,-130,2,4
+08 Jul 2025,,New York Mets,Baltimore Orioles,-133,+110,7,6
+07 Jul 2025,,Philadelphia Phillies,San Francisco Giants,-137,+114,1,3
+07 Jul 2025,,Arizona Diamondbacks,San Diego Padres,+100,-120,6,3
+07 Jul 2025,,Texas Rangers,Los Angeles Angels,-137,+114,5,6
+07 Jul 2025,,Cleveland Guardians,Houston Astros,+114,-137,7,5
+07 Jul 2025,,Toronto Blue Jays,Chicago White Sox,-169,+140,8,4
+07 Jul 2025,,Pittsburgh Pirates,Kansas City Royals,+125,-149,3,9
+07 Jul 2025,,Los Angeles Dodgers,Milwaukee Brewers,-143,+120,1,9
+07 Jul 2025,,Colorado Rockies,Boston Red Sox,+200,-250,3,9
+07 Jul 2025,,Miami Marlins,Cincinnati Reds,+114,-137,5,1
+07 Jul 2025,,Tampa Bay Rays,Detroit Tigers,-115,-105,1,5
+06 Jul 2025,,San Francisco Giants,Athletics,+104,-125,6,2
+06 Jul 2025,,Texas Rangers,San Diego Padres,+110,-130,1,4
+06 Jul 2025,,St.Louis Cardinals,Chicago Cubs,+185,-227,0,11
+06 Jul 2025,,Kansas City Royals,Arizona Diamondbacks,+129,-154,4,0
+06 Jul 2025,,Houston Astros,Los Angeles Dodgers,+170,-208,5,1
+06 Jul 2025,,Pittsburgh Pirates,Seattle Mariners,-105,-115,0,1
+06 Jul 2025,,Chicago White Sox,Colorado Rockies,-125,+104,4,6
+06 Jul 2025,,Tampa Bay Rays,Minnesota Twins,+110,-130,7,5
+06 Jul 2025,,Detroit Tigers,Cleveland Guardians,-227,+185,7,2
+06 Jul 2025,,Milwaukee Brewers,Miami Marlins,-105,-115,3,1
+06 Jul 2025,,New York Yankees,New York Mets,-182,+154,6,4
+06 Jul 2025,,Los Angeles Angels,Toronto Blue Jays,+154,-182,2,3
+06 Jul 2025,,Boston Red Sox,Washington Nationals,-250,+200,6,4
+06 Jul 2025,,Cincinnati Reds,Philadelphia Phillies,+195,-238,1,3
+06 Jul 2025,,Baltimore Orioles,Atlanta Braves,+129,-154,2,1
+05 Jul 2025,,Pittsburgh Pirates,Seattle Mariners,+140,-169,0,1
+05 Jul 2025,,San Francisco Giants,Athletics,-189,+154,7,2
+05 Jul 2025,,Texas Rangers,San Diego Padres,+104,-125,7,4
+05 Jul 2025,,Chicago White Sox,Colorado Rockies,+125,-154,10,3
+05 Jul 2025,,Detroit Tigers,Cleveland Guardians,-143,+120,1,0
+05 Jul 2025,,Houston Astros,Los Angeles Dodgers,+125,-149,6,4
+05 Jul 2025,,Baltimore Orioles,Atlanta Braves,+129,-154,9,6
+05 Jul 2025,,New York Yankees,New York Mets,-149,+125,6,12
+05 Jul 2025,,Kansas City Royals,Arizona Diamondbacks,+114,-137,1,7
+05 Jul 2025,,Milwaukee Brewers,Miami Marlins,-139,+114,2,4
+05 Jul 2025,,Boston Red Sox,Washington Nationals,-115,-105,10,3
+05 Jul 2025,,Cincinnati Reds,Philadelphia Phillies,+165,-200,1,5
+05 Jul 2025,,Los Angeles Angels,Toronto Blue Jays,+165,-200,3,4
+05 Jul 2025,,St.Louis Cardinals,Chicago Cubs,+140,-167,8,6
+05 Jul 2025,,Tampa Bay Rays,Minnesota Twins,-105,-115,5,6
+04 Jul 2025,,San Francisco Giants,Athletics,-110,-110,2,11
+04 Jul 2025,,Kansas City Royals,Arizona Diamondbacks,-105,-115,9,3
+04 Jul 2025,,Houston Astros,Los Angeles Dodgers,+154,-182,18,1
+04 Jul 2025,,Chicago White Sox,Colorado Rockies,-125,+104,3,2
+04 Jul 2025,,Baltimore Orioles,Atlanta Braves,+154,-182,3,2
+04 Jul 2025,,Detroit Tigers,Cleveland Guardians,-125,+104,2,1
+04 Jul 2025,,Milwaukee Brewers,Miami Marlins,-139,+114,6,5
+04 Jul 2025,,Los Angeles Angels,Toronto Blue Jays,+120,-143,3,4
+04 Jul 2025,,Texas Rangers,San Diego Padres,-115,-105,2,3
+04 Jul 2025,,Tampa Bay Rays,Minnesota Twins,+100,-120,3,4
+04 Jul 2025,,Pittsburgh Pirates,Seattle Mariners,+154,-189,0,6
+04 Jul 2025,,New York Yankees,New York Mets,-105,-115,5,6
+04 Jul 2025,,St.Louis Cardinals,Chicago Cubs,+120,-143,3,11
+04 Jul 2025,,Cincinnati Reds,Philadelphia Phillies,+135,-161,9,6
+04 Jul 2025,,Boston Red Sox,Washington Nationals,-115,-105,11,2
+03 Jul 2025,,Chicago White Sox,Los Angeles Dodgers,+229,-286,2,6
+03 Jul 2025,,Kansas City Royals,Seattle Mariners,+104,-125,3,2
+03 Jul 2025,,San Francisco Giants,Arizona Diamondbacks,-125,+104,7,2
+03 Jul 2025,,Cleveland Guardians,Chicago Cubs,+118,-139,0,1
+03 Jul 2025,,Los Angeles Angels,Atlanta Braves,+129,-154,5,1
+03 Jul 2025,,Milwaukee Brewers,New York Mets,+140,-167,2,3
+03 Jul 2025,,New York Yankees,Toronto Blue Jays,-135,+114,5,8
+03 Jul 2025,,Detroit Tigers,Washington Nationals,-143,+120,7,11
+03 Jul 2025,,Houston Astros,Colorado Rockies,-189,+154,6,7
+03 Jul 2025,,Minnesota Twins,Miami Marlins,-115,-105,1,4
+02 Jul 2025,,Chicago White Sox,Los Angeles Dodgers,+280,-357,4,5
+02 Jul 2025,,San Francisco Giants,Arizona Diamondbacks,+125,-149,6,5
+02 Jul 2025,,Kansas City Royals,Seattle Mariners,+145,-175,2,3
+02 Jul 2025,,Houston Astros,Colorado Rockies,-278,+220,5,3
+02 Jul 2025,,Baltimore Orioles,Texas Rangers,+129,-154,0,6
+02 Jul 2025,,Cleveland Guardians,Chicago Cubs,+140,-167,4,5
+02 Jul 2025,,Los Angeles Angels,Atlanta Braves,+118,-139,3,8
+02 Jul 2025,,Cincinnati Reds,Boston Red Sox,+110,-130,8,4
+02 Jul 2025,,Milwaukee Brewers,New York Mets,-120,+100,3,7
+02 Jul 2025,,New York Yankees,Toronto Blue Jays,-135,+114,9,11
+02 Jul 2025,,Detroit Tigers,Washington Nationals,-120,+100,4,9
+02 Jul 2025,,Minnesota Twins,Miami Marlins,-120,+100,2,1
+02 Jul 2025,,San Diego Padres,Philadelphia Phillies,+129,-154,1,5
+02 Jul 2025,,Cincinnati Reds,Boston Red Sox,,,3,5
+02 Jul 2025,,Milwaukee Brewers,New York Mets,+110,-130,7,2
+02 Jul 2025,,Detroit Tigers,Washington Nationals,,,11,2
+02 Jul 2025,,San Diego Padres,Philadelphia Phillies,-115,-105,6,4
+02 Jul 2025,,St.Louis Cardinals,Pittsburgh Pirates,-125,+104,0,5
+02 Jul 2025,,Athletics,Tampa Bay Rays,+170,-208,5,6
+01 Jul 2025,,Chicago White Sox,Los Angeles Dodgers,+295,-385,1,6
+01 Jul 2025,,San Francisco Giants,Arizona Diamondbacks,+114,-133,2,8
+01 Jul 2025,,Kansas City Royals,Seattle Mariners,+114,-137,6,3
+01 Jul 2025,,Houston Astros,Colorado Rockies,-154,+129,6,5
+01 Jul 2025,,Baltimore Orioles,Texas Rangers,+154,-189,2,10
+01 Jul 2025,,Cleveland Guardians,Chicago Cubs,+170,-208,2,5
+01 Jul 2025,,Los Angeles Angels,Atlanta Braves,+170,-208,4,0
+01 Jul 2025,,Athletics,Tampa Bay Rays,+145,-175,4,3
+01 Jul 2025,,Minnesota Twins,Miami Marlins,-141,+120,0,2
+01 Jul 2025,,St.Louis Cardinals,Pittsburgh Pirates,+135,-161,0,1
+01 Jul 2025,,New York Yankees,Toronto Blue Jays,-167,+140,5,12
+30 Jun 2025,,San Francisco Giants,Arizona Diamondbacks,-149,+125,2,4
+30 Jun 2025,,Kansas City Royals,Seattle Mariners,+135,-161,2,6
+30 Jun 2025,,Baltimore Orioles,Texas Rangers,-118,-102,10,6
+30 Jun 2025,,Athletics,Tampa Bay Rays,+154,-189,6,4
+30 Jun 2025,,Cincinnati Reds,Boston Red Sox,+145,-175,6,13
+30 Jun 2025,,New York Yankees,Toronto Blue Jays,-141,+120,4,5
+30 Jun 2025,,St.Louis Cardinals,Pittsburgh Pirates,-110,-110,0,7
+30 Jun 2025,,San Diego Padres,Philadelphia Phillies,+220,-278,0,4
+29 Jun 2025,,Minnesota Twins,Detroit Tigers,+240,-303,0,3
+29 Jun 2025,,Miami Marlins,Arizona Diamondbacks,+154,-189,6,4
+29 Jun 2025,,Washington Nationals,Los Angeles Angels,+110,-130,7,4
+29 Jun 2025,,Seattle Mariners,Texas Rangers,-120,+100,6,4
+29 Jun 2025,,Chicago Cubs,Houston Astros,+114,-135,0,2
+29 Jun 2025,,San Francisco Giants,Chicago White Sox,-161,+135,2,5
+29 Jun 2025,,Colorado Rockies,Milwaukee Brewers,+200,-250,4,3
+29 Jun 2025,,Los Angeles Dodgers,Kansas City Royals,-130,+110,5,1
+29 Jun 2025,,San Diego Padres,Cincinnati Reds,+110,-130,2,3
+29 Jun 2025,,Athletics,New York Yankees,+175,-213,5,12
+29 Jun 2025,,Philadelphia Phillies,Atlanta Braves,+135,-161,2,1
+29 Jun 2025,,Tampa Bay Rays,Baltimore Orioles,-102,-118,1,5
+29 Jun 2025,,Toronto Blue Jays,Boston Red Sox,-110,-110,5,3
+29 Jun 2025,,New York Mets,Pittsburgh Pirates,-143,+120,1,12
+29 Jun 2025,,St.Louis Cardinals,Cleveland Guardians,-118,-102,7,0
+28 Jun 2025,,Washington Nationals,Los Angeles Angels,-105,-115,2,8
+28 Jun 2025,,Philadelphia Phillies,Atlanta Braves,+140,-169,1,6
+28 Jun 2025,,Chicago Cubs,Houston Astros,-102,-118,12,3
+28 Jun 2025,,Miami Marlins,Arizona Diamondbacks,+140,-169,8,7
+28 Jun 2025,,Toronto Blue Jays,Boston Red Sox,-125,+104,1,15
+28 Jun 2025,,San Francisco Giants,Chicago White Sox,-169,+140,0,1
+28 Jun 2025,,San Diego Padres,Cincinnati Reds,+129,-154,6,4
+28 Jun 2025,,St.Louis Cardinals,Cleveland Guardians,+100,-120,9,6
+28 Jun 2025,,Colorado Rockies,Milwaukee Brewers,+240,-303,0,5
+28 Jun 2025,,Los Angeles Dodgers,Kansas City Royals,-169,+140,5,9
+28 Jun 2025,,Tampa Bay Rays,Baltimore Orioles,-105,-115,11,3
+28 Jun 2025,,New York Mets,Pittsburgh Pirates,-149,+125,2,9
+28 Jun 2025,,Seattle Mariners,Texas Rangers,-125,+104,2,3
+28 Jun 2025,,Minnesota Twins,Detroit Tigers,+135,-161,5,10
+28 Jun 2025,,Athletics,New York Yankees,+240,-303,7,0
+27 Jun 2025,,Miami Marlins,Arizona Diamondbacks,+145,-175,9,8
+27 Jun 2025,,Washington Nationals,Los Angeles Angels,+140,-169,15,9
+27 Jun 2025,,Chicago Cubs,Houston Astros,-105,-115,4,7
+27 Jun 2025,,Colorado Rockies,Milwaukee Brewers,+170,-208,6,10
+27 Jun 2025,,Los Angeles Dodgers,Kansas City Royals,-167,+140,5,4
+27 Jun 2025,,Seattle Mariners,Texas Rangers,-118,-102,7,6
+27 Jun 2025,,San Francisco Giants,Chicago White Sox,-161,+135,3,1
+27 Jun 2025,,Philadelphia Phillies,Atlanta Braves,+145,-175,13,0
+27 Jun 2025,,Toronto Blue Jays,Boston Red Sox,+104,-125,9,0
+27 Jun 2025,,San Diego Padres,Cincinnati Reds,-130,+110,1,8
+27 Jun 2025,,St.Louis Cardinals,Cleveland Guardians,-130,+110,5,0
+27 Jun 2025,,Minnesota Twins,Detroit Tigers,+114,-139,4,1
+27 Jun 2025,,Athletics,New York Yankees,+220,-278,0,3
+27 Jun 2025,,Tampa Bay Rays,Baltimore Orioles,-133,+114,8,22
+27 Jun 2025,,New York Mets,Pittsburgh Pirates,-149,+125,1,9
+26 Jun 2025,,Atlanta Braves,New York Mets,+100,-120,0,4
+26 Jun 2025,,Miami Marlins,San Francisco Giants,+150,-182,12,5
+26 Jun 2025,,Los Angeles Dodgers,Colorado Rockies,-294,+229,3,1
+26 Jun 2025,,Chicago Cubs,St.Louis Cardinals,-137,+114,3,0
+26 Jun 2025,,Philadelphia Phillies,Houston Astros,+125,-149,1,2
+26 Jun 2025,,Tampa Bay Rays,Kansas City Royals,-125,+104,4,0
+26 Jun 2025,,Athletics,Detroit Tigers,+120,-143,0,8
+26 Jun 2025,,Toronto Blue Jays,Cleveland Guardians,+114,-137,6,0
+26 Jun 2025,,Seattle Mariners,Minnesota Twins,+110,-130,1,10
+25 Jun 2025,,Miami Marlins,San Francisco Giants,+185,-227,8,5
+25 Jun 2025,,Los Angeles Dodgers,Colorado Rockies,-333,+260,8,1
+25 Jun 2025,,Philadelphia Phillies,Houston Astros,-161,+135,0,2
+25 Jun 2025,,Chicago Cubs,St.Louis Cardinals,-149,+125,8,0
+25 Jun 2025,,Tampa Bay Rays,Kansas City Royals,-130,+110,3,0
+25 Jun 2025,,Seattle Mariners,Minnesota Twins,+100,-120,0,2
+25 Jun 2025,,Atlanta Braves,New York Mets,+120,-141,3,7
+25 Jun 2025,,New York Yankees,Cincinnati Reds,-208,+170,7,1
+25 Jun 2025,,Athletics,Detroit Tigers,+154,-189,3,0
+25 Jun 2025,,Toronto Blue Jays,Cleveland Guardians,+100,-120,4,5
+25 Jun 2025,,Texas Rangers,Baltimore Orioles,-149,+125,7,0
+25 Jun 2025,,Washington Nationals,San Diego Padres,+120,-141,0,1
+25 Jun 2025,,Boston Red Sox,Los Angeles Angels,+110,-130,2,5
+25 Jun 2025,,Arizona Diamondbacks,Chicago White Sox,-149,+125,3,7
+25 Jun 2025,,Pittsburgh Pirates,Milwaukee Brewers,-110,-110,2,4
+24 Jun 2025,,Miami Marlins,San Francisco Giants,+150,-182,4,2
+24 Jun 2025,,Washington Nationals,San Diego Padres,+135,-167,3,4
+24 Jun 2025,,Boston Red Sox,Los Angeles Angels,-169,+140,2,3
+24 Jun 2025,,Los Angeles Dodgers,Colorado Rockies,-250,+200,9,7
+24 Jun 2025,,Philadelphia Phillies,Houston Astros,+129,-154,0,1
+24 Jun 2025,,Chicago Cubs,St.Louis Cardinals,-115,-105,7,8
+24 Jun 2025,,Arizona Diamondbacks,Chicago White Sox,-120,+100,4,1
+24 Jun 2025,,Tampa Bay Rays,Kansas City Royals,+120,-143,5,1
+24 Jun 2025,,Pittsburgh Pirates,Milwaukee Brewers,+170,-208,3,9
+24 Jun 2025,,Seattle Mariners,Minnesota Twins,-110,-110,6,5
+24 Jun 2025,,Atlanta Braves,New York Mets,-143,+120,7,4
+24 Jun 2025,,New York Yankees,Cincinnati Reds,-167,+140,4,5
+24 Jun 2025,,Athletics,Detroit Tigers,+260,-333,4,11
+24 Jun 2025,,Toronto Blue Jays,Cleveland Guardians,-139,+114,10,6
+24 Jun 2025,,Texas Rangers,Baltimore Orioles,+100,-120,6,5
+23 Jun 2025,,Washington Nationals,San Diego Padres,+154,-189,10,6
+23 Jun 2025,,Boston Red Sox,Los Angeles Angels,-118,-102,5,9
+23 Jun 2025,,Chicago Cubs,St.Louis Cardinals,-115,-105,2,8
+23 Jun 2025,,Arizona Diamondbacks,Chicago White Sox,-143,+120,10,0
+23 Jun 2025,,Pittsburgh Pirates,Milwaukee Brewers,+140,-167,5,4
+23 Jun 2025,,Seattle Mariners,Minnesota Twins,-130,+110,11,2
+23 Jun 2025,,Atlanta Braves,New York Mets,-149,+125,3,2
+23 Jun 2025,,New York Yankees,Cincinnati Reds,-125,+104,1,6
+23 Jun 2025,,Texas Rangers,Baltimore Orioles,+110,-130,0,6
+22 Jun 2025,,New York Mets,Philadelphia Phillies,+100,-120,1,7
+22 Jun 2025,,Kansas City Royals,San Diego Padres,+100,-120,2,3
+22 Jun 2025,,Washington Nationals,Los Angeles Dodgers,+200,-250,7,13
+22 Jun 2025,,Houston Astros,Los Angeles Angels,-110,-110,8,7
+22 Jun 2025,,Cleveland Guardians,Athletics,-115,-105,3,0
+22 Jun 2025,,Boston Red Sox,San Francisco Giants,+135,-167,5,9
+22 Jun 2025,,Arizona Diamondbacks,Colorado Rockies,-189,+154,2,4
+22 Jun 2025,,Seattle Mariners,Chicago Cubs,-125,+104,14,6
+22 Jun 2025,,Cincinnati Reds,St.Louis Cardinals,-115,-105,4,1
+22 Jun 2025,,Milwaukee Brewers,Minnesota Twins,+114,-137,9,8
+22 Jun 2025,,Atlanta Braves,Miami Marlins,-149,+125,3,5
+22 Jun 2025,,Chicago White Sox,Toronto Blue Jays,+170,-208,4,2
+22 Jun 2025,,Texas Rangers,Pittsburgh Pirates,-102,-118,3,8
+22 Jun 2025,,Detroit Tigers,Tampa Bay Rays,-110,-110,9,3
+22 Jun 2025,,Baltimore Orioles,New York Yankees,+179,-222,2,4
+21 Jun 2025,,Washington Nationals,Los Angeles Dodgers,+225,-278,7,3
+21 Jun 2025,,Cleveland Guardians,Athletics,-137,+114,4,2
+21 Jun 2025,,Houston Astros,Los Angeles Angels,+104,-125,1,9
+21 Jun 2025,,Arizona Diamondbacks,Colorado Rockies,-200,+165,5,3
+21 Jun 2025,,Kansas City Royals,San Diego Padres,+129,-154,1,5
+21 Jun 2025,,New York Mets,Philadelphia Phillies,-120,+100,11,4
+21 Jun 2025,,Atlanta Braves,Miami Marlins,-167,+140,7,0
+21 Jun 2025,,Boston Red Sox,San Francisco Giants,+104,-125,2,3
+21 Jun 2025,,Texas Rangers,Pittsburgh Pirates,-110,-110,3,2
+21 Jun 2025,,Chicago White Sox,Toronto Blue Jays,+170,-208,1,7
+21 Jun 2025,,Seattle Mariners,Chicago Cubs,+145,-175,7,10
+21 Jun 2025,,Cincinnati Reds,St.Louis Cardinals,+165,-200,5,6
+21 Jun 2025,,Milwaukee Brewers,Minnesota Twins,+114,-137,9,0
+21 Jun 2025,,Baltimore Orioles,New York Yankees,+145,-175,0,9
+21 Jun 2025,,Detroit Tigers,Tampa Bay Rays,+114,-139,3,8
+20 Jun 2025,,Boston Red Sox,San Francisco Giants,+110,-130,7,5
+20 Jun 2025,,Washington Nationals,Los Angeles Dodgers,+154,-189,5,6
+20 Jun 2025,,Cleveland Guardians,Athletics,-120,+100,1,5
+20 Jun 2025,,Kansas City Royals,San Diego Padres,+140,-167,6,5
+20 Jun 2025,,Houston Astros,Los Angeles Angels,-169,+140,3,2
+20 Jun 2025,,Arizona Diamondbacks,Colorado Rockies,-167,+140,14,8
+20 Jun 2025,,Milwaukee Brewers,Minnesota Twins,+129,-154,17,6
+20 Jun 2025,,Cincinnati Reds,St.Louis Cardinals,+120,-141,1,6
+20 Jun 2025,,New York Mets,Philadelphia Phillies,+165,-200,2,10
+20 Jun 2025,,Atlanta Braves,Miami Marlins,-161,+135,2,6
+20 Jun 2025,,Chicago White Sox,Toronto Blue Jays,+165,-200,7,1
+20 Jun 2025,,Baltimore Orioles,New York Yankees,+260,-333,5,3
+20 Jun 2025,,Detroit Tigers,Tampa Bay Rays,-110,-110,8,14
+20 Jun 2025,,Texas Rangers,Pittsburgh Pirates,-189,+154,6,2
+20 Jun 2025,,Seattle Mariners,Chicago Cubs,+120,-143,9,4
+19 Jun 2025,,San Diego Padres,Los Angeles Dodgers,+220,-278,5,3
+19 Jun 2025,,Houston Astros,Athletics,-149,+125,4,6
+19 Jun 2025,,Baltimore Orioles,Tampa Bay Rays,+120,-141,4,1
+19 Jun 2025,,New York Mets,Atlanta Braves,+114,-137,1,7
+19 Jun 2025,,Philadelphia Phillies,Miami Marlins,-141,+120,2,1
+19 Jun 2025,,Pittsburgh Pirates,Detroit Tigers,,,8,4
+19 Jun 2025,,St.Louis Cardinals,Chicago White Sox,,,8,6
+19 Jun 2025,,Cleveland Guardians,San Francisco Giants,+150,-182,1,2
+19 Jun 2025,,Arizona Diamondbacks,Toronto Blue Jays,+140,-167,9,5
+19 Jun 2025,,Kansas City Royals,Texas Rangers,+104,-125,4,1
+19 Jun 2025,,Milwaukee Brewers,Chicago Cubs,+104,-125,8,7
+19 Jun 2025,,St.Louis Cardinals,Chicago White Sox,-137,+114,5,4
+19 Jun 2025,,Pittsburgh Pirates,Detroit Tigers,-137,+114,2,9
+19 Jun 2025,,Colorado Rockies,Washington Nationals,+145,-175,3,4
+19 Jun 2025,,Los Angeles Angels,New York Yankees,+225,-286,3,7
+19 Jun 2025,,Minnesota Twins,Cincinnati Reds,-102,-118,12,5
+18 Jun 2025,,San Diego Padres,Los Angeles Dodgers,+165,-200,3,4
+18 Jun 2025,,Houston Astros,Athletics,-182,+150,11,4
+18 Jun 2025,,Cleveland Guardians,San Francisco Giants,+125,-149,4,2
+18 Jun 2025,,Kansas City Royals,Texas Rangers,-137,+114,6,3
+18 Jun 2025,,Baltimore Orioles,Tampa Bay Rays,+100,-120,8,12
+18 Jun 2025,,New York Mets,Atlanta Braves,+165,-200,0,5
+18 Jun 2025,,Minnesota Twins,Cincinnati Reds,+114,-137,2,4
+18 Jun 2025,,Arizona Diamondbacks,Toronto Blue Jays,-110,-110,1,8
+18 Jun 2025,,Los Angeles Angels,New York Yankees,+220,-278,3,2
+18 Jun 2025,,Colorado Rockies,Washington Nationals,+129,-154,3,1
+18 Jun 2025,,Philadelphia Phillies,Miami Marlins,-182,+150,4,2
+18 Jun 2025,,Boston Red Sox,Seattle Mariners,-120,+100,3,1
+17 Jun 2025,,San Diego Padres,Los Angeles Dodgers,+179,-222,6,8
+17 Jun 2025,,Houston Astros,Athletics,-125,+104,13,3
+17 Jun 2025,,Cleveland Guardians,San Francisco Giants,+125,-149,3,2
+17 Jun 2025,,Boston Red Sox,Seattle Mariners,+140,-169,0,8
+17 Jun 2025,,Milwaukee Brewers,Chicago Cubs,+135,-161,3,5
+17 Jun 2025,,Kansas City Royals,Texas Rangers,+110,-130,6,1
+17 Jun 2025,,St.Louis Cardinals,Chicago White Sox,-137,+114,12,2
+17 Jun 2025,,Baltimore Orioles,Tampa Bay Rays,-110,-110,5,1
+17 Jun 2025,,New York Mets,Atlanta Braves,+120,-143,4,5
+17 Jun 2025,,Minnesota Twins,Cincinnati Reds,+104,-125,5,6
+17 Jun 2025,,Arizona Diamondbacks,Toronto Blue Jays,+100,-120,4,5
+17 Jun 2025,,Los Angeles Angels,New York Yankees,+200,-250,4,0
+17 Jun 2025,,Colorado Rockies,Washington Nationals,+165,-200,10,6
+17 Jun 2025,,Pittsburgh Pirates,Detroit Tigers,+165,-200,3,7
+17 Jun 2025,,Philadelphia Phillies,Miami Marlins,-175,+145,3,8
+16 Jun 2025,,San Diego Padres,Los Angeles Dodgers,+150,-182,3,6
+16 Jun 2025,,Houston Astros,Athletics,-110,-110,1,3
+16 Jun 2025,,Boston Red Sox,Seattle Mariners,+145,-175,2,0
+16 Jun 2025,,Baltimore Orioles,Tampa Bay Rays,-110,-110,1,7
+16 Jun 2025,,Los Angeles Angels,New York Yankees,+154,-189,1,0
+16 Jun 2025,,Colorado Rockies,Washington Nationals,+145,-175,6,4
+16 Jun 2025,,Philadelphia Phillies,Miami Marlins,-115,-105,5,2
+15 Jun 2025,,San Francisco Giants,Los Angeles Dodgers,+154,-189,4,5
+15 Jun 2025,,San Diego Padres,Arizona Diamondbacks,+114,-137,8,2
+15 Jun 2025,,Cleveland Guardians,Seattle Mariners,+100,-120,0,6
+15 Jun 2025,,Chicago White Sox,Texas Rangers,+140,-169,1,2
+15 Jun 2025,,Pittsburgh Pirates,Chicago Cubs,+125,-149,2,3
+15 Jun 2025,,Athletics,Kansas City Royals,+125,-149,3,2
+15 Jun 2025,,Minnesota Twins,Houston Astros,+100,-120,1,2
+15 Jun 2025,,St.Louis Cardinals,Milwaukee Brewers,+114,-137,2,3
+15 Jun 2025,,Tampa Bay Rays,New York Mets,+129,-154,9,0
+15 Jun 2025,,Colorado Rockies,Atlanta Braves,+280,-357,10,1
+15 Jun 2025,,Los Angeles Angels,Baltimore Orioles,-110,-110,2,11
+15 Jun 2025,,New York Yankees,Boston Red Sox,-189,+154,0,2
+15 Jun 2025,,Miami Marlins,Washington Nationals,+140,-169,3,1
+15 Jun 2025,,Toronto Blue Jays,Philadelphia Phillies,+145,-175,4,11
+15 Jun 2025,,Cincinnati Reds,Detroit Tigers,+150,-182,8,4
+14 Jun 2025,,San Francisco Giants,Los Angeles Dodgers,+150,-182,5,11
+14 Jun 2025,,Cleveland Guardians,Seattle Mariners,+120,-143,3,4
+14 Jun 2025,,San Diego Padres,Arizona Diamondbacks,+145,-175,7,8
+14 Jun 2025,,New York Yankees,Boston Red Sox,-175,+145,3,4
+14 Jun 2025,,Athletics,Kansas City Royals,+135,-161,4,0
+14 Jun 2025,,Colorado Rockies,Atlanta Braves,+280,-357,1,4
+14 Jun 2025,,Minnesota Twins,Houston Astros,-120,+100,2,3
+14 Jun 2025,,St.Louis Cardinals,Milwaukee Brewers,+104,-125,8,5
+14 Jun 2025,,Tampa Bay Rays,New York Mets,+125,-149,8,4
+14 Jun 2025,,Los Angeles Angels,Baltimore Orioles,+135,-161,5,6
+14 Jun 2025,,Chicago White Sox,Texas Rangers,+240,-303,4,5
+14 Jun 2025,,Toronto Blue Jays,Philadelphia Phillies,+140,-167,2,3
+14 Jun 2025,,Pittsburgh Pirates,Chicago Cubs,+200,-250,1,2
+14 Jun 2025,,Cincinnati Reds,Detroit Tigers,+160,-189,11,1
+14 Jun 2025,,Miami Marlins,Washington Nationals,+110,-130,4,3
+13 Jun 2025,,Cleveland Guardians,Seattle Mariners,-110,-110,2,7
+13 Jun 2025,,San Francisco Giants,Los Angeles Dodgers,+165,-200,6,2
+13 Jun 2025,,San Diego Padres,Arizona Diamondbacks,+120,-141,1,5
+13 Jun 2025,,Athletics,Kansas City Royals,+140,-167,6,4
+13 Jun 2025,,Minnesota Twins,Houston Astros,-115,-105,3,10
+13 Jun 2025,,St.Louis Cardinals,Milwaukee Brewers,+135,-161,2,3
+13 Jun 2025,,Chicago White Sox,Texas Rangers,+145,-175,1,3
+13 Jun 2025,,Colorado Rockies,Atlanta Braves,+300,-385,4,12
+13 Jun 2025,,New York Yankees,Boston Red Sox,+120,-141,1,2
+13 Jun 2025,,Cincinnati Reds,Detroit Tigers,+120,-141,5,11
+13 Jun 2025,,Tampa Bay Rays,New York Mets,+145,-175,7,5
+13 Jun 2025,,Los Angeles Angels,Baltimore Orioles,+165,-200,0,2
+13 Jun 2025,,Miami Marlins,Washington Nationals,-110,-110,11,9
+13 Jun 2025,,Toronto Blue Jays,Philadelphia Phillies,-110,-110,0,8
+13 Jun 2025,,Pittsburgh Pirates,Chicago Cubs,-102,-118,2,1
+12 Jun 2025,,Chicago White Sox,Houston Astros,+220,-278,3,4
+12 Jun 2025,,Pittsburgh Pirates,Chicago Cubs,+165,-200,2,3
+12 Jun 2025,,New York Yankees,Kansas City Royals,-130,+110,1,0
+12 Jun 2025,,St.Louis Cardinals,Milwaukee Brewers,-137,+114,0,6
+12 Jun 2025,,Detroit Tigers,Baltimore Orioles,-200,+165,4,1
+12 Jun 2025,,San Francisco Giants,Colorado Rockies,-200,+165,7,8
+12 Jun 2025,,Texas Rangers,Minnesota Twins,+125,-149,16,3
+12 Jun 2025,,Washington Nationals,New York Mets,+170,-208,3,4
+11 Jun 2025,,San Francisco Giants,Colorado Rockies,-200,+165,10,7
+11 Jun 2025,,Chicago White Sox,Houston Astros,+145,-175,2,10
+11 Jun 2025,,New York Yankees,Kansas City Royals,-125,+104,6,3
+11 Jun 2025,,Texas Rangers,Minnesota Twins,+125,-149,2,6
+11 Jun 2025,,Tampa Bay Rays,Boston Red Sox,+104,-125,3,4
+11 Jun 2025,,Washington Nationals,New York Mets,+220,-278,0,5
+11 Jun 2025,,Detroit Tigers,Baltimore Orioles,+114,-137,1,10
+11 Jun 2025,,Los Angeles Dodgers,San Diego Padres,-149,+125,5,2
+11 Jun 2025,,Athletics,Los Angeles Angels,+125,-149,5,6
+11 Jun 2025,,Seattle Mariners,Arizona Diamondbacks,-105,-115,2,5
+11 Jun 2025,,Toronto Blue Jays,St.Louis Cardinals,+114,-139,5,2
+11 Jun 2025,,Atlanta Braves,Milwaukee Brewers,-189,+154,6,2
+11 Jun 2025,,Cincinnati Reds,Cleveland Guardians,-120,+100,2,11
+11 Jun 2025,,Chicago Cubs,Philadelphia Phillies,-105,-115,2,7
+11 Jun 2025,,Miami Marlins,Pittsburgh Pirates,+140,-167,2,5
+10 Jun 2025,,Seattle Mariners,Arizona Diamondbacks,+114,-139,3,10
+10 Jun 2025,,Los Angeles Dodgers,San Diego Padres,-102,-118,1,11
+10 Jun 2025,,Athletics,Los Angeles Angels,+140,-169,1,2
+10 Jun 2025,,San Francisco Giants,Colorado Rockies,-208,+170,6,5
+10 Jun 2025,,Chicago White Sox,Houston Astros,+145,-179,4,2
+10 Jun 2025,,Toronto Blue Jays,St.Louis Cardinals,+104,-125,10,9
+10 Jun 2025,,Atlanta Braves,Milwaukee Brewers,-130,+110,1,4
+10 Jun 2025,,New York Yankees,Kansas City Royals,-208,+170,10,2
+10 Jun 2025,,Texas Rangers,Minnesota Twins,+104,-125,16,4
+10 Jun 2025,,Tampa Bay Rays,Boston Red Sox,-110,-110,1,3
+10 Jun 2025,,Washington Nationals,New York Mets,+125,-149,4,5
+10 Jun 2025,,Chicago Cubs,Philadelphia Phillies,-110,-110,8,4
+10 Jun 2025,,Cincinnati Reds,Cleveland Guardians,-110,-110,1,0
+10 Jun 2025,,Miami Marlins,Pittsburgh Pirates,+125,-149,3,2
+10 Jun 2025,,Detroit Tigers,Baltimore Orioles,+110,-130,5,3
+09 Jun 2025,,Seattle Mariners,Arizona Diamondbacks,+140,-169,4,8
+09 Jun 2025,,Los Angeles Dodgers,San Diego Padres,-125,+104,8,7
+09 Jun 2025,,Athletics,Los Angeles Angels,+118,-143,4,7
+09 Jun 2025,,Toronto Blue Jays,St.Louis Cardinals,+104,-125,5,4
+09 Jun 2025,,Atlanta Braves,Milwaukee Brewers,-182,+150,7,1
+09 Jun 2025,,Tampa Bay Rays,Boston Red Sox,-110,-110,10,8
+09 Jun 2025,,Chicago Cubs,Philadelphia Phillies,+110,-130,3,4
+09 Jun 2025,,Cincinnati Reds,Cleveland Guardians,+135,-161,7,4
+09 Jun 2025,,Miami Marlins,Pittsburgh Pirates,+100,-120,3,10
+08 Jun 2025,,Boston Red Sox,New York Yankees,+195,-238,11,7
+08 Jun 2025,,Seattle Mariners,Los Angeles Angels,-128,+110,3,2
+08 Jun 2025,,Baltimore Orioles,Athletics,-125,+104,1,5
+08 Jun 2025,,Atlanta Braves,San Francisco Giants,-125,+104,3,4
+08 Jun 2025,,New York Mets,Colorado Rockies,-286,+229,13,5
+08 Jun 2025,,Los Angeles Dodgers,St.Louis Cardinals,-139,+114,7,3
+08 Jun 2025,,Kansas City Royals,Chicago White Sox,-130,+110,7,5
+08 Jun 2025,,Toronto Blue Jays,Minnesota Twins,+154,-189,3,6
+08 Jun 2025,,Arizona Diamondbacks,Cincinnati Reds,-125,+104,2,4
+08 Jun 2025,,Chicago Cubs,Detroit Tigers,+100,-120,0,4
+08 Jun 2025,,Houston Astros,Cleveland Guardians,+125,-149,2,4
+08 Jun 2025,,Philadelphia Phillies,Pittsburgh Pirates,+100,-120,1,2
+08 Jun 2025,,Texas Rangers,Washington Nationals,-133,+110,4,2
+08 Jun 2025,,San Diego Padres,Milwaukee Brewers,+145,-175,1,0
+08 Jun 2025,,Miami Marlins,Tampa Bay Rays,+185,-227,2,3
+07 Jun 2025,,Baltimore Orioles,Athletics,-125,+104,7,4
+07 Jun 2025,,New York Mets,Colorado Rockies,-286,+225,8,1
+07 Jun 2025,,Seattle Mariners,Los Angeles Angels,-167,+140,6,8
+07 Jun 2025,,Boston Red Sox,New York Yankees,-110,-110,10,7
+07 Jun 2025,,San Diego Padres,Milwaukee Brewers,+125,-149,3,4
+07 Jun 2025,,Arizona Diamondbacks,Cincinnati Reds,-110,-110,1,13
+07 Jun 2025,,Kansas City Royals,Chicago White Sox,-141,+120,1,4
+07 Jun 2025,,Houston Astros,Cleveland Guardians,-115,-105,5,3
+07 Jun 2025,,Miami Marlins,Tampa Bay Rays,+129,-154,11,10
+07 Jun 2025,,Atlanta Braves,San Francisco Giants,+120,-141,2,3
+07 Jun 2025,,Philadelphia Phillies,Pittsburgh Pirates,-141,+120,1,2
+07 Jun 2025,,Texas Rangers,Washington Nationals,-167,+140,5,0
+07 Jun 2025,,Los Angeles Dodgers,St.Louis Cardinals,-189,+154,1,2
+07 Jun 2025,,Arizona Diamondbacks,Cincinnati Reds,,,3,4
+07 Jun 2025,,Toronto Blue Jays,Minnesota Twins,+100,-120,5,4
+07 Jun 2025,,Chicago Cubs,Detroit Tigers,-115,-105,6,1
+06 Jun 2025,,Atlanta Braves,San Francisco Giants,-141,+120,4,5
+06 Jun 2025,,Baltimore Orioles,Athletics,-120,+100,4,5
+06 Jun 2025,,Seattle Mariners,Los Angeles Angels,-130,+110,4,5
+06 Jun 2025,,New York Mets,Colorado Rockies,-278,+220,4,2
+06 Jun 2025,,Los Angeles Dodgers,St.Louis Cardinals,+100,-120,0,5
+06 Jun 2025,,San Diego Padres,Milwaukee Brewers,+125,-149,2,0
+06 Jun 2025,,Toronto Blue Jays,Minnesota Twins,+110,-130,6,4
+06 Jun 2025,,Kansas City Royals,Chicago White Sox,-137,+114,2,7
+06 Jun 2025,,Chicago Cubs,Detroit Tigers,+165,-200,1,3
+06 Jun 2025,,Houston Astros,Cleveland Guardians,-130,+110,4,2
+06 Jun 2025,,Boston Red Sox,New York Yankees,+165,-200,6,9
+06 Jun 2025,,Texas Rangers,Washington Nationals,-115,-105,0,2
+06 Jun 2025,,Philadelphia Phillies,Pittsburgh Pirates,-130,+110,4,5
+06 Jun 2025,,Miami Marlins,Tampa Bay Rays,+120,-139,3,4
+05 Jun 2025,,Kansas City Royals,St.Louis Cardinals,-110,-110,7,5
+05 Jun 2025,,Texas Rangers,Tampa Bay Rays,+120,-141,3,4
+05 Jun 2025,,Cleveland Guardians,New York Yankees,+225,-278,0,4
+05 Jun 2025,,Chicago Cubs,Washington Nationals,-149,+125,7,1
+05 Jun 2025,,Houston Astros,Pittsburgh Pirates,-141,+120,8,2
+05 Jun 2025,,New York Mets,Los Angeles Dodgers,+110,-128,5,6
+05 Jun 2025,,San Diego Padres,San Francisco Giants,-105,-115,2,3
+05 Jun 2025,,Baltimore Orioles,Seattle Mariners,+129,-154,4,3
+05 Jun 2025,,Minnesota Twins,Athletics,-200,+165,3,14
+05 Jun 2025,,Philadelphia Phillies,Toronto Blue Jays,-115,-105,1,9
+05 Jun 2025,,Detroit Tigers,Chicago White Sox,-200,+165,2,3
+05 Jun 2025,,Kansas City Royals,St.Louis Cardinals,+104,-125,5,6
+05 Jun 2025,,Arizona Diamondbacks,Atlanta Braves,+125,-149,11,10
+04 Jun 2025,,New York Mets,Los Angeles Dodgers,+125,-149,6,1
+04 Jun 2025,,Minnesota Twins,Athletics,-182,+150,6,1
+04 Jun 2025,,San Diego Padres,San Francisco Giants,-115,-105,5,6
+04 Jun 2025,,Baltimore Orioles,Seattle Mariners,-110,-110,3,2
+04 Jun 2025,,Detroit Tigers,Chicago White Sox,-200,+165,5,4
+04 Jun 2025,,Texas Rangers,Tampa Bay Rays,+110,-130,4,5
+04 Jun 2025,,Arizona Diamondbacks,Atlanta Braves,+145,-175,2,1
+04 Jun 2025,,Philadelphia Phillies,Toronto Blue Jays,-110,-110,1,2
+04 Jun 2025,,Cleveland Guardians,New York Yankees,+154,-189,4,0
+04 Jun 2025,,Chicago Cubs,Washington Nationals,-141,+120,0,2
+04 Jun 2025,,Houston Astros,Pittsburgh Pirates,-130,+110,0,3
+04 Jun 2025,,Los Angeles Angels,Boston Red Sox,+114,-137,9,11
+04 Jun 2025,,Milwaukee Brewers,Cincinnati Reds,+110,-130,9,1
+04 Jun 2025,,Colorado Rockies,Miami Marlins,+125,-149,3,2
+03 Jun 2025,,New York Mets,Los Angeles Dodgers,+125,-149,5,6
+03 Jun 2025,,Minnesota Twins,Athletics,-222,+179,10,3
+03 Jun 2025,,San Diego Padres,San Francisco Giants,+135,-167,3,2
+03 Jun 2025,,Baltimore Orioles,Seattle Mariners,+125,-149,5,1
+03 Jun 2025,,Kansas City Royals,St.Louis Cardinals,+118,-143,10,7
+03 Jun 2025,,Detroit Tigers,Chicago White Sox,-169,+140,1,8
+03 Jun 2025,,Texas Rangers,Tampa Bay Rays,+125,-149,1,5
+03 Jun 2025,,Arizona Diamondbacks,Atlanta Braves,+140,-169,8,3
+03 Jun 2025,,Los Angeles Angels,Boston Red Sox,+125,-149,4,3
+03 Jun 2025,,Milwaukee Brewers,Cincinnati Reds,+104,-125,2,4
+03 Jun 2025,,Philadelphia Phillies,Toronto Blue Jays,-130,+110,8,3
+03 Jun 2025,,Cleveland Guardians,New York Yankees,+165,-200,2,3
+03 Jun 2025,,Chicago Cubs,Washington Nationals,-143,+120,8,3
+03 Jun 2025,,Colorado Rockies,Miami Marlins,+145,-175,3,2
+03 Jun 2025,,Houston Astros,Pittsburgh Pirates,+135,-161,3,0
+02 Jun 2025,,New York Mets,Los Angeles Dodgers,+135,-161,4,3
+02 Jun 2025,,Minnesota Twins,Athletics,-161,+135,10,4
+02 Jun 2025,,San Diego Padres,San Francisco Giants,+145,-175,1,0
+02 Jun 2025,,Detroit Tigers,Chicago White Sox,-250,+200,13,1
+02 Jun 2025,,Los Angeles Angels,Boston Red Sox,+125,-149,7,6
+02 Jun 2025,,Milwaukee Brewers,Cincinnati Reds,-110,-110,3,2
+02 Jun 2025,,Colorado Rockies,Miami Marlins,+165,-200,6,4
+01 Jun 2025,,New York Yankees,Los Angeles Dodgers,+154,-189,7,3
+01 Jun 2025,,Pittsburgh Pirates,San Diego Padres,+125,-149,4,6
+01 Jun 2025,,Washington Nationals,Arizona Diamondbacks,+190,-238,1,3
+01 Jun 2025,,Minnesota Twins,Seattle Mariners,+110,-133,1,2
+01 Jun 2025,,Cincinnati Reds,Chicago Cubs,+135,-161,3,7
+01 Jun 2025,,Detroit Tigers,Kansas City Royals,+140,-169,1,0
+01 Jun 2025,,Tampa Bay Rays,Houston Astros,+140,-169,0,1
+01 Jun 2025,,Los Angeles Angels,Cleveland Guardians,+170,-208,2,4
+01 Jun 2025,,Colorado Rockies,New York Mets,+309,-400,3,5
+01 Jun 2025,,San Francisco Giants,Miami Marlins,-115,-105,4,2
+01 Jun 2025,,Athletics,Toronto Blue Jays,+200,-238,4,8
+01 Jun 2025,,Boston Red Sox,Atlanta Braves,-120,+100,3,1
+01 Jun 2025,,Chicago White Sox,Baltimore Orioles,+120,-143,2,3
+01 Jun 2025,,Milwaukee Brewers,Philadelphia Phillies,+140,-169,5,2
+01 Jun 2025,,St.Louis Cardinals,Texas Rangers,+135,-161,1,8
+31 May 2025,,Washington Nationals,Arizona Diamondbacks,+154,-189,11,7
+31 May 2025,,Pittsburgh Pirates,San Diego Padres,+179,-222,5,0
+31 May 2025,,New York Yankees,Los Angeles Dodgers,-125,+104,2,18
+31 May 2025,,Minnesota Twins,Seattle Mariners,-115,-105,4,5
+31 May 2025,,Boston Red Sox,Atlanta Braves,+154,-185,0,5
+31 May 2025,,Los Angeles Angels,Cleveland Guardians,+145,-175,5,7
+31 May 2025,,Colorado Rockies,New York Mets,+300,-385,2,8
+31 May 2025,,Detroit Tigers,Kansas City Royals,-200,+165,0,1
+31 May 2025,,Tampa Bay Rays,Houston Astros,+110,-130,16,3
+31 May 2025,,San Francisco Giants,Miami Marlins,-149,+125,0,1
+31 May 2025,,Chicago White Sox,Baltimore Orioles,+145,-175,2,4
+31 May 2025,,Milwaukee Brewers,Philadelphia Phillies,+154,-189,17,7
+31 May 2025,,St.Louis Cardinals,Texas Rangers,-149,+125,2,0
+31 May 2025,,Athletics,Toronto Blue Jays,+125,-149,7,8
+31 May 2025,,Cincinnati Reds,Chicago Cubs,+145,-175,0,2
+30 May 2025,,New York Yankees,Los Angeles Dodgers,-141,+120,5,8
+30 May 2025,,Minnesota Twins,Seattle Mariners,+125,-149,12,6
+30 May 2025,,Washington Nationals,Arizona Diamondbacks,+185,-227,9,7
+30 May 2025,,Pittsburgh Pirates,San Diego Padres,+154,-189,2,3
+30 May 2025,,Detroit Tigers,Kansas City Royals,-120,+100,7,5
+30 May 2025,,Tampa Bay Rays,Houston Astros,+129,-154,1,2
+30 May 2025,,St.Louis Cardinals,Texas Rangers,-130,+110,1,11
+30 May 2025,,Boston Red Sox,Atlanta Braves,+140,-167,5,1
+30 May 2025,,Los Angeles Angels,Cleveland Guardians,+120,-141,4,1
+30 May 2025,,Colorado Rockies,New York Mets,+250,-312,2,4
+30 May 2025,,San Francisco Giants,Miami Marlins,-167,+140,2,0
+30 May 2025,,Athletics,Toronto Blue Jays,+150,-182,7,11
+30 May 2025,,Milwaukee Brewers,Philadelphia Phillies,+100,-120,6,2
+30 May 2025,,Chicago White Sox,Baltimore Orioles,+179,-222,1,2
+30 May 2025,,Cincinnati Reds,Chicago Cubs,+140,-169,6,2
+29 May 2025,,Washington Nationals,Seattle Mariners,+100,-120,9,3
+29 May 2025,,Tampa Bay Rays,Houston Astros,-105,-115,13,3
+29 May 2025,,Athletics,Toronto Blue Jays,+140,-167,0,12
+29 May 2025,,Atlanta Braves,Philadelphia Phillies,-120,+100,9,3
+29 May 2025,,Atlanta Braves,Philadelphia Phillies,,,4,5
+28 May 2025,,Washington Nationals,Seattle Mariners,+179,-222,9,0
+28 May 2025,,New York Yankees,Los Angeles Angels,-161,+135,1,0
+28 May 2025,,Colorado Rockies,Chicago Cubs,+260,-333,1,2
+28 May 2025,,Toronto Blue Jays,Texas Rangers,+114,-139,2,0
+28 May 2025,,Cincinnati Reds,Kansas City Royals,-120,+100,2,3
+28 May 2025,,St.Louis Cardinals,Baltimore Orioles,+100,-120,6,4
+28 May 2025,,Miami Marlins,San Diego Padres,+135,-161,10,8
+28 May 2025,,Pittsburgh Pirates,Arizona Diamondbacks,+110,-133,10,1
+28 May 2025,,Athletics,Houston Astros,+114,-133,3,5
+28 May 2025,,Boston Red Sox,Milwaukee Brewers,+125,-149,5,6
+28 May 2025,,Chicago White Sox,New York Mets,+200,-250,9,4
+28 May 2025,,Los Angeles Dodgers,Cleveland Guardians,-175,+145,4,7
+28 May 2025,,San Francisco Giants,Detroit Tigers,-105,-115,3,4
+28 May 2025,,Minnesota Twins,Tampa Bay Rays,+110,-130,0,5
+27 May 2025,,Pittsburgh Pirates,Arizona Diamondbacks,+200,-250,9,6
+27 May 2025,,Miami Marlins,San Diego Padres,+135,-161,6,8
+27 May 2025,,Washington Nationals,Seattle Mariners,+135,-161,1,9
+27 May 2025,,New York Yankees,Los Angeles Angels,-208,+170,3,2
+27 May 2025,,Athletics,Houston Astros,+190,-238,1,11
+27 May 2025,,Colorado Rockies,Chicago Cubs,+260,-333,3,4
+27 May 2025,,Toronto Blue Jays,Texas Rangers,+120,-143,0,2
+27 May 2025,,Boston Red Sox,Milwaukee Brewers,-110,-110,1,5
+27 May 2025,,Cincinnati Reds,Kansas City Royals,+104,-125,7,2
+27 May 2025,,Chicago White Sox,New York Mets,+220,-278,4,6
+27 May 2025,,Minnesota Twins,Tampa Bay Rays,-125,+104,4,2
+27 May 2025,,Atlanta Braves,Philadelphia Phillies,-105,-115,0,2
+27 May 2025,,San Francisco Giants,Detroit Tigers,-118,-102,1,3
+27 May 2025,,St.Louis Cardinals,Baltimore Orioles,-125,+104,7,4
+27 May 2025,,Los Angeles Dodgers,Cleveland Guardians,-125,+104,9,5
+26 May 2025,,New York Yankees,Los Angeles Angels,-189,+154,5,1
+26 May 2025,,Miami Marlins,San Diego Padres,+125,-149,3,4
+26 May 2025,,Pittsburgh Pirates,Arizona Diamondbacks,+154,-189,0,5
+26 May 2025,,Minnesota Twins,Tampa Bay Rays,-105,-115,2,7
+26 May 2025,,Los Angeles Dodgers,Cleveland Guardians,-182,+150,7,2
+26 May 2025,,Chicago White Sox,New York Mets,+229,-286,1,2
+26 May 2025,,Cincinnati Reds,Kansas City Royals,-105,-115,7,4
+26 May 2025,,Toronto Blue Jays,Texas Rangers,+114,-139,2,1
+26 May 2025,,St.Louis Cardinals,Baltimore Orioles,-115,-105,2,5
+26 May 2025,,Colorado Rockies,Chicago Cubs,+260,-333,1,3
+26 May 2025,,Boston Red Sox,Milwaukee Brewers,-167,+140,2,3
+26 May 2025,,San Francisco Giants,Detroit Tigers,-110,-110,1,3
+25 May 2025,,Los Angeles Dodgers,New York Mets,-102,-118,1,3
+25 May 2025,,San Diego Padres,Atlanta Braves,+125,-149,5,3
+25 May 2025,,Miami Marlins,Los Angeles Angels,-105,-115,3,0
+25 May 2025,,Philadelphia Phillies,Athletics,-189,+154,4,5
+25 May 2025,,New York Yankees,Colorado Rockies,-278,+225,5,4
+25 May 2025,,Arizona Diamondbacks,St.Louis Cardinals,+104,-125,3,4
+25 May 2025,,Texas Rangers,Chicago White Sox,-120,+100,5,4
+25 May 2025,,Seattle Mariners,Houston Astros,-143,+120,3,5
+25 May 2025,,Kansas City Royals,Minnesota Twins,-102,-118,2,1
+25 May 2025,,Chicago Cubs,Cincinnati Reds,-125,+104,11,8
+25 May 2025,,Toronto Blue Jays,Tampa Bay Rays,-110,-110,0,13
+25 May 2025,,Baltimore Orioles,Boston Red Sox,+110,-130,5,1
+25 May 2025,,Milwaukee Brewers,Pittsburgh Pirates,-149,+125,6,5
+25 May 2025,,San Francisco Giants,Washington Nationals,-154,+129,3,2
+25 May 2025,,Cleveland Guardians,Detroit Tigers,+260,-333,0,5
+24 May 2025,,Miami Marlins,Los Angeles Angels,+165,-200,6,2
+24 May 2025,,Philadelphia Phillies,Athletics,-175,+145,9,6
+24 May 2025,,Cleveland Guardians,Detroit Tigers,+120,-143,7,5
+24 May 2025,,Los Angeles Dodgers,New York Mets,+100,-120,2,5
+24 May 2025,,Toronto Blue Jays,Tampa Bay Rays,-105,-115,1,3
+24 May 2025,,Baltimore Orioles,Boston Red Sox,+118,-139,2,1
+24 May 2025,,San Diego Padres,Atlanta Braves,-105,-115,1,7
+24 May 2025,,Chicago Cubs,Cincinnati Reds,-115,-105,4,6
+24 May 2025,,Texas Rangers,Chicago White Sox,-161,+135,5,10
+24 May 2025,,New York Yankees,Colorado Rockies,-333,+260,13,1
+24 May 2025,,Seattle Mariners,Houston Astros,-110,-110,1,2
+24 May 2025,,Milwaukee Brewers,Pittsburgh Pirates,-102,-118,1,2
+24 May 2025,,San Francisco Giants,Washington Nationals,-161,+135,0,3
+24 May 2025,,Arizona Diamondbacks,St.Louis Cardinals,+100,-120,5,6
+24 May 2025,,Kansas City Royals,Minnesota Twins,+104,-125,4,5
+24 May 2025,,Baltimore Orioles,Boston Red Sox,,,5,6
+23 May 2025,,Philadelphia Phillies,Athletics,-227,+185,4,3
+23 May 2025,,Miami Marlins,Los Angeles Angels,+135,-161,4,7
+23 May 2025,,New York Yankees,Colorado Rockies,-333,+260,2,3
+23 May 2025,,Arizona Diamondbacks,St.Louis Cardinals,-115,-105,3,4
+23 May 2025,,Seattle Mariners,Houston Astros,-102,-118,5,3
+23 May 2025,,Kansas City Royals,Minnesota Twins,+154,-189,1,3
+23 May 2025,,Texas Rangers,Chicago White Sox,-189,+154,1,4
+23 May 2025,,San Diego Padres,Atlanta Braves,+150,-182,2,1
+23 May 2025,,Cleveland Guardians,Detroit Tigers,-102,-118,3,1
+23 May 2025,,Los Angeles Dodgers,New York Mets,+100,-120,7,5
+23 May 2025,,Toronto Blue Jays,Tampa Bay Rays,+118,-139,1,3
+23 May 2025,,San Francisco Giants,Washington Nationals,-102,-118,4,0
+23 May 2025,,Chicago Cubs,Cincinnati Reds,-120,+100,13,6
+23 May 2025,,Milwaukee Brewers,Pittsburgh Pirates,+110,-130,5,6
+23 May 2025,,Baltimore Orioles,Boston Red Sox,,,5,19
+22 May 2025,,Seattle Mariners,Houston Astros,-130,+110,2,9
+22 May 2025,,Atlanta Braves,Washington Nationals,-161,+135,7,8
+22 May 2025,,Cleveland Guardians,Detroit Tigers,+110,-130,7,0
+22 May 2025,,Milwaukee Brewers,Pittsburgh Pirates,-115,-105,8,5
+22 May 2025,,Los Angeles Angels,Athletics,+114,-135,10,5
+22 May 2025,,Philadelphia Phillies,Colorado Rockies,-303,+240,2,0
+22 May 2025,,San Diego Padres,Toronto Blue Jays,-120,+100,6,7
+22 May 2025,,Texas Rangers,New York Yankees,+135,-161,0,1
+21 May 2025,,Arizona Diamondbacks,Los Angeles Dodgers,+125,-149,1,3
+21 May 2025,,Los Angeles Angels,Athletics,+125,-149,10,5
+21 May 2025,,Philadelphia Phillies,Colorado Rockies,-200,+165,9,5
+21 May 2025,,San Diego Padres,Toronto Blue Jays,+140,-167,0,14
+21 May 2025,,Texas Rangers,New York Yankees,-105,-115,3,4
+21 May 2025,,New York Mets,Boston Red Sox,+125,-149,5,1
+21 May 2025,,Kansas City Royals,San Francisco Giants,+179,-222,8,4
+21 May 2025,,Cleveland Guardians,Minnesota Twins,+100,-120,5,1
+21 May 2025,,Seattle Mariners,Chicago White Sox,-149,+125,6,5
+21 May 2025,,Detroit Tigers,St.Louis Cardinals,-105,-115,5,1
+21 May 2025,,Cleveland Guardians,Minnesota Twins,,,5,6
+21 May 2025,,Baltimore Orioles,Milwaukee Brewers,-105,-115,8,4
+21 May 2025,,Chicago Cubs,Miami Marlins,-149,+125,2,1
+21 May 2025,,Houston Astros,Tampa Bay Rays,-169,+140,4,8
+21 May 2025,,Cincinnati Reds,Pittsburgh Pirates,-130,+110,1,3
+20 May 2025,,Arizona Diamondbacks,Los Angeles Dodgers,+190,-238,3,4
+20 May 2025,,Los Angeles Angels,Athletics,+145,-175,7,5
+20 May 2025,,Kansas City Royals,San Francisco Giants,+114,-139,2,3
+20 May 2025,,Philadelphia Phillies,Colorado Rockies,-278,+225,7,4
+20 May 2025,,Detroit Tigers,St.Louis Cardinals,-179,+145,5,4
+20 May 2025,,Baltimore Orioles,Milwaukee Brewers,+104,-125,2,5
+20 May 2025,,Seattle Mariners,Chicago White Sox,-182,+150,0,1
+20 May 2025,,San Diego Padres,Toronto Blue Jays,-110,-110,0,3
+20 May 2025,,Houston Astros,Tampa Bay Rays,+110,-133,2,3
+20 May 2025,,Texas Rangers,New York Yankees,+170,-208,2,5
+20 May 2025,,Atlanta Braves,Washington Nationals,-167,+135,3,5
+20 May 2025,,New York Mets,Boston Red Sox,-139,+114,0,2
+20 May 2025,,Chicago Cubs,Miami Marlins,-143,+120,14,1
+20 May 2025,,Cincinnati Reds,Pittsburgh Pirates,-143,+120,0,1
+19 May 2025,,Arizona Diamondbacks,Los Angeles Dodgers,+125,-154,9,5
+19 May 2025,,Los Angeles Angels,Athletics,+114,-139,4,3
+19 May 2025,,Kansas City Royals,San Francisco Giants,+110,-130,3,1
+19 May 2025,,Philadelphia Phillies,Colorado Rockies,-250,+200,9,3
+19 May 2025,,Detroit Tigers,St.Louis Cardinals,+140,-167,4,11
+19 May 2025,,Baltimore Orioles,Milwaukee Brewers,-105,-115,4,5
+19 May 2025,,Seattle Mariners,Chicago White Sox,-200,+165,5,1
+19 May 2025,,Houston Astros,Tampa Bay Rays,+125,-149,4,3
+19 May 2025,,New York Mets,Boston Red Sox,-125,+104,1,3
+19 May 2025,,Chicago Cubs,Miami Marlins,-169,+140,7,8
+19 May 2025,,Cincinnati Reds,Pittsburgh Pirates,-118,-102,7,1
+18 May 2025,,New York Mets,New York Yankees,+135,-161,2,8
+18 May 2025,,Colorado Rockies,Arizona Diamondbacks,+240,-303,0,1
+18 May 2025,,Los Angeles Angels,Los Angeles Dodgers,+179,-222,6,4
+18 May 2025,,Seattle Mariners,San Diego Padres,+120,-143,6,1
+18 May 2025,,Athletics,San Francisco Giants,+125,-149,2,3
+18 May 2025,,Chicago White Sox,Chicago Cubs,+235,-294,2,6
+18 May 2025,,St.Louis Cardinals,Kansas City Royals,-115,-105,1,2
+18 May 2025,,Minnesota Twins,Milwaukee Brewers,+120,-143,2,5
+18 May 2025,,Cleveland Guardians,Cincinnati Reds,+110,-130,1,3
+18 May 2025,,Tampa Bay Rays,Miami Marlins,-149,+125,1,5
+18 May 2025,,Detroit Tigers,Toronto Blue Jays,+104,-125,3,2
+18 May 2025,,Atlanta Braves,Boston Red Sox,-125,+104,10,4
+18 May 2025,,Washington Nationals,Baltimore Orioles,+150,-182,10,4
+18 May 2025,,Pittsburgh Pirates,Philadelphia Phillies,-115,-105,0,1
+18 May 2025,,Houston Astros,Texas Rangers,-115,-105,4,3
+17 May 2025,,Los Angeles Angels,Los Angeles Dodgers,+185,-227,11,9
+17 May 2025,,Athletics,San Francisco Giants,+140,-169,0,1
+17 May 2025,,Seattle Mariners,San Diego Padres,+154,-189,4,1
+17 May 2025,,Colorado Rockies,Arizona Diamondbacks,+290,-385,14,12
+17 May 2025,,Atlanta Braves,Boston Red Sox,+100,-120,6,7
+17 May 2025,,Minnesota Twins,Milwaukee Brewers,-125,+104,7,0
+17 May 2025,,St.Louis Cardinals,Kansas City Royals,-105,-115,1,0
+17 May 2025,,Houston Astros,Texas Rangers,+100,-120,1,5
+17 May 2025,,Cleveland Guardians,Cincinnati Reds,-115,-105,1,4
+17 May 2025,,Pittsburgh Pirates,Philadelphia Phillies,+260,-333,2,5
+17 May 2025,,Tampa Bay Rays,Miami Marlins,-141,+120,4,0
+17 May 2025,,Washington Nationals,Baltimore Orioles,+129,-154,10,6
+17 May 2025,,Detroit Tigers,Toronto Blue Jays,-137,+114,1,2
+17 May 2025,,Chicago White Sox,Chicago Cubs,+240,-303,3,7
+17 May 2025,,New York Mets,New York Yankees,+110,-130,3,2
+16 May 2025,,Athletics,San Francisco Giants,+165,-200,1,9
+16 May 2025,,Los Angeles Angels,Los Angeles Dodgers,+260,-333,6,2
+16 May 2025,,Colorado Rockies,Arizona Diamondbacks,+300,-385,0,8
+16 May 2025,,Seattle Mariners,San Diego Padres,+145,-175,5,1
+16 May 2025,,Minnesota Twins,Milwaukee Brewers,-115,-105,3,0
+16 May 2025,,Houston Astros,Texas Rangers,+165,-200,6,3
+16 May 2025,,St.Louis Cardinals,Kansas City Royals,+129,-154,10,3
+16 May 2025,,Atlanta Braves,Boston Red Sox,-105,-115,4,2
+16 May 2025,,Tampa Bay Rays,Miami Marlins,-125,+104,4,9
+16 May 2025,,Detroit Tigers,Toronto Blue Jays,-125,+104,5,4
+16 May 2025,,Washington Nationals,Baltimore Orioles,+104,-125,4,3
+16 May 2025,,New York Mets,New York Yankees,+125,-149,2,6
+16 May 2025,,Pittsburgh Pirates,Philadelphia Phillies,+200,-250,4,8
+16 May 2025,,Cleveland Guardians,Cincinnati Reds,-120,+100,4,5
+16 May 2025,,Chicago White Sox,Chicago Cubs,+185,-227,3,13
+15 May 2025,,Athletics,Los Angeles Dodgers,+200,-250,2,19
+15 May 2025,,Houston Astros,Texas Rangers,+114,-137,0,1
+15 May 2025,,Tampa Bay Rays,Toronto Blue Jays,+145,-175,8,3
+15 May 2025,,Chicago White Sox,Cincinnati Reds,+190,-238,1,7
+15 May 2025,,Minnesota Twins,Baltimore Orioles,+114,-137,4,0
+15 May 2025,,Washington Nationals,Atlanta Braves,+170,-208,2,5
+14 May 2025,,Athletics,Los Angeles Dodgers,+240,-303,3,9
+14 May 2025,,Los Angeles Angels,San Diego Padres,+154,-189,1,5
+14 May 2025,,Kansas City Royals,Houston Astros,+104,-125,3,4
+14 May 2025,,Colorado Rockies,Texas Rangers,+179,-222,3,8
+14 May 2025,,Miami Marlins,Chicago Cubs,+179,-222,3,1
+14 May 2025,,Washington Nationals,Atlanta Braves,+150,-182,5,4
+14 May 2025,,Chicago White Sox,Cincinnati Reds,+165,-200,4,2
+14 May 2025,,Pittsburgh Pirates,New York Mets,+225,-278,4,0
+14 May 2025,,Tampa Bay Rays,Toronto Blue Jays,+135,-161,1,3
+14 May 2025,,Boston Red Sox,Detroit Tigers,+195,-238,5,6
+14 May 2025,,St.Louis Cardinals,Philadelphia Phillies,+100,-120,14,7
+14 May 2025,,New York Yankees,Seattle Mariners,-118,-102,3,2
+14 May 2025,,Arizona Diamondbacks,San Francisco Giants,-115,-105,8,7
+14 May 2025,,Minnesota Twins,Baltimore Orioles,+110,-130,8,6
+14 May 2025,,Milwaukee Brewers,Cleveland Guardians,+100,-120,9,5
+14 May 2025,,St.Louis Cardinals,Philadelphia Phillies,+150,-182,1,2
+14 May 2025,,Minnesota Twins,Baltimore Orioles,+104,-125,6,3
+13 May 2025,,Athletics,Los Angeles Dodgers,+170,-208,11,1
+13 May 2025,,Arizona Diamondbacks,San Francisco Giants,-115,-105,6,10
+13 May 2025,,Los Angeles Angels,San Diego Padres,+179,-222,4,6
+13 May 2025,,New York Yankees,Seattle Mariners,-143,+120,1,2
+13 May 2025,,Kansas City Royals,Houston Astros,+114,-135,1,2
+13 May 2025,,Colorado Rockies,Texas Rangers,+190,-238,1,4
+13 May 2025,,Miami Marlins,Chicago Cubs,+200,-250,4,5
+13 May 2025,,Washington Nationals,Atlanta Braves,+179,-222,2,5
+13 May 2025,,Pittsburgh Pirates,New York Mets,+195,-238,1,2
+13 May 2025,,Tampa Bay Rays,Toronto Blue Jays,+114,-135,11,9
+13 May 2025,,Boston Red Sox,Detroit Tigers,-105,-115,9,10
+13 May 2025,,Chicago White Sox,Cincinnati Reds,+165,-200,5,1
+13 May 2025,,Milwaukee Brewers,Cleveland Guardians,+120,-143,0,2
+12 May 2025,,Arizona Diamondbacks,San Francisco Giants,-118,-102,2,1
+12 May 2025,,Los Angeles Angels,San Diego Padres,+195,-238,9,5
+12 May 2025,,New York Yankees,Seattle Mariners,-149,+125,11,5
+12 May 2025,,Kansas City Royals,Houston Astros,+100,-120,7,5
+12 May 2025,,Colorado Rockies,Texas Rangers,+200,-250,1,2
+12 May 2025,,Miami Marlins,Chicago Cubs,+200,-250,2,5
+12 May 2025,,Washington Nationals,Atlanta Braves,+154,-189,3,4
+12 May 2025,,Pittsburgh Pirates,New York Mets,+140,-167,3,4
+12 May 2025,,St.Louis Cardinals,Philadelphia Phillies,+145,-175,3,2
+12 May 2025,,Boston Red Sox,Detroit Tigers,-118,-102,2,14
+12 May 2025,,Milwaukee Brewers,Cleveland Guardians,-115,-105,0,5
+11 May 2025,,Philadelphia Phillies,Cleveland Guardians,-182,+150,3,0
+11 May 2025,,Los Angeles Dodgers,Arizona Diamondbacks,-110,-110,8,1
+11 May 2025,,Toronto Blue Jays,Seattle Mariners,+150,-182,9,1
+11 May 2025,,Baltimore Orioles,Los Angeles Angels,-143,+120,7,3
+11 May 2025,,New York Yankees,Athletics,-143,+120,12,2
+11 May 2025,,San Diego Padres,Colorado Rockies,-303,+240,3,9
+11 May 2025,,Boston Red Sox,Kansas City Royals,+110,-130,3,1
+11 May 2025,,Miami Marlins,Chicago White Sox,-137,+114,2,4
+11 May 2025,,Cincinnati Reds,Houston Astros,+125,-149,0,6
+11 May 2025,,San Francisco Giants,Minnesota Twins,+135,-161,6,7
+11 May 2025,,Texas Rangers,Detroit Tigers,+100,-120,6,1
+11 May 2025,,Milwaukee Brewers,Tampa Bay Rays,+125,-149,4,2
+11 May 2025,,Atlanta Braves,Pittsburgh Pirates,-222,+179,3,4
+11 May 2025,,St.Louis Cardinals,Washington Nationals,+125,-149,6,1
+11 May 2025,,Chicago Cubs,New York Mets,+110,-130,2,6
+10 May 2025,,Toronto Blue Jays,Seattle Mariners,+120,-141,6,3
+10 May 2025,,Baltimore Orioles,Los Angeles Angels,-141,+120,2,5
+10 May 2025,,Los Angeles Dodgers,Arizona Diamondbacks,-105,-115,0,3
+10 May 2025,,San Diego Padres,Colorado Rockies,-250,+200,21,0
+10 May 2025,,Chicago Cubs,New York Mets,+140,-169,6,5
+10 May 2025,,San Francisco Giants,Minnesota Twins,-115,-105,1,2
+10 May 2025,,Boston Red Sox,Kansas City Royals,+100,-120,10,1
+10 May 2025,,Miami Marlins,Chicago White Sox,-110,-110,3,1
+10 May 2025,,Cincinnati Reds,Houston Astros,+110,-130,13,9
+10 May 2025,,Philadelphia Phillies,Cleveland Guardians,-130,+110,7,1
+10 May 2025,,Texas Rangers,Detroit Tigers,-120,+100,10,3
+10 May 2025,,Milwaukee Brewers,Tampa Bay Rays,+100,-120,2,3
+10 May 2025,,Atlanta Braves,Pittsburgh Pirates,-154,+129,3,2
+10 May 2025,,St.Louis Cardinals,Washington Nationals,-115,-105,4,2
+10 May 2025,,New York Yankees,Athletics,-161,+135,7,11
+09 May 2025,,New York Yankees,Athletics,-161,+135,10,2
+09 May 2025,,Los Angeles Dodgers,Arizona Diamondbacks,-105,-115,14,11
+09 May 2025,,Toronto Blue Jays,Seattle Mariners,+120,-143,6,3
+09 May 2025,,Baltimore Orioles,Los Angeles Angels,-143,+120,4,1
+09 May 2025,,San Diego Padres,Colorado Rockies,-182,+150,13,9
+09 May 2025,,Cincinnati Reds,Houston Astros,+165,-200,0,3
+09 May 2025,,San Francisco Giants,Minnesota Twins,-115,-105,1,3
+09 May 2025,,Boston Red Sox,Kansas City Royals,-110,-110,1,2
+09 May 2025,,Miami Marlins,Chicago White Sox,-149,+125,2,6
+09 May 2025,,Chicago Cubs,New York Mets,+120,-143,2,7
+09 May 2025,,Philadelphia Phillies,Cleveland Guardians,-115,-105,0,6
+09 May 2025,,Milwaukee Brewers,Tampa Bay Rays,-120,+100,3,4
+09 May 2025,,St.Louis Cardinals,Washington Nationals,-110,-110,10,0
+09 May 2025,,Atlanta Braves,Pittsburgh Pirates,-149,+125,2,3
+09 May 2025,,Texas Rangers,Detroit Tigers,+240,-294,1,2
+08 May 2025,,Los Angeles Dodgers,Arizona Diamondbacks,-167,+140,3,5
+08 May 2025,,Toronto Blue Jays,Los Angeles Angels,-135,+114,8,5
+08 May 2025,,Cincinnati Reds,Atlanta Braves,+165,-200,4,5
+08 May 2025,,Philadelphia Phillies,Tampa Bay Rays,-167,+140,7,6
+08 May 2025,,Detroit Tigers,Colorado Rockies,-208,+170,11,1
+08 May 2025,,Detroit Tigers,Colorado Rockies,-169,+140,10,2
+08 May 2025,,Chicago White Sox,Kansas City Royals,+190,-238,0,10
+08 May 2025,,Texas Rangers,Boston Red Sox,+129,-154,0,5
+08 May 2025,,Baltimore Orioles,Minnesota Twins,+140,-169,2,5
+07 May 2025,,Toronto Blue Jays,Los Angeles Angels,-120,+100,4,5
+07 May 2025,,Detroit Tigers,Colorado Rockies,-169,+140,8,6
+07 May 2025,,Baltimore Orioles,Minnesota Twins,+120,-141,2,5
+07 May 2025,,Chicago White Sox,Kansas City Royals,+185,-227,1,2
+07 May 2025,,Cincinnati Reds,Atlanta Braves,+100,-120,4,3
+07 May 2025,,San Diego Padres,New York Yankees,+150,-182,3,4
+07 May 2025,,Philadelphia Phillies,Tampa Bay Rays,-161,+135,7,0
+07 May 2025,,Texas Rangers,Boston Red Sox,+120,-141,4,6
+07 May 2025,,Los Angeles Dodgers,Miami Marlins,-227,+185,10,1
+07 May 2025,,New York Mets,Arizona Diamondbacks,-118,-102,7,1
+07 May 2025,,Seattle Mariners,Athletics,-139,+114,6,5
+07 May 2025,,San Francisco Giants,Chicago Cubs,+135,-161,3,1
+07 May 2025,,Pittsburgh Pirates,St.Louis Cardinals,+145,-175,0,5
+07 May 2025,,Houston Astros,Milwaukee Brewers,-133,+114,9,1
+07 May 2025,,Cleveland Guardians,Washington Nationals,-110,-110,8,6
+06 May 2025,,Seattle Mariners,Athletics,+100,-120,5,3
+06 May 2025,,New York Mets,Arizona Diamondbacks,-105,-115,1,5
+06 May 2025,,Toronto Blue Jays,Los Angeles Angels,-115,-105,3,8
+06 May 2025,,Pittsburgh Pirates,St.Louis Cardinals,-120,+100,1,2
+06 May 2025,,Baltimore Orioles,Minnesota Twins,+140,-169,1,9
+06 May 2025,,San Francisco Giants,Chicago Cubs,+125,-149,14,5
+06 May 2025,,Chicago White Sox,Kansas City Royals,+200,-250,3,4
+06 May 2025,,Houston Astros,Milwaukee Brewers,+100,-120,3,4
+06 May 2025,,Cincinnati Reds,Atlanta Braves,+185,-227,1,2
+06 May 2025,,Philadelphia Phillies,Tampa Bay Rays,-135,+114,8,4
+06 May 2025,,San Diego Padres,New York Yankees,+100,-120,3,12
+06 May 2025,,Texas Rangers,Boston Red Sox,-120,+100,6,1
+06 May 2025,,Los Angeles Dodgers,Miami Marlins,-250,+200,4,5
+06 May 2025,,Cleveland Guardians,Washington Nationals,-110,-110,9,1
+06 May 2025,,Cleveland Guardians,Washington Nationals,-120,+100,9,10
+05 May 2025,,Seattle Mariners,Athletics,-115,-105,6,7
+05 May 2025,,New York Mets,Arizona Diamondbacks,-102,-118,5,4
+05 May 2025,,Pittsburgh Pirates,St.Louis Cardinals,+110,-130,3,6
+05 May 2025,,San Francisco Giants,Chicago Cubs,+150,-182,2,9
+05 May 2025,,Chicago White Sox,Kansas City Royals,+179,-222,0,3
+05 May 2025,,Houston Astros,Milwaukee Brewers,-105,-115,1,5
+05 May 2025,,Cincinnati Reds,Atlanta Braves,+114,-135,0,4
+05 May 2025,,San Diego Padres,New York Yankees,+135,-161,4,3
+05 May 2025,,Los Angeles Dodgers,Miami Marlins,-222,+179,7,4
+04 May 2025,,Los Angeles Dodgers,Atlanta Braves,-135,+114,3,4
+04 May 2025,,New York Mets,St.Louis Cardinals,,,4,5
+04 May 2025,,Washington Nationals,Cincinnati Reds,-105,-115,4,1
+04 May 2025,,Detroit Tigers,Los Angeles Angels,-175,+145,13,1
+04 May 2025,,Colorado Rockies,San Francisco Giants,+309,-400,3,9
+04 May 2025,,Seattle Mariners,Texas Rangers,+145,-179,1,8
+04 May 2025,,Chicago Cubs,Milwaukee Brewers,-115,-105,0,4
+04 May 2025,,Houston Astros,Chicago White Sox,-179,+145,4,5
+04 May 2025,,Arizona Diamondbacks,Philadelphia Phillies,+135,-161,11,9
+04 May 2025,,Athletics,Miami Marlins,-110,-110,3,2
+04 May 2025,,Cleveland Guardians,Toronto Blue Jays,-115,-105,5,4
+04 May 2025,,Kansas City Royals,Baltimore Orioles,+118,-139,11,6
+04 May 2025,,Minnesota Twins,Boston Red Sox,+170,-208,5,4
+04 May 2025,,Tampa Bay Rays,New York Yankees,+145,-175,7,5
+04 May 2025,,San Diego Padres,Pittsburgh Pirates,-110,-110,4,0
+04 May 2025,,New York Mets,St.Louis Cardinals,-143,+120,5,6
+03 May 2025,,Detroit Tigers,Los Angeles Angels,-182,+150,2,5
+03 May 2025,,Los Angeles Dodgers,Atlanta Braves,+104,-125,10,3
+03 May 2025,,Kansas City Royals,Baltimore Orioles,-105,-115,4,0
+03 May 2025,,Chicago Cubs,Milwaukee Brewers,-110,-110,6,2
+03 May 2025,,Seattle Mariners,Texas Rangers,-133,+110,2,1
+03 May 2025,,Washington Nationals,Cincinnati Reds,+154,-189,11,6
+03 May 2025,,Arizona Diamondbacks,Philadelphia Phillies,+104,-125,2,7
+03 May 2025,,Athletics,Miami Marlins,+104,-125,6,9
+03 May 2025,,Minnesota Twins,Boston Red Sox,-105,-115,4,3
+03 May 2025,,Colorado Rockies,San Francisco Giants,+229,-294,3,6
+03 May 2025,,San Diego Padres,Pittsburgh Pirates,+104,-125,2,1
+03 May 2025,,Cleveland Guardians,Toronto Blue Jays,+125,-149,5,3
+03 May 2025,,Houston Astros,Chicago White Sox,-250,+200,8,3
+03 May 2025,,Tampa Bay Rays,New York Yankees,+165,-200,3,2
+02 May 2025,,Colorado Rockies,San Francisco Giants,+240,-303,0,4
+02 May 2025,,Detroit Tigers,Los Angeles Angels,-189,+154,9,1
+02 May 2025,,New York Mets,St.Louis Cardinals,-120,+100,9,3
+02 May 2025,,Chicago Cubs,Milwaukee Brewers,-125,+104,10,0
+02 May 2025,,Seattle Mariners,Texas Rangers,-125,+104,13,1
+02 May 2025,,Houston Astros,Chicago White Sox,-222,+179,3,7
+02 May 2025,,Los Angeles Dodgers,Atlanta Braves,-182,+150,2,1
+02 May 2025,,Athletics,Miami Marlins,-137,+114,6,1
+02 May 2025,,Minnesota Twins,Boston Red Sox,+100,-120,1,6
+02 May 2025,,Cleveland Guardians,Toronto Blue Jays,+140,-167,3,5
+02 May 2025,,Kansas City Royals,Baltimore Orioles,+120,-141,0,3
+02 May 2025,,Tampa Bay Rays,New York Yankees,+200,-250,0,3
+02 May 2025,,Arizona Diamondbacks,Philadelphia Phillies,+129,-154,2,3
+02 May 2025,,San Diego Padres,Pittsburgh Pirates,-137,+114,9,4
+02 May 2025,,Washington Nationals,Cincinnati Reds,+165,-200,1,6
+01 May 2025,,Colorado Rockies,San Francisco Giants,+220,-278,4,3
+01 May 2025,,Detroit Tigers,Los Angeles Angels,-149,+125,10,4
+01 May 2025,,Boston Red Sox,Toronto Blue Jays,-120,+100,2,4
+01 May 2025,,Washington Nationals,Philadelphia Phillies,+145,-175,4,2
+01 May 2025,,Athletics,Texas Rangers,+110,-130,3,0
+01 May 2025,,Milwaukee Brewers,Chicago White Sox,-169,+140,0,8
+01 May 2025,,Arizona Diamondbacks,New York Mets,+140,-169,4,2
+01 May 2025,,Minnesota Twins,Cleveland Guardians,-125,+104,3,4
+01 May 2025,,Kansas City Royals,Tampa Bay Rays,+135,-161,8,2
+01 May 2025,,St.Louis Cardinals,Cincinnati Reds,-120,+100,1,9
+01 May 2025,,Chicago Cubs,Pittsburgh Pirates,+104,-125,8,3
+30 Apr 2025,,Athletics,Texas Rangers,+129,-154,7,1
+30 Apr 2025,,Milwaukee Brewers,Chicago White Sox,-154,+129,6,4
+30 Apr 2025,,Arizona Diamondbacks,New York Mets,-110,-110,4,3
+30 Apr 2025,,Boston Red Sox,Toronto Blue Jays,-110,-110,6,7
+30 Apr 2025,,Kansas City Royals,Tampa Bay Rays,+140,-167,3,0
+30 Apr 2025,,Washington Nationals,Philadelphia Phillies,+200,-250,2,7
+30 Apr 2025,,Chicago Cubs,Pittsburgh Pirates,-175,+145,3,4
+30 Apr 2025,,St.Louis Cardinals,Cincinnati Reds,+100,-120,9,1
+30 Apr 2025,,New York Yankees,Baltimore Orioles,+100,-120,4,5
+30 Apr 2025,,Minnesota Twins,Cleveland Guardians,-110,-110,2,4
+30 Apr 2025,,Los Angeles Angels,Seattle Mariners,+120,-141,3,9
+30 Apr 2025,,San Francisco Giants,San Diego Padres,+120,-141,3,5
+30 Apr 2025,,Atlanta Braves,Colorado Rockies,-294,+229,1,2
+30 Apr 2025,,Miami Marlins,Los Angeles Dodgers,+260,-333,7,12
+30 Apr 2025,,Detroit Tigers,Houston Astros,+100,-120,7,4
+30 Apr 2025,,St.Louis Cardinals,Cincinnati Reds,+125,-149,6,0
+29 Apr 2025,,Miami Marlins,Los Angeles Dodgers,+170,-208,2,15
+29 Apr 2025,,Los Angeles Angels,Seattle Mariners,+165,-200,3,5
+29 Apr 2025,,San Francisco Giants,San Diego Padres,-125,+104,4,7
+29 Apr 2025,,Atlanta Braves,Colorado Rockies,-222,+179,8,2
+29 Apr 2025,,Detroit Tigers,Houston Astros,-105,-115,4,6
+29 Apr 2025,,Athletics,Texas Rangers,+165,-200,2,15
+29 Apr 2025,,Milwaukee Brewers,Chicago White Sox,-278,+220,7,2
+29 Apr 2025,,Arizona Diamondbacks,New York Mets,+120,-143,3,8
+29 Apr 2025,,Boston Red Sox,Toronto Blue Jays,-141,+120,10,2
+29 Apr 2025,,Kansas City Royals,Tampa Bay Rays,+135,-161,3,1
+29 Apr 2025,,Washington Nationals,Philadelphia Phillies,+165,-200,6,7
+29 Apr 2025,,Chicago Cubs,Pittsburgh Pirates,-149,+125,9,0
+29 Apr 2025,,New York Yankees,Baltimore Orioles,-161,+135,15,3
+29 Apr 2025,,Minnesota Twins,Cleveland Guardians,+114,-139,1,2
+28 Apr 2025,,Miami Marlins,Los Angeles Dodgers,+225,-278,6,7
+28 Apr 2025,,Atlanta Braves,Colorado Rockies,-175,+145,6,3
+28 Apr 2025,,Detroit Tigers,Houston Astros,+100,-120,5,8
+28 Apr 2025,,Athletics,Texas Rangers,-110,-110,2,1
+28 Apr 2025,,St.Louis Cardinals,Cincinnati Reds,+104,-125,1,3
+28 Apr 2025,,New York Yankees,Baltimore Orioles,-137,+114,3,4
+28 Apr 2025,,Minnesota Twins,Cleveland Guardians,+104,-125,11,1
+28 Apr 2025,,New York Mets,Washington Nationals,-175,+145,19,5
+27 Apr 2025,,Philadelphia Phillies,Chicago Cubs,+110,-130,3,1
+27 Apr 2025,,Toronto Blue Jays,New York Yankees,,,1,5
+27 Apr 2025,,Atlanta Braves,Arizona Diamondbacks,-120,+100,4,6
+27 Apr 2025,,Pittsburgh Pirates,Los Angeles Dodgers,+260,-333,2,9
+27 Apr 2025,,Miami Marlins,Seattle Mariners,+120,-143,6,7
+27 Apr 2025,,Tampa Bay Rays,San Diego Padres,-115,-105,4,2
+27 Apr 2025,,Chicago White Sox,Athletics,+170,-208,2,3
+27 Apr 2025,,Texas Rangers,San Francisco Giants,+110,-130,2,3
+27 Apr 2025,,Cincinnati Reds,Colorado Rockies,-154,+129,8,1
+27 Apr 2025,,Milwaukee Brewers,St.Louis Cardinals,-110,-110,7,1
+27 Apr 2025,,Houston Astros,Kansas City Royals,-149,+125,7,3
+27 Apr 2025,,Baltimore Orioles,Detroit Tigers,+190,-238,0,7
+27 Apr 2025,,Boston Red Sox,Cleveland Guardians,-115,-105,13,3
+27 Apr 2025,,Los Angeles Angels,Minnesota Twins,+145,-179,0,5
+27 Apr 2025,,New York Mets,Washington Nationals,-149,+125,7,8
+27 Apr 2025,,Toronto Blue Jays,New York Yankees,+165,-200,2,11
+26 Apr 2025,,Miami Marlins,Seattle Mariners,+200,-250,0,14
+26 Apr 2025,,Pittsburgh Pirates,Los Angeles Dodgers,+220,-278,4,8
+26 Apr 2025,,Tampa Bay Rays,San Diego Padres,+125,-149,4,1
+26 Apr 2025,,Atlanta Braves,Arizona Diamondbacks,+100,-120,8,7
+26 Apr 2025,,Houston Astros,Kansas City Royals,-141,+120,0,2
+26 Apr 2025,,Baltimore Orioles,Detroit Tigers,-110,-110,2,6
+26 Apr 2025,,Boston Red Sox,Cleveland Guardians,-120,+100,7,3
+26 Apr 2025,,Chicago White Sox,Athletics,+185,-227,10,3
+26 Apr 2025,,Philadelphia Phillies,Chicago Cubs,-118,-102,10,4
+26 Apr 2025,,New York Mets,Washington Nationals,-182,+150,2,0
+26 Apr 2025,,Texas Rangers,San Francisco Giants,+120,-141,2,3
+26 Apr 2025,,Cincinnati Reds,Colorado Rockies,-200,+165,6,4
+26 Apr 2025,,Milwaukee Brewers,St.Louis Cardinals,+125,-149,5,6
+26 Apr 2025,,Los Angeles Angels,Minnesota Twins,+110,-133,1,5
+26 Apr 2025,,Baltimore Orioles,Detroit Tigers,+114,-139,3,4
+26 Apr 2025,,Boston Red Sox,Cleveland Guardians,,,4,5
+25 Apr 2025,,Texas Rangers,San Francisco Giants,+110,-130,2,0
+25 Apr 2025,,Pittsburgh Pirates,Los Angeles Dodgers,+179,-222,3,0
+25 Apr 2025,,Chicago White Sox,Athletics,+195,-238,5,6
+25 Apr 2025,,Atlanta Braves,Arizona Diamondbacks,-130,+110,8,2
+25 Apr 2025,,Miami Marlins,Seattle Mariners,+240,-303,8,4
+25 Apr 2025,,Tampa Bay Rays,San Diego Padres,+125,-149,1,0
+25 Apr 2025,,Cincinnati Reds,Colorado Rockies,-137,+114,8,7
+25 Apr 2025,,Milwaukee Brewers,St.Louis Cardinals,+114,-137,2,3
+25 Apr 2025,,Houston Astros,Kansas City Royals,-115,-105,0,2
+25 Apr 2025,,Los Angeles Angels,Minnesota Twins,+165,-200,4,11
+25 Apr 2025,,Toronto Blue Jays,New York Yankees,+118,-139,4,2
+25 Apr 2025,,New York Mets,Washington Nationals,-182,+150,4,5
+25 Apr 2025,,Philadelphia Phillies,Chicago Cubs,+129,-156,0,4
+24 Apr 2025,,Texas Rangers,Athletics,-143,+120,3,4
+24 Apr 2025,,Tampa Bay Rays,Arizona Diamondbacks,+114,-135,7,4
+24 Apr 2025,,Pittsburgh Pirates,Los Angeles Angels,+129,-156,3,4
+24 Apr 2025,,Baltimore Orioles,Washington Nationals,-102,-118,2,1
+24 Apr 2025,,Colorado Rockies,Kansas City Royals,+165,-200,2,6
+24 Apr 2025,,Milwaukee Brewers,San Francisco Giants,+135,-167,5,6
+24 Apr 2025,,Colorado Rockies,Kansas City Royals,+240,-303,4,7
+24 Apr 2025,,Seattle Mariners,Boston Red Sox,+150,-182,4,3
+24 Apr 2025,,Chicago White Sox,Minnesota Twins,+179,-222,3,0
+23 Apr 2025,,Texas Rangers,Athletics,-110,-110,2,5
+23 Apr 2025,,Milwaukee Brewers,San Francisco Giants,+120,-143,2,4
+23 Apr 2025,,Tampa Bay Rays,Arizona Diamondbacks,+140,-167,7,6
+23 Apr 2025,,Pittsburgh Pirates,Los Angeles Angels,+114,-135,3,0
+23 Apr 2025,,Chicago White Sox,Minnesota Twins,+220,-278,3,6
+23 Apr 2025,,Toronto Blue Jays,Houston Astros,-110,-110,1,3
+23 Apr 2025,,Los Angeles Dodgers,Chicago Cubs,+104,-125,6,7
+23 Apr 2025,,Baltimore Orioles,Washington Nationals,-139,+118,3,4
+23 Apr 2025,,Seattle Mariners,Boston Red Sox,+118,-139,8,5
+23 Apr 2025,,Cincinnati Reds,Miami Marlins,-110,-110,5,2
+23 Apr 2025,,New York Yankees,Cleveland Guardians,-169,+140,5,1
+23 Apr 2025,,San Diego Padres,Detroit Tigers,+140,-169,0,6
+23 Apr 2025,,Philadelphia Phillies,New York Mets,-115,-105,3,4
+23 Apr 2025,,St.Louis Cardinals,Atlanta Braves,+140,-169,1,4
+22 Apr 2025,,Texas Rangers,Athletics,+104,-125,8,5
+22 Apr 2025,,Milwaukee Brewers,San Francisco Giants,+125,-149,11,3
+22 Apr 2025,,Tampa Bay Rays,Arizona Diamondbacks,+154,-189,1,5
+22 Apr 2025,,Pittsburgh Pirates,Los Angeles Angels,+154,-189,9,3
+22 Apr 2025,,Toronto Blue Jays,Houston Astros,-120,+100,1,5
+22 Apr 2025,,Los Angeles Dodgers,Chicago Cubs,-120,+100,10,11
+22 Apr 2025,,Chicago White Sox,Minnesota Twins,+200,-250,2,4
+22 Apr 2025,,Colorado Rockies,Kansas City Royals,+200,-250,3,4
+22 Apr 2025,,St.Louis Cardinals,Atlanta Braves,+120,-141,10,4
+22 Apr 2025,,Philadelphia Phillies,New York Mets,-130,+110,1,5
+22 Apr 2025,,Baltimore Orioles,Washington Nationals,-137,+114,0,7
+22 Apr 2025,,Seattle Mariners,Boston Red Sox,+100,-120,3,8
+22 Apr 2025,,Cincinnati Reds,Miami Marlins,-115,-105,3,4
+22 Apr 2025,,San Diego Padres,Detroit Tigers,+110,-130,2,0
+22 Apr 2025,,New York Yankees,Cleveland Guardians,-105,-115,2,3
+21 Apr 2025,,Milwaukee Brewers,San Francisco Giants,+114,-135,2,5
+21 Apr 2025,,Toronto Blue Jays,Houston Astros,+120,-141,0,7
+21 Apr 2025,,St.Louis Cardinals,Atlanta Braves,+185,-222,6,7
+21 Apr 2025,,Philadelphia Phillies,New York Mets,+120,-141,4,5
+21 Apr 2025,,Cincinnati Reds,Miami Marlins,-120,+100,3,6
+21 Apr 2025,,San Diego Padres,Detroit Tigers,+125,-149,4,6
+21 Apr 2025,,New York Yankees,Cleveland Guardians,-125,+104,4,6
+21 Apr 2025,,Chicago White Sox,Boston Red Sox,+240,-303,2,4
+20 Apr 2025,,Washington Nationals,Colorado Rockies,-115,-105,1,3
+20 Apr 2025,,San Diego Padres,Houston Astros,+100,-120,3,2
+20 Apr 2025,,San Francisco Giants,Los Angeles Angels,+100,-120,4,5
+20 Apr 2025,,Washington Nationals,Colorado Rockies,-110,-110,3,2
+20 Apr 2025,,Los Angeles Dodgers,Texas Rangers,-161,+135,1,0
+20 Apr 2025,,Arizona Diamondbacks,Chicago Cubs,+120,-143,3,2
+20 Apr 2025,,Athletics,Milwaukee Brewers,+114,-133,1,14
+20 Apr 2025,,Kansas City Royals,Detroit Tigers,+179,-222,4,3
+20 Apr 2025,,St.Louis Cardinals,New York Mets,+120,-141,4,7
+20 Apr 2025,,New York Yankees,Tampa Bay Rays,-182,+150,4,0
+20 Apr 2025,,Seattle Mariners,Toronto Blue Jays,-115,-105,8,3
+20 Apr 2025,,Minnesota Twins,Atlanta Braves,-102,-118,2,6
+20 Apr 2025,,Cincinnati Reds,Baltimore Orioles,+165,-200,24,2
+20 Apr 2025,,Chicago White Sox,Boston Red Sox,+240,-303,8,4
+20 Apr 2025,,Cleveland Guardians,Pittsburgh Pirates,+100,-120,5,4
+20 Apr 2025,,Miami Marlins,Philadelphia Phillies,+270,-333,7,5
+19 Apr 2025,,San Francisco Giants,Los Angeles Angels,-149,+125,3,2
+19 Apr 2025,,Minnesota Twins,Atlanta Braves,+200,-250,3,4
+19 Apr 2025,,Athletics,Milwaukee Brewers,+114,-137,3,1
+19 Apr 2025,,San Diego Padres,Houston Astros,-120,+100,2,3
+19 Apr 2025,,Chicago White Sox,Boston Red Sox,+260,-333,3,4
+19 Apr 2025,,Washington Nationals,Colorado Rockies,-135,+114,12,11
+19 Apr 2025,,New York Yankees,Tampa Bay Rays,+104,-125,8,10
+19 Apr 2025,,Cincinnati Reds,Baltimore Orioles,+104,-125,5,9
+19 Apr 2025,,Cleveland Guardians,Pittsburgh Pirates,+150,-182,3,0
+19 Apr 2025,,Los Angeles Dodgers,Texas Rangers,-102,-118,3,4
+19 Apr 2025,,St.Louis Cardinals,New York Mets,+170,-208,0,3
+19 Apr 2025,,Seattle Mariners,Toronto Blue Jays,-120,+100,8,4
+19 Apr 2025,,Arizona Diamondbacks,Chicago Cubs,+110,-128,2,6
+19 Apr 2025,,Kansas City Royals,Detroit Tigers,+114,-135,1,3
+19 Apr 2025,,Miami Marlins,Philadelphia Phillies,+185,-227,10,11
+18 Apr 2025,,San Francisco Giants,Los Angeles Angels,-154,+129,0,2
+18 Apr 2025,,Athletics,Milwaukee Brewers,+150,-182,3,5
+18 Apr 2025,,San Diego Padres,Houston Astros,+145,-175,4,6
+18 Apr 2025,,Los Angeles Dodgers,Texas Rangers,-125,+104,3,0
+18 Apr 2025,,Minnesota Twins,Atlanta Braves,+125,-149,4,6
+18 Apr 2025,,Chicago White Sox,Boston Red Sox,+200,-250,3,10
+18 Apr 2025,,St.Louis Cardinals,New York Mets,+179,-222,4,5
+18 Apr 2025,,Seattle Mariners,Toronto Blue Jays,+104,-125,1,3
+18 Apr 2025,,Cincinnati Reds,Baltimore Orioles,+140,-169,8,3
+18 Apr 2025,,New York Yankees,Tampa Bay Rays,-120,+100,1,0
+18 Apr 2025,,Miami Marlins,Philadelphia Phillies,+179,-222,2,7
+18 Apr 2025,,Cleveland Guardians,Pittsburgh Pirates,-128,+110,10,7
+18 Apr 2025,,Kansas City Royals,Detroit Tigers,-143,+120,3,7
+18 Apr 2025,,Arizona Diamondbacks,Chicago Cubs,-115,-105,11,13
+17 Apr 2025,,Los Angeles Angels,Texas Rangers,+129,-154,3,5
+17 Apr 2025,,St.Louis Cardinals,New York Mets,+118,-139,1,4
+17 Apr 2025,,New York Yankees,Tampa Bay Rays,-105,-115,6,3
+17 Apr 2025,,Kansas City Royals,Detroit Tigers,+125,-154,1,6
+17 Apr 2025,,Cleveland Guardians,Baltimore Orioles,+110,-133,2,6
+17 Apr 2025,,San Francisco Giants,Philadelphia Phillies,+165,-200,4,6
+17 Apr 2025,,Athletics,Chicago White Sox,-130,+110,8,0
+17 Apr 2025,,Seattle Mariners,Cincinnati Reds,+104,-125,11,7
+17 Apr 2025,,Washington Nationals,Pittsburgh Pirates,+125,-149,0,1
+17 Apr 2025,,Arizona Diamondbacks,Miami Marlins,-143,+118,6,4
+16 Apr 2025,,Colorado Rockies,Los Angeles Dodgers,+260,-333,7,8
+16 Apr 2025,,Los Angeles Angels,Texas Rangers,-133,+114,1,3
+16 Apr 2025,,Athletics,Chicago White Sox,-161,+135,3,1
+16 Apr 2025,,Boston Red Sox,Tampa Bay Rays,+110,-133,1,0
+16 Apr 2025,,Kansas City Royals,New York Yankees,+125,-149,3,4
+16 Apr 2025,,San Francisco Giants,Philadelphia Phillies,+120,-143,11,4
+16 Apr 2025,,Arizona Diamondbacks,Miami Marlins,-143,+120,6,2
+16 Apr 2025,,Seattle Mariners,Cincinnati Reds,-110,-110,5,3
+16 Apr 2025,,Washington Nationals,Pittsburgh Pirates,-105,-115,1,6
+16 Apr 2025,,Cleveland Guardians,Baltimore Orioles,+104,-125,1,9
+16 Apr 2025,,Chicago Cubs,San Diego Padres,+100,-120,2,4
+16 Apr 2025,,Houston Astros,St.Louis Cardinals,-110,-110,1,4
+16 Apr 2025,,Detroit Tigers,Milwaukee Brewers,+125,-149,1,5
+16 Apr 2025,,New York Mets,Minnesota Twins,+100,-120,3,4
+16 Apr 2025,,Atlanta Braves,Toronto Blue Jays,-128,+110,1,3
+15 Apr 2025,,Colorado Rockies,Los Angeles Dodgers,+260,-333,2,6
+15 Apr 2025,,Chicago Cubs,San Diego Padres,-154,+129,2,1
+15 Apr 2025,,Los Angeles Angels,Texas Rangers,+118,-139,0,4
+15 Apr 2025,,Houston Astros,St.Louis Cardinals,-128,+110,2,0
+15 Apr 2025,,Athletics,Chicago White Sox,-161,+135,12,3
+15 Apr 2025,,Detroit Tigers,Milwaukee Brewers,-110,-110,0,5
+15 Apr 2025,,New York Mets,Minnesota Twins,-115,-105,3,6
+15 Apr 2025,,Atlanta Braves,Toronto Blue Jays,-115,-105,3,6
+15 Apr 2025,,Cleveland Guardians,Baltimore Orioles,+125,-149,6,3
+15 Apr 2025,,Boston Red Sox,Tampa Bay Rays,+114,-135,7,4
+15 Apr 2025,,Kansas City Royals,New York Yankees,+200,-250,2,4
+15 Apr 2025,,San Francisco Giants,Philadelphia Phillies,+135,-161,4,6
+15 Apr 2025,,Arizona Diamondbacks,Miami Marlins,-154,+129,10,4
+15 Apr 2025,,Seattle Mariners,Cincinnati Reds,-115,-105,4,8
+15 Apr 2025,,Washington Nationals,Pittsburgh Pirates,+114,-135,3,0
+14 Apr 2025,,Colorado Rockies,Los Angeles Dodgers,+280,-357,3,5
+14 Apr 2025,,Chicago Cubs,San Diego Padres,+125,-149,4,10
+14 Apr 2025,,Houston Astros,St.Louis Cardinals,-110,-110,3,8
+14 Apr 2025,,Detroit Tigers,Milwaukee Brewers,-161,+135,9,1
+14 Apr 2025,,New York Mets,Minnesota Twins,+100,-120,5,1
+14 Apr 2025,,Atlanta Braves,Toronto Blue Jays,-115,-105,8,4
+14 Apr 2025,,Boston Red Sox,Tampa Bay Rays,+100,-120,1,16
+14 Apr 2025,,Kansas City Royals,New York Yankees,+120,-143,1,4
+14 Apr 2025,,San Francisco Giants,Philadelphia Phillies,-105,-115,10,4
+14 Apr 2025,,Washington Nationals,Pittsburgh Pirates,+154,-189,3,10
+13 Apr 2025,,Chicago Cubs,Los Angeles Dodgers,+185,-227,4,2
+13 Apr 2025,,Milwaukee Brewers,Arizona Diamondbacks,+100,-120,2,5
+13 Apr 2025,,Colorado Rockies,San Diego Padres,+200,-250,0,6
+13 Apr 2025,,Texas Rangers,Seattle Mariners,+120,-139,1,3
+13 Apr 2025,,New York Mets,Athletics,-149,+125,8,0
+13 Apr 2025,,Philadelphia Phillies,St.Louis Cardinals,-175,+145,0,7
+13 Apr 2025,,Boston Red Sox,Chicago White Sox,-250,+200,3,1
+13 Apr 2025,,Detroit Tigers,Minnesota Twins,-105,-115,1,5
+13 Apr 2025,,Los Angeles Angels,Houston Astros,+140,-167,3,7
+13 Apr 2025,,Atlanta Braves,Tampa Bay Rays,-175,+145,3,8
+13 Apr 2025,,Pittsburgh Pirates,Cincinnati Reds,+154,-182,0,4
+13 Apr 2025,,Kansas City Royals,Cleveland Guardians,-139,+120,4,2
+13 Apr 2025,,Washington Nationals,Miami Marlins,-154,+129,4,11
+13 Apr 2025,,Toronto Blue Jays,Baltimore Orioles,+114,-133,7,6
+13 Apr 2025,,San Francisco Giants,New York Yankees,+100,-120,5,4
+12 Apr 2025,,Texas Rangers,Seattle Mariners,+120,-143,2,9
+12 Apr 2025,,Chicago Cubs,Los Angeles Dodgers,+154,-182,16,0
+12 Apr 2025,,Colorado Rockies,San Diego Padres,+140,-169,0,2
+12 Apr 2025,,Milwaukee Brewers,Arizona Diamondbacks,+154,-182,4,5
+12 Apr 2025,,Los Angeles Angels,Houston Astros,+140,-167,4,1
+12 Apr 2025,,Pittsburgh Pirates,Cincinnati Reds,+100,-120,2,5
+12 Apr 2025,,Kansas City Royals,Cleveland Guardians,+114,-133,3,6
+12 Apr 2025,,Atlanta Braves,Tampa Bay Rays,+118,-143,5,4
+12 Apr 2025,,Boston Red Sox,Chicago White Sox,-161,+135,2,3
+12 Apr 2025,,Washington Nationals,Miami Marlins,+120,-143,6,7
+12 Apr 2025,,New York Mets,Athletics,-135,+114,1,3
+12 Apr 2025,,Toronto Blue Jays,Baltimore Orioles,+104,-125,4,5
+12 Apr 2025,,San Francisco Giants,New York Yankees,+114,-135,4,8
+12 Apr 2025,,Philadelphia Phillies,St.Louis Cardinals,-182,+154,4,1
+12 Apr 2025,,Detroit Tigers,Minnesota Twins,+135,-161,4,0
+11 Apr 2025,,Chicago Cubs,Los Angeles Dodgers,+150,-182,0,3
+11 Apr 2025,,New York Mets,Athletics,-130,+110,7,6
+11 Apr 2025,,Milwaukee Brewers,Arizona Diamondbacks,+129,-154,7,0
+11 Apr 2025,,Colorado Rockies,San Diego Padres,+185,-227,0,8
+11 Apr 2025,,Texas Rangers,Seattle Mariners,-125,+104,3,5
+11 Apr 2025,,Philadelphia Phillies,St.Louis Cardinals,-118,-102,0,2
+11 Apr 2025,,Detroit Tigers,Minnesota Twins,-102,-118,7,6
+11 Apr 2025,,Los Angeles Angels,Houston Astros,+118,-139,3,14
+11 Apr 2025,,Boston Red Sox,Chicago White Sox,-167,+140,1,11
+11 Apr 2025,,Washington Nationals,Miami Marlins,-115,-105,7,4
+11 Apr 2025,,Atlanta Braves,Tampa Bay Rays,+118,-139,3,6
+11 Apr 2025,,San Francisco Giants,New York Yankees,+118,-139,9,1
+11 Apr 2025,,Pittsburgh Pirates,Cincinnati Reds,+145,-175,3,5
+11 Apr 2025,,Kansas City Royals,Cleveland Guardians,+104,-125,0,7
+10 Apr 2025,,Philadelphia Phillies,Atlanta Braves,+114,-139,2,4
+10 Apr 2025,,Toronto Blue Jays,Boston Red Sox,+110,-130,3,4
+10 Apr 2025,,Milwaukee Brewers,Colorado Rockies,-130,+110,2,7
+10 Apr 2025,,Minnesota Twins,Kansas City Royals,-102,-118,2,3
+10 Apr 2025,,Chicago White Sox,Cleveland Guardians,+200,-250,1,6
+10 Apr 2025,,Los Angeles Angels,Tampa Bay Rays,-102,-118,11,1
+09 Apr 2025,,Milwaukee Brewers,Colorado Rockies,-139,+120,17,2
+09 Apr 2025,,Minnesota Twins,Kansas City Royals,-110,-110,4,0
+09 Apr 2025,,Philadelphia Phillies,Atlanta Braves,+125,-135,4,3
+09 Apr 2025,,Los Angeles Angels,Tampa Bay Rays,+120,-141,4,5
+09 Apr 2025,,Toronto Blue Jays,Boston Red Sox,+110,-128,2,1
+09 Apr 2025,,Chicago White Sox,Cleveland Guardians,+160,-179,2,3
+05 Apr 2025,,Cleveland Guardians,Los Angeles Angels,-149,+125,4,10
+05 Apr 2025,,Seattle Mariners,San Francisco Giants,+100,-120,1,4
+05 Apr 2025,,Athletics,Colorado Rockies,-110,-110,7,4
+05 Apr 2025,,Miami Marlins,Atlanta Braves,+220,-263,4,0
+05 Apr 2025,,Cincinnati Reds,Milwaukee Brewers,+110,-120,11,7
+05 Apr 2025,,Toronto Blue Jays,New York Mets,+114,-135,2,3
+05 Apr 2025,,Tampa Bay Rays,Texas Rangers,+150,-179,4,6
+05 Apr 2025,,Baltimore Orioles,Kansas City Royals,-105,-115,8,1
+05 Apr 2025,,Arizona Diamondbacks,Washington Nationals,-133,+114,3,4
+05 Apr 2025,,Los Angeles Dodgers,Philadelphia Phillies,-105,-115,3,1
+05 Apr 2025,,New York Yankees,Pittsburgh Pirates,-159,+135,10,4
+05 Apr 2025,,San Diego Padres,Chicago Cubs,+100,-115,1,7
+05 Apr 2025,,Houston Astros,Minnesota Twins,+110,-125,1,6
+05 Apr 2025,,Chicago White Sox,Detroit Tigers,+200,-244,2,7
+04 Apr 2025,,Cleveland Guardians,Los Angeles Angels,-115,-105,8,6
+04 Apr 2025,,Cincinnati Reds,Milwaukee Brewers,+110,-130,2,3
+04 Apr 2025,,Tampa Bay Rays,Texas Rangers,+114,-130,2,5
+04 Apr 2025,,Baltimore Orioles,Kansas City Royals,-115,-105,2,8
+04 Apr 2025,,Miami Marlins,Atlanta Braves,+204,-250,0,10
+04 Apr 2025,,Arizona Diamondbacks,Washington Nationals,-154,+140,6,4
+04 Apr 2025,,Los Angeles Dodgers,Philadelphia Phillies,-135,+114,2,3
+04 Apr 2025,,Seattle Mariners,San Francisco Giants,+129,-149,9,10
+04 Apr 2025,,New York Yankees,Pittsburgh Pirates,-175,+150,9,4
+04 Apr 2025,,Athletics,Colorado Rockies,-115,-105,6,3
+04 Apr 2025,,Toronto Blue Jays,New York Mets,+114,-130,0,5
+04 Apr 2025,,San Diego Padres,Chicago Cubs,+145,-167,1,3
+04 Apr 2025,,St.Louis Cardinals,Boston Red Sox,+100,-115,9,13
+04 Apr 2025,,Chicago White Sox,Detroit Tigers,+220,-244,4,7
+03 Apr 2025,,Cincinnati Reds,Milwaukee Brewers,+100,-120,0,1
+03 Apr 2025,,Arizona Diamondbacks,New York Yankees,+120,-141,7,9
+03 Apr 2025,,Houston Astros,Minnesota Twins,+120,-139,5,2
+03 Apr 2025,,Boston Red Sox,Baltimore Orioles,+110,-128,8,4
+03 Apr 2025,,Colorado Rockies,Philadelphia Phillies,+179,-208,1,3
+02 Apr 2025,,Atlanta Braves,Los Angeles Dodgers,+200,-233,5,6
+02 Apr 2025,,Arizona Diamondbacks,New York Yankees,+125,-143,4,3
+02 Apr 2025,,Colorado Rockies,Philadelphia Phillies,+265,-333,1,5
+02 Apr 2025,,Boston Red Sox,Baltimore Orioles,-125,+110,3,0
+02 Apr 2025,,New York Mets,Miami Marlins,-222,+179,6,5
+02 Apr 2025,,Cleveland Guardians,San Diego Padres,+154,-185,2,5
+02 Apr 2025,,Detroit Tigers,Seattle Mariners,-125,+104,2,3
+02 Apr 2025,,San Francisco Giants,Houston Astros,+145,-169,6,3
+02 Apr 2025,,Chicago Cubs,Athletics,+104,-118,10,2
+02 Apr 2025,,Washington Nationals,Toronto Blue Jays,-110,-110,2,4
+02 Apr 2025,,Minnesota Twins,Chicago White Sox,-182,+160,6,1
+02 Apr 2025,,Los Angeles Angels,St.Louis Cardinals,+125,-143,5,12
+02 Apr 2025,,Kansas City Royals,Milwaukee Brewers,+104,-125,2,3
+02 Apr 2025,,Pittsburgh Pirates,Tampa Bay Rays,-115,-102,4,2
+02 Apr 2025,,Texas Rangers,Cincinnati Reds,+120,-141,1,0
+01 Apr 2025,,Atlanta Braves,Los Angeles Dodgers,+110,-130,1,3
+01 Apr 2025,,Chicago Cubs,Athletics,-135,+114,7,4
+01 Apr 2025,,Cleveland Guardians,San Diego Padres,+145,-169,0,7
+01 Apr 2025,,Detroit Tigers,Seattle Mariners,+150,-175,4,1
+01 Apr 2025,,San Francisco Giants,Houston Astros,-139,+120,3,1
+01 Apr 2025,,Los Angeles Angels,St.Louis Cardinals,+118,-135,9,7
+01 Apr 2025,,Minnesota Twins,Chicago White Sox,-161,+140,8,3
+01 Apr 2025,,Kansas City Royals,Milwaukee Brewers,+110,-125,0,5
+01 Apr 2025,,Washington Nationals,Toronto Blue Jays,+140,-164,3,5
+01 Apr 2025,,Arizona Diamondbacks,New York Yankees,-120,+104,7,5
+01 Apr 2025,,Pittsburgh Pirates,Tampa Bay Rays,+145,-159,0,7
+01 Apr 2025,,Texas Rangers,Cincinnati Reds,-149,+125,1,0
+01 Apr 2025,,New York Mets,Miami Marlins,-149,+129,2,4
+31 Mar 2025,,Atlanta Braves,Los Angeles Dodgers,+200,-233,1,6
+31 Mar 2025,,Chicago Cubs,Athletics,-143,+125,18,3
+31 Mar 2025,,Cleveland Guardians,San Diego Padres,+114,-135,2,7
+31 Mar 2025,,Detroit Tigers,Seattle Mariners,+100,-118,9,6
+31 Mar 2025,,San Francisco Giants,Houston Astros,+104,-125,7,2
+31 Mar 2025,,Los Angeles Angels,St.Louis Cardinals,+135,-159,5,4
+31 Mar 2025,,Washington Nationals,Toronto Blue Jays,+145,-164,2,5
+31 Mar 2025,,Pittsburgh Pirates,Tampa Bay Rays,+150,-179,1,6
+31 Mar 2025,,Texas Rangers,Cincinnati Reds,-125,+110,3,14
+31 Mar 2025,,New York Mets,Miami Marlins,-189,+160,10,4
+31 Mar 2025,,Colorado Rockies,Philadelphia Phillies,+260,-333,1,6
+31 Mar 2025,,Boston Red Sox,Baltimore Orioles,+125,-149,5,8
+31 Mar 2025,,Minnesota Twins,Chicago White Sox,-200,+165,0,9
+31 Mar 2025,,Kansas City Royals,Milwaukee Brewers,+100,-118,11,1
+30 Mar 2025,,Atlanta Braves,San Diego Padres,+110,-130,0,5
+30 Mar 2025,,Chicago Cubs,Arizona Diamondbacks,-110,-110,6,10
+30 Mar 2025,,Athletics,Seattle Mariners,+154,-179,1,2
+30 Mar 2025,,Boston Red Sox,Texas Rangers,+135,-159,2,3
+30 Mar 2025,,Minnesota Twins,St.Louis Cardinals,-110,-105,2,9
+30 Mar 2025,,Los Angeles Angels,Chicago White Sox,-125,+104,3,2
+30 Mar 2025,,Cleveland Guardians,Kansas City Royals,-105,-115,6,2
+30 Mar 2025,,San Francisco Giants,Cincinnati Reds,-120,+104,6,3
+30 Mar 2025,,Colorado Rockies,Tampa Bay Rays,+154,-185,4,6
+30 Mar 2025,,Pittsburgh Pirates,Miami Marlins,+104,-125,2,3
+30 Mar 2025,,Baltimore Orioles,Toronto Blue Jays,+114,-133,1,3
+30 Mar 2025,,Milwaukee Brewers,New York Yankees,+125,-149,3,12
+30 Mar 2025,,Philadelphia Phillies,Washington Nationals,-141,+125,1,5
+29 Mar 2025,,Athletics,Seattle Mariners,+150,-175,4,2
+29 Mar 2025,,Detroit Tigers,Los Angeles Dodgers,+175,-208,3,7
+29 Mar 2025,,Chicago Cubs,Arizona Diamondbacks,+100,-120,4,3
+29 Mar 2025,,Atlanta Braves,San Diego Padres,-149,+129,0,1
+29 Mar 2025,,New York Mets,Houston Astros,+100,-118,1,2
+29 Mar 2025,,Boston Red Sox,Texas Rangers,-105,-115,3,4
+29 Mar 2025,,San Francisco Giants,Cincinnati Reds,+104,-120,2,3
+29 Mar 2025,,Cleveland Guardians,Kansas City Royals,+100,-115,3,4
+29 Mar 2025,,Colorado Rockies,Tampa Bay Rays,+154,-182,2,1
+29 Mar 2025,,Pittsburgh Pirates,Miami Marlins,-120,+104,4,5
+29 Mar 2025,,Philadelphia Phillies,Washington Nationals,-154,+135,11,6
+29 Mar 2025,,Baltimore Orioles,Toronto Blue Jays,+110,-120,9,5
+29 Mar 2025,,Minnesota Twins,St.Louis Cardinals,-110,-110,1,5
+29 Mar 2025,,Los Angeles Angels,Chicago White Sox,-161,+140,1,0
+29 Mar 2025,,Milwaukee Brewers,New York Yankees,+140,-164,9,20
+28 Mar 2025,,Detroit Tigers,Los Angeles Dodgers,+185,-222,5,8
+28 Mar 2025,,Chicago Cubs,Arizona Diamondbacks,+125,-143,1,8
+28 Mar 2025,,Athletics,Seattle Mariners,+120,-139,7,0
+28 Mar 2025,,Atlanta Braves,San Diego Padres,+114,-135,3,4
+28 Mar 2025,,New York Mets,Houston Astros,-105,-115,3,1
+28 Mar 2025,,Boston Red Sox,Texas Rangers,-115,-105,1,4
+28 Mar 2025,,Pittsburgh Pirates,Miami Marlins,-135,+118,4,3
+28 Mar 2025,,Baltimore Orioles,Toronto Blue Jays,+104,-125,2,8
+28 Mar 2025,,Colorado Rockies,Tampa Bay Rays,+179,-222,2,3
+27 Mar 2025,,Chicago Cubs,Arizona Diamondbacks,+104,-125,10,6
+27 Mar 2025,,Athletics,Seattle Mariners,+145,-169,2,4
+27 Mar 2025,,Detroit Tigers,Los Angeles Dodgers,+140,-164,4,5
+27 Mar 2025,,Minnesota Twins,St.Louis Cardinals,-115,-105,3,5
+27 Mar 2025,,Atlanta Braves,San Diego Padres,-125,+104,4,7
+27 Mar 2025,,Los Angeles Angels,Chicago White Sox,-159,+135,1,8
+27 Mar 2025,,San Francisco Giants,Cincinnati Reds,-110,-110,6,4
+27 Mar 2025,,Cleveland Guardians,Kansas City Royals,+150,-175,7,4
+27 Mar 2025,,New York Mets,Houston Astros,-105,-115,1,3
+27 Mar 2025,,Pittsburgh Pirates,Miami Marlins,-149,+125,4,5
+27 Mar 2025,,Boston Red Sox,Texas Rangers,-125,+104,5,2
+27 Mar 2025,,Philadelphia Phillies,Washington Nationals,-154,+129,7,3
+27 Mar 2025,,Baltimore Orioles,Toronto Blue Jays,+100,-120,12,2
+27 Mar 2025,,Milwaukee Brewers,New York Yankees,+120,-141,2,4
+19 Mar 2025,,Los Angeles Dodgers,Chicago Cubs,-149,+125,6,3
+18 Mar 2025,,Los Angeles Dodgers,Chicago Cubs,-141,+125,4,1

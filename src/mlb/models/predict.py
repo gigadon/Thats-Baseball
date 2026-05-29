@@ -109,26 +109,11 @@ class PredictionService:
 
         raw_home_prob = float(detailed["ensemble"][0])
 
-        # Blend with REAL market odds (Vegas encodes info the model can't see:
-        # injuries, lineup decisions, weather, sharp money).
-        # Only apply when we have genuine market odds — NOT the Elo-derived
-        # proxy used in training (which is already an input feature).
-        market_prob = game_fv.features.get("market_home_prob", 0.5)
-        has_real_odds = game_fv.features.get("has_real_odds", False)
-
-        if has_real_odds and market_prob != 0.5:
-            # Real Vegas odds: blend 40% model, 60% market
-            alpha = 0.40
-            home_win_prob = alpha * raw_home_prob + (1 - alpha) * market_prob
-        else:
-            # No real market data (proxy or missing) — use model output
-            # with a small home-field calibration nudge
-            home_bias = 0.012
-            distance_from_center = abs(raw_home_prob - 0.5)
-            taper = max(0.0, 1.0 - distance_from_center * 4)
-            home_win_prob = raw_home_prob + home_bias * taper
-
-        home_win_prob = max(0.01, min(0.99, home_win_prob))
+        # Use model output directly — market odds flow through the model
+        # as a feature (market_home_prob) rather than being blended post-hoc.
+        # The old 60/40 market blend and home-bias nudge created a
+        # train/inference mismatch that degraded live accuracy.
+        home_win_prob = max(0.01, min(0.99, raw_home_prob))
 
         model_preds = {
             name: float(vals[0])
@@ -210,9 +195,8 @@ class PredictionService:
         if self._runs_regressor is not None and self._runs_feature_names is not None:
             # Build a feature row matching the training feature set
             fv = game_fv.features
-            row = {col: fv.get(col, 0.0) for col in self._runs_feature_names}
+            row = {col: fv.get(col, np.nan) for col in self._runs_feature_names}
             X = np.array([[row[c] for c in self._runs_feature_names]], dtype=float)
-            X = np.nan_to_num(X, nan=0.0)
 
             if self._runs_scaler is not None:
                 X = self._runs_scaler.transform(X)
@@ -327,7 +311,6 @@ _FACTOR_LABELS: dict[str, tuple[str, str]] = {
     "diff_sp_recent_whip": ("Pitcher Recent WHIP", "Last 3 starts WHIP"),
     "diff_sp_season_k9": ("Pitcher K rate", "Strikeouts per 9"),
     "diff_sp_recent_k9": ("Pitcher Recent K/9", "Last 3 starts K/9"),
-    "diff_sp_k_minus_bb": ("Pitcher K-BB", "K/9 minus BB/9 gap"),
     "diff_sp_rest_days": ("Pitcher rest", "Days since last start"),
     # Batting
     "diff_bat_avg": ("Batting average", "Team BA"),
