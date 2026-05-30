@@ -161,34 +161,67 @@ class EnsembleModel:
                 self._oof_metrics[model.name].auc_roc,
             )
 
-        # Tune meta-learner regularization via CV on OOF predictions
+        # Tune meta-learner: compare LogisticRegression vs MLP
         from sklearn.metrics import brier_score_loss
-        best_c = 1.0
-        best_score = float("inf")
-        for c_val in [0.001, 0.01, 0.05, 0.1, 0.5, 1.0, 2.0, 5.0, 10.0]:
+        from sklearn.neural_network import MLPClassifier
+
+        candidates = {}
+
+        # 1) LogisticRegression with C tuning
+        for c_val in [0.01, 0.1, 0.5, 1.0, 5.0, 10.0]:
             cv_briers = []
             for tr_idx, val_idx in StratifiedKFold(
                 n_splits=5, shuffle=True, random_state=42
             ).split(oof_preds, y):
-                lr = LogisticRegression(
+                m = LogisticRegression(
                     C=c_val, max_iter=1000, random_state=self.config.random_state
                 )
                 sw_tr = sw[tr_idx] if sw is not None else None
-                lr.fit(oof_preds[tr_idx], y[tr_idx], sample_weight=sw_tr)
-                probs = lr.predict_proba(oof_preds[val_idx])[:, 1]
+                m.fit(oof_preds[tr_idx], y[tr_idx], sample_weight=sw_tr)
+                probs = m.predict_proba(oof_preds[val_idx])[:, 1]
                 cv_briers.append(brier_score_loss(y[val_idx], probs))
-            mean_brier = np.mean(cv_briers)
-            if mean_brier < best_score:
-                best_score = mean_brier
-                best_c = c_val
-        logger.info("Meta-learner tuned: C=%.4f (Brier=%.4f)", best_c, best_score)
+            candidates[f"LR_C={c_val}"] = (np.mean(cv_briers), "lr", c_val)
 
-        # Train meta-learner on OOF predictions with best C
-        self.meta_model = LogisticRegression(
-            C=best_c, max_iter=1000, random_state=self.config.random_state
-        )
-        self.meta_model.fit(oof_preds, y, sample_weight=sw)
-        logger.info("Meta-model trained on %d OOF predictions (C=%.4f)", n_samples, best_c)
+        # 2) MLP with different architectures
+        for hidden in [(8,), (16,), (8, 4), (16, 8)]:
+            for alpha in [0.01, 0.1, 1.0]:
+                cv_briers = []
+                for tr_idx, val_idx in StratifiedKFold(
+                    n_splits=5, shuffle=True, random_state=42
+                ).split(oof_preds, y):
+                    m = MLPClassifier(
+                        hidden_layer_sizes=hidden, alpha=alpha,
+                        max_iter=500, random_state=self.config.random_state,
+                        early_stopping=True, validation_fraction=0.15,
+                    )
+                    m.fit(oof_preds[tr_idx], y[tr_idx])
+                    probs = m.predict_proba(oof_preds[val_idx])[:, 1]
+                    cv_briers.append(brier_score_loss(y[val_idx], probs))
+                candidates[f"MLP_{hidden}_a={alpha}"] = (np.mean(cv_briers), "mlp", (hidden, alpha))
+
+        # Pick best
+        best_name = min(candidates, key=lambda k: candidates[k][0])
+        best_brier, best_type, best_param = candidates[best_name]
+        logger.info("Meta-learner comparison (top 5):")
+        for name, (brier, _, _) in sorted(candidates.items(), key=lambda x: x[1][0])[:5]:
+            logger.info("  %s: Brier=%.4f%s", name, brier, " <-- best" if name == best_name else "")
+
+        # Train final meta-learner
+        if best_type == "mlp":
+            hidden, alpha = best_param
+            self.meta_model = MLPClassifier(
+                hidden_layer_sizes=hidden, alpha=alpha,
+                max_iter=500, random_state=self.config.random_state,
+                early_stopping=True, validation_fraction=0.15,
+            )
+            self.meta_model.fit(oof_preds, y)
+            logger.info("Meta-model: MLP %s alpha=%.2f (Brier=%.4f)", hidden, alpha, best_brier)
+        else:
+            self.meta_model = LogisticRegression(
+                C=best_param, max_iter=1000, random_state=self.config.random_state
+            )
+            self.meta_model.fit(oof_preds, y, sample_weight=sw)
+            logger.info("Meta-model: LogisticRegression C=%.4f (Brier=%.4f)", best_param, best_brier)
 
         # Calibrate: fit isotonic regression on meta-model OOF outputs
         meta_probs = self.meta_model.predict_proba(oof_preds)[:, 1]

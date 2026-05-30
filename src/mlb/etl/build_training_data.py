@@ -313,9 +313,16 @@ class TrainingDataBuilder:
             row["rest_diff"] = row["h_rest_days"] - row["a_rest_days"]
 
             # Venue-specific win pct differential (already in h_/a_ from rolling stats)
-            h_home_wpct = home_feat.get("venue_home_win_pct", 0.536)
-            a_away_wpct = away_feat.get("venue_away_win_pct", 0.464)
+            h_home_wpct = home_feat.get("venue_home_win_pct", 0.500)
+            a_away_wpct = away_feat.get("venue_away_win_pct", 0.500)
             row["diff_venue_win_pct"] = h_home_wpct - a_away_wpct
+
+            # Home-field advantage strength: how much better each team is at home vs away
+            h_hfa = home_feat.get("venue_home_win_pct", 0.500) - home_feat.get("venue_away_win_pct", 0.500)
+            a_hfa = away_feat.get("venue_home_win_pct", 0.500) - away_feat.get("venue_away_win_pct", 0.500)
+            row["h_hfa_strength"] = h_hfa
+            row["a_hfa_strength"] = a_hfa
+            row["diff_hfa_strength"] = h_hfa - a_hfa
 
             # Starting pitcher season stats (entering this game)
             h_sp = sp_season.get((game["game_id"], home))
@@ -1454,11 +1461,11 @@ class TrainingDataBuilder:
                     # Venue-specific rolling stats (last 20 home/away games)
                     "venue_home_win_pct": (
                         sum(1 for r in home_buffer if r["won"]) / len(home_buffer)
-                        if home_buffer else 0.536
+                        if home_buffer else 0.500
                     ),
                     "venue_away_win_pct": (
                         sum(1 for r in away_buffer if r["won"]) / len(away_buffer)
-                        if away_buffer else 0.464
+                        if away_buffer else 0.500
                     ),
                     "venue_home_rs_per_game": (
                         sum(r["rs"] for r in home_buffer) / len(home_buffer)
@@ -1601,8 +1608,8 @@ class TrainingDataBuilder:
             "home_wpct": latest["home_wpct"],
             "away_wpct": latest["away_wpct"],
             # Venue-specific rolling stats (last 20 home/away games)
-            "venue_home_win_pct": latest.get("venue_home_win_pct", 0.536),
-            "venue_away_win_pct": latest.get("venue_away_win_pct", 0.464),
+            "venue_home_win_pct": latest.get("venue_home_win_pct", 0.500),
+            "venue_away_win_pct": latest.get("venue_away_win_pct", 0.500),
             "venue_home_rs_per_game": latest.get("venue_home_rs_per_game", 4.5),
             "venue_away_rs_per_game": latest.get("venue_away_rs_per_game", 4.5),
             # Games played (proxy for sample stability)

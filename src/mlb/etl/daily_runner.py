@@ -788,11 +788,18 @@ class DailyRunner:
         features["rest_diff"] = features["h_rest_days"] - features["a_rest_days"]
 
         # Venue-specific rolling features (home team's home record, away team's road record)
-        features["h_home_win_pct"] = home_feat.get("venue_home_win_pct", 0.536)
-        features["a_away_win_pct"] = away_feat.get("venue_away_win_pct", 0.464)
+        features["h_home_win_pct"] = home_feat.get("venue_home_win_pct", 0.500)
+        features["a_away_win_pct"] = away_feat.get("venue_away_win_pct", 0.500)
         features["diff_venue_win_pct"] = features["h_home_win_pct"] - features["a_away_win_pct"]
         features["h_home_rs_per_game"] = home_feat.get("venue_home_rs_per_game", 4.5)
         features["a_away_rs_per_game"] = away_feat.get("venue_away_rs_per_game", 4.5)
+
+        # Home-field advantage strength per team
+        h_hfa = home_feat.get("venue_home_win_pct", 0.500) - home_feat.get("venue_away_win_pct", 0.500)
+        a_hfa = away_feat.get("venue_home_win_pct", 0.500) - away_feat.get("venue_away_win_pct", 0.500)
+        features["h_hfa_strength"] = h_hfa
+        features["a_hfa_strength"] = a_hfa
+        features["diff_hfa_strength"] = h_hfa - a_hfa
 
         # Starting pitcher season stats — passed to model as features
         sp_data = sp_stats or {}
