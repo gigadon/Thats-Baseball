@@ -27,43 +27,15 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import TimeSeriesSplit
 from xgboost import XGBRegressor
 
+# RunsEnsemble lives in its own module so the pickled model always references a
+# stable, importable class path (running this file as ``python -m`` makes it
+# ``__main__``, which would pickle as ``__main__.RunsEnsemble`` and fail to load
+# in the prediction service).
+from mlb.models.runs_ensemble import RunsEnsemble
+
 logger = logging.getLogger(__name__)
 
 optuna.logging.set_verbosity(optuna.logging.WARNING)
-
-
-class RunsEnsemble:
-    """Ensemble wrapper combining LightGBM + XGBoost for runs prediction.
-
-    The underlying models predict deviation from market_total.
-    This wrapper adds the market_total back to produce final total runs.
-
-    Parameters calibrated via CV:
-        alpha: weight for LightGBM (1-alpha for XGBoost)
-        shrinkage: how much to trust the model's deviation (0=just use market_total, 1=full model)
-    """
-
-    def __init__(self, lgbm, xgb, market_total_idx: int | None = None,
-                 alpha: float = 0.5, shrinkage: float = 1.0):
-        self.lgbm = lgbm
-        self.xgb = xgb
-        self.market_total_idx = market_total_idx
-        self.alpha = alpha
-        self.shrinkage = shrinkage
-
-    def predict(self, X):
-        # LightGBM handles NaN; XGBoost needs clean input
-        X_clean = np.nan_to_num(X, nan=0.0)
-        p_lgbm = self.lgbm.predict(X)
-        p_xgb = self.xgb.predict(X_clean)
-        deviation = self.alpha * p_lgbm + (1 - self.alpha) * p_xgb
-        deviation = deviation * self.shrinkage
-
-        # Add market_total back to get absolute total runs
-        if self.market_total_idx is not None:
-            market_total = np.nan_to_num(X[:, self.market_total_idx], nan=8.5)
-            return deviation + market_total
-        return deviation + 8.5  # fallback to league average
 
 # Columns that must NOT be used as features
 META_AND_TARGET_COLS = {
