@@ -18,7 +18,7 @@ import joblib
 import numpy as np
 from sklearn.calibration import CalibratedClassifierCV
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import TimeSeriesSplit
 
 from mlb.models.base import (
     BaseModel,
@@ -105,53 +105,57 @@ class EnsembleModel:
         self.is_fitted = True
 
     def _train_stacking(self, X: np.ndarray, y: np.ndarray):
-        """Train with stacking: OOF predictions → meta-learner.
+        """Train with stacking using time-series-aware cross-validation.
+
+        X is assumed to be ordered chronologically (the pipeline sorts by
+        game date before the train/test split).  Out-of-fold predictions are
+        generated with TimeSeriesSplit so the meta-learner and calibrator are
+        never trained on information from the future.  TimeSeriesSplit never
+        validates the earliest block, so those rows carry no OOF prediction
+        and are excluded from meta-training via ``oof_mask``.
 
         Fold-trained models are kept for inference (bagged predictions)
         instead of retraining on full data, which would cause leakage
         between the meta-learner's calibration and the base model outputs.
         """
+        from sklearn.metrics import brier_score_loss, log_loss, roc_auc_score
+        from sklearn.neural_network import MLPClassifier
+
         n_samples = X.shape[0]
         n_models = len(self.base_models)
-        oof_preds = np.zeros((n_samples, n_models))
+        oof_preds = np.full((n_samples, n_models), np.nan)
+        oof_mask = np.zeros(n_samples, dtype=bool)
 
-        kf = StratifiedKFold(
-            n_splits=self.config.cv_folds,
-            shuffle=True,
-            random_state=self.config.random_state,
-        )
-
-        # Generate OOF predictions and store fold-trained models
+        tscv = TimeSeriesSplit(n_splits=self.config.cv_folds)
         sw = self._sample_weight
         self.fold_models = [[] for _ in range(n_models)]
 
         for model_idx, model in enumerate(self.base_models):
-            logger.info("Generating OOF predictions for %s", model.name)
-            fold_preds = np.zeros(n_samples)
+            logger.info("Generating time-series OOF predictions for %s", model.name)
 
-            for fold_idx, (train_idx, val_idx) in enumerate(kf.split(X, y)):
-                X_train, X_val = X[train_idx], X[val_idx]
-                y_train = y[train_idx]
-                sw_train = sw[train_idx] if sw is not None else None
+            for train_idx, val_idx in tscv.split(X):
+                X_tr, X_val = X[train_idx], X[val_idx]
+                y_tr = y[train_idx]
+                sw_tr = sw[train_idx] if sw is not None else None
 
-                # Clone model for this fold and keep it
+                # Clone model for this fold and keep it for bagged inference
                 fold_model = model.__class__()
-                fold_model.train(X_train, y_train, self.feature_names, sample_weight=sw_train)
-                fold_preds[val_idx] = fold_model.predict_proba(X_val)
+                fold_model.train(X_tr, y_tr, self.feature_names, sample_weight=sw_tr)
+                oof_preds[val_idx, model_idx] = fold_model.predict_proba(X_val)
                 self.fold_models[model_idx].append(fold_model)
+                oof_mask[val_idx] = True
 
-            oof_preds[:, model_idx] = fold_preds
-
-            # Evaluate OOF performance
-            from sklearn.metrics import brier_score_loss, log_loss, roc_auc_score
-
-            preds_binary = (fold_preds >= 0.5).astype(int)
+            # Evaluate OOF performance on the rows that received predictions
+            cov = oof_mask
+            fp = oof_preds[cov, model_idx]
+            y_cov = y[cov]
+            preds_binary = (fp >= 0.5).astype(int)
             self._oof_metrics[model.name] = ModelMetrics(
-                accuracy=float(np.mean(preds_binary == y)),
-                brier_score=float(brier_score_loss(y, fold_preds)),
-                log_loss=float(log_loss(y, np.clip(fold_preds, 1e-7, 1 - 1e-7))),
-                auc_roc=float(roc_auc_score(y, fold_preds)),
-                calibration_error=_expected_calibration_error(y, fold_preds),
+                accuracy=float(np.mean(preds_binary == y_cov)),
+                brier_score=float(brier_score_loss(y_cov, fp)),
+                log_loss=float(log_loss(y_cov, np.clip(fp, 1e-7, 1 - 1e-7))),
+                auc_roc=float(roc_auc_score(y_cov, fp)),
+                calibration_error=_expected_calibration_error(y_cov, fp),
             )
             logger.info(
                 "%s OOF — Acc: %.3f, Brier: %.4f, AUC: %.3f",
@@ -161,42 +165,48 @@ class EnsembleModel:
                 self._oof_metrics[model.name].auc_roc,
             )
 
-        # Tune meta-learner: compare LogisticRegression vs MLP
-        from sklearn.metrics import brier_score_loss
-        from sklearn.neural_network import MLPClassifier
+        # ── Split covered OOF rows into meta-train (earlier) and a held-out
+        #    calibration block (most recent), so the calibrator is fit on a
+        #    time block the meta-learner never trained on. ──
+        cov_idx = np.where(oof_mask)[0]  # ascending → chronological order
+        n_cov = len(cov_idx)
+        cal_n = int(0.2 * n_cov) if n_cov >= 1000 else 0
+        meta_idx = cov_idx[: n_cov - cal_n] if cal_n else cov_idx
+        cal_idx = cov_idx[n_cov - cal_n:] if cal_n else cov_idx
 
+        oof_meta, y_meta = oof_preds[meta_idx], y[meta_idx]
+        sw_meta = sw[meta_idx] if sw is not None else None
+
+        # Tune meta-learner with time-series CV on the meta-train block
+        meta_cv = TimeSeriesSplit(n_splits=5)
         candidates = {}
 
         # 1) LogisticRegression with C tuning
         for c_val in [0.01, 0.1, 0.5, 1.0, 5.0, 10.0]:
             cv_briers = []
-            for tr_idx, val_idx in StratifiedKFold(
-                n_splits=5, shuffle=True, random_state=42
-            ).split(oof_preds, y):
+            for tr_idx, val_idx in meta_cv.split(oof_meta):
                 m = LogisticRegression(
                     C=c_val, max_iter=1000, random_state=self.config.random_state
                 )
-                sw_tr = sw[tr_idx] if sw is not None else None
-                m.fit(oof_preds[tr_idx], y[tr_idx], sample_weight=sw_tr)
-                probs = m.predict_proba(oof_preds[val_idx])[:, 1]
-                cv_briers.append(brier_score_loss(y[val_idx], probs))
+                sw_tr = sw_meta[tr_idx] if sw_meta is not None else None
+                m.fit(oof_meta[tr_idx], y_meta[tr_idx], sample_weight=sw_tr)
+                probs = m.predict_proba(oof_meta[val_idx])[:, 1]
+                cv_briers.append(brier_score_loss(y_meta[val_idx], probs))
             candidates[f"LR_C={c_val}"] = (np.mean(cv_briers), "lr", c_val)
 
         # 2) MLP with different architectures
         for hidden in [(8,), (16,), (8, 4), (16, 8)]:
             for alpha in [0.01, 0.1, 1.0]:
                 cv_briers = []
-                for tr_idx, val_idx in StratifiedKFold(
-                    n_splits=5, shuffle=True, random_state=42
-                ).split(oof_preds, y):
+                for tr_idx, val_idx in meta_cv.split(oof_meta):
                     m = MLPClassifier(
                         hidden_layer_sizes=hidden, alpha=alpha,
                         max_iter=500, random_state=self.config.random_state,
                         early_stopping=True, validation_fraction=0.15,
                     )
-                    m.fit(oof_preds[tr_idx], y[tr_idx])
-                    probs = m.predict_proba(oof_preds[val_idx])[:, 1]
-                    cv_briers.append(brier_score_loss(y[val_idx], probs))
+                    m.fit(oof_meta[tr_idx], y_meta[tr_idx])
+                    probs = m.predict_proba(oof_meta[val_idx])[:, 1]
+                    cv_briers.append(brier_score_loss(y_meta[val_idx], probs))
                 candidates[f"MLP_{hidden}_a={alpha}"] = (np.mean(cv_briers), "mlp", (hidden, alpha))
 
         # Pick best
@@ -206,7 +216,7 @@ class EnsembleModel:
         for name, (brier, _, _) in sorted(candidates.items(), key=lambda x: x[1][0])[:5]:
             logger.info("  %s: Brier=%.4f%s", name, brier, " <-- best" if name == best_name else "")
 
-        # Train final meta-learner
+        # Train final meta-learner on the meta-train block
         if best_type == "mlp":
             hidden, alpha = best_param
             self.meta_model = MLPClassifier(
@@ -214,35 +224,44 @@ class EnsembleModel:
                 max_iter=500, random_state=self.config.random_state,
                 early_stopping=True, validation_fraction=0.15,
             )
-            self.meta_model.fit(oof_preds, y)
+            self.meta_model.fit(oof_meta, y_meta)
             logger.info("Meta-model: MLP %s alpha=%.2f (Brier=%.4f)", hidden, alpha, best_brier)
         else:
             self.meta_model = LogisticRegression(
                 C=best_param, max_iter=1000, random_state=self.config.random_state
             )
-            self.meta_model.fit(oof_preds, y, sample_weight=sw)
+            self.meta_model.fit(oof_meta, y_meta, sample_weight=sw_meta)
             logger.info("Meta-model: LogisticRegression C=%.4f (Brier=%.4f)", best_param, best_brier)
 
-        # Calibrate: fit isotonic regression on meta-model OOF outputs
-        meta_probs = self.meta_model.predict_proba(oof_preds)[:, 1]
-        self._fit_calibrator(meta_probs, y)
+        # Calibrate isotonic on the held-out most-recent block (the meta-learner
+        # never trained on it), weighting recent games more via sample_weight.
+        oof_cal, y_cal = oof_preds[cal_idx], y[cal_idx]
+        sw_cal = sw[cal_idx] if sw is not None else None
+        meta_probs_cal = self.meta_model.predict_proba(oof_cal)[:, 1]
+        self._fit_calibrator(meta_probs_cal, y_cal, sample_weight=sw_cal)
 
     def _train_weighted(self, X: np.ndarray, y: np.ndarray):
         """Train with simple weighted average (no meta-learner)."""
         for model in self.base_models:
             model.train(X, y, self.feature_names)
 
-    def _fit_calibrator(self, probs: np.ndarray, y: np.ndarray):
-        """Fit isotonic calibration on OOF probabilities."""
+    def _fit_calibrator(
+        self, probs: np.ndarray, y: np.ndarray, sample_weight: np.ndarray | None = None
+    ):
+        """Fit isotonic calibration on held-out probabilities.
+
+        ``sample_weight`` (time-decay) lets recent games dominate the
+        calibration map so probabilities match the current run environment.
+        """
         from sklearn.isotonic import IsotonicRegression
 
         self.calibrator = IsotonicRegression(y_min=0.01, y_max=0.99, out_of_bounds="clip")
-        self.calibrator.fit(probs, y)
+        self.calibrator.fit(probs, y, sample_weight=sample_weight)
         cal_probs = self.calibrator.predict(probs)
 
         from sklearn.metrics import brier_score_loss
-        raw_brier = brier_score_loss(y, probs)
-        cal_brier = brier_score_loss(y, cal_probs)
+        raw_brier = brier_score_loss(y, probs, sample_weight=sample_weight)
+        cal_brier = brier_score_loss(y, cal_probs, sample_weight=sample_weight)
         raw_ece = _expected_calibration_error(y, probs)
         cal_ece = _expected_calibration_error(y, cal_probs)
         logger.info(

@@ -62,6 +62,12 @@ class TrainingPipeline:
         self.scaler: StandardScaler | None = None
         self.imputer: KNNImputer | None = None
         self.selected_features: list[str] | None = None
+        # Full ordered feature list the imputer was fit on (pre-selection).
+        # Needed to reconstruct the training feature width at inference time.
+        self.feature_names_in_: list[str] | None = None
+        # First out-of-sample date (train/test cutoff) — used by the backtester
+        # to avoid grading the model on games it trained on.
+        self.train_cutoff_: str | None = None
         self.ensemble: EnsembleModel | None = None
         self.run_metrics: dict[str, Any] = {}
 
@@ -105,13 +111,16 @@ class TrainingPipeline:
         # 2. Impute missing values
         X_train, X_test = self._impute(X_train, X_test)
 
-        # 3. Scale
-        X_train_scaled, X_test_scaled = self._scale(X_train, X_test)
-
-        # 4. Feature selection (train a quick model, keep important features)
+        # 3. Feature selection (train a quick model, keep important features).
+        #    No global StandardScaler: tree models are scale-invariant and the
+        #    LogisticRegression base model self-scales internally, so a global
+        #    scaler added no value and caused train/serve skew — it was fit
+        #    during training but never applied at inference. Dropping it keeps
+        #    the train and predict transforms identical.
         feature_names = list(features_df.columns)
+        self.feature_names_in_ = feature_names
         X_train_selected, X_test_selected, selected_names = self._select_features(
-            X_train_scaled, X_test_scaled, y_train, feature_names,
+            X_train, X_test, y_train, feature_names,
             sample_weight=sw_train,
         )
         logger.info("Selected %d / %d features", len(selected_names), len(feature_names))
@@ -146,7 +155,6 @@ class TrainingPipeline:
         """Run Optuna hyperparameter tuning, then train with best params."""
         import optuna
         from sklearn.metrics import roc_auc_score
-        from sklearn.model_selection import StratifiedKFold
 
         optuna.logging.set_verbosity(optuna.logging.WARNING)
 
@@ -164,15 +172,18 @@ class TrainingPipeline:
             sw_train = None
 
         X_train, X_test = self._impute(X_train, X_test)
-        X_train_scaled, X_test_scaled = self._scale(X_train, X_test)
+        # No global StandardScaler (see train(): avoids train/serve skew).
         feature_names = list(features_df.columns)
+        self.feature_names_in_ = feature_names
         X_train_sel, X_test_sel, selected_names = self._select_features(
-            X_train_scaled, X_test_scaled, y_train, feature_names,
+            X_train, X_test, y_train, feature_names,
             sample_weight=sw_train,
         )
         logger.info("Selected %d / %d features", len(selected_names), len(feature_names))
 
-        cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+        # Time-series CV: games are temporally correlated, so shuffled folds
+        # leak future information into tuning. X_train is already sorted by date.
+        cv = TimeSeriesSplit(n_splits=5)
 
         def _cv_auc(model_cls, params, use_sw=True):
             """Manual CV to avoid sklearn tags compatibility issues."""
@@ -378,6 +389,8 @@ class TrainingPipeline:
         self.scaler = pipeline_meta["scaler"]
         self.imputer = pipeline_meta["imputer"]
         self.selected_features = pipeline_meta["selected_features"]
+        self.feature_names_in_ = pipeline_meta.get("feature_names_in_")
+        self.train_cutoff_ = pipeline_meta.get("train_cutoff_date")
         self.run_metrics = pipeline_meta.get("run_metrics", {})
 
         self.ensemble = EnsembleModel()
@@ -402,6 +415,9 @@ class TrainingPipeline:
             sorted_idx = game_dates.argsort()
             X, y = X[sorted_idx], y[sorted_idx]
             split_point = int(len(X) * (1 - self.config.test_size))
+            # Record the train/test cutoff date for honest out-of-sample backtests
+            dates_sorted = np.asarray(game_dates)[np.asarray(sorted_idx)]
+            self.train_cutoff_ = str(pd.Timestamp(dates_sorted[split_point]).date())
             return X[:split_point], X[split_point:], y[:split_point], y[split_point:]
         else:
             return train_test_split(
@@ -504,6 +520,8 @@ class TrainingPipeline:
                 "scaler": self.scaler,
                 "imputer": self.imputer,
                 "selected_features": self.selected_features,
+                "feature_names_in_": self.feature_names_in_,
+                "train_cutoff_date": self.train_cutoff_,
                 "run_metrics": self.run_metrics,
             },
             model_dir / "pipeline_meta.joblib",
@@ -516,22 +534,34 @@ class TrainingPipeline:
         logger.info("Pipeline saved to %s", model_dir)
 
     def _preprocess_for_predict(self, features_df: pd.DataFrame) -> np.ndarray:
-        """Apply feature selection and imputation for prediction.
+        """Apply imputation and feature selection for prediction.
 
-        Selects known features by name first (handles variable input width),
-        then fills missing values. Tree-based models are scale-invariant so
-        we skip the scaler at prediction time (it was fit on a different
-        feature width during training).
+        Mirrors the training transform exactly to avoid train/serve skew. When
+        an imputer was fitted, the live row is first reconstructed to the full
+        training feature width (in the original column order) so the imputer
+        applies to the right columns, then the trained subset is selected by
+        name. No scaler is applied: tree models are scale-invariant and the
+        LogisticRegression base model carries its own internal scaler.
         """
-        # Select only the features the model was trained on
+        if self.imputer is not None and self.feature_names_in_ is not None:
+            # Reconstruct full training width, impute, then select by name.
+            X_full = features_df.reindex(columns=self.feature_names_in_)
+            X = self.imputer.transform(X_full.values.astype(float))
+            full = pd.DataFrame(X, columns=self.feature_names_in_)
+            sel = self.selected_features or self.feature_names_in_
+            for f in sel:
+                if f not in full.columns:
+                    full[f] = 0.0
+            return full[sel].values.astype(float)
+
+        # No imputer (training data had no missing values): select the trained
+        # features by name and zero-fill anything the live row is missing.
         if self.selected_features is not None:
             available = [f for f in self.selected_features if f in features_df.columns]
-            missing = [f for f in self.selected_features if f not in features_df.columns]
             X_df = features_df[available].copy()
-            # Fill missing features with 0
-            for f in missing:
-                X_df[f] = 0.0
-            # Ensure column order matches training
+            for f in self.selected_features:
+                if f not in X_df.columns:
+                    X_df[f] = 0.0
             X_df = X_df[self.selected_features]
         else:
             X_df = features_df

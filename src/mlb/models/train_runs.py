@@ -24,7 +24,7 @@ import numpy as np
 import optuna
 import pandas as pd
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-from sklearn.model_selection import KFold
+from sklearn.model_selection import TimeSeriesSplit
 from xgboost import XGBRegressor
 
 logger = logging.getLogger(__name__)
@@ -178,7 +178,9 @@ def _optuna_objective(trial, X_train, y_train, model_type: str):
         }
         model = _make_xgb(params)
 
-    kf = KFold(n_splits=5, shuffle=True, random_state=42)
+    # Time-series CV: X_train is sorted chronologically before tuning, so
+    # shuffled folds would leak future games into the validation score.
+    kf = TimeSeriesSplit(n_splits=5)
     scores = []
     for train_idx, val_idx in kf.split(X_train):
         X_t, X_v = X_train[train_idx], X_train[val_idx]
@@ -288,7 +290,7 @@ def train_runs_model(
         alpha = trial.suggest_float("alpha", 0.0, 1.0)
         shrinkage = trial.suggest_float("shrinkage", 0.0, 1.5)
 
-        kf = KFold(n_splits=5, shuffle=True, random_state=42)
+        kf = TimeSeriesSplit(n_splits=5)
         scores = []
         for tr_idx, val_idx in kf.split(X_train_sel):
             Xt, Xv = X_train_sel[tr_idx], X_train_sel[val_idx]

@@ -1,11 +1,18 @@
-"""Historical backtester — simulates betting with model predictions against past results.
+"""Honest historical backtester — evaluates the model against the REAL market.
 
-Walks through games chronologically, generates predictions using only data
-available at the time, and simulates betting with synthetic or real odds.
+Critical methodology (vs the old version, which was invalid):
+  * Bets are measured against the **real, de-vigged market line**
+    (``market_home_prob``) and settled at the **real moneyline prices** from
+    ``data/odds_history.csv`` — NOT against a synthetic line fabricated from
+    the model's own prediction.
+  * Only **out-of-sample** games are scored — those after the model's
+    train/test cutoff — so we never grade the model on games it trained on.
+  * Edge is reported with a **bootstrap confidence interval and t-stat**, and
+    a favorite-betting baseline (which should ≈ −vig) confirms the mechanics.
 
 Usage:
-    python -m mlb.models.backtest --seasons 2024 2025 2026
-    python -m mlb.models.backtest --seasons 2025 2026 --bankroll 5000 --kelly 0.25
+    PYTHONPATH=src python -m mlb.models.backtest
+    PYTHONPATH=src python -m mlb.models.backtest --oos-start 2024-08-25 --min-edge 0.03
 """
 
 from __future__ import annotations
@@ -17,57 +24,59 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from mlb.betting.engine import (
-    BettingConfig,
-    BettingEngine,
-    american_to_decimal,
-    american_to_implied,
-    remove_vig,
-)
 from mlb.models.pipeline import TrainingPipeline
 
 logger = logging.getLogger(__name__)
 
+# Columns that are not features (mirror of pipeline.NON_FEATURE_COLS).
+_META_COLS = [
+    "game_id", "game_date", "home_team", "away_team",
+    "home_score", "away_score", "home_win", "total_runs", "season",
+]
+
 
 @dataclass
 class BacktestResult:
-    """Summary of a backtest run."""
+    """Summary of an honest out-of-sample backtest."""
 
-    total_games: int
-    games_bet: int
-    bets_won: int
-    bets_lost: int
-    win_rate: float
+    oos_start: str
+    total_games: int          # out-of-sample games scored
+    games_with_odds: int      # games matched to a real moneyline
 
-    starting_bankroll: float
-    ending_bankroll: float
-    peak_bankroll: float
-    total_pnl: float
-    roi: float
-    max_drawdown: float
-    sharpe_ratio: float
-
-    # Flat-bet metrics (for comparison)
-    flat_bet_pnl: float
-    flat_bet_roi: float
-
-    # By-month breakdown
-    monthly: list[dict]
-
-    # Model accuracy on all games (not just bet games)
-    model_accuracy: float
+    # Discrimination/calibration — model vs the de-vigged market line
+    model_auc: float
     model_brier: float
-    model_auc: float = 0.0
+    model_accuracy: float
+    market_auc: float
+    market_brier: float
+    market_accuracy: float
+    mean_prob_gap: float      # mean |model − market| probability
 
-    # Calibration bins: list of dicts with predicted_avg, observed_avg, count
+    # Edge-threshold sweep: one dict per min_edge
+    thresholds: list[dict] = field(default_factory=list)
+
+    # Significance at the headline edge (bootstrap over per-bet returns)
+    headline_edge: float = 0.0
+    headline_bets: int = 0
+    headline_flat_roi: float = 0.0
+    headline_t_stat: float = 0.0
+    headline_ci: tuple[float, float] = (0.0, 0.0)
+    headline_p_positive: float = 0.0
+
+    # Sanity baseline: flat-bet the market favorite every game (≈ −vig)
+    favorite_baseline_roi: float = 0.0
+
     calibration: list[dict] = field(default_factory=list)
+    monthly: list[dict] = field(default_factory=list)
 
-    # Monthly accuracy breakdown (all games, not just bets)
-    monthly_accuracy: list[dict] = field(default_factory=list)
+
+def _american_to_decimal(odds: float) -> float:
+    """American moneyline → decimal odds."""
+    return 1.0 + (odds / 100.0 if odds > 0 else 100.0 / abs(odds))
 
 
 class Backtester:
-    """Walk-forward backtest of model predictions + betting strategy."""
+    """Walk-forward-style backtest of model predictions against the real market."""
 
     def __init__(
         self,
@@ -77,6 +86,9 @@ class Backtester:
         kelly_fraction: float = 0.25,
         min_edge: float = 0.03,
         flat_bet_size: float = 100.0,
+        oos_start: str | None = None,
+        bootstrap_iters: int = 5000,
+        seed: int = 0,
     ):
         self.data_dir = data_dir
         self.model_dir = model_dir
@@ -84,211 +96,251 @@ class Backtester:
         self.kelly_fraction = kelly_fraction
         self.min_edge = min_edge
         self.flat_bet_size = flat_bet_size
+        self.oos_start = oos_start
+        self.bootstrap_iters = bootstrap_iters
+        self.seed = seed
 
-    def run(self, seasons: list[int]) -> BacktestResult:
-        """Run a full historical backtest."""
-        # Load training data (already has features + results)
-        df = pd.read_parquet(self.data_dir / "training_data.parquet")
-        df = df.sort_values("game_date").reset_index(drop=True)
-        df["game_date"] = pd.to_datetime(df["game_date"])
+    # ── Out-of-sample cutoff ──────────────────────────────────
+    def _resolve_oos_start(self, df_all: pd.DataFrame, pipeline: TrainingPipeline) -> pd.Timestamp:
+        """Determine the first out-of-sample date.
 
-        # Filter to requested seasons
-        df = df[df["game_date"].dt.year.isin(seasons)].reset_index(drop=True)
-        logger.info("Backtesting on %d games (%s)", len(df), [int(y) for y in sorted(df["game_date"].dt.year.unique())])
+        Priority: explicit --oos-start → cutoff stored on the model →
+        recompute the pipeline's time-based train/test split.
+        """
+        if self.oos_start:
+            return pd.Timestamp(self.oos_start)
 
-        # Load trained model
+        stored = getattr(pipeline, "train_cutoff_", None)
+        if stored is not None:
+            logger.info("Using train cutoff stored on the model: %s", stored)
+            return pd.Timestamp(stored)
+
+        # Recompute the 80/20 time split the pipeline uses by default.
+        test_size = pipeline.config.test_size
+        dates = df_all["game_date"].sort_values().reset_index(drop=True)
+        split = int(len(dates) * (1 - test_size))
+        cutoff = dates.iloc[split]
+        logger.warning(
+            "Model has no stored train cutoff; deriving 80/20 split → OOS starts %s. "
+            "Retrain to persist train_cutoff_date for exactness.", cutoff.date(),
+        )
+        return cutoff
+
+    # ── Odds ──────────────────────────────────────────────────
+    def _load_odds(self) -> dict[tuple, tuple[float, float]]:
+        """Real moneylines keyed by (game_date, home_team, away_team)."""
+        path = self.data_dir / "odds_history.csv"
+        if not path.exists():
+            raise FileNotFoundError(
+                f"{path} not found — the honest backtest needs real moneylines."
+            )
+        odds = pd.read_csv(path)
+        odds["game_date"] = pd.to_datetime(odds["game_date"])
+        return {
+            (r.game_date, r.home_team, r.away_team): (float(r.home_moneyline), float(r.away_moneyline))
+            for r in odds.itertuples()
+            if pd.notna(r.home_moneyline) and pd.notna(r.away_moneyline)
+        }
+
+    def run(self, seasons: list[int] | None = None) -> BacktestResult:
+        from sklearn.metrics import roc_auc_score, brier_score_loss
+
+        df_all = pd.read_parquet(self.data_dir / "training_data.parquet")
+        df_all["game_date"] = pd.to_datetime(df_all["game_date"])
+        df_all = df_all.sort_values("game_date").reset_index(drop=True)
+
         pipeline = TrainingPipeline()
         pipeline.load(self.model_dir)
 
-        meta_cols = ["game_id", "game_date", "home_team", "away_team", "home_score", "away_score", "home_win", "total_runs"]
-        feature_cols = [c for c in df.columns if c not in meta_cols]
+        oos_start = self._resolve_oos_start(df_all, pipeline)
+        df = df_all[df_all["game_date"] >= oos_start].reset_index(drop=True)
+        if seasons:
+            df = df[df["game_date"].dt.year.isin(seasons)].reset_index(drop=True)
+        if df.empty:
+            raise ValueError(f"No out-of-sample games on/after {oos_start.date()}")
 
-        # Generate predictions for all games
-        X = df[feature_cols]
-        probs = pipeline.predict(X)
-
-        df["pred_home_prob"] = probs
-        df["pred_correct"] = ((probs >= 0.5) & (df["home_win"] == 1)) | ((probs < 0.5) & (df["home_win"] == 0))
-
-        # Compute AUC
-        from sklearn.metrics import roc_auc_score
-        try:
-            model_auc = float(roc_auc_score(df["home_win"].values, probs))
-        except ValueError:
-            model_auc = 0.0
-
-        # Calibration bins (deciles)
-        calibration_bins = self._compute_calibration(probs, df["home_win"].values)
-
-        # Monthly accuracy breakdown (all games, not just bets)
-        df["_month"] = df["game_date"].dt.to_period("M").astype(str)
-        monthly_acc_data = (
-            df.groupby("_month")
-            .agg(
-                games=("pred_correct", "size"),
-                correct=("pred_correct", "sum"),
-                avg_pred=("pred_home_prob", "mean"),
-                actual_home_rate=("home_win", "mean"),
-            )
-            .reset_index()
+        logger.info(
+            "Out-of-sample backtest: %d games (%s → %s)",
+            len(df), df["game_date"].min().date(), df["game_date"].max().date(),
         )
-        monthly_accuracy = [
-            {
-                "month": row["_month"],
-                "games": int(row["games"]),
-                "correct": int(row["correct"]),
-                "accuracy": round(row["correct"] / row["games"], 4) if row["games"] > 0 else 0.0,
-                "avg_pred": round(float(row["avg_pred"]), 4),
-                "actual_home_rate": round(float(row["actual_home_rate"]), 4),
-            }
-            for _, row in monthly_acc_data.iterrows()
+
+        # Predict
+        feature_cols = [c for c in df.columns if c not in _META_COLS]
+        p_model = np.asarray(pipeline.predict(df[feature_cols]))
+        p_mkt = df["market_home_prob"].values.astype(float)
+        y = df["home_win"].values.astype(int)
+
+        oddmap = self._load_odds()
+
+        # Discrimination / calibration vs market
+        model_auc = float(roc_auc_score(y, p_model))
+        market_auc = float(roc_auc_score(y, p_mkt))
+
+        # Per-game betting records (computed once at edge 0, filtered per threshold)
+        records = self._build_records(df, p_model, p_mkt, y, oddmap)
+        games_with_odds = len(records)
+
+        thresholds = [
+            self._simulate(records, me) for me in (0.0, 0.01, 0.02, 0.03, 0.05, 0.08)
         ]
 
-        # Simulate betting
-        bankroll = self.initial_bankroll
-        peak = bankroll
-        max_dd = 0.0
-        total_wagered = 0.0
-        bets_won = bets_lost = 0
-        flat_pnl = 0.0
-        daily_returns: list[float] = []
-        monthly_data: dict[str, dict] = {}
+        # Significance at the headline edge
+        rets = self._per_bet_returns(records, self.min_edge)
+        sig = self._significance(rets)
 
-        for _, row in df.iterrows():
-            pred_prob = row["pred_home_prob"]
-            home_win = row["home_win"]
-            game_date = row["game_date"]
-            month_key = game_date.strftime("%Y-%m")
-
-            if month_key not in monthly_data:
-                monthly_data[month_key] = {
-                    "month": month_key, "games": 0, "bets": 0,
-                    "wins": 0, "pnl": 0.0, "flat_pnl": 0.0,
-                }
-            monthly_data[month_key]["games"] += 1
-
-            # Generate synthetic odds from prediction (simulate market)
-            # Assume market is efficient with some noise + vig
-            market_noise = np.random.normal(0, 0.03)
-            true_home = 0.5 + (pred_prob - 0.5) * 0.6 + market_noise  # Market partially agrees
-            true_home = np.clip(true_home, 0.2, 0.8)
-            true_away = 1 - true_home
-
-            # Add vig (~4.5% overround)
-            vig_factor = 1.045
-            implied_home = true_home * vig_factor
-            implied_away = true_away * vig_factor
-
-            # Convert to American odds
-            home_odds = _prob_to_american(implied_home)
-            away_odds = _prob_to_american(implied_away)
-
-            # Check for value
-            clean_home, clean_away = remove_vig(home_odds, away_odds)
-            home_edge = pred_prob - clean_home
-            away_edge = (1 - pred_prob) - clean_away
-
-            bet_side = None
-            edge = 0.0
-            odds = 0.0
-
-            if home_edge >= self.min_edge:
-                bet_side = "home"
-                edge = home_edge
-                odds = home_odds
-            elif away_edge >= self.min_edge:
-                bet_side = "away"
-                edge = away_edge
-                odds = away_odds
-
-            if bet_side is None:
-                daily_returns.append(0.0)
-                continue
-
-            # Kelly sizing
-            dec_odds = american_to_decimal(odds)
-            b = dec_odds - 1
-            p = pred_prob if bet_side == "home" else (1 - pred_prob)
-            q = 1 - p
-            kelly = max(0, (b * p - q) / b) * self.kelly_fraction
-            stake = min(bankroll * kelly, bankroll * 0.05)
-
-            if stake < 1:
-                daily_returns.append(0.0)
-                continue
-
-            # Settle
-            won = (bet_side == "home" and home_win == 1) or (bet_side == "away" and home_win == 0)
-            total_wagered += stake
-
-            if won:
-                payout = stake * (dec_odds - 1)
-                bankroll += payout
-                bets_won += 1
-                daily_returns.append(payout / self.initial_bankroll)
-                monthly_data[month_key]["pnl"] += payout
-                monthly_data[month_key]["wins"] += 1
-            else:
-                bankroll -= stake
-                bets_lost += 1
-                daily_returns.append(-stake / self.initial_bankroll)
-                monthly_data[month_key]["pnl"] -= stake
-
-            monthly_data[month_key]["bets"] += 1
-
-            # Flat bet tracking
-            flat_dec = american_to_decimal(odds)
-            if won:
-                flat_pnl += self.flat_bet_size * (flat_dec - 1)
-            else:
-                flat_pnl -= self.flat_bet_size
-
-            monthly_data[month_key]["flat_pnl"] += (
-                self.flat_bet_size * (flat_dec - 1) if won else -self.flat_bet_size
-            )
-
-            # Drawdown
-            peak = max(peak, bankroll)
-            dd = (peak - bankroll) / peak if peak > 0 else 0
-            max_dd = max(max_dd, dd)
-
-        # Calculate Sharpe
-        returns_arr = np.array(daily_returns)
-        sharpe = 0.0
-        if len(returns_arr) > 1 and returns_arr.std() > 0:
-            sharpe = float(returns_arr.mean() / returns_arr.std() * np.sqrt(252))
-
-        total_bets = bets_won + bets_lost
-        total_pnl = bankroll - self.initial_bankroll
+        # Baseline: flat-bet the market favorite (should ≈ −vig)
+        fav = self._favorite_baseline(df, p_mkt, y, oddmap)
 
         return BacktestResult(
+            oos_start=str(oos_start.date()),
             total_games=len(df),
-            games_bet=total_bets,
-            bets_won=bets_won,
-            bets_lost=bets_lost,
-            win_rate=bets_won / max(total_bets, 1),
-            starting_bankroll=self.initial_bankroll,
-            ending_bankroll=round(bankroll, 2),
-            peak_bankroll=round(peak, 2),
-            total_pnl=round(total_pnl, 2),
-            roi=round(total_pnl / max(total_wagered, 1), 4),
-            max_drawdown=round(max_dd, 4),
-            sharpe_ratio=round(sharpe, 3),
-            flat_bet_pnl=round(flat_pnl, 2),
-            flat_bet_roi=round(flat_pnl / max(total_bets * self.flat_bet_size, 1), 4),
-            monthly=sorted(monthly_data.values(), key=lambda m: m["month"]),
-            model_accuracy=float(df["pred_correct"].mean()),
-            model_brier=float(((probs - df["home_win"].values) ** 2).mean()),
-            model_auc=model_auc,
-            calibration=calibration_bins,
-            monthly_accuracy=monthly_accuracy,
+            games_with_odds=games_with_odds,
+            model_auc=round(model_auc, 4),
+            model_brier=round(float(brier_score_loss(y, p_model)), 4),
+            model_accuracy=round(float(((p_model >= 0.5) == y).mean()), 4),
+            market_auc=round(market_auc, 4),
+            market_brier=round(float(brier_score_loss(y, p_mkt)), 4),
+            market_accuracy=round(float(((p_mkt >= 0.5) == y).mean()), 4),
+            mean_prob_gap=round(float(np.abs(p_model - p_mkt).mean()), 4),
+            thresholds=thresholds,
+            headline_edge=self.min_edge,
+            headline_bets=len(rets),
+            headline_flat_roi=round(sig["roi"], 4),
+            headline_t_stat=round(sig["t"], 3),
+            headline_ci=(round(sig["ci_low"], 4), round(sig["ci_high"], 4)),
+            headline_p_positive=round(sig["p_positive"], 4),
+            favorite_baseline_roi=round(fav, 4),
+            calibration=self._compute_calibration(p_model, y),
+            monthly=self._monthly(df, p_model, p_mkt, y, oddmap),
         )
 
+    # ── Internals ─────────────────────────────────────────────
+    def _build_records(self, df, p_model, p_mkt, y, oddmap) -> list[dict]:
+        """One record per game that has a real moneyline, with the side the
+        model would back and its signed edge vs the de-vigged market line."""
+        recs = []
+        for i in range(len(df)):
+            key = (df["game_date"].iloc[i], df["home_team"].iloc[i], df["away_team"].iloc[i])
+            if key not in oddmap:
+                continue
+            hml, aml = oddmap[key]
+            pm, mk, hw = float(p_model[i]), float(p_mkt[i]), int(y[i])
+            edge_home = pm - mk  # >0 → model likes home more than market
+            if edge_home >= 0:
+                side, price, p, edge = "home", hml, pm, edge_home
+            else:
+                side, price, p, edge = "away", aml, 1.0 - pm, -edge_home
+            won = (side == "home" and hw == 1) or (side == "away" and hw == 0)
+            recs.append({"edge": edge, "side": side, "price": price, "p": p, "won": won})
+        return recs
 
-    def _compute_calibration(
-        self, predictions: np.ndarray, actuals: np.ndarray, n_bins: int = 10
-    ) -> list[dict]:
-        """Compute calibration bins: do predicted probabilities match observed rates?"""
+    def _simulate(self, records, min_edge: float) -> dict:
+        """Flat + fractional-Kelly P&L over records with edge ≥ min_edge."""
+        bk = self.initial_bankroll
+        wagered = 0.0
+        flat_pnl = 0.0
+        w = l = 0
+        for r in records:
+            if r["edge"] < min_edge:
+                continue
+            d = _american_to_decimal(r["price"])
+            b = d - 1.0
+            p = r["p"]
+            kelly = max(0.0, (b * p - (1 - p)) / b) * self.kelly_fraction
+            stake = min(bk * kelly, bk * 0.05)
+            if stake < 1:
+                continue
+            if r["won"]:
+                bk += stake * b
+                flat_pnl += self.flat_bet_size * b
+                w += 1
+            else:
+                bk -= stake
+                flat_pnl -= self.flat_bet_size
+                l += 1
+            wagered += stake
+        nb = w + l
+        return {
+            "min_edge": min_edge,
+            "bets": nb,
+            "win_rate": round(w / nb, 4) if nb else 0.0,
+            "flat_roi": round(flat_pnl / (nb * self.flat_bet_size), 4) if nb else 0.0,
+            "kelly_roi": round((bk - self.initial_bankroll) / wagered, 4) if wagered > 0 else 0.0,
+            "flat_pnl": round(flat_pnl, 2),
+            "end_bankroll": round(bk, 2),
+        }
+
+    def _per_bet_returns(self, records, min_edge: float) -> np.ndarray:
+        """Per-bet unit returns (decimal−1 if won else −1) for flat bets ≥ min_edge."""
+        out = []
+        for r in records:
+            if r["edge"] < min_edge:
+                continue
+            b = _american_to_decimal(r["price"]) - 1.0
+            out.append(b if r["won"] else -1.0)
+        return np.array(out, dtype=float)
+
+    def _significance(self, rets: np.ndarray) -> dict:
+        if len(rets) < 2:
+            return {"roi": 0.0, "t": 0.0, "ci_low": 0.0, "ci_high": 0.0, "p_positive": 0.0}
+        roi = float(rets.mean())
+        se = float(rets.std(ddof=1) / np.sqrt(len(rets)))
+        rng = np.random.default_rng(self.seed)
+        boot = np.array([
+            rng.choice(rets, len(rets), replace=True).mean()
+            for _ in range(self.bootstrap_iters)
+        ])
+        lo, hi = np.percentile(boot, [2.5, 97.5])
+        return {
+            "roi": roi,
+            "t": roi / se if se > 0 else 0.0,
+            "ci_low": float(lo),
+            "ci_high": float(hi),
+            "p_positive": float((boot > 0).mean()),
+        }
+
+    def _favorite_baseline(self, df, p_mkt, y, oddmap) -> float:
+        rets = []
+        for i in range(len(df)):
+            key = (df["game_date"].iloc[i], df["home_team"].iloc[i], df["away_team"].iloc[i])
+            if key not in oddmap:
+                continue
+            hml, aml = oddmap[key]
+            hw = int(y[i])
+            if p_mkt[i] >= 0.5:
+                price, won = hml, hw == 1
+            else:
+                price, won = aml, hw == 0
+            b = _american_to_decimal(price) - 1.0
+            rets.append(b if won else -1.0)
+        return float(np.mean(rets)) if rets else 0.0
+
+    def _monthly(self, df, p_model, p_mkt, y, oddmap) -> list[dict]:
+        recs = self._build_records(df, p_model, p_mkt, y, oddmap)
+        # Attach month by re-walking (records align to odds-matched games)
+        months: dict[str, dict] = {}
+        ri = 0
+        for i in range(len(df)):
+            key = (df["game_date"].iloc[i], df["home_team"].iloc[i], df["away_team"].iloc[i])
+            if key not in oddmap:
+                continue
+            mk = df["game_date"].iloc[i].strftime("%Y-%m")
+            m = months.setdefault(mk, {"month": mk, "games": 0, "bets": 0, "wins": 0, "flat_pnl": 0.0})
+            m["games"] += 1
+            r = recs[ri]; ri += 1
+            if r["edge"] >= self.min_edge:
+                b = _american_to_decimal(r["price"]) - 1.0
+                m["bets"] += 1
+                if r["won"]:
+                    m["wins"] += 1
+                    m["flat_pnl"] += self.flat_bet_size * b
+                else:
+                    m["flat_pnl"] -= self.flat_bet_size
+        for m in months.values():
+            m["flat_pnl"] = round(m["flat_pnl"], 2)
+        return sorted(months.values(), key=lambda x: x["month"])
+
+    def _compute_calibration(self, predictions, actuals, n_bins: int = 10) -> list[dict]:
         edges = np.linspace(0, 1, n_bins + 1)
         bins = []
         for lo, hi in zip(edges[:-1], edges[1:]):
@@ -306,37 +358,26 @@ class Backtester:
         return bins
 
 
-def _prob_to_american(prob: float) -> float:
-    """Convert probability to American odds."""
-    prob = np.clip(prob, 0.01, 0.99)
-    if prob >= 0.5:
-        return round(-100 * prob / (1 - prob))
-    return round(100 * (1 - prob) / prob)
-
-
 # ── CLI ───────────────────────────────────────────────────────
 
 
 def main():
     import argparse
 
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s %(levelname)s %(name)s: %(message)s",
-    )
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 
-    parser = argparse.ArgumentParser(description="Historical backtest of MLB betting model")
-    parser.add_argument("--seasons", type=int, nargs="+", default=[2024, 2025, 2026])
+    parser = argparse.ArgumentParser(description="Honest out-of-sample MLB betting backtest")
     parser.add_argument("--data-dir", type=str, default="data")
     parser.add_argument("--model-dir", type=str, default="models/win_model")
+    parser.add_argument("--oos-start", type=str, default=None,
+                        help="First out-of-sample date YYYY-MM-DD (default: derive train/test cutoff)")
+    parser.add_argument("--seasons", type=int, nargs="+", default=None,
+                        help="Optional: restrict OOS games to these seasons")
     parser.add_argument("--bankroll", type=float, default=10000)
     parser.add_argument("--kelly", type=float, default=0.25)
     parser.add_argument("--min-edge", type=float, default=0.03)
-    parser.add_argument("--confidence-threshold", type=float, default=0.55,
-                        help="Min probability to simulate a bet (default: 0.55)")
     args = parser.parse_args()
 
-    # Support both --model-dir models and --model-dir models/win_model
     model_dir = Path(args.model_dir)
     if model_dir.name == "models" and (model_dir / "win_model").exists():
         model_dir = model_dir / "win_model"
@@ -347,69 +388,41 @@ def main():
         bankroll=args.bankroll,
         kelly_fraction=args.kelly,
         min_edge=args.min_edge,
+        oos_start=args.oos_start,
     )
+    r = bt.run(args.seasons)
 
-    result = bt.run(args.seasons)
-
-    print(f"\n{'='*60}")
-    print(f"  BACKTEST RESULTS")
-    print(f"{'='*60}")
-    print(f"  Games analyzed:    {result.total_games}")
-    print(f"  Bets placed:       {result.games_bet}")
-    print(f"  Win rate:          {result.win_rate:.1%}")
+    print(f"\n{'='*64}")
+    print(f"  HONEST OUT-OF-SAMPLE BACKTEST  (OOS from {r.oos_start})")
+    print(f"{'='*64}")
+    print(f"  Games scored:      {r.total_games}  (with real odds: {r.games_with_odds})")
     print()
-    print(f"  MODEL METRICS")
-    print(f"  Accuracy:          {result.model_accuracy:.1%}")
-    print(f"  AUC-ROC:           {result.model_auc:.4f}")
-    print(f"  Brier score:       {result.model_brier:.4f}")
+    print(f"  PREDICTION vs MARKET")
+    print(f"  {'':14}{'AUC':>8}{'Brier':>9}{'Acc':>8}")
+    print(f"  {'Model':14}{r.model_auc:>8.4f}{r.model_brier:>9.4f}{r.model_accuracy:>8.3f}")
+    print(f"  {'Market':14}{r.market_auc:>8.4f}{r.market_brier:>9.4f}{r.market_accuracy:>8.3f}")
+    print(f"  Mean |model−market| prob gap: {r.mean_prob_gap:.4f}")
     print()
-    print(f"  KELLY STRATEGY")
-    print(f"  Starting bankroll: ${result.starting_bankroll:,.2f}")
-    print(f"  Ending bankroll:   ${result.ending_bankroll:,.2f}")
-    print(f"  Total P&L:         ${result.total_pnl:+,.2f}")
-    print(f"  ROI:               {result.roi:+.2%}")
-    print(f"  Peak bankroll:     ${result.peak_bankroll:,.2f}")
-    print(f"  Max drawdown:      {result.max_drawdown:.1%}")
-    print(f"  Sharpe ratio:      {result.sharpe_ratio:.3f}")
+    print(f"  BETTING vs REAL NO-VIG LINE, REAL PRICES")
+    print(f"  {'min_edge':>8}{'bets':>7}{'win%':>8}{'flat_ROI':>10}{'kelly_ROI':>11}{'flat_P&L':>11}")
+    for t in r.thresholds:
+        print(f"  {t['min_edge']:>8.2f}{t['bets']:>7}{t['win_rate']:>7.1%}"
+              f"{t['flat_roi']:>+9.2%}{t['kelly_roi']:>+10.2%} ${t['flat_pnl']:>+9,.0f}")
     print()
-    print(f"  FLAT BET ($100)")
-    print(f"  Total P&L:         ${result.flat_bet_pnl:+,.2f}")
-    print(f"  ROI:               {result.flat_bet_roi:+.2%}")
+    print(f"  SIGNIFICANCE @ edge {r.headline_edge:.2f}  (n={r.headline_bets} bets)")
+    print(f"  Flat ROI {r.headline_flat_roi:+.2%} | t={r.headline_t_stat:.2f} | "
+          f"95% CI [{r.headline_ci[0]:+.2%}, {r.headline_ci[1]:+.2%}] | P(ROI>0)={r.headline_p_positive:.1%}")
+    verdict = "SIGNIFICANT EDGE" if r.headline_t_stat >= 2 else "NOT significant — consistent with no edge"
+    print(f"  Verdict: {verdict}")
     print()
-
-    # Monthly accuracy breakdown
-    if result.monthly_accuracy:
-        print(f"  MONTHLY ACCURACY (all games)")
-        print(f"  {'Month':<10} {'Games':>6} {'Correct':>8} {'Accuracy':>10} {'AvgPred':>10} {'ActualHR':>10}")
-        print(f"  {'-'*58}")
-        for m in result.monthly_accuracy:
-            print(
-                f"  {m['month']:<10} {m['games']:>6} {m['correct']:>8} "
-                f"{m['accuracy']:>9.1%} {m['avg_pred']:>10.4f} {m['actual_home_rate']:>10.4f}"
-            )
-        print()
-
-    # Monthly betting breakdown
-    print(f"  MONTHLY BETTING P&L")
-    print(f"  {'Month':<10} {'Games':>6} {'Bets':>6} {'Wins':>6} {'Kelly P&L':>12} {'Flat P&L':>12}")
-    print(f"  {'-'*56}")
-    for m in result.monthly:
-        print(
-            f"  {m['month']:<10} {m['games']:>6} {m['bets']:>6} {m['wins']:>6} "
-            f"${m['pnl']:>+10,.2f} ${m['flat_pnl']:>+10,.2f}"
-        )
+    print(f"  SANITY: flat-bet market favorite ROI = {r.favorite_baseline_roi:+.2%}  (should ≈ −vig)")
     print()
 
-    # Calibration check
-    if result.calibration:
-        print(f"  CALIBRATION CHECK (predicted vs observed)")
-        print(f"  {'Bin':<12} {'Predicted':>10} {'Observed':>10} {'Count':>8} {'Gap':>8}")
-        print(f"  {'-'*50}")
-        for b in result.calibration:
-            print(
-                f"  {b['bin']:<12} {b['predicted_avg']:>10.4f} {b['observed_avg']:>10.4f} "
-                f"{b['count']:>8} {b['gap']:>8.4f}"
-            )
+    if r.monthly:
+        print(f"  MONTHLY (flat bets @ edge {r.headline_edge:.2f})")
+        print(f"  {'Month':<9}{'Games':>7}{'Bets':>6}{'Wins':>6}{'Flat P&L':>12}")
+        for m in r.monthly:
+            print(f"  {m['month']:<9}{m['games']:>7}{m['bets']:>6}{m['wins']:>6} ${m['flat_pnl']:>+9,.0f}")
         print()
 
 
