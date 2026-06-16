@@ -84,7 +84,7 @@ def fetch_weather_batch(
             "longitude": lon,
             "start_date": start_date,
             "end_date": end_date,
-            "hourly": "temperature_2m,wind_speed_10m,relative_humidity_2m",
+            "hourly": "temperature_2m,wind_speed_10m,wind_direction_10m,relative_humidity_2m",
             "temperature_unit": "fahrenheit",
             "wind_speed_unit": "mph",
         },
@@ -100,15 +100,17 @@ def fetch_weather_batch(
         if hour == target_hour:
             temp = hourly["temperature_2m"][i]
             wind = hourly["wind_speed_10m"][i]
+            wdir = hourly["wind_direction_10m"][i]
             hum = hourly["relative_humidity_2m"][i]
             # Skip if any value is None (missing data)
-            if temp is None or wind is None or hum is None:
+            if temp is None or wind is None or hum is None or wdir is None:
                 continue
             records.append({
                 "date": time_str[:10],
                 "team": team,
                 "temperature": round(float(temp), 1),
                 "wind_speed": round(float(wind), 1),
+                "wind_direction": round(float(wdir)),  # degrees, 0=N 90=E (FROM)
                 "humidity": round(float(hum) / 100.0, 3),  # 0-100 → 0-1
             })
     return records
@@ -125,9 +127,10 @@ def backfill_all_weather(seasons: list[int] | None = None):
     # by checking if any record exists for that team in that season window
     def _season_cached(team: str, season: int) -> bool:
         start, end = SEASON_WINDOWS[season]
-        # Check if at least one record exists in range
-        for (d, t) in existing:
-            if t == team and start <= d <= end:
+        # Cached only if a record in range already has wind_direction (so old
+        # caches without direction are re-fetched to add it).
+        for (d, t), row in existing.items():
+            if t == team and start <= d <= end and row.get("wind_direction"):
                 return True
         return False
 
@@ -164,7 +167,11 @@ def backfill_all_weather(seasons: list[int] | None = None):
     # Write CSV
     CACHE_FILE.parent.mkdir(parents=True, exist_ok=True)
     with open(CACHE_FILE, "w", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=["date", "team", "temperature", "wind_speed", "humidity"])
+        writer = csv.DictWriter(
+            f,
+            fieldnames=["date", "team", "temperature", "wind_speed", "wind_direction", "humidity"],
+            extrasaction="ignore",
+        )
         writer.writeheader()
         for key in sorted(seen):
             writer.writerow(seen[key])
