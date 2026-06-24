@@ -590,6 +590,8 @@ class MLBApiClient:
             "slg": slg,
             "ops": obp + slg,
             "at_bats": ab,
+            "hits": h,
+            "walks": bb,
         }
 
     async def get_all_pitcher_records(self, season: int) -> dict[int, dict[str, int]]:

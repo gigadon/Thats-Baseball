@@ -410,19 +410,28 @@ class DailyRunner:
             game_feats: dict[str, float] = {}
             for prefix, side in [("h", "home"), ("a", "away")]:
                 players = lineup_data.get(side, [])
-                ops_vals = []
+                # OBP must use TRAINING's formula (H+BB)/(AB+BB) — which omits
+                # HBP/SF and runs ~0.304 — not the MLB API's real OBP (~0.320).
+                # Defaults are set to TRAINING means so missing pre-game data
+                # keeps the model in-distribution rather than biasing it.
+                obp_vals, slg_vals, ops_vals = [], [], []
                 for p in players:
                     bs = batting_stats.get(p["id"])
-                    if bs:
-                        ops_vals.append(bs["ops"])
+                    if not bs:
+                        continue
+                    ab, h, bb = bs.get("at_bats", 0), bs.get("hits", 0), bs.get("walks", 0)
+                    o = (h + bb) / (ab + bb) if (ab + bb) > 0 else 0.304
+                    s = bs["slg"]
+                    obp_vals.append(o); slg_vals.append(s); ops_vals.append(o + s)
 
-                game_feats[f"{prefix}_lineup_ops"] = np.mean(ops_vals) if ops_vals else 0.720
-                game_feats[f"{prefix}_lineup_obp"] = np.mean(
-                    [batting_stats[p["id"]]["obp"] for p in players if p["id"] in batting_stats]
-                ) if any(p["id"] in batting_stats for p in players) else 0.320
-                game_feats[f"{prefix}_lineup_slg"] = np.mean(
-                    [batting_stats[p["id"]]["slg"] for p in players if p["id"] in batting_stats]
-                ) if any(p["id"] in batting_stats for p in players) else 0.400
+                if obp_vals:
+                    game_feats[f"{prefix}_lineup_obp"] = float(np.mean(obp_vals))
+                    game_feats[f"{prefix}_lineup_slg"] = float(np.mean(slg_vals))
+                    game_feats[f"{prefix}_lineup_ops"] = float(np.mean(obp_vals) + np.mean(slg_vals))
+                else:
+                    game_feats[f"{prefix}_lineup_obp"] = 0.304
+                    game_feats[f"{prefix}_lineup_slg"] = 0.401
+                    game_feats[f"{prefix}_lineup_ops"] = 0.705
 
                 # Position-weighted OPS (players come in batting order from API)
                 pos_weights = [1.0, 0.95, 0.90, 0.85, 0.80, 0.75, 0.70, 0.65, 0.60]
@@ -432,13 +441,13 @@ class DailyRunner:
                     game_feats[f"{prefix}_lineup_wt_ops"] = (
                         sum(w * o for w, o in zip(wts, starters)) / sum(wts)
                     )
-                    game_feats[f"{prefix}_lineup_top4_ops"] = (
+                    game_feats[f"{prefix}_lineup_top4_ops"] = float(
                         np.mean(starters[:4]) if len(starters) >= 4
                         else np.mean(starters)
                     )
                 else:
-                    game_feats[f"{prefix}_lineup_wt_ops"] = 0.720
-                    game_feats[f"{prefix}_lineup_top4_ops"] = 0.750
+                    game_feats[f"{prefix}_lineup_wt_ops"] = 0.706
+                    game_feats[f"{prefix}_lineup_top4_ops"] = 0.707
 
                 # Platoon advantage vs opposing SP
                 opp_side = "away" if side == "home" else "home"
@@ -848,9 +857,12 @@ class DailyRunner:
 
         # Lineup and platoon features
         lf = (lineup_features or {}).get(game["game_id"], {})
+        # Defaults are TRAINING means so missing pre-game lineups keep the model
+        # in-distribution (stale defaults like obp 0.320 vs training 0.304 and
+        # top4_ops 0.750 vs 0.707 were out-of-distribution and biased picks home).
         _lineup_defaults = {
-            "lineup_ops": 0.720, "lineup_obp": 0.320, "lineup_slg": 0.400,
-            "lineup_wt_ops": 0.720, "lineup_top4_ops": 0.750,
+            "lineup_ops": 0.705, "lineup_obp": 0.304, "lineup_slg": 0.401,
+            "lineup_wt_ops": 0.706, "lineup_top4_ops": 0.707,
             "platoon_adv": 0.5, "platoon_wt_adv": 0.5,
         }
         for k, default in _lineup_defaults.items():
