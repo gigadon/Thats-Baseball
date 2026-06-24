@@ -16,7 +16,6 @@ from typing import Any
 
 import joblib
 import numpy as np
-from sklearn.calibration import CalibratedClassifierCV
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import TimeSeriesSplit
 
@@ -36,6 +35,40 @@ from mlb.models.base import (
 # NeuralNetModel and GradientBoostingModel still imported for load() compatibility
 
 logger = logging.getLogger(__name__)
+
+
+def _logit(p: np.ndarray) -> np.ndarray:
+    p = np.clip(np.asarray(p, dtype=float), 1e-6, 1 - 1e-6)
+    return np.log(p / (1 - p))
+
+
+class PlattCalibrator:
+    """Sigmoid (Platt) probability calibration.
+
+    A smooth, strictly monotonic alternative to isotonic regression: fits
+    ``cal = sigmoid(A * logit(p) + B)`` via near-unregularized logistic
+    regression. Because it is continuous, every distinct input maps to a
+    distinct output (no isotonic plateaus where many games collapse to one
+    value), while staying well-calibrated. Exposes ``predict`` so it is a
+    drop-in replacement for the IsotonicRegression calibrator. Defined here
+    (an importable module) so the pickled calibrator loads in the service.
+    """
+
+    def __init__(self, lo: float = 0.01, hi: float = 0.99):
+        self.lr: LogisticRegression | None = None
+        self.lo = lo
+        self.hi = hi
+
+    def fit(self, probs, y, sample_weight=None):
+        x = _logit(probs).reshape(-1, 1)
+        self.lr = LogisticRegression(C=1e6, solver="lbfgs", max_iter=1000)
+        self.lr.fit(x, y, sample_weight=sample_weight)
+        return self
+
+    def predict(self, probs):
+        x = _logit(probs).reshape(-1, 1)
+        out = self.lr.predict_proba(x)[:, 1]
+        return np.clip(out, self.lo, self.hi)
 
 
 @dataclass
@@ -67,7 +100,7 @@ class EnsembleModel:
             LogisticRegressionModel(),
         ]
         self.meta_model: LogisticRegression | None = None
-        self.calibrator: CalibratedClassifierCV | None = None
+        self.calibrator: PlattCalibrator | None = None
         self.feature_names: list[str] = []
         self.is_fitted = False
         self._oof_metrics: dict[str, ModelMetrics] = {}
@@ -248,14 +281,14 @@ class EnsembleModel:
     def _fit_calibrator(
         self, probs: np.ndarray, y: np.ndarray, sample_weight: np.ndarray | None = None
     ):
-        """Fit isotonic calibration on held-out probabilities.
+        """Fit sigmoid (Platt) calibration on held-out probabilities.
 
-        ``sample_weight`` (time-decay) lets recent games dominate the
-        calibration map so probabilities match the current run environment.
+        Sigmoid calibration is smooth and strictly monotonic, so it avoids the
+        isotonic plateaus that collapsed many "slight favorite" games onto a
+        single value (e.g. lots of games at 58.8%). ``sample_weight``
+        (time-decay) lets recent games dominate the calibration map.
         """
-        from sklearn.isotonic import IsotonicRegression
-
-        self.calibrator = IsotonicRegression(y_min=0.01, y_max=0.99, out_of_bounds="clip")
+        self.calibrator = PlattCalibrator()
         self.calibrator.fit(probs, y, sample_weight=sample_weight)
         cal_probs = self.calibrator.predict(probs)
 
