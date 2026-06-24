@@ -874,9 +874,16 @@ class DailyRunner:
         # bp_ip_3d is already in the rolling features from _compute_team_rolling_stats
         h_bp_ip_3d = home_feat.get("bp_ip_3d", 6.0)
         a_bp_ip_3d = away_feat.get("bp_ip_3d", 6.0)
-        # Freshness: 15 IP in 3 days = fully depleted (freshness 0)
-        h_bp_freshness = max(0.0, 1.0 - h_bp_ip_3d / 15.0)
-        a_bp_freshness = max(0.0, 1.0 - a_bp_ip_3d / 15.0)
+        # Freshness must match TRAINING's distribution: there it is the fraction
+        # of the season's bullpen unused in the last 3 days, which sits ~0.934
+        # (std 0.019, range ~0.91-0.96) — effectively near-constant. The old live
+        # formula (1 - ip/15) produced ~0.39, ~29 std out of distribution, which
+        # flipped tree splits and biased live picks toward home. Reproduce the
+        # training scale (centered ~0.945, mild penalty for heavy recent usage).
+        def _bp_freshness(ip_3d: float) -> float:
+            return min(0.96, max(0.90, 0.945 - max(0.0, ip_3d - 6.0) * 0.005))
+        h_bp_freshness = _bp_freshness(h_bp_ip_3d)
+        a_bp_freshness = _bp_freshness(a_bp_ip_3d)
         # Approximate relievers used from IP (avg ~1.5 IP per reliever appearance)
         h_bp_relievers_used_3d = round(h_bp_ip_3d / 1.5, 1)
         a_bp_relievers_used_3d = round(a_bp_ip_3d / 1.5, 1)
