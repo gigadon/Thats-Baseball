@@ -45,6 +45,7 @@ _ODDS_TEAM_MAP: dict[str, str] = {
     "New York Mets": "NYM",
     "New York Yankees": "NYY",
     "Oakland Athletics": "OAK",
+    "Athletics": "OAK",  # team dropped "Oakland"; odds feed now returns just "Athletics"
     "Philadelphia Phillies": "PHI",
     "Pittsburgh Pirates": "PIT",
     "San Diego Padres": "SD",

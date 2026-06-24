@@ -754,15 +754,22 @@ class DailyRunner:
         features["humidity"] = 50.0 if is_dome or not wx else wx.humidity_pct
         features["is_outdoor"] = 0 if is_dome else 1
 
-        # Market odds features
+        # Market odds features. market_home_prob must be DE-VIGGED to match the
+        # training data (odds_history.csv stored no-vig probabilities). Using the
+        # raw home-moneyline implied prob (with vig) inflates the model's
+        # strongest home-anchoring feature and biases live picks toward home.
+        def _implied(ml: float) -> float:
+            return abs(ml) / (abs(ml) + 100) if ml < 0 else 100 / (ml + 100)
+
         if game_odds:
             h_ml = game_odds.get("home_moneyline")
             a_ml = game_odds.get("away_moneyline")
-            if h_ml is not None and h_ml != 0:
-                features["market_home_prob"] = (
-                    abs(h_ml) / (abs(h_ml) + 100) if h_ml < 0
-                    else 100 / (h_ml + 100)
-                )
+            if h_ml and a_ml:
+                h_imp, a_imp = _implied(h_ml), _implied(a_ml)
+                features["market_home_prob"] = h_imp / (h_imp + a_imp)  # de-vig
+                features["has_real_odds"] = True
+            elif h_ml:
+                features["market_home_prob"] = _implied(h_ml)  # away side missing
                 features["has_real_odds"] = True
             else:
                 features["market_home_prob"] = 0.5
