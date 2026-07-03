@@ -67,8 +67,9 @@ mlartifacts/
 *.feather
 data/raw/
 data/processed/
-data/predictions/
-data/betting/
+# data/predictions/ and data/betting/ are TRACKED (small daily JSONs): the
+# GitHub Actions daily job commits them back so next-day CI runs can settle
+# bets and score yesterday's predictions (accuracy.py / settlement.py).
 
 # Keep training data + models for deployment
 !data/*.csv

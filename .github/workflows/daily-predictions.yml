@@ -1,0 +1,69 @@
+name: Daily MLB Predictions to Slack
+
+# Replaces the dead Railway scheduler: runs the daily pipeline with the model
+# committed in THIS repo, posts predictions to Slack, settles/scores yesterday,
+# and commits the accumulated data back so retraining data keeps growing.
+on:
+  schedule:
+    # 17:00 UTC = 1:00 PM EDT in summer (12:00 PM EST in winter — the 1-hour
+    # DST drift is accepted; adjust to "0 18" for winter if it matters).
+    - cron: "0 17 * * *"
+  workflow_dispatch: {}   # manual test runs from the Actions tab
+
+permissions:
+  contents: write   # the data commit-back step pushes to main
+
+concurrency:
+  group: daily-predictions
+  cancel-in-progress: false
+
+jobs:
+  predict:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+
+      - name: Settle yesterday's bets
+        continue-on-error: true   # missing scores must not block today's slate
+        env:
+          PYTHONPATH: src
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+        run: python -m mlb.betting.settlement --backfill 2
+
+      - name: Score yesterday's predictions
+        continue-on-error: true
+        env:
+          PYTHONPATH: src
+        run: python -m mlb.models.accuracy --backfill 2
+
+      - name: Run daily predictions (posts to Slack)
+        env:
+          PYTHONPATH: src
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+          WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY }}
+        run: python -m mlb.etl.daily_runner
+
+      - name: Commit accumulated data back
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/odds_history.csv data/accuracy data/predictions data/betting data/feature_defaults.json || true
+          if git diff --cached --quiet; then
+            echo "No data changes to commit."
+          else
+            git commit -m "chore: daily data update ($(date -u +%F))"
+            git pull --rebase origin main
+            git push origin main
+          fi
