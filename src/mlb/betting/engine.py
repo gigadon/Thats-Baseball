@@ -134,6 +134,9 @@ class BettingConfig:
     """Betting engine configuration."""
 
     min_edge: float = 0.01  # Minimum 1% edge to bet
+    # Real MLB edges vs the closing line are ~0-3%; anything above this cap is
+    # a model/odds artifact (bad feature, stale line, mismatched game), not value.
+    max_edge: float = 0.10
     kelly_fraction: float = 0.35  # ~Third Kelly
     max_bet_pct: float = 0.05  # Max 5% of bankroll per bet
     max_daily_exposure: float = 0.20  # Max 20% of bankroll at risk per day
@@ -190,6 +193,15 @@ class BettingEngine:
         value_bets = []
         for b in opportunities:
             if b.edge < self.config.min_edge:
+                continue
+            if b.edge > self.config.max_edge:
+                logger.info(
+                    "Suppressed implausible edge %.1f%% on %s %s (%s) — "
+                    "max_edge cap; likely model/odds artifact, not value",
+                    b.edge * 100, b.selection,
+                    b.home_team if b.selection == "home" else b.away_team,
+                    b.bet_type,
+                )
                 continue
             if b.confidence < self.config.min_confidence:
                 continue

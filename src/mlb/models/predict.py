@@ -143,8 +143,8 @@ class PredictionService:
             dq += 4
         if fv.get("a_sp_season_ip", 0) > 0:
             dq += 4
-        # Market odds available (not default 0.5): +6
-        if fv.get("market_home_prob", 0.5) != 0.5:
+        # Market odds available (real, not the missing-odds default): +6
+        if fv.get("has_real_odds", 0):
             dq += 6
         # Weather data available (not default 72): +3
         if fv.get("temperature", 72.0) != 72.0 or fv.get("is_outdoor", 0) == 0:

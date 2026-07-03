@@ -85,10 +85,10 @@ class TestBettingEngine:
         self.engine = BettingEngine()
 
     def test_find_value_bet_positive_edge(self):
-        pred = _make_prediction(home_win_prob=0.65)
+        pred = _make_prediction(home_win_prob=0.60, away_win_prob=0.40)
         odds = [{
             "game_id": "123456",
-            "home_moneyline": -130,  # implies ~56.5%
+            "home_moneyline": -130,  # ~54% no-vig → ~6% edge (within max_edge cap)
             "away_moneyline": 110,
             "total_line": 8.5,
             "over_odds": -110,
@@ -96,10 +96,27 @@ class TestBettingEngine:
         }]
 
         slip = self.engine.find_value_bets([pred], odds)
-        # Should find at least a home moneyline value bet (65% model vs ~56.5% implied)
+        # Should find a home moneyline value bet (60% model vs ~54% no-vig)
         home_bets = [b for b in slip.bets if b.selection == "home" and b.bet_type == "moneyline"]
         assert len(home_bets) >= 1
-        assert home_bets[0].edge > 0
+        assert 0 < home_bets[0].edge <= self.engine.config.max_edge
+
+    def test_implausible_edge_suppressed(self):
+        # 75% model vs ~54% no-vig market = ~21% "edge" — always a model/odds
+        # artifact in MLB, never real value. The max_edge cap must suppress it.
+        pred = _make_prediction(home_win_prob=0.75, away_win_prob=0.25)
+        odds = [{
+            "game_id": "123456",
+            "home_moneyline": -130,
+            "away_moneyline": 110,
+            "total_line": 8.5,
+            "over_odds": -110,
+            "under_odds": -110,
+        }]
+
+        slip = self.engine.find_value_bets([pred], odds)
+        home_ml = [b for b in slip.bets if b.selection == "home" and b.bet_type == "moneyline"]
+        assert home_ml == []
 
     def test_no_value_when_aligned(self):
         pred = _make_prediction(home_win_prob=0.55)

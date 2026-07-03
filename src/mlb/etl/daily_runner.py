@@ -28,6 +28,14 @@ from mlb.etl.build_training_data import (
     TEAM_TIMEZONES, TrainingDataBuilder, _classify_day_game,
     _compute_travel_fatigue, _update_elo,
 )
+from mlb.features.defaults import load_defaults
+from mlb.features.formulas import (
+    bp_freshness_from_ip,
+    compute_interaction_features,
+    devig_home_prob,
+    american_implied,
+    lineup_obp,
+)
 from mlb.features.stadium import compute_stadium_features, calculate_stadium_factor
 from mlb.models.predict import GamePrediction, PredictionService
 from mlb.features.assembler import GameFeatureVector
@@ -36,6 +44,10 @@ from mlb.alerts import AlertService
 from mlb.api.routes.rankings import cache_team_rankings, cache_player_rankings
 
 logger = logging.getLogger(__name__)
+
+# Training-distribution defaults for missing pre-game data (single source of
+# truth shared with build_training_data — see mlb.features.defaults).
+_D = load_defaults()
 
 
 class DailyRunner:
@@ -410,17 +422,18 @@ class DailyRunner:
             game_feats: dict[str, float] = {}
             for prefix, side in [("h", "home"), ("a", "away")]:
                 players = lineup_data.get(side, [])
-                # OBP must use TRAINING's formula (H+BB)/(AB+BB) — which omits
-                # HBP/SF and runs ~0.304 — not the MLB API's real OBP (~0.320).
-                # Defaults are set to TRAINING means so missing pre-game data
-                # keeps the model in-distribution rather than biasing it.
+                # OBP uses the shared training formula (H+BB)/(AB+BB) — see
+                # mlb.features.formulas.lineup_obp — NOT the MLB API's real OBP
+                # (which includes HBP/SF and runs ~0.8 train-std high).
                 obp_vals, slg_vals, ops_vals = [], [], []
                 for p in players:
                     bs = batting_stats.get(p["id"])
                     if not bs:
                         continue
-                    ab, h, bb = bs.get("at_bats", 0), bs.get("hits", 0), bs.get("walks", 0)
-                    o = (h + bb) / (ab + bb) if (ab + bb) > 0 else 0.304
+                    o = lineup_obp(
+                        bs.get("hits", 0), bs.get("walks", 0),
+                        bs.get("at_bats", 0), _D["lineup_obp"],
+                    )
                     s = bs["slg"]
                     obp_vals.append(o); slg_vals.append(s); ops_vals.append(o + s)
 
@@ -429,9 +442,9 @@ class DailyRunner:
                     game_feats[f"{prefix}_lineup_slg"] = float(np.mean(slg_vals))
                     game_feats[f"{prefix}_lineup_ops"] = float(np.mean(obp_vals) + np.mean(slg_vals))
                 else:
-                    game_feats[f"{prefix}_lineup_obp"] = 0.304
-                    game_feats[f"{prefix}_lineup_slg"] = 0.401
-                    game_feats[f"{prefix}_lineup_ops"] = 0.705
+                    game_feats[f"{prefix}_lineup_obp"] = _D["lineup_obp"]
+                    game_feats[f"{prefix}_lineup_slg"] = _D["lineup_slg"]
+                    game_feats[f"{prefix}_lineup_ops"] = _D["lineup_ops"]
 
                 # Position-weighted OPS (players come in batting order from API)
                 pos_weights = [1.0, 0.95, 0.90, 0.85, 0.80, 0.75, 0.70, 0.65, 0.60]
@@ -446,8 +459,8 @@ class DailyRunner:
                         else np.mean(starters)
                     )
                 else:
-                    game_feats[f"{prefix}_lineup_wt_ops"] = 0.706
-                    game_feats[f"{prefix}_lineup_top4_ops"] = 0.707
+                    game_feats[f"{prefix}_lineup_wt_ops"] = _D["lineup_wt_ops"]
+                    game_feats[f"{prefix}_lineup_top4_ops"] = _D["lineup_top4_ops"]
 
                 # Platoon advantage vs opposing SP
                 opp_side = "away" if side == "home" else "home"
@@ -469,7 +482,7 @@ class DailyRunner:
                         continue
                     total += 1
                     bats = pi.get("bats", "R")
-                    b_ops = batting_stats.get(p["id"], {}).get("ops", 0.720)
+                    b_ops = batting_stats.get(p["id"], {}).get("ops", _D["lineup_ops"])
                     ops_total_plat += b_ops
                     has_adv = (
                         bats == "S"
@@ -480,10 +493,12 @@ class DailyRunner:
                         adv_count += 1
                         ops_weighted_adv += b_ops
 
-                game_feats[f"{prefix}_platoon_adv"] = adv_count / total if total >= 3 else 0.5
+                game_feats[f"{prefix}_platoon_adv"] = (
+                    adv_count / total if total >= 3 else _D["platoon_adv"]
+                )
                 game_feats[f"{prefix}_platoon_wt_adv"] = (
                     ops_weighted_adv / ops_total_plat
-                    if ops_total_plat > 0 and total >= 3 else 0.5
+                    if ops_total_plat > 0 and total >= 3 else _D["platoon_wt_adv"]
                 )
 
             # Batter-vs-pitcher matchup OPS
@@ -510,7 +525,7 @@ class DailyRunner:
                 if len(bvp_ops_vals) >= 3:
                     game_feats[f"{prefix}_bvp_ops"] = np.mean(bvp_ops_vals)
                 else:
-                    game_feats[f"{prefix}_bvp_ops"] = 0.750  # league average default
+                    game_feats[f"{prefix}_bvp_ops"] = _D["bvp_ops"]  # league average
 
             game_feats["diff_bvp_ops"] = game_feats["h_bvp_ops"] - game_feats["a_bvp_ops"]
 
@@ -522,9 +537,13 @@ class DailyRunner:
             for prefix, side in [("h", "home"), ("a", "away")]:
                 players = lineup_data.get(side, [])
                 ops_vals = [batting_stats[p["id"]]["ops"] for p in players if p["id"] in batting_stats]
-                game_feats[f"{prefix}_lineup_ops_7d"] = np.mean(ops_vals) if ops_vals else 0.720
+                game_feats[f"{prefix}_lineup_ops_7d"] = (
+                    np.mean(ops_vals) if ops_vals else _D["lineup_ops_7d"]
+                )
                 hot = sum(1 for o in ops_vals if o > 0.800)
-                game_feats[f"{prefix}_lineup_hot_pct"] = hot / len(ops_vals) if ops_vals else 0.4
+                game_feats[f"{prefix}_lineup_hot_pct"] = (
+                    hot / len(ops_vals) if ops_vals else _D["lineup_hot_pct"]
+                )
 
             # Differentials
             for k in ("lineup_ops", "lineup_obp", "lineup_slg",
@@ -655,7 +674,7 @@ class DailyRunner:
 
     def _get_sp_rest_days(self, pitcher_id: int, target_date: date) -> int:
         """Return cached rest days for a pitcher, defaulting to 5."""
-        return self._sp_rest_cache.get(pitcher_id, 5)
+        return self._sp_rest_cache.get(pitcher_id, int(_D["sp_rest_days"]))
 
     def _get_sp_recent_form(self, pitcher_id: int) -> dict[str, float]:
         """Return recent form stats (last 3 starts) from cached game log.
@@ -763,35 +782,31 @@ class DailyRunner:
         features["humidity"] = 50.0 if is_dome or not wx else wx.humidity_pct
         features["is_outdoor"] = 0 if is_dome else 1
 
-        # Market odds features. market_home_prob must be DE-VIGGED to match the
-        # training data (odds_history.csv stored no-vig probabilities). Using the
-        # raw home-moneyline implied prob (with vig) inflates the model's
-        # strongest home-anchoring feature and biases live picks toward home.
-        def _implied(ml: float) -> float:
-            return abs(ml) / (abs(ml) + 100) if ml < 0 else 100 / (ml + 100)
-
+        # Market odds features. market_home_prob must be DE-VIGGED with the same
+        # shared transform that builds odds_history.csv (training's source) —
+        # see mlb.features.formulas.devig_home_prob. Using the raw vig-inflated
+        # home implied prob here previously biased live picks toward home.
         if game_odds:
             h_ml = game_odds.get("home_moneyline")
             a_ml = game_odds.get("away_moneyline")
             if h_ml and a_ml:
-                h_imp, a_imp = _implied(h_ml), _implied(a_ml)
-                features["market_home_prob"] = h_imp / (h_imp + a_imp)  # de-vig
+                features["market_home_prob"] = devig_home_prob(h_ml, a_ml)
                 features["has_real_odds"] = True
             elif h_ml:
-                features["market_home_prob"] = _implied(h_ml)  # away side missing
+                features["market_home_prob"] = american_implied(h_ml)  # away side missing
                 features["has_real_odds"] = True
             else:
-                features["market_home_prob"] = 0.5
+                features["market_home_prob"] = _D["market_home_prob"]
                 features["has_real_odds"] = False
-            features["market_total"] = game_odds.get("total_line", 8.5) or 8.5
+            features["market_total"] = game_odds.get("total_line") or _D["market_total"]
         else:
-            features["market_home_prob"] = 0.5
-            features["market_total"] = 8.5
+            features["market_home_prob"] = _D["market_home_prob"]
+            features["market_total"] = _D["market_total"]
             features["has_real_odds"] = False
 
         # Elo ratings
-        h_elo = self._elo_ratings.get(home, 1500.0)
-        a_elo = self._elo_ratings.get(away, 1500.0)
+        h_elo = self._elo_ratings.get(home, _D["elo"])
+        a_elo = self._elo_ratings.get(away, _D["elo"])
         features["h_elo"] = h_elo
         features["a_elo"] = a_elo
         features["elo_diff"] = h_elo - a_elo
@@ -799,20 +814,23 @@ class DailyRunner:
         # Rest days
         h_last = self._last_game_date.get(home)
         a_last = self._last_game_date.get(away)
-        features["h_rest_days"] = (target_date - h_last).days if h_last else 5
-        features["a_rest_days"] = (target_date - a_last).days if a_last else 5
+        features["h_rest_days"] = (target_date - h_last).days if h_last else int(_D["rest_days"])
+        features["a_rest_days"] = (target_date - a_last).days if a_last else int(_D["rest_days"])
         features["rest_diff"] = features["h_rest_days"] - features["a_rest_days"]
 
-        # Venue-specific rolling features (home team's home record, away team's road record)
-        features["h_home_win_pct"] = home_feat.get("venue_home_win_pct", 0.500)
-        features["a_away_win_pct"] = away_feat.get("venue_away_win_pct", 0.500)
+        # Venue-specific rolling features (home team's home record, away team's
+        # road record). Win-pct defaults are deliberately SYMMETRIC 0.500/0.500
+        # (see mlb.features.defaults) — asymmetric defaults previously caused
+        # home bias (commit 4ecec9f).
+        features["h_home_win_pct"] = home_feat.get("venue_home_win_pct", _D["venue_home_win_pct"])
+        features["a_away_win_pct"] = away_feat.get("venue_away_win_pct", _D["venue_away_win_pct"])
         features["diff_venue_win_pct"] = features["h_home_win_pct"] - features["a_away_win_pct"]
-        features["h_home_rs_per_game"] = home_feat.get("venue_home_rs_per_game", 4.5)
-        features["a_away_rs_per_game"] = away_feat.get("venue_away_rs_per_game", 4.5)
+        features["h_home_rs_per_game"] = home_feat.get("venue_home_rs_per_game", _D["venue_home_rs_per_game"])
+        features["a_away_rs_per_game"] = away_feat.get("venue_away_rs_per_game", _D["venue_away_rs_per_game"])
 
         # Home-field advantage strength per team
-        h_hfa = home_feat.get("venue_home_win_pct", 0.500) - home_feat.get("venue_away_win_pct", 0.500)
-        a_hfa = away_feat.get("venue_home_win_pct", 0.500) - away_feat.get("venue_away_win_pct", 0.500)
+        h_hfa = home_feat.get("venue_home_win_pct", _D["venue_home_win_pct"]) - home_feat.get("venue_away_win_pct", _D["venue_away_win_pct"])
+        a_hfa = away_feat.get("venue_home_win_pct", _D["venue_home_win_pct"]) - away_feat.get("venue_away_win_pct", _D["venue_away_win_pct"])
         features["h_hfa_strength"] = h_hfa
         features["a_hfa_strength"] = a_hfa
         features["diff_hfa_strength"] = h_hfa - a_hfa
@@ -824,7 +842,11 @@ class DailyRunner:
         h_sp_stats = sp_data.get(home_sp["player_id"]) if home_sp else None
         a_sp_stats = sp_data.get(away_sp["player_id"]) if away_sp else None
 
-        sp_defaults = {"era": 4.50, "whip": 1.30, "k_per_nine": 8.0, "bb_per_nine": 3.0, "innings_pitched": 0.0}
+        sp_defaults = {
+            "era": _D["sp_season_era"], "whip": _D["sp_season_whip"],
+            "k_per_nine": _D["sp_season_k9"], "bb_per_nine": _D["sp_season_bb9"],
+            "innings_pitched": _D["sp_season_ip"],
+        }
         sp_key_map = {"era": "sp_season_era", "whip": "sp_season_whip",
                       "k_per_nine": "sp_season_k9", "bb_per_nine": "sp_season_bb9",
                       "innings_pitched": "sp_season_ip"}
@@ -845,57 +867,42 @@ class DailyRunner:
         # Pitcher recent form (last 3 starts) — derived from game log
         h_recent = self._get_sp_recent_form(home_sp["player_id"]) if home_sp else {}
         a_recent = self._get_sp_recent_form(away_sp["player_id"]) if away_sp else {}
-        features["h_sp_recent_era"] = h_recent.get("era", features.get("h_sp_season_era", 4.50))
-        features["a_sp_recent_era"] = a_recent.get("era", features.get("a_sp_season_era", 4.50))
+        features["h_sp_recent_era"] = h_recent.get("era", features.get("h_sp_season_era", _D["sp_recent_era"]))
+        features["a_sp_recent_era"] = a_recent.get("era", features.get("a_sp_season_era", _D["sp_recent_era"]))
         features["diff_sp_recent_era"] = features["h_sp_recent_era"] - features["a_sp_recent_era"]
-        features["h_sp_recent_whip"] = h_recent.get("whip", features.get("h_sp_season_whip", 1.30))
-        features["a_sp_recent_whip"] = a_recent.get("whip", features.get("a_sp_season_whip", 1.30))
+        features["h_sp_recent_whip"] = h_recent.get("whip", features.get("h_sp_season_whip", _D["sp_recent_whip"]))
+        features["a_sp_recent_whip"] = a_recent.get("whip", features.get("a_sp_season_whip", _D["sp_recent_whip"]))
         features["diff_sp_recent_whip"] = features["h_sp_recent_whip"] - features["a_sp_recent_whip"]
-        features["h_sp_recent_k9"] = h_recent.get("k9", features.get("h_sp_season_k9", 8.0))
-        features["a_sp_recent_k9"] = a_recent.get("k9", features.get("a_sp_season_k9", 8.0))
+        features["h_sp_recent_k9"] = h_recent.get("k9", features.get("h_sp_season_k9", _D["sp_recent_k9"]))
+        features["a_sp_recent_k9"] = a_recent.get("k9", features.get("a_sp_season_k9", _D["sp_recent_k9"]))
         features["diff_sp_recent_k9"] = features["h_sp_recent_k9"] - features["a_sp_recent_k9"]
 
         # Lineup and platoon features
         lf = (lineup_features or {}).get(game["game_id"], {})
-        # Defaults are TRAINING means so missing pre-game lineups keep the model
-        # in-distribution (stale defaults like obp 0.320 vs training 0.304 and
-        # top4_ops 0.750 vs 0.707 were out-of-distribution and biased picks home).
-        _lineup_defaults = {
-            "lineup_ops": 0.705, "lineup_obp": 0.304, "lineup_slg": 0.401,
-            "lineup_wt_ops": 0.706, "lineup_top4_ops": 0.707,
-            "platoon_adv": 0.5, "platoon_wt_adv": 0.5,
-        }
-        for k, default in _lineup_defaults.items():
-            features[f"h_{k}"] = lf.get(f"h_{k}", default)
-            features[f"a_{k}"] = lf.get(f"a_{k}", default)
-            features[f"diff_{k}"] = features[f"h_{k}"] - features[f"a_{k}"]
-
-        # Lineup recent form (7-day OPS)
-        for k in ("lineup_ops_7d", "lineup_hot_pct"):
-            default = 0.720 if "ops" in k else 0.4
-            features[f"h_{k}"] = lf.get(f"h_{k}", default)
-            features[f"a_{k}"] = lf.get(f"a_{k}", default)
+        # Defaults come from the shared training-distribution registry
+        # (mlb.features.defaults) so missing pre-game lineups keep the model
+        # in-distribution — stale hardcoded defaults previously biased picks home.
+        for k in ("lineup_ops", "lineup_obp", "lineup_slg",
+                  "lineup_wt_ops", "lineup_top4_ops",
+                  "platoon_adv", "platoon_wt_adv",
+                  "lineup_ops_7d", "lineup_hot_pct"):
+            features[f"h_{k}"] = lf.get(f"h_{k}", _D[k])
+            features[f"a_{k}"] = lf.get(f"a_{k}", _D[k])
             features[f"diff_{k}"] = features[f"h_{k}"] - features[f"a_{k}"]
 
         # Batter-vs-pitcher matchup OPS
-        features["h_bvp_ops"] = lf.get("h_bvp_ops", 0.750)
-        features["a_bvp_ops"] = lf.get("a_bvp_ops", 0.750)
+        features["h_bvp_ops"] = lf.get("h_bvp_ops", _D["bvp_ops"])
+        features["a_bvp_ops"] = lf.get("a_bvp_ops", _D["bvp_ops"])
         features["diff_bvp_ops"] = features["h_bvp_ops"] - features["a_bvp_ops"]
 
-        # Bullpen availability (approximated from rolling stats)
-        # bp_ip_3d is already in the rolling features from _compute_team_rolling_stats
+        # Bullpen availability (approximated from rolling stats).
+        # bp_ip_3d is already in the rolling features from _compute_team_rolling_stats;
+        # freshness mapping shared via mlb.features.formulas (must stay on the
+        # training distribution's ~0.91-0.96 scale).
         h_bp_ip_3d = home_feat.get("bp_ip_3d", 6.0)
         a_bp_ip_3d = away_feat.get("bp_ip_3d", 6.0)
-        # Freshness must match TRAINING's distribution: there it is the fraction
-        # of the season's bullpen unused in the last 3 days, which sits ~0.934
-        # (std 0.019, range ~0.91-0.96) — effectively near-constant. The old live
-        # formula (1 - ip/15) produced ~0.39, ~29 std out of distribution, which
-        # flipped tree splits and biased live picks toward home. Reproduce the
-        # training scale (centered ~0.945, mild penalty for heavy recent usage).
-        def _bp_freshness(ip_3d: float) -> float:
-            return min(0.96, max(0.90, 0.945 - max(0.0, ip_3d - 6.0) * 0.005))
-        h_bp_freshness = _bp_freshness(h_bp_ip_3d)
-        a_bp_freshness = _bp_freshness(a_bp_ip_3d)
+        h_bp_freshness = bp_freshness_from_ip(h_bp_ip_3d)
+        a_bp_freshness = bp_freshness_from_ip(a_bp_ip_3d)
         # Approximate relievers used from IP (avg ~1.5 IP per reliever appearance)
         h_bp_relievers_used_3d = round(h_bp_ip_3d / 1.5, 1)
         a_bp_relievers_used_3d = round(a_bp_ip_3d / 1.5, 1)
@@ -969,37 +976,9 @@ class DailyRunner:
         features["diff_bp_ip_3d"] = features["h_bp_ip_3d"] - features["a_bp_ip_3d"]
 
         # ── Feature 7: Interaction Features (mismatch detection) ──
-        elo_gap = features.get("elo_diff", 0.0) / 100.0
-        sp_gap = features.get("diff_sp_season_era", 0.0)
-        bp_gap = features.get("diff_bp_freshness", 0.0)
-        mom_gap = features.get("diff_momentum", 0.0)
-        form_gap = features.get("diff_ewm_win_pct", 0.0) * 10
-
-        features["interact_elo_x_sp"] = elo_gap * (-sp_gap)
-        features["interact_elo_x_bp"] = elo_gap * bp_gap
-        features["interact_sp_x_bp"] = (-sp_gap) * bp_gap
-        features["interact_elo_x_momentum"] = elo_gap * mom_gap
-
-        # SP quality × opposing offense
-        h_off_ops = home_feat.get("ops_14", 0.720)
-        a_off_ops = away_feat.get("ops_14", 0.720)
-        features["interact_hsp_vs_aoff"] = (-sp_gap) * (a_off_ops - 0.720) * 10
-        features["interact_asp_vs_hoff"] = sp_gap * (h_off_ops - 0.720) * 10
-
-        # Rest × form
-        rest_gap = features.get("rest_diff", 0.0)
-        features["interact_rest_x_form"] = rest_gap * form_gap
-
-        # Park factor × SP quality
+        # Shared implementation with the training builder (mlb.features.formulas)
         park = PARK_FACTORS.get(home, PARK_DEFAULT)
-        pf = park["runs"]
-        features["interact_park_x_sp"] = (pf - 1.0) * 10 * (-sp_gap)
-
-        # Bullpen × pitching duel likelihood
-        h_sp_era_val = features.get("h_sp_season_era", 4.50)
-        a_sp_era_val = features.get("a_sp_season_era", 4.50)
-        pitching_duel = max(0, (9.0 - h_sp_era_val - a_sp_era_val) / 4.0)
-        features["interact_bp_x_duel"] = bp_gap * pitching_duel
+        features.update(compute_interaction_features(features, park["runs"]))
 
         # ── Feature 8: Injury/IL Signals ──
         ic = injury_counts or {}
@@ -1573,14 +1552,9 @@ class DailyRunner:
             away_ml = odds.get("away_moneyline")
             if home_ml is None or away_ml is None:
                 continue
-            # Compute implied probabilities (removing vig with power method)
-            from mlb.betting.engine import american_to_decimal
-            h_dec = american_to_decimal(home_ml)
-            a_dec = american_to_decimal(away_ml)
-            h_imp = 1.0 / h_dec
-            a_imp = 1.0 / a_dec
-            total_imp = h_imp + a_imp
-            h_prob = h_imp / total_imp  # Vig-removed
+            # Proportional de-vig — the shared transform live features also use,
+            # so training (this CSV) and live market_home_prob stay identical.
+            h_prob = devig_home_prob(home_ml, away_ml)
             rows.append({
                 "game_date": target_date.isoformat(),
                 "home_team": odds["home_team"],

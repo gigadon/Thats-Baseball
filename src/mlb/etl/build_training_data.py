@@ -18,7 +18,14 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
+from mlb.features.defaults import load_defaults
+from mlb.features.formulas import compute_interaction_features
+
 logger = logging.getLogger(__name__)
+
+# Missing-data defaults shared with the live pipeline (mlb.features.defaults).
+# Both pipelines must insert identical values for identical missing scenarios.
+_DEFAULTS = load_defaults()
 
 # Park factors: runs factor relative to league average (1.00).
 # Source: multi-year averages. >1.0 = hitter-friendly, <1.0 = pitcher-friendly.
@@ -308,27 +315,30 @@ class TrainingDataBuilder:
             # Rest days
             h_last = last_game_date.get(home)
             a_last = last_game_date.get(away)
-            row["h_rest_days"] = (game_date - h_last).days if h_last else 5
-            row["a_rest_days"] = (game_date - a_last).days if a_last else 5
+            row["h_rest_days"] = (game_date - h_last).days if h_last else _DEFAULTS["rest_days"]
+            row["a_rest_days"] = (game_date - a_last).days if a_last else _DEFAULTS["rest_days"]
             row["rest_diff"] = row["h_rest_days"] - row["a_rest_days"]
 
             # Venue-specific win pct differential (already in h_/a_ from rolling stats)
-            h_home_wpct = home_feat.get("venue_home_win_pct", 0.500)
-            a_away_wpct = away_feat.get("venue_away_win_pct", 0.500)
+            h_home_wpct = home_feat.get("venue_home_win_pct", _DEFAULTS["venue_home_win_pct"])
+            a_away_wpct = away_feat.get("venue_away_win_pct", _DEFAULTS["venue_away_win_pct"])
             row["diff_venue_win_pct"] = h_home_wpct - a_away_wpct
 
             # Home-field advantage strength: how much better each team is at home vs away
-            h_hfa = home_feat.get("venue_home_win_pct", 0.500) - home_feat.get("venue_away_win_pct", 0.500)
-            a_hfa = away_feat.get("venue_home_win_pct", 0.500) - away_feat.get("venue_away_win_pct", 0.500)
+            h_hfa = home_feat.get("venue_home_win_pct", _DEFAULTS["venue_home_win_pct"]) - home_feat.get("venue_away_win_pct", _DEFAULTS["venue_away_win_pct"])
+            a_hfa = away_feat.get("venue_home_win_pct", _DEFAULTS["venue_home_win_pct"]) - away_feat.get("venue_away_win_pct", _DEFAULTS["venue_away_win_pct"])
             row["h_hfa_strength"] = h_hfa
             row["a_hfa_strength"] = a_hfa
             row["diff_hfa_strength"] = h_hfa - a_hfa
 
-            # Starting pitcher season stats (entering this game)
+            # Starting pitcher season stats (entering this game).
+            # Missing-data defaults come from the shared registry so training
+            # and live prediction insert identical values (mlb.features.defaults).
             h_sp = sp_season.get((game["game_id"], home))
             a_sp = sp_season.get((game["game_id"], away))
-            sp_defaults = {"sp_season_era": 4.50, "sp_season_whip": 1.30,
-                           "sp_season_k9": 8.0, "sp_season_bb9": 3.0, "sp_season_ip": 0.0}
+            sp_defaults = {k: _DEFAULTS[k] for k in (
+                "sp_season_era", "sp_season_whip", "sp_season_k9",
+                "sp_season_bb9", "sp_season_ip")}
             for k, default in sp_defaults.items():
                 row[f"h_{k}"] = h_sp[k] if h_sp else default
                 row[f"a_{k}"] = a_sp[k] if a_sp else default
@@ -337,14 +347,14 @@ class TrainingDataBuilder:
             # SP recent form (rolling 3-start ERA/WHIP/K9)
             h_sp_recent = sp_recent.get((game["game_id"], home))
             a_sp_recent = sp_recent.get((game["game_id"], away))
-            row["h_sp_recent_era"] = h_sp_recent["sp_recent_era"] if h_sp_recent else row.get("h_sp_season_era", 4.50)
-            row["a_sp_recent_era"] = a_sp_recent["sp_recent_era"] if a_sp_recent else row.get("a_sp_season_era", 4.50)
+            row["h_sp_recent_era"] = h_sp_recent["sp_recent_era"] if h_sp_recent else row.get("h_sp_season_era", _DEFAULTS["sp_recent_era"])
+            row["a_sp_recent_era"] = a_sp_recent["sp_recent_era"] if a_sp_recent else row.get("a_sp_season_era", _DEFAULTS["sp_recent_era"])
             row["diff_sp_recent_era"] = row["h_sp_recent_era"] - row["a_sp_recent_era"]
-            row["h_sp_recent_whip"] = h_sp_recent["sp_recent_whip"] if h_sp_recent else row.get("h_sp_season_whip", 1.30)
-            row["a_sp_recent_whip"] = a_sp_recent["sp_recent_whip"] if a_sp_recent else row.get("a_sp_season_whip", 1.30)
+            row["h_sp_recent_whip"] = h_sp_recent["sp_recent_whip"] if h_sp_recent else row.get("h_sp_season_whip", _DEFAULTS["sp_recent_whip"])
+            row["a_sp_recent_whip"] = a_sp_recent["sp_recent_whip"] if a_sp_recent else row.get("a_sp_season_whip", _DEFAULTS["sp_recent_whip"])
             row["diff_sp_recent_whip"] = row["h_sp_recent_whip"] - row["a_sp_recent_whip"]
-            row["h_sp_recent_k9"] = h_sp_recent["sp_recent_k9"] if h_sp_recent else row.get("h_sp_season_k9", 8.0)
-            row["a_sp_recent_k9"] = a_sp_recent["sp_recent_k9"] if a_sp_recent else row.get("a_sp_season_k9", 8.0)
+            row["h_sp_recent_k9"] = h_sp_recent["sp_recent_k9"] if h_sp_recent else row.get("h_sp_season_k9", _DEFAULTS["sp_recent_k9"])
+            row["a_sp_recent_k9"] = a_sp_recent["sp_recent_k9"] if a_sp_recent else row.get("a_sp_season_k9", _DEFAULTS["sp_recent_k9"])
             row["diff_sp_recent_k9"] = row["h_sp_recent_k9"] - row["a_sp_recent_k9"]
 
             # Pitcher rest days (days since SP last started a game)
@@ -352,17 +362,16 @@ class TrainingDataBuilder:
             a_sp_pid = sp_lookup.get((game["game_id"], away))
             h_sp_last = last_sp_start.get(h_sp_pid) if h_sp_pid else None
             a_sp_last = last_sp_start.get(a_sp_pid) if a_sp_pid else None
-            row["h_sp_rest_days"] = (game_date - h_sp_last).days if h_sp_last else 5
-            row["a_sp_rest_days"] = (game_date - a_sp_last).days if a_sp_last else 5
+            row["h_sp_rest_days"] = (game_date - h_sp_last).days if h_sp_last else _DEFAULTS["sp_rest_days"]
+            row["a_sp_rest_days"] = (game_date - a_sp_last).days if a_sp_last else _DEFAULTS["sp_rest_days"]
             row["diff_sp_rest_days"] = row["h_sp_rest_days"] - row["a_sp_rest_days"]
 
             # Lineup aggregate season stats
             h_lineup = lineup_season.get((game["game_id"], home))
             a_lineup = lineup_season.get((game["game_id"], away))
-            lineup_defaults = {
-                "lineup_ops": 0.720, "lineup_obp": 0.320, "lineup_slg": 0.400,
-                "lineup_wt_ops": 0.720, "lineup_top4_ops": 0.750,
-            }
+            lineup_defaults = {k: _DEFAULTS[k] for k in (
+                "lineup_ops", "lineup_obp", "lineup_slg",
+                "lineup_wt_ops", "lineup_top4_ops")}
             for k, default in lineup_defaults.items():
                 row[f"h_{k}"] = h_lineup.get(k, default) if h_lineup else default
                 row[f"a_{k}"] = a_lineup.get(k, default) if a_lineup else default
@@ -371,7 +380,8 @@ class TrainingDataBuilder:
             # Platoon advantage
             h_platoon = platoon.get((game["game_id"], home))
             a_platoon = platoon.get((game["game_id"], away))
-            for pk, pdefault in {"platoon_adv": 0.5, "platoon_wt_adv": 0.5}.items():
+            for pk in ("platoon_adv", "platoon_wt_adv"):
+                pdefault = _DEFAULTS[pk]
                 row[f"h_{pk}"] = h_platoon.get(pk, pdefault) if h_platoon else pdefault
                 row[f"a_{pk}"] = a_platoon.get(pk, pdefault) if a_platoon else pdefault
                 row[f"diff_{pk}"] = row[f"h_{pk}"] - row[f"a_{pk}"]
@@ -379,7 +389,7 @@ class TrainingDataBuilder:
             # Lineup recent form (7-day rolling OPS)
             h_recent = lineup_recent.get((game["game_id"], home))
             a_recent = lineup_recent.get((game["game_id"], away))
-            recent_defaults = {"lineup_ops_7d": 0.720, "lineup_hot_pct": 0.4}
+            recent_defaults = {k: _DEFAULTS[k] for k in ("lineup_ops_7d", "lineup_hot_pct")}
             for k, default in recent_defaults.items():
                 row[f"h_{k}"] = h_recent[k] if h_recent else default
                 row[f"a_{k}"] = a_recent[k] if a_recent else default
@@ -391,9 +401,8 @@ class TrainingDataBuilder:
             # Bullpen availability
             h_bp_avail = bp_avail.get((game["game_id"], home))
             a_bp_avail = bp_avail.get((game["game_id"], away))
-            bp_avail_defaults = {
-                "bp_relievers_used_3d": 4, "bp_freshness": 0.5,
-            }
+            bp_avail_defaults = {k: _DEFAULTS[k] for k in (
+                "bp_relievers_used_3d", "bp_freshness")}
             for k, default in bp_avail_defaults.items():
                 row[f"h_{k}"] = h_bp_avail[k] if h_bp_avail else default
                 row[f"a_{k}"] = a_bp_avail[k] if a_bp_avail else default
@@ -476,39 +485,8 @@ class TrainingDataBuilder:
             # Live predictions inject real IL data when available.
 
             # ── Interaction Features (mismatch detection) ──
-            # Normalized component diffs for interaction terms
-            elo_gap = row.get("elo_diff", 0.0) / 100.0  # ~±2 range
-            sp_era_gap = row.get("diff_sp_season_era", 0.0)  # Negative = home SP better ERA
-            bp_fresh = row.get("diff_bp_freshness", 0.0)
-            mom_gap = row.get("diff_momentum", 0.0)
-            form_gap = row.get("diff_ewm_win_pct", 0.0) * 10  # Scale up
-
-            # Core interactions
-            row["interact_elo_x_sp"] = elo_gap * (-sp_era_gap)  # Both favor home → positive
-            row["interact_elo_x_bp"] = elo_gap * bp_fresh
-            row["interact_sp_x_bp"] = (-sp_era_gap) * bp_fresh
-            row["interact_elo_x_momentum"] = elo_gap * mom_gap
-
-            # NEW: SP quality × opposing offense (mismatch detector)
-            h_off_ops = home_feat.get("ops_14", 0.720)
-            a_off_ops = away_feat.get("ops_14", 0.720)
-            row["interact_hsp_vs_aoff"] = (-sp_era_gap) * (a_off_ops - 0.720) * 10
-            row["interact_asp_vs_hoff"] = sp_era_gap * (h_off_ops - 0.720) * 10
-
-            # NEW: Rest × form (rested team on a hot streak)
-            rest_gap = row.get("rest_diff", 0.0)
-            row["interact_rest_x_form"] = rest_gap * form_gap
-
-            # NEW: Park factor × SP quality (elite SP in hitter park)
-            pf = park["runs"]
-            row["interact_park_x_sp"] = (pf - 1.0) * 10 * (-sp_era_gap)
-
-            # NEW: Bullpen fatigue × close-game likelihood
-            # If both SPs are good (low ERA), game likely close → bullpen matters more
-            h_sp_era_val = row.get("h_sp_season_era", 4.50)
-            a_sp_era_val = row.get("a_sp_season_era", 4.50)
-            pitching_duel = max(0, (9.0 - h_sp_era_val - a_sp_era_val) / 4.0)
-            row["interact_bp_x_duel"] = bp_fresh * pitching_duel
+            # Shared implementation with the live pipeline (mlb.features.formulas)
+            row.update(compute_interaction_features(row, park["runs"]))
 
             feature_rows.append(row)
 
