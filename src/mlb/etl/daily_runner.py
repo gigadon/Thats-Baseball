@@ -13,9 +13,10 @@ from __future__ import annotations
 import asyncio
 import logging
 from dataclasses import asdict
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Any
+from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
@@ -50,6 +51,16 @@ logger = logging.getLogger(__name__)
 _D = load_defaults()
 
 
+def _today_et() -> date:
+    """The current MLB slate date — today in US Eastern time.
+
+    Naive ``date.today()`` is wrong on UTC hosts (GitHub Actions): a run after
+    8 PM ET is already "tomorrow" in UTC and would predict the next day's
+    slate. All default-date resolution must go through this.
+    """
+    return datetime.now(ZoneInfo("America/New_York")).date()
+
+
 class DailyRunner:
     """Orchestrates the full daily prediction pipeline."""
 
@@ -74,7 +85,7 @@ class DailyRunner:
 
         Returns a summary dict with predictions, betting slip, and metadata.
         """
-        target_date = target_date or date.today()
+        target_date = target_date or _today_et()
         logger.info("=== Daily Runner: %s ===", target_date)
 
         result: dict[str, Any] = {
@@ -1867,7 +1878,7 @@ def main():
     parser.add_argument("--model-dir", type=str, default="models")
     args = parser.parse_args()
 
-    target = date.fromisoformat(args.date) if args.date else date.today()
+    target = date.fromisoformat(args.date) if args.date else _today_et()
 
     runner = DailyRunner(
         data_dir=Path(args.data_dir),

@@ -15,10 +15,16 @@ from __future__ import annotations
 import json
 import logging
 from datetime import date, datetime, timedelta
+from zoneinfo import ZoneInfo
 from pathlib import Path
 from typing import Any
 
 logger = logging.getLogger(__name__)
+
+
+def _today_et() -> date:
+    """Today in US Eastern — naive date.today() is tomorrow on UTC hosts after 8 PM ET."""
+    return datetime.now(ZoneInfo("America/New_York")).date()
 
 
 async def track_accuracy(
@@ -76,6 +82,12 @@ async def track_accuracy(
         away = pred.get("away_team")
         score = scores.get((home, away))
         if not score:
+            continue
+
+        # Skip no-prediction placeholders (TBD pitchers → prob 0.5, confidence
+        # 0): grading a coin-flip the model never actually called pollutes the
+        # scoreboard with an arbitrary correct/incorrect.
+        if not pred.get("confidence") and pred.get("home_win_prob", 0.5) == 0.5:
             continue
 
         home_score = score["home_score"]
@@ -201,12 +213,12 @@ async def _main():
     data_dir = Path(args.data_dir)
 
     if args.backfill > 0:
-        today = date.today()
+        today = _today_et()
         for i in range(args.backfill, 0, -1):
             d = today - timedelta(days=i)
             await track_accuracy(d, data_dir)
     else:
-        target = date.fromisoformat(args.date) if args.date else date.today()
+        target = date.fromisoformat(args.date) if args.date else _today_et()
         await track_accuracy(target, data_dir)
 
 

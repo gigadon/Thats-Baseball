@@ -34,6 +34,19 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e .
 
+      - name: Backfill recent game results (rolling team stats source)
+        continue-on-error: true   # a backfill hiccup must not block predictions
+        env:
+          PYTHONPATH: src
+        # 10-day window, merge-by-game_id semantics: keeps games/batting/pitching
+        # CSVs current so Elo/form/venue features aren't stale (the old Railway
+        # scheduler did this daily; it died with the trial).
+        run: |
+          python -m mlb.etl.backfill \
+            --start "$(date -u -d '10 days ago' +%F)" \
+            --end "$(date -u +%F)" \
+            --delay 0.3
+
       - name: Settle yesterday's bets
         continue-on-error: true   # missing scores must not block today's slate
         env:
@@ -59,7 +72,8 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/odds_history.csv data/accuracy data/predictions data/betting data/feature_defaults.json || true
+          git add data/odds_history.csv data/accuracy data/predictions data/betting data/feature_defaults.json \
+                  data/games_*.csv data/batting_*.csv data/pitching_*.csv || true
           if git diff --cached --quiet; then
             echo "No data changes to commit."
           else

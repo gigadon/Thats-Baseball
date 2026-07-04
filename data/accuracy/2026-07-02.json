@@ -1,6 +1,6 @@
 {
   "date": "2026-07-02",
-  "tracked_at": "2026-07-04T15:17:52.763792",
+  "tracked_at": "2026-07-04T10:30:54.361926",
   "results": [
     {
       "game_id": "823765",
@@ -97,25 +97,13 @@
       "actual_away_score": 7,
       "actual_winner": "LAD",
       "correct": true
-    },
-    {
-      "game_id": "823442",
-      "home_team": "PHI",
-      "away_team": "PIT",
-      "home_win_prob": 0.5,
-      "confidence": 0.0,
-      "predicted_winner": "PHI",
-      "actual_home_score": 1,
-      "actual_away_score": 6,
-      "actual_winner": "PIT",
-      "correct": true
     }
   ],
   "summary": {
-    "total_games": 9,
-    "correct": 8,
+    "total_games": 8,
+    "correct": 7,
     "incorrect": 1,
-    "accuracy": 0.8889,
-    "brier_score": 0.1742
+    "accuracy": 0.875,
+    "brier_score": 0.1647
   }
 }

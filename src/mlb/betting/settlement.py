@@ -15,6 +15,7 @@ from __future__ import annotations
 import json
 import logging
 from datetime import date, datetime, timedelta
+from zoneinfo import ZoneInfo
 from pathlib import Path
 from typing import Any
 
@@ -22,6 +23,11 @@ from mlb.betting.engine import american_to_decimal
 from mlb.data.odds_api import OddsApiClient
 
 logger = logging.getLogger(__name__)
+
+
+def _today_et() -> date:
+    """Today in US Eastern — naive date.today() is tomorrow on UTC hosts after 8 PM ET."""
+    return datetime.now(ZoneInfo("America/New_York")).date()
 
 
 # ── Core settlement ──────────────────────────────────────────
@@ -52,7 +58,7 @@ async def settle_day(
 
     # Fetch final scores — try Odds API for recent, fall back to local CSV
     score_map: dict[tuple[str, str], dict] = {}
-    days_ago = (date.today() - target_date).days
+    days_ago = (_today_et() - target_date).days
 
     if days_ago <= 3:
         try:
@@ -289,7 +295,7 @@ def main():
 
     async def run():
         if args.backfill:
-            today = date.today()
+            today = _today_et()
             for i in range(args.backfill, 0, -1):
                 d = today - timedelta(days=i)
                 settlement_file = data_dir / "betting" / f"{d.isoformat()}.json"
@@ -308,7 +314,7 @@ def main():
                         f"Cumulative: ${s['cumulative_pnl']:+.2f}"
                     )
         else:
-            target = date.fromisoformat(args.date) if args.date else date.today()
+            target = date.fromisoformat(args.date) if args.date else _today_et()
             result = await settle_day(target, data_dir)
             if result:
                 s = result["summary"]

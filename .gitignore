@@ -79,3 +79,6 @@ data/processed/
 # OS
 Thumbs.db
 catboost_info/
+
+# Runtime lock files (never commit)
+data/predictions/*.lock
