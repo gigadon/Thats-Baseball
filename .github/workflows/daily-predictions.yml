@@ -5,9 +5,9 @@ name: Daily MLB Predictions to Slack
 # and commits the accumulated data back so retraining data keeps growing.
 on:
   schedule:
-    # 17:00 UTC = 1:00 PM EDT in summer (12:00 PM EST in winter — the 1-hour
-    # DST drift is accepted; adjust to "0 18" for winter if it matters).
-    - cron: "0 17 * * *"
+    # 16:30 UTC = 11:30 AM CDT in summer (10:30 AM CST in winter — the 1-hour
+    # DST drift is accepted; adjust to "30 17" for winter if it matters).
+    - cron: "30 16 * * *"
   workflow_dispatch: {}   # manual test runs from the Actions tab
 
 permissions:

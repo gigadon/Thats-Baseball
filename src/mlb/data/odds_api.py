@@ -201,6 +201,7 @@ class OddsApiClient:
 
             results.append({
                 "event_id": event.get("id"),
+                "commence_time": event.get("commence_time"),
                 "home_team": home_abbrev,
                 "away_team": away_abbrev,
                 "home_score": home_score,

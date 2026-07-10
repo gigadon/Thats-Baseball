@@ -171,6 +171,76 @@ def load_all_accuracy(data_dir: Path = Path("data")) -> list[dict]:
     return records
 
 
+# Confidence (0-100) at or above which a pick gets its own hit-rate line in the
+# daily review, separate from the full-slate record.
+HIGH_CONF_THRESHOLD = 65
+
+
+def _record_from_results(results: list[dict], high_conf_only: bool = False) -> dict:
+    """Tally a W-L record from accuracy `results`, optionally only >=65 conf games."""
+    if high_conf_only:
+        results = [r for r in results if (r.get("confidence") or 0) >= HIGH_CONF_THRESHOLD]
+    total = len(results)
+    correct = sum(1 for r in results if r.get("correct"))
+    return {"correct": correct, "total": total, "incorrect": total - correct}
+
+
+def build_daily_review(
+    target_date: date,
+    data_dir: Path = Path("data"),
+    high_conf_window: int = 5,
+) -> dict:
+    """Assemble the retrospective block shown atop the daily Slack card.
+
+    Covers the day *before* `target_date`: full-slate record, high-confidence
+    (>=65) record, the trailing high-conf record over `high_conf_window` days,
+    and yesterday's settled betting card. Sections are None when their file is
+    missing (e.g. games not yet graded), so the caller can skip them cleanly.
+    """
+    from mlb.betting.settlement import load_settlement
+
+    yesterday = target_date - timedelta(days=1)
+    review: dict[str, Any] = {"yesterday": yesterday.isoformat()}
+
+    y_acc = load_accuracy(yesterday, data_dir)
+    if y_acc:
+        results = y_acc.get("results", [])
+        review["full"] = _record_from_results(results)
+        review["high_conf"] = _record_from_results(results, high_conf_only=True)
+    else:
+        review["full"] = None
+        review["high_conf"] = None
+
+    # Trailing high-conf record (inclusive of yesterday, back high_conf_window days).
+    window = {"correct": 0, "total": 0, "incorrect": 0, "days": high_conf_window}
+    for i in range(1, high_conf_window + 1):
+        acc = load_accuracy(target_date - timedelta(days=i), data_dir)
+        if not acc:
+            continue
+        rec = _record_from_results(acc.get("results", []), high_conf_only=True)
+        window["correct"] += rec["correct"]
+        window["total"] += rec["total"]
+        window["incorrect"] += rec["incorrect"]
+    review["high_conf_window"] = window
+
+    settlement = load_settlement(yesterday, data_dir)
+    if settlement and settlement.get("summary", {}).get("bets_placed"):
+        s = settlement["summary"]
+        review["card"] = {
+            "won": s["bets_won"],
+            "lost": s["bets_lost"],
+            "pushed": s["bets_pushed"],
+            "staked": s["total_staked"],
+            "pnl": s["daily_pnl"],
+            "roi": s["roi"],
+            "cumulative": s.get("cumulative_pnl"),
+        }
+    else:
+        review["card"] = None
+
+    return review
+
+
 def get_rolling_accuracy(
     window: int = 30, data_dir: Path = Path("data")
 ) -> list[dict]:

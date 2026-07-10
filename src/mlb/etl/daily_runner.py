@@ -38,6 +38,7 @@ from mlb.features.formulas import (
     lineup_obp,
 )
 from mlb.features.stadium import compute_stadium_features, calculate_stadium_factor
+from mlb.models.accuracy import build_daily_review
 from mlb.models.predict import GamePrediction, PredictionService
 from mlb.features.assembler import GameFeatureVector
 from mlb.betting.engine import BettingEngine, BettingSlip
@@ -283,7 +284,13 @@ class DailyRunner:
             # 9b. Generate player rankings from season CSV data
             await self._generate_player_rankings(target_date)
 
-            # 10. Send alerts (Slack/email) if configured
+            # 10. Send alerts (Slack/email) if configured. Attach the previous
+            # day's review (settlement + accuracy already written by the earlier
+            # pipeline steps) so the card leads with how yesterday landed.
+            try:
+                result["review"] = build_daily_review(target_date, self.data_dir)
+            except Exception as e:
+                logger.warning("Review build failed: %s", e)
             try:
                 await self.alert_service.send_betting_alert(result)
             except Exception as e:
