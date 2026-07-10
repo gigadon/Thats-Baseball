@@ -88,6 +88,21 @@ class AlertService:
         """Format a plain-text summary."""
         lines = [f"MLB Predictions for {result['date']}", "=" * 40, ""]
 
+        review = result.get("review")
+        if review:
+            lines.append(f"Yesterday ({review.get('yesterday', '?')}) review:")
+            lines.append(f"  Full card:         {self._record_str(review.get('full'))}")
+            lines.append(f"  High-conf (≥65):   {self._record_str(review.get('high_conf'))}")
+            win = review.get("high_conf_window") or {}
+            lines.append(f"  High-conf last {win.get('days', 5)}d: {self._record_str(win)}")
+            card = review.get("card")
+            if card:
+                rec = f"{card['won']}W-{card['lost']}L" + (f"-{card['pushed']}P" if card.get("pushed") else "")
+                lines.append(f"  Betting card:     {rec}  ${card['pnl']:+,.2f} ({card['roi']:+.1%})")
+            else:
+                lines.append("  Betting card:     no bets settled")
+            lines.append("")
+
         for p in result.get("predictions", []):
             winner = p["predicted_winner"]
             prob = max(p["home_win_prob"], p["away_win_prob"])
@@ -113,6 +128,37 @@ class AlertService:
 
         return "\n".join(lines)
 
+    @staticmethod
+    def _record_str(rec: dict | None) -> str:
+        """Render a {correct,incorrect,total} tally as 'W-L (pct)'."""
+        if not rec or not rec.get("total"):
+            return "no graded games"
+        pct = rec["correct"] / rec["total"]
+        return f"{rec['correct']}-{rec['incorrect']} ({pct:.1%})"
+
+    def _format_review_text(self, review: dict) -> str:
+        """Build the yesterday-review mrkdwn block for the top of the card."""
+        lines = [f":bar_chart: *Yesterday ({review.get('yesterday', '?')}) — Review*"]
+        lines.append(f"• Full card: {self._record_str(review.get('full'))}")
+        lines.append(f"• High-conf (≥65): {self._record_str(review.get('high_conf'))}")
+        win = review.get("high_conf_window") or {}
+        days = win.get("days", 5)
+        lines.append(f"• High-conf, last {days}d: {self._record_str(win)}")
+
+        card = review.get("card")
+        if card:
+            rec = f"{card['won']}W-{card['lost']}L"
+            if card.get("pushed"):
+                rec += f"-{card['pushed']}P"
+            emoji = ":chart_with_upwards_trend:" if card["pnl"] >= 0 else ":chart_with_downwards_trend:"
+            lines.append(
+                f"• Betting card: {emoji} {rec} · "
+                f"${card['pnl']:+,.2f} ({card['roi']:+.1%}) on ${card['staked']:,.2f}"
+            )
+        else:
+            lines.append("• Betting card: no bets settled")
+        return "\n".join(lines)
+
     def _format_slack_blocks(self, result: dict) -> dict:
         """Format Slack Block Kit message."""
         blocks = [
@@ -121,6 +167,15 @@ class AlertService:
                 "text": {"type": "plain_text", "text": f"MLB Predictions — {result['date']}"},
             }
         ]
+
+        # Yesterday's review (record + betting card), if available
+        review = result.get("review")
+        if review:
+            blocks.append({
+                "type": "section",
+                "text": {"type": "mrkdwn", "text": self._format_review_text(review)},
+            })
+            blocks.append({"type": "divider"})
 
         # Game predictions
         pred_lines = []

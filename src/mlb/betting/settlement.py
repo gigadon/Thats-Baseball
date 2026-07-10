@@ -30,6 +30,23 @@ def _today_et() -> date:
     return datetime.now(ZoneInfo("America/New_York")).date()
 
 
+def _score_on_date(score: dict, target_date: date) -> bool:
+    """True if an Odds API score's first pitch (ET) falls on target_date.
+
+    Used to keep a multi-day scores window from settling a slip with an
+    adjacent series game's result. When commence_time is absent, fall back to
+    True so we don't silently drop otherwise-matchable scores.
+    """
+    commence = score.get("commence_time")
+    if not commence:
+        return True
+    try:
+        dt = datetime.fromisoformat(commence.replace("Z", "+00:00"))
+    except (ValueError, AttributeError):
+        return True
+    return dt.astimezone(ZoneInfo("America/New_York")).date() == target_date
+
+
 # ── Core settlement ──────────────────────────────────────────
 
 
@@ -65,6 +82,12 @@ async def settle_day(
             client = OddsApiClient()
             scores = await client.get_scores(days_from=days_ago + 1)
             for s in scores:
+                # The scores window spans several days, so the same matchup from
+                # an adjacent series game can appear. Keep only games that
+                # actually played on target_date (by ET first-pitch date);
+                # otherwise a later game overwrites and mis-settles the slip.
+                if not _score_on_date(s, target_date):
+                    continue
                 score_map[(s["home_team"], s["away_team"])] = s
         except Exception as e:
             logger.debug("Odds API scores failed: %s", e)
