@@ -1,0 +1,157 @@
+{
+  "date": "2026-07-09",
+  "tracked_at": "2026-07-11T17:30:40.839406",
+  "results": [
+    {
+      "game_id": "823606",
+      "home_team": "NYM",
+      "away_team": "KC",
+      "home_win_prob": 0.6182,
+      "confidence": 67.7,
+      "predicted_winner": "NYM",
+      "actual_home_score": 7,
+      "actual_away_score": 3,
+      "actual_winner": "NYM",
+      "correct": true
+    },
+    {
+      "game_id": "822954",
+      "home_team": "TB",
+      "away_team": "NYY",
+      "home_win_prob": 0.5161,
+      "confidence": 34.0,
+      "predicted_winner": "TB",
+      "actual_home_score": 4,
+      "actual_away_score": 12,
+      "actual_winner": "NYY",
+      "correct": false
+    },
+    {
+      "game_id": "824816",
+      "home_team": "BAL",
+      "away_team": "CHC",
+      "home_win_prob": 0.5862,
+      "confidence": 58.2,
+      "predicted_winner": "BAL",
+      "actual_home_score": 3,
+      "actual_away_score": 2,
+      "actual_winner": "BAL",
+      "correct": true
+    },
+    {
+      "game_id": "823683",
+      "home_team": "MIN",
+      "away_team": "CLE",
+      "home_win_prob": 0.6329,
+      "confidence": 74.0,
+      "predicted_winner": "MIN",
+      "actual_home_score": 2,
+      "actual_away_score": 5,
+      "actual_winner": "CLE",
+      "correct": false
+    },
+    {
+      "game_id": "824577",
+      "home_team": "CWS",
+      "away_team": "BOS",
+      "home_win_prob": 0.5419,
+      "confidence": 43.5,
+      "predicted_winner": "CWS",
+      "actual_home_score": 1,
+      "actual_away_score": 2,
+      "actual_winner": "BOS",
+      "correct": false
+    },
+    {
+      "game_id": "824251",
+      "home_team": "DET",
+      "away_team": "OAK",
+      "home_win_prob": 0.6654,
+      "confidence": 80.3,
+      "predicted_winner": "DET",
+      "actual_home_score": 4,
+      "actual_away_score": 1,
+      "actual_winner": "DET",
+      "correct": true
+    },
+    {
+      "game_id": "823846",
+      "home_team": "MIA",
+      "away_team": "SEA",
+      "home_win_prob": 0.5201,
+      "confidence": 39.6,
+      "predicted_winner": "MIA",
+      "actual_home_score": 8,
+      "actual_away_score": 4,
+      "actual_winner": "MIA",
+      "correct": true
+    },
+    {
+      "game_id": "824494",
+      "home_team": "CIN",
+      "away_team": "PHI",
+      "home_win_prob": 0.6551,
+      "confidence": 74.5,
+      "predicted_winner": "CIN",
+      "actual_home_score": 0,
+      "actual_away_score": 1,
+      "actual_winner": "PHI",
+      "correct": false
+    },
+    {
+      "game_id": "823034",
+      "home_team": "STL",
+      "away_team": "MIL",
+      "home_win_prob": 0.6419,
+      "confidence": 70.3,
+      "predicted_winner": "STL",
+      "actual_home_score": 4,
+      "actual_away_score": 8,
+      "actual_winner": "MIL",
+      "correct": false
+    },
+    {
+      "game_id": "822877",
+      "home_team": "TEX",
+      "away_team": "LAA",
+      "home_win_prob": 0.6485,
+      "confidence": 74.1,
+      "predicted_winner": "TEX",
+      "actual_home_score": 7,
+      "actual_away_score": 6,
+      "actual_winner": "TEX",
+      "correct": true
+    },
+    {
+      "game_id": "823277",
+      "home_team": "SD",
+      "away_team": "ARI",
+      "home_win_prob": 0.5118,
+      "confidence": 34.4,
+      "predicted_winner": "SD",
+      "actual_home_score": 1,
+      "actual_away_score": 3,
+      "actual_winner": "ARI",
+      "correct": false
+    },
+    {
+      "game_id": "823201",
+      "home_team": "SF",
+      "away_team": "COL",
+      "home_win_prob": 0.6226,
+      "confidence": 66.8,
+      "predicted_winner": "SF",
+      "actual_home_score": 8,
+      "actual_away_score": 2,
+      "actual_winner": "SF",
+      "correct": true
+    }
+  ],
+  "summary": {
+    "total_games": 12,
+    "correct": 6,
+    "incorrect": 6,
+    "accuracy": 0.5,
+    "brier_score": 0.2491
+  }
+}
