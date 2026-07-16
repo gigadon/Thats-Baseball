@@ -1443,6 +1443,7 @@ game_id,game_date,home_team_id,away_team_id,home_score,away_score,status
 824574,2026-07-12,CWS,OAK,9,1,Final
 824814,2026-07-12,BAL,KC,8,2,Final
 823443,2026-07-14,160,159,0,4,Final
+823440,2026-07-16,PHI,NYM,,,Scheduled
 824766,2026-07-17,BOS,TB,,,Postponed
 823042,2026-07-23,STL,ARI,,,Postponed
 824664,2026-08-06,CHC,TOR,,,Postponed
