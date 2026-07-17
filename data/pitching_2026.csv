@@ -12236,3 +12236,11 @@ game_id,game_date,team_id,side,player_id,player_name,innings_pitched,hits_allowe
 823443,2026-07-14,159,away,657746,Joe Ryan,1.0,1,0,0,0,2,16
 823443,2026-07-14,159,away,656876,Drew Rasmussen,0.6666666666666666,0,0,0,1,1,18
 823443,2026-07-14,159,away,547973,Aroldis Chapman,0.6666666666666666,0,0,0,0,1,6
+823440,2026-07-16,PHI,home,686751,Seth Johnson,2.0,1,1,1,1,2,27
+823440,2026-07-16,PHI,home,680742,Jonathan Bowlan,1.0,0,0,0,1,0,14
+823440,2026-07-16,PHI,home,605400,Aaron Nola,6.0,6,3,3,4,6,97
+823440,2026-07-16,NYM,away,623211,Huascar Brazobán,1.0,0,0,0,0,0,12
+823440,2026-07-16,NYM,away,596133,Luke Weaver,1.0,1,1,1,0,0,9
+823440,2026-07-16,NYM,away,642207,Devin Williams,1.0,0,0,0,0,1,13
+823440,2026-07-16,NYM,away,681035,Christian Scott,5.666666666666667,3,0,0,0,7,79
+823440,2026-07-16,NYM,away,548384,Brooks Raley,0.3333333333333333,0,0,0,1,1,7
