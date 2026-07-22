@@ -38,6 +38,7 @@ from mlb.features.formulas import (
     lineup_obp,
 )
 from mlb.features.stadium import compute_stadium_features, calculate_stadium_factor
+from mlb.etl.sent_log import append_sent, due_game_ids, load_sent
 from mlb.models.accuracy import build_daily_review
 from mlb.models.predict import GamePrediction, PredictionService
 from mlb.features.assembler import GameFeatureVector
@@ -81,8 +82,21 @@ class DailyRunner:
         self._sp_rest_cache: dict[int, int] = {}
         self._sp_form_cache: dict[int, dict[str, float]] = {}
 
-    async def run(self, target_date: date | None = None) -> dict[str, Any]:
+    async def run(
+        self,
+        target_date: date | None = None,
+        send_mode: str = "full",
+        lead_hours: float = 4.0,
+    ) -> dict[str, Any]:
         """Run the full daily pipeline.
+
+        The full slate is always computed and cached. `send_mode` controls what gets
+        pushed to Slack:
+          - "full":    the whole slate in one card (default; manual/legacy runs).
+          - "preview": yesterday-review + full-slate preview + bets for games
+                       starting within `lead_hours` (the morning card).
+          - "wave":    only games starting within `lead_hours` that haven't been sent
+                       yet today (later runs, close to first pitch).
 
         Returns a summary dict with predictions, betting slip, and metadata.
         """
@@ -286,13 +300,13 @@ class DailyRunner:
 
             # 10. Send alerts (Slack/email) if configured. Attach the previous
             # day's review (settlement + accuracy already written by the earlier
-            # pipeline steps) so the card leads with how yesterday landed.
+            # pipeline steps) so the morning card leads with how yesterday landed.
             try:
                 result["review"] = build_daily_review(target_date, self.data_dir)
             except Exception as e:
                 logger.warning("Review build failed: %s", e)
             try:
-                await self.alert_service.send_betting_alert(result)
+                await self._send_cards(target_date, result, send_mode, lead_hours)
             except Exception as e:
                 logger.warning("Alert send failed: %s", e)
 
@@ -303,6 +317,71 @@ class DailyRunner:
             await self.mlb_client.close()
 
         return result
+
+    async def _send_cards(
+        self, target_date: date, result: dict[str, Any], send_mode: str, lead_hours: float
+    ) -> None:
+        """Push the Slack card(s) according to `send_mode` (see `run`).
+
+        "full" sends the whole slate unchanged. "preview"/"wave" filter to games due
+        within `lead_hours`, de-duplicated against today's sent log, and record what
+        was sent so later waves don't repeat a game.
+        """
+        if send_mode not in ("preview", "wave"):
+            await self.alert_service.send_betting_alert(result)
+            return
+
+        now = datetime.now(ZoneInfo("America/New_York"))
+        all_preds = result.get("predictions", [])
+        already = set(load_sent(target_date, self.data_dir))
+        due = due_game_ids(all_preds, now, lead_hours) - already
+
+        if send_mode == "wave" and not due:
+            logger.info(
+                "Wave: no new games within %.0fh window — nothing to send", lead_hours
+            )
+            return
+
+        due_slip = self._filter_slip(result.get("betting_slip"), due)
+
+        if send_mode == "preview":
+            # Morning card: yesterday review + full-slate preview + bets for the
+            # games already inside the window.
+            send_result = {
+                "date": result["date"],
+                "kind": "preview",
+                "predictions": all_preds,
+                "betting_slip": due_slip,
+                "review": result.get("review"),
+            }
+        else:  # wave
+            send_result = {
+                "date": result["date"],
+                "kind": "wave",
+                "predictions": [p for p in all_preds if str(p.get("game_id")) in due],
+                "betting_slip": due_slip,
+            }
+
+        await self.alert_service.send_betting_alert(send_result)
+        if due:
+            append_sent(target_date, due, self.data_dir)
+            logger.info("%s send: %d game(s): %s", send_mode, len(due), sorted(due))
+
+    @staticmethod
+    def _filter_slip(slip: dict | None, game_ids: set[str]) -> dict | None:
+        """Return a copy of `slip` keeping only bets on `game_ids`, totals recomputed."""
+        if not slip or not slip.get("bets"):
+            return slip
+        bets = [b for b in slip["bets"] if str(b.get("game_id")) in game_ids]
+        return {
+            **slip,
+            "bets": bets,
+            "num_bets": len(bets),
+            "total_stake": round(sum(b.get("recommended_stake", 0) for b in bets), 2),
+            "total_ev": round(
+                sum(b.get("ev_per_dollar", 0) * b.get("recommended_stake", 0) for b in bets), 2
+            ),
+        }
 
     def _build_team_features(self, target_date: date) -> dict[str, dict[str, float]]:
         """Build current team features from CSV rolling stats."""
@@ -1883,6 +1962,19 @@ def main():
     parser.add_argument("--date", type=str, help="Target date (YYYY-MM-DD), default today")
     parser.add_argument("--data-dir", type=str, default="data")
     parser.add_argument("--model-dir", type=str, default="models")
+    parser.add_argument(
+        "--send-mode",
+        choices=["full", "preview", "wave"],
+        default="full",
+        help="full=whole slate (default); preview=morning review + full slate + "
+        "due bets; wave=only games starting within --lead-hours, de-duped",
+    )
+    parser.add_argument(
+        "--lead-hours",
+        type=float,
+        default=4.0,
+        help="For preview/wave: send a game when first pitch is within this many hours",
+    )
     args = parser.parse_args()
 
     target = date.fromisoformat(args.date) if args.date else _today_et()
@@ -1892,7 +1984,9 @@ def main():
         model_dir=Path(args.model_dir),
     )
 
-    result = asyncio.run(runner.run(target))
+    result = asyncio.run(
+        runner.run(target, send_mode=args.send_mode, lead_hours=args.lead_hours)
+    )
 
     # Print summary
     print(f"\n{'='*60}")
