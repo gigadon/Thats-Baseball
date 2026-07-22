@@ -5,10 +5,19 @@ name: Daily MLB Predictions to Slack
 # and commits the accumulated data back so retraining data keeps growing.
 on:
   schedule:
-    # 16:30 UTC = 11:30 AM CDT in summer (10:30 AM CST in winter — the 1-hour
-    # DST drift is accepted; adjust to "30 17" for winter if it matters).
+    # Wave sends: each run pushes only the games starting within the next ~4h that
+    # haven't been sent yet, so every game gets a card close to first pitch with
+    # fresh starters/odds/lineups. Times are UTC; CDT (summer) shown. In winter
+    # (CST) they land 1h earlier — accepted DST drift; add an hour to each for CST.
+    #   16:30 UTC = 11:30 AM CDT — morning: yesterday review + full preview + due bets
     - cron: "30 16 * * *"
-  workflow_dispatch: {}   # manual test runs from the Actions tab
+    #   19:30 UTC = 2:30 PM CDT — afternoon wave
+    - cron: "30 19 * * *"
+    #   22:30 UTC = 5:30 PM CDT — early-evening wave
+    - cron: "30 22 * * *"
+    #   00:30 UTC = 7:30 PM CDT — late/West-coast wave
+    - cron: "30 0 * * *"
+  workflow_dispatch: {}   # manual test runs from the Actions tab (sends full slate)
 
 permissions:
   contents: write   # the data commit-back step pushes to main
@@ -35,6 +44,9 @@ jobs:
           pip install -e .
 
       - name: Backfill recent game results (rolling team stats source)
+        # Once/day work — only on the morning cron (and manual runs). Later waves
+        # reuse the data the morning run committed, saving time and API quota.
+        if: github.event.schedule == '30 16 * * *' || github.event_name == 'workflow_dispatch'
         continue-on-error: true   # a backfill hiccup must not block predictions
         env:
           PYTHONPATH: src
@@ -48,6 +60,7 @@ jobs:
             --delay 0.3
 
       - name: Settle yesterday's bets
+        if: github.event.schedule == '30 16 * * *' || github.event_name == 'workflow_dispatch'
         continue-on-error: true   # missing scores must not block today's slate
         env:
           PYTHONPATH: src
@@ -55,6 +68,7 @@ jobs:
         run: python -m mlb.betting.settlement --backfill 2
 
       - name: Score yesterday's predictions
+        if: github.event.schedule == '30 16 * * *' || github.event_name == 'workflow_dispatch'
         continue-on-error: true
         env:
           PYTHONPATH: src
@@ -66,13 +80,23 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
           WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY }}
-        run: python -m mlb.etl.daily_runner
+        # Morning cron = preview (review + full slate + due bets). Every other cron
+        # = wave (only games starting within the next 4h, de-duped via data/sent).
+        # Manual dispatch = full slate.
+        run: |
+          if [ "${{ github.event.schedule }}" = "30 16 * * *" ]; then
+            python -m mlb.etl.daily_runner --send-mode preview --lead-hours 4
+          elif [ -n "${{ github.event.schedule }}" ]; then
+            python -m mlb.etl.daily_runner --send-mode wave --lead-hours 4
+          else
+            python -m mlb.etl.daily_runner --send-mode full
+          fi
 
       - name: Commit accumulated data back
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/odds_history.csv data/accuracy data/predictions data/betting data/feature_defaults.json \
+          git add data/odds_history.csv data/accuracy data/predictions data/betting data/sent data/feature_defaults.json \
                   data/games_*.csv data/batting_*.csv data/pitching_*.csv || true
           if git diff --cached --quiet; then
             echo "No data changes to commit."

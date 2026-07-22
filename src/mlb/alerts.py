@@ -86,7 +86,7 @@ class AlertService:
 
     def _format_message(self, result: dict) -> str:
         """Format a plain-text summary."""
-        lines = [f"MLB Predictions for {result['date']}", "=" * 40, ""]
+        lines = [self._card_title(result), "=" * 40, ""]
 
         review = result.get("review")
         if review:
@@ -159,12 +159,19 @@ class AlertService:
             lines.append("• Betting card: no bets settled")
         return "\n".join(lines)
 
+    @staticmethod
+    def _card_title(result: dict) -> str:
+        """Header text — depends on whether this is a morning preview or a wave send."""
+        if result.get("kind") == "wave":
+            return f"Starting Soon — {result['date']}"
+        return f"MLB Predictions — {result['date']}"
+
     def _format_slack_blocks(self, result: dict) -> dict:
         """Format Slack Block Kit message."""
         blocks = [
             {
                 "type": "header",
-                "text": {"type": "plain_text", "text": f"MLB Predictions — {result['date']}"},
+                "text": {"type": "plain_text", "text": self._card_title(result)},
             }
         ]
 
