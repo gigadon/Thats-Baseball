@@ -182,6 +182,14 @@ def train_runs_model(
     if "total_runs" not in df.columns:
         raise ValueError("Column 'total_runs' not found in training data.")
 
+    # The training parquet now keeps games that have a moneyline but no totals
+    # line (so the win model can use them). The runs model predicts the deviation
+    # from market_total, so training on a fabricated line would corrupt the
+    # target — restrict it to games with a real market_total.
+    if "market_total" in df.columns:
+        before = len(df)
+        df = df[df["market_total"].notna()].reset_index(drop=True)
+        logger.info("Runs model: kept %d/%d rows with a real market_total", len(df), before)
 
     # ── Separate features / target ───────────────────────────
     feature_cols = [c for c in df.columns if c not in META_AND_TARGET_COLS]
