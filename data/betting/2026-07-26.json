@@ -1,0 +1,41 @@
+{
+  "date": "2026-07-26",
+  "settled_at": "2026-07-27T18:03:10",
+  "bankroll": 10000.0,
+  "bets": [
+    {
+      "game_id": "823433",
+      "game_date": "2026-07-26",
+      "home_team": "PHI",
+      "away_team": "NYY",
+      "bet_type": "total",
+      "selection": "over",
+      "odds": -110,
+      "model_prob": 0.5292,
+      "implied_prob": 0.4899,
+      "edge": 0.0393,
+      "edge_pct": 3.93,
+      "kelly_fraction": 0.0112,
+      "recommended_stake": 39.36,
+      "confidence": 83.9,
+      "ev_per_dollar": 0.0102,
+      "decimal_odds": 1.909,
+      "total_line": 8.5,
+      "actual_home_score": 11,
+      "actual_away_score": 4,
+      "result": "win",
+      "pnl": 35.78
+    }
+  ],
+  "summary": {
+    "bets_placed": 1,
+    "bets_won": 1,
+    "bets_lost": 0,
+    "bets_pushed": 0,
+    "total_staked": 39.36,
+    "daily_pnl": 35.78,
+    "roi": 0.909,
+    "cumulative_pnl": 1929.33,
+    "max_drawdown": 0.0
+  }
+}
