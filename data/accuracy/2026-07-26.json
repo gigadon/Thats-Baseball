@@ -1,0 +1,25 @@
+{
+  "date": "2026-07-26",
+  "tracked_at": "2026-07-27T18:03:11.366770",
+  "results": [
+    {
+      "game_id": "823433",
+      "home_team": "PHI",
+      "away_team": "NYY",
+      "home_win_prob": 0.6492,
+      "confidence": 83.9,
+      "predicted_winner": "PHI",
+      "actual_home_score": 11,
+      "actual_away_score": 4,
+      "actual_winner": "PHI",
+      "correct": true
+    }
+  ],
+  "summary": {
+    "total_games": 1,
+    "correct": 1,
+    "incorrect": 0,
+    "accuracy": 1.0,
+    "brier_score": 0.1231
+  }
+}

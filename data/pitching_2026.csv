@@ -13354,6 +13354,13 @@ game_id,game_date,team_id,side,player_id,player_name,innings_pitched,hits_allowe
 823354,2026-07-26,CHC,away,650644,Aaron Civale,2.0,1,0,0,0,3,27
 823354,2026-07-26,CHC,away,669020,Ryan Rolison,1.0,3,1,1,1,0,23
 823354,2026-07-26,CHC,away,663423,Trent Thornton,1.0,1,0,0,0,2,19
+823433,2026-07-26,PHI,home,650911,Cristopher Sánchez,6.0,6,3,3,3,6,101
+823433,2026-07-26,PHI,home,663767,Chase Shugart,2.0,1,0,0,1,5,39
+823433,2026-07-26,PHI,home,641835,Tim Mayza,1.0,1,1,1,0,2,16
+823433,2026-07-26,NYY,away,642232,Ryan Yarbrough,3.0,6,5,5,2,2,51
+823433,2026-07-26,NYY,away,657612,Tim Hill,1.0,1,0,0,1,0,18
+823433,2026-07-26,NYY,away,701542,Will Warren,3.0,6,6,6,2,5,68
+823433,2026-07-26,NYY,away,666808,Camilo Doval,1.0,0,0,0,0,3,12
 823599,2026-07-26,NYM,home,596133,Luke Weaver,1.0,2,0,0,0,0,22
 823599,2026-07-26,NYM,home,642207,Devin Williams,1.0,1,0,0,0,3,19
 823599,2026-07-26,NYM,home,672335,Cionel Pérez,2.0,0,0,0,0,3,27
