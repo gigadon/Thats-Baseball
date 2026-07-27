@@ -182,6 +182,14 @@ def train_runs_model(
     if "total_runs" not in df.columns:
         raise ValueError("Column 'total_runs' not found in training data.")
 
+    # The training parquet now keeps games that have a moneyline but no totals
+    # line (so the win model can use them). The runs model predicts the deviation
+    # from market_total, so training on a fabricated line would corrupt the
+    # target — restrict it to games with a real market_total.
+    if "market_total" in df.columns:
+        before = len(df)
+        df = df[df["market_total"].notna()].reset_index(drop=True)
+        logger.info("Runs model: kept %d/%d rows with a real market_total", len(df), before)
 
     # ── Separate features / target ───────────────────────────
     feature_cols = [c for c in df.columns if c not in META_AND_TARGET_COLS]
@@ -314,6 +322,13 @@ def train_runs_model(
     y_total_test = y_test + mt_test   # actual total runs
     y_total_train = y_train + mt_train
 
+    # Held-out residuals (actual - predicted total). This is the runs model's
+    # true predictive uncertainty; it is persisted so the betting engine can turn
+    # a predicted total into a *calibrated* over/under probability (empirical
+    # residual CDF, or its std) instead of a hardcoded sigma.
+    test_residuals = np.sort((y_total_test - y_pred_test).astype(float))
+    residual_std = float(np.sqrt(mean_squared_error(y_total_test, y_pred_test)))
+
     # ── Evaluate (in terms of actual total runs) ─────────────
     metrics = {
         "model": "LightGBM+XGBoost calibrated deviation ensemble",
@@ -338,6 +353,9 @@ def train_runs_model(
         "dev_std": float(y.std()),
         "pred_mean_test": float(y_pred_test.mean()),
         "pred_std_test": float(y_pred_test.std()),
+        # Calibration inputs for the over/under probability (see betting engine).
+        "residual_std": residual_std,
+        "residuals": test_residuals.tolist(),
     }
 
     logger.info(
@@ -371,6 +389,8 @@ def train_runs_model(
         market_total_idx=mt_sel_idx,
         alpha=best_alpha,
         shrinkage=best_shrinkage,
+        residual_std=residual_std,
+        residuals=test_residuals.tolist(),
     )
 
     joblib.dump(ensemble, output_dir / "runs_regressor.joblib")

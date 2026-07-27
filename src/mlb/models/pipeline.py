@@ -25,10 +25,16 @@ logger = logging.getLogger(__name__)
 
 MODEL_DIR = Path("models")
 
-# Columns that are NOT features — must be excluded before training
+# Columns that are NOT features — must be excluded before training.
+# market_total is excluded from the WIN model specifically: it is redundant with
+# market_home_prob (feature selection already dropped it) and, since the parquet
+# now keeps moneyline-only games (market_total NaN) so the win model can use the
+# recent high-weight games, including it would inject NaN and force imputation.
+# The runs model keeps market_total via its own META_AND_TARGET_COLS list.
 NON_FEATURE_COLS = {
     "game_id", "game_date", "home_team", "away_team",
     "home_win", "home_score", "away_score", "total_runs", "season",
+    "market_total",
 }
 
 

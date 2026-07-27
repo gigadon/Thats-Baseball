@@ -15,6 +15,7 @@ import pandas as pd
 
 from mlb.features.assembler import GameFeatureVector
 from mlb.models.pipeline import TrainingPipeline
+from mlb.models.runs_calibration import DEFAULT_RESIDUAL_STD
 
 logger = logging.getLogger(__name__)
 
@@ -73,6 +74,11 @@ class PredictionService:
         self._runs_regressor: object | None = None
         self._runs_scaler: object | None = None
         self._runs_feature_names: list[str] | None = None
+        # Over/under calibration, populated on load() from the runs model. The
+        # betting engine reads these to turn a predicted total into a calibrated
+        # over/under probability.
+        self.runs_residual_std: float = DEFAULT_RESIDUAL_STD
+        self.runs_residuals: list[float] | None = None
 
     def load(self):
         """Load trained models from disk."""
@@ -89,7 +95,25 @@ class PredictionService:
                 self._runs_regressor = joblib.load(regressor_file)
                 self._runs_scaler = joblib.load(runs_path / "runs_scaler.joblib")
                 self._runs_feature_names = joblib.load(runs_path / "runs_feature_names.joblib")
-                logger.info("Runs regression model loaded from %s", runs_path)
+
+                # Over/under calibration inputs: prefer attributes the model
+                # carries; fall back to saved metrics; else the default std.
+                rstd = getattr(self._runs_regressor, "residual_std", None)
+                resid = getattr(self._runs_regressor, "residuals", None)
+                if rstd is None or resid is None:
+                    metrics_file = runs_path / "runs_metrics.joblib"
+                    if metrics_file.exists():
+                        m = joblib.load(metrics_file)
+                        rstd = rstd if rstd is not None else m.get("residual_std")
+                        resid = resid if resid is not None else m.get("residuals")
+                self.runs_residual_std = float(rstd) if rstd else DEFAULT_RESIDUAL_STD
+                self.runs_residuals = list(resid) if resid is not None else None
+
+                logger.info(
+                    "Runs regression model loaded from %s (residual_std=%.2f, residuals=%s)",
+                    runs_path, self.runs_residual_std,
+                    len(self.runs_residuals) if self.runs_residuals else "none",
+                )
             except Exception as e:
                 logger.warning("Failed to load runs model: %s", e)
                 self._runs_regressor = None
@@ -156,7 +180,7 @@ class PredictionService:
         confidence = min(100.0, strength + agreement_pts + dq)
 
         # Run predictions
-        home_runs, away_runs = self._predict_runs(game_fv, home_win_prob)
+        home_runs, away_runs, predicted_total = self._predict_runs(game_fv, home_win_prob)
 
         # Top contributing factors
         top_factors = self._get_top_factors(game_fv)
@@ -170,7 +194,7 @@ class PredictionService:
             away_win_prob=round(1 - home_win_prob, 4),
             predicted_home_runs=round(home_runs, 1),
             predicted_away_runs=round(away_runs, 1),
-            predicted_total=round(home_runs + away_runs, 1),
+            predicted_total=round(predicted_total, 1),
             confidence=round(confidence, 1),
             model_agreement=round(agreement, 3),
             model_predictions=model_preds,
@@ -185,12 +209,16 @@ class PredictionService:
 
     def _predict_runs(
         self, game_fv: GameFeatureVector, home_win_prob: float
-    ) -> tuple[float, float]:
-        """Predict runs for each team.
+    ) -> tuple[float, float, float]:
+        """Predict runs for each team, plus the game total.
 
-        If a runs regression model is loaded, use it for differentiated
-        totals (Coors games 10+, pitcher duels 6-7, etc.) and split by
-        win probability.  Falls back to a heuristic if no model exists.
+        Returns ``(home_runs, away_runs, total)``. The **total** is the runs
+        model's prediction used verbatim (the number the over/under bet keys
+        off). The home/away split is a display-only convenience derived from the
+        win probability — it does not feed back into the total, so predicted_total
+        no longer drifts from the regressor via a home/away round-trip.
+
+        Falls back to a heuristic if no runs model is loaded.
         """
         if self._runs_regressor is not None and self._runs_feature_names is not None:
             # Build a feature row matching the training feature set
@@ -214,7 +242,8 @@ class PredictionService:
             home_runs = max(0.5, total * home_share)
             away_runs = max(0.5, total * (1 - home_share))
 
-            # Ensure runs agree with win probability direction
+            # Ensure the *displayed* runs agree with win probability direction.
+            # This nudge is cosmetic — `total` above is the authoritative number.
             if home_win_prob > 0.5 and home_runs <= away_runs:
                 avg = (home_runs + away_runs) / 2
                 home_runs = avg + 0.1
@@ -224,7 +253,7 @@ class PredictionService:
                 away_runs = avg + 0.1
                 home_runs = avg - 0.1
 
-            return round(home_runs, 1), round(away_runs, 1)
+            return round(home_runs, 1), round(away_runs, 1), round(total, 1)
 
         # Heuristic estimation from feature scores
         # Average MLB game: ~4.5 runs per team, ~9 total
@@ -263,7 +292,11 @@ class PredictionService:
             away_runs = avg + 0.1
             home_runs = avg - 0.1
 
-        return round(max(0.5, home_runs), 1), round(max(0.5, away_runs), 1)
+        return (
+            round(max(0.5, home_runs), 1),
+            round(max(0.5, away_runs), 1),
+            round(max(0.5, home_runs) + max(0.5, away_runs), 1),
+        )
 
     def _get_top_factors(
         self, game_fv: GameFeatureVector, n: int = 10

@@ -1,5 +1,5 @@
 {
- "bp_freshness": 0.9341,
+ "bp_freshness": 0.9369,
  "bp_relievers_used_3d": 7.0,
  "bvp_ops": 0.75,
  "elo": 1500.0,
@@ -13,8 +13,8 @@
  "lineup_wt_ops": 0.7052,
  "market_home_prob": 0.537,
  "market_total": 8.5,
- "platoon_adv": 0.5455,
- "platoon_wt_adv": 0.539,
+ "platoon_adv": 0.5556,
+ "platoon_wt_adv": 0.5431,
  "rest_days": 5.0,
  "sp_recent_era": 3.78,
  "sp_recent_k9": 8.1,
@@ -28,7 +28,7 @@
  "temperature": 72.0,
  "venue_away_rs_per_game": 4.4,
  "venue_away_win_pct": 0.5,
- "venue_home_rs_per_game": 4.4,
+ "venue_home_rs_per_game": 4.45,
  "venue_home_win_pct": 0.5,
  "wind_speed": 5.0
 }

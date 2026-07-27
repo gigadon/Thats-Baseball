@@ -18,6 +18,7 @@ from typing import Any
 import numpy as np
 
 from mlb.models.predict import GamePrediction
+from mlb.models.runs_calibration import over_under_probabilities
 
 logger = logging.getLogger(__name__)
 
@@ -143,6 +144,14 @@ class BettingConfig:
     min_confidence: float = 50.0  # Minimum model confidence to bet
     min_odds: float = -200  # Won't bet on heavy favorites past -200
     max_odds: float = 250  # Won't bet on longshots past +250
+
+    # Over/under calibration. The runs model's held-out residuals (preferred) or
+    # its residual std drive P(over); these are populated from the loaded model at
+    # runtime (see daily_runner). Defaults are used only if a model predates
+    # residual persistence — the old code hardcoded 4.1, which understated the
+    # true ~4.45-run uncertainty and systematically inflated totals edges.
+    total_residual_std: float = 4.45
+    total_residuals: list[float] | None = None
 
 
 class BettingEngine:
@@ -380,13 +389,16 @@ class BettingEngine:
         if total_line is None:
             return bets
 
-        # Estimate over/under probability from predicted total.
-        # Residual std of the runs model is ~4.1 runs (R²≈0.15),
-        # so that is the true prediction uncertainty.
-        diff = pred.predicted_total - total_line
-        from scipy.stats import norm
-        over_prob = float(norm.sf(-diff / 4.1))  # P(actual > line)
-        under_prob = 1.0 - over_prob
+        # Estimate over/under probability from the predicted total using the
+        # runs model's real held-out residual distribution (empirical CDF when
+        # available, else Normal(residual_std)). Single-sourced in
+        # runs_calibration so the live engine and the totals backtester agree.
+        over_prob, under_prob = over_under_probabilities(
+            pred.predicted_total,
+            total_line,
+            residuals=self.config.total_residuals,
+            residual_std=self.config.total_residual_std,
+        )
 
         true_over, true_under = remove_vig(over_odds, under_odds)
 

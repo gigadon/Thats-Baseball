@@ -509,10 +509,23 @@ class TrainingDataBuilder:
             if (idx + 1) % 500 == 0:
                 logger.info("Processed %d / %d games", idx + 1, len(games_sorted))
 
-        # Drop rows missing market_total to avoid noisy training signal
+        # Keep every game that has a real moneyline (market_home_prob). The win
+        # model only needs the moneyline, so gating the whole dataset on the
+        # totals line — which the odds feed captures far less often for recent
+        # games — needlessly starved the win model of the most recent, highest
+        # time-decay-weight games. The runs model, whose target is deviation from
+        # market_total, filters to real-total_line rows itself (see train_runs).
+        # market_total stays NaN when unavailable and is imputed for the win model.
+        def _missing(v: object) -> bool:
+            return v is None or (isinstance(v, float) and np.isnan(v))
+
         before = len(feature_rows)
-        feature_rows = [r for r in feature_rows if not (r.get("market_total") is None or (isinstance(r.get("market_total"), float) and np.isnan(r["market_total"])))]
-        logger.info("Dropped %d rows with missing market_total (%d remaining)", before - len(feature_rows), len(feature_rows))
+        feature_rows = [r for r in feature_rows if not _missing(r.get("market_home_prob"))]
+        with_total = sum(1 for r in feature_rows if not _missing(r.get("market_total")))
+        logger.info(
+            "Dropped %d rows without a real moneyline (%d remaining; %d also have a totals line)",
+            before - len(feature_rows), len(feature_rows), with_total,
+        )
 
         df = pd.DataFrame(feature_rows)
         logger.info("Built %d training samples with %d features", len(df), len(df.columns) - 9)
@@ -567,11 +580,17 @@ class TrainingDataBuilder:
             return {}
 
         import csv
+        # Normalize odds-feed team codes to the games-CSV vocabulary. The feed
+        # labels the Athletics "Athletics" (post-Oakland) while the games data
+        # keeps "OAK"; without this alias those rows never join.
+        aliases = {"Athletics": "OAK"}
         result: dict[tuple, dict] = {}
         with open(odds_file) as f:
             reader = csv.DictReader(f)
             for row in reader:
-                key = (row["game_date"], row["home_team"], row["away_team"])
+                home = aliases.get(row["home_team"], row["home_team"])
+                away = aliases.get(row["away_team"], row["away_team"])
+                key = (row["game_date"], home, away)
                 result[key] = {
                     "market_home_prob": float(row["market_home_prob"]),
                     "total_line": float(row["total_line"]) if row.get("total_line") else None,
