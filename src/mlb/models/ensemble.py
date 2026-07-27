@@ -171,8 +171,12 @@ class EnsembleModel:
                 y_tr = y[train_idx]
                 sw_tr = sw[train_idx] if sw is not None else None
 
-                # Clone model for this fold and keep it for bagged inference
-                fold_model = model.__class__()
+                # Clone model for this fold and keep it for bagged inference.
+                # Pass model.config so tuned hyperparameters (set in
+                # tune_and_train) actually reach the fold models that get saved
+                # and served — model.__class__() alone silently reverts to the
+                # hardcoded defaults, making Optuna tuning a no-op.
+                fold_model = model.__class__(model.config)
                 fold_model.train(X_tr, y_tr, self.feature_names, sample_weight=sw_tr)
                 oof_preds[val_idx, model_idx] = fold_model.predict_proba(X_val)
                 self.fold_models[model_idx].append(fold_model)

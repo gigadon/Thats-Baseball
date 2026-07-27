@@ -114,6 +114,14 @@ class DailyRunner:
         try:
             # 1. Load the trained model
             self.prediction_service.load()
+            # Feed the runs model's real uncertainty into the betting engine so
+            # over/under probabilities are calibrated (not the old hardcoded 4.1).
+            self.betting_engine.config.total_residual_std = (
+                self.prediction_service.runs_residual_std
+            )
+            self.betting_engine.config.total_residuals = (
+                self.prediction_service.runs_residuals
+            )
         except Exception as e:
             logger.error("Failed to load model: %s", e)
             result["errors"].append(f"Model load failed: {e}")

@@ -32,6 +32,7 @@ logger = logging.getLogger(__name__)
 _META_COLS = [
     "game_id", "game_date", "home_team", "away_team",
     "home_score", "away_score", "home_win", "total_runs", "season",
+    "market_total",
 ]
 
 
