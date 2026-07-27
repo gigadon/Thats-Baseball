@@ -23,15 +23,25 @@ class RunsEnsemble:
         alpha: weight for LightGBM (1-alpha for XGBoost)
         shrinkage: how much to trust the model's deviation
                    (0 = just use market_total, 1 = full model)
+
+    Uncertainty (set at train time from held-out residuals so the model
+    self-describes how noisy its total is — consumed by the betting engine to
+    turn a predicted total into a calibrated over/under probability):
+        residual_std: std of (actual_total - predicted_total) on the test set
+        residuals:    the sorted held-out residual array (empirical CDF)
     """
 
     def __init__(self, lgbm, xgb, market_total_idx: int | None = None,
-                 alpha: float = 0.5, shrinkage: float = 1.0):
+                 alpha: float = 0.5, shrinkage: float = 1.0,
+                 residual_std: float | None = None,
+                 residuals: list[float] | None = None):
         self.lgbm = lgbm
         self.xgb = xgb
         self.market_total_idx = market_total_idx
         self.alpha = alpha
         self.shrinkage = shrinkage
+        self.residual_std = residual_std
+        self.residuals = residuals
 
     def predict(self, X):
         # LightGBM handles NaN; XGBoost needs clean input
