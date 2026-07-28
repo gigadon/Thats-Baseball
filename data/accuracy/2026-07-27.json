@@ -1,0 +1,61 @@
+{
+  "date": "2026-07-27",
+  "tracked_at": "2026-07-28T17:54:21.674546",
+  "results": [
+    {
+      "game_id": "823025",
+      "home_team": "STL",
+      "away_team": "CHC",
+      "home_win_prob": 0.5155,
+      "confidence": 50.3,
+      "predicted_winner": "STL",
+      "actual_home_score": 3,
+      "actual_away_score": 7,
+      "actual_winner": "CHC",
+      "correct": false
+    },
+    {
+      "game_id": "824001",
+      "home_team": "LAA",
+      "away_team": "HOU",
+      "home_win_prob": 0.5392,
+      "confidence": 53.1,
+      "predicted_winner": "LAA",
+      "actual_home_score": 4,
+      "actual_away_score": 6,
+      "actual_winner": "HOU",
+      "correct": false
+    },
+    {
+      "game_id": "824977",
+      "home_team": "OAK",
+      "away_team": "BOS",
+      "home_win_prob": 0.3987,
+      "confidence": 69.3,
+      "predicted_winner": "BOS",
+      "actual_home_score": 2,
+      "actual_away_score": 4,
+      "actual_winner": "BOS",
+      "correct": true
+    },
+    {
+      "game_id": "823195",
+      "home_team": "SF",
+      "away_team": "MIL",
+      "home_win_prob": 0.4552,
+      "confidence": 53.5,
+      "predicted_winner": "MIL",
+      "actual_home_score": 3,
+      "actual_away_score": 0,
+      "actual_winner": "SF",
+      "correct": false
+    }
+  ],
+  "summary": {
+    "total_games": 4,
+    "correct": 1,
+    "incorrect": 3,
+    "accuracy": 0.25,
+    "brier_score": 0.2531
+  }
+}
