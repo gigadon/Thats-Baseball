@@ -1619,10 +1619,10 @@ game_id,game_date,home_team_id,away_team_id,home_score,away_score,status
 823596,2026-07-29,NYM,ATL,0,0,In Progress
 823598,2026-07-29,NYM,ATL,,,Scheduled
 823677,2026-07-29,MIN,KC,,,Scheduled
-823837,2026-07-29,MIA,PHI,1,6,In Progress
+823837,2026-07-29,MIA,PHI,3,6,In Progress
 823924,2026-07-29,LAD,SEA,,,Scheduled
 824002,2026-07-29,LAA,HOU,,,Scheduled
-824242,2026-07-29,DET,BAL,0,0,In Progress
+824242,2026-07-29,DET,BAL,2,0,In Progress
 824487,2026-07-29,CIN,CLE,,,Scheduled
 824567,2026-07-29,CWS,NYY,,,Scheduled
 824973,2026-07-29,OAK,BOS,,,Scheduled
