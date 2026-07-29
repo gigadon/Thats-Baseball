@@ -56,19 +56,29 @@ async def settle_day(
 ) -> dict | None:
     """Settle all bets for a given date.
 
+    Settles the card that was actually sent — the slip locked when the main card
+    went out (mlb.etl.slate_record). Days from before the lock existed fall back to
+    the prediction cache.
+
     Returns the settlement dict, or None if there's nothing to settle.
     """
+    from mlb.etl.slate_record import load_slate
+
     date_str = target_date.isoformat()
-    pred_file = data_dir / "predictions" / f"{date_str}.json"
+    slate = load_slate(target_date, data_dir)
 
-    if not pred_file.exists():
-        logger.info("No prediction file for %s", date_str)
-        return None
+    if slate is not None:
+        slip = slate.get("betting_slip")
+    else:
+        pred_file = data_dir / "predictions" / f"{date_str}.json"
+        if not pred_file.exists():
+            logger.info("No prediction file for %s", date_str)
+            return None
 
-    with open(pred_file) as f:
-        pred_data = json.load(f)
+        with open(pred_file) as f:
+            pred_data = json.load(f)
+        slip = pred_data.get("betting_slip")
 
-    slip = pred_data.get("betting_slip")
     if not slip or not slip.get("bets"):
         logger.info("No bets to settle for %s", date_str)
         return None
@@ -317,6 +327,8 @@ def main():
     data_dir = Path(args.data_dir)
 
     async def run():
+        from mlb.etl.slate_record import slate_path
+
         if args.backfill:
             today = _today_et()
             for i in range(args.backfill, 0, -1):
@@ -326,7 +338,7 @@ def main():
                 if settlement_file.exists():
                     logger.info("Already settled %s — skipping", d)
                     continue
-                if not pred_file.exists():
+                if not slate_path(d, data_dir).exists() and not pred_file.exists():
                     continue
                 result = await settle_day(d, data_dir)
                 if result:
