@@ -121,18 +121,7 @@ def _result():
     }
 
 
-def test_filter_slip_recomputes_totals():
-    from mlb.etl.daily_runner import DailyRunner
-
-    out = DailyRunner._filter_slip(_slip(), {"in"})
-    assert out["num_bets"] == 1
-    assert [b["game_id"] for b in out["bets"]] == ["in"]
-    assert out["total_stake"] == 100.0
-    assert out["total_ev"] == 10.0  # 0.10 * 100
-    assert DailyRunner._filter_slip(None, {"in"}) is None
-
-
-async def test_wave_sends_due_only_and_dedups(tmp_path, monkeypatch):
+async def test_wave_sends_due_games_only_and_no_bets(tmp_path, monkeypatch):
     _fix_now(monkeypatch, datetime(2026, 7, 21, 18, 0, tzinfo=ET))  # 6 PM ET
     r = _runner(tmp_path)
 
@@ -141,8 +130,8 @@ async def test_wave_sends_due_only_and_dedups(tmp_path, monkeypatch):
     sent = r.alert_service.sent[0]
     assert sent["kind"] == "wave"
     assert [p["game_id"] for p in sent["predictions"]] == ["in"]     # only due game
-    assert [b["game_id"] for b in sent["betting_slip"]["bets"]] == ["in"]
-    assert "review" not in sent                                       # waves omit review
+    assert "betting_slip" not in sent      # bets ride the main card only
+    assert "review" not in sent            # waves omit the review
     assert load_sent(date(2026, 7, 21), tmp_path) == ["in"]
 
     # A second wave at the same time re-sends nothing (already recorded).
@@ -150,7 +139,7 @@ async def test_wave_sends_due_only_and_dedups(tmp_path, monkeypatch):
     assert len(r.alert_service.sent) == 1
 
 
-async def test_preview_sends_full_slate_with_review(tmp_path, monkeypatch):
+async def test_preview_sends_full_slate_and_whole_card(tmp_path, monkeypatch):
     _fix_now(monkeypatch, datetime(2026, 7, 21, 8, 0, tzinfo=ET))  # 8 AM: nothing due yet
     r = _runner(tmp_path)
 
@@ -160,5 +149,18 @@ async def test_preview_sends_full_slate_with_review(tmp_path, monkeypatch):
     assert sent["kind"] == "preview"
     assert {p["game_id"] for p in sent["predictions"]} == {"in", "far"}  # full slate
     assert sent["review"] == {"yesterday": "2026-07-20", "full": None}
-    assert sent["betting_slip"]["num_bets"] == 0                         # no due bets yet
-    assert load_sent(date(2026, 7, 21), tmp_path) == []                  # nothing recorded
+    # Every bet goes out here, including the late game outside the 4h window.
+    assert [b["game_id"] for b in sent["betting_slip"]["bets"]] == ["in", "far"]
+    assert load_sent(date(2026, 7, 21), tmp_path) == []                  # nothing due yet
+
+
+async def test_preview_marks_games_already_inside_the_window(tmp_path, monkeypatch):
+    """A game due at main-card time isn't re-sent as a wave reminder later."""
+    _fix_now(monkeypatch, datetime(2026, 7, 21, 18, 0, tzinfo=ET))  # 6 PM ET
+    r = _runner(tmp_path)
+
+    await r._send_cards(date(2026, 7, 21), _result(), "preview", 4)
+    assert load_sent(date(2026, 7, 21), tmp_path) == ["in"]
+
+    await r._send_cards(date(2026, 7, 21), _result(), "wave", 4)
+    assert len(r.alert_service.sent) == 1  # nothing new to remind about

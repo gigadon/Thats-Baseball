@@ -91,7 +91,7 @@ class AlertService:
         review = result.get("review")
         if review:
             lines.append(f"Yesterday ({review.get('yesterday', '?')}) review:")
-            lines.append(f"  Full card:         {self._record_str(review.get('full'))}")
+            lines.append(f"  Full slate:        {self._record_str(review.get('full'))}")
             lines.append(f"  High-conf (≥65):   {self._record_str(review.get('high_conf'))}")
             win = review.get("high_conf_window") or {}
             lines.append(f"  High-conf last {win.get('days', 5)}d: {self._record_str(win)}")
@@ -139,7 +139,9 @@ class AlertService:
     def _format_review_text(self, review: dict) -> str:
         """Build the yesterday-review mrkdwn block for the top of the card."""
         lines = [f":bar_chart: *Yesterday ({review.get('yesterday', '?')}) — Review*"]
-        lines.append(f"• Full card: {self._record_str(review.get('full'))}")
+        # "Full slate", not "full card" — the betting card is the line below it, and
+        # having both read as "card" is exactly what made these reports hard to read.
+        lines.append(f"• Full slate: {self._record_str(review.get('full'))}")
         lines.append(f"• High-conf (≥65): {self._record_str(review.get('high_conf'))}")
         win = review.get("high_conf_window") or {}
         days = win.get("days", 5)
@@ -202,6 +204,18 @@ class AlertService:
             "type": "section",
             "text": {"type": "mrkdwn", "text": "\n".join(pred_lines)},
         })
+
+        # Wave cards are near-first-pitch reminders — the whole day's card went out
+        # on the main send, so say so rather than leaving a bet-less card ambiguous.
+        if result.get("kind") == "wave":
+            blocks.append({
+                "type": "context",
+                "elements": [{
+                    "type": "mrkdwn",
+                    "text": ":pushpin: Reminder only — today's bets went out on the "
+                            "main card.",
+                }],
+            })
 
         # Value bets
         slip = result.get("betting_slip")
