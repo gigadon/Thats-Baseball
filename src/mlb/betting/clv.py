@@ -31,13 +31,19 @@ def compute_daily_clv(
 
     Returns list of {game_id, selection, model_prob, closing_prob, clv}.
     """
-    # Load the prediction file (contains betting slip)
-    pred_path = data_dir / "predictions" / f"{target_date}.json"
-    if not pred_path.exists():
-        return []
+    # The card as sent (mlb.etl.slate_record) — CLV on bets that were never
+    # alerted is meaningless. Pre-lock days fall back to the prediction cache.
+    from mlb.etl.slate_record import load_slate
 
-    pred_data = json.loads(pred_path.read_text())
-    slip = pred_data.get("betting_slip")
+    slate = load_slate(date.fromisoformat(target_date), data_dir)
+    if slate is not None:
+        slip = slate.get("betting_slip")
+    else:
+        pred_path = data_dir / "predictions" / f"{target_date}.json"
+        if not pred_path.exists():
+            return []
+        slip = json.loads(pred_path.read_text()).get("betting_slip")
+
     if not slip or not slip.get("bets"):
         return []
 

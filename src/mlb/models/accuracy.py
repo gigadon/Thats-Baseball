@@ -33,17 +33,28 @@ async def track_accuracy(
 ) -> dict | None:
     """Compare predictions for *target_date* against actual outcomes.
 
+    Grades the slate that was actually sent — the copy locked when the main card
+    went out (mlb.etl.slate_record) — not the refreshed predictions later runs leave
+    in data/predictions for the dashboard. Days from before the lock existed fall
+    back to that cache.
+
     Returns the accuracy record dict, or None if no predictions/scores found.
     """
-    pred_path = data_dir / "predictions" / f"{target_date.isoformat()}.json"
-    if not pred_path.exists():
-        logger.info("No predictions file for %s", target_date)
-        return None
+    from mlb.etl.slate_record import locked_predictions
 
-    with open(pred_path) as f:
-        pred_data = json.load(f)
+    graded_from = "slate"
+    predictions = locked_predictions(target_date, data_dir)
+    if predictions is None:
+        graded_from = "cache"
+        pred_path = data_dir / "predictions" / f"{target_date.isoformat()}.json"
+        if not pred_path.exists():
+            logger.info("No predictions file for %s", target_date)
+            return None
 
-    predictions = pred_data.get("predictions", [])
+        with open(pred_path) as f:
+            pred_data = json.load(f)
+        predictions = pred_data.get("predictions", [])
+
     if not predictions:
         logger.info("No predictions for %s", target_date)
         return None
@@ -126,6 +137,7 @@ async def track_accuracy(
     record = {
         "date": target_date.isoformat(),
         "tracked_at": datetime.now().isoformat(),
+        "graded_from": graded_from,
         "results": results,
         "summary": {
             "total_games": total,
@@ -144,8 +156,8 @@ async def track_accuracy(
         json.dump(record, f, indent=2)
 
     logger.info(
-        "Accuracy for %s: %d/%d (%.1f%%), Brier: %.4f",
-        target_date, correct, total, accuracy * 100, brier,
+        "Accuracy for %s (%s): %d/%d (%.1f%%), Brier: %.4f",
+        target_date, graded_from, correct, total, accuracy * 100, brier,
     )
     return record
 

@@ -39,6 +39,7 @@ from mlb.features.formulas import (
 )
 from mlb.features.stadium import compute_stadium_features, calculate_stadium_factor
 from mlb.etl.sent_log import append_sent, due_game_ids, load_sent
+from mlb.etl.slate_record import load_slate, lock_slate
 from mlb.models.accuracy import build_daily_review
 from mlb.models.predict import GamePrediction, PredictionService
 from mlb.features.assembler import GameFeatureVector
@@ -93,10 +94,15 @@ class DailyRunner:
         The full slate is always computed and cached. `send_mode` controls what gets
         pushed to Slack:
           - "full":    the whole slate in one card (default; manual/legacy runs).
-          - "preview": yesterday-review + full-slate preview + bets for games
-                       starting within `lead_hours` (the morning card).
+          - "preview": the main card — yesterday-review + full-slate preview + the
+                       day's entire betting card.
           - "wave":    only games starting within `lead_hours` that haven't been sent
-                       yet today (later runs, close to first pitch).
+                       yet today (later runs, close to first pitch). No bets: the
+                       card was already sent on the main run.
+
+        Bets ride on the main card alone, and that card is the day's slate of record
+        (see `_apply_slate_record`) — what later runs recompute is never sent, so it
+        never gets recorded or graded.
 
         Returns a summary dict with predictions, betting slip, and metadata.
         """
@@ -297,6 +303,10 @@ class DailyRunner:
                 logger.warning("Odds fetch failed: %s", e)
                 result["errors"].append(f"Odds: {e}")
 
+            # 7b. Lock the day's slate of record (main run), or adopt the locked
+            # betting card (wave runs) — must happen before the cache write below.
+            self._apply_slate_record(target_date, result, send_mode)
+
             # 8. Cache predictions for the API
             self._cache_results(target_date, result)
 
@@ -326,14 +336,45 @@ class DailyRunner:
 
         return result
 
+    def _apply_slate_record(
+        self, target_date: date, result: dict[str, Any], send_mode: str
+    ) -> None:
+        """Lock the day's slate on the main run; adopt the locked card afterwards.
+
+        Every run recomputes a slip from the odds available at that moment, but only
+        the main card's slip is ever sent — so only it may be recorded. Wave runs
+        drop their freshly computed slip and take the locked one instead, which keeps
+        Slack, the dashboard, and settlement on one identical set of bets.
+        """
+        locked = load_slate(target_date, self.data_dir)
+        # A manual "full" run is a re-run or a test, so it fills a gap but never
+        # overwrites a slate the main card already set.
+        if send_mode == "preview" or (send_mode == "full" and locked is None):
+            lock_slate(
+                target_date,
+                result.get("predictions", []),
+                result.get("betting_slip"),
+                self.data_dir,
+            )
+            return
+
+        result["betting_slip"] = (locked or {}).get("betting_slip")
+        if locked is None:
+            logger.warning(
+                "No locked slate for %s — the main card never ran, so this run "
+                "sends and records no bets", target_date,
+            )
+
     async def _send_cards(
         self, target_date: date, result: dict[str, Any], send_mode: str, lead_hours: float
     ) -> None:
         """Push the Slack card(s) according to `send_mode` (see `run`).
 
-        "full" sends the whole slate unchanged. "preview"/"wave" filter to games due
-        within `lead_hours`, de-duplicated against today's sent log, and record what
-        was sent so later waves don't repeat a game.
+        The betting card rides on the main ("preview") send only — splitting bets
+        across four sends left the Slack history impossible to reconcile against
+        what was recorded and graded. Waves are reminders: the games about to start,
+        no bets, no review. Games sent are recorded so a later wave doesn't repeat
+        one.
         """
         if send_mode not in ("preview", "wave"):
             await self.alert_service.send_betting_alert(result)
@@ -344,52 +385,33 @@ class DailyRunner:
         already = set(load_sent(target_date, self.data_dir))
         due = due_game_ids(all_preds, now, lead_hours) - already
 
-        if send_mode == "wave" and not due:
-            logger.info(
-                "Wave: no new games within %.0fh window — nothing to send", lead_hours
-            )
-            return
-
-        due_slip = self._filter_slip(result.get("betting_slip"), due)
-
         if send_mode == "preview":
-            # Morning card: yesterday review + full-slate preview + bets for the
-            # games already inside the window.
+            # The main card: yesterday's grades, the full slate, and every bet.
             send_result = {
                 "date": result["date"],
                 "kind": "preview",
                 "predictions": all_preds,
-                "betting_slip": due_slip,
+                "betting_slip": result.get("betting_slip"),
                 "review": result.get("review"),
             }
         else:  # wave
+            if not due:
+                logger.info(
+                    "Wave: no new games within %.0fh window — nothing to send", lead_hours
+                )
+                return
             send_result = {
                 "date": result["date"],
                 "kind": "wave",
                 "predictions": [p for p in all_preds if str(p.get("game_id")) in due],
-                "betting_slip": due_slip,
             }
 
         await self.alert_service.send_betting_alert(send_result)
         if due:
             append_sent(target_date, due, self.data_dir)
-            logger.info("%s send: %d game(s): %s", send_mode, len(due), sorted(due))
-
-    @staticmethod
-    def _filter_slip(slip: dict | None, game_ids: set[str]) -> dict | None:
-        """Return a copy of `slip` keeping only bets on `game_ids`, totals recomputed."""
-        if not slip or not slip.get("bets"):
-            return slip
-        bets = [b for b in slip["bets"] if str(b.get("game_id")) in game_ids]
-        return {
-            **slip,
-            "bets": bets,
-            "num_bets": len(bets),
-            "total_stake": round(sum(b.get("recommended_stake", 0) for b in bets), 2),
-            "total_ev": round(
-                sum(b.get("ev_per_dollar", 0) * b.get("recommended_stake", 0) for b in bets), 2
-            ),
-        }
+            logger.info(
+                "%s send: %d game(s) marked sent: %s", send_mode, len(due), sorted(due)
+            )
 
     def _build_team_features(self, target_date: date) -> dict[str, dict[str, float]]:
         """Build current team features from CSV rolling stats."""
@@ -1679,7 +1701,13 @@ class DailyRunner:
             logger.info("Saved %d odds records to history", len(rows))
 
     def _cache_results(self, target_date: date, result: dict):
-        """Push results into the API cache."""
+        """Push results into the API cache — the live view, refreshed every run.
+
+        Predictions here track the latest data (fresh lineups/odds) for the
+        dashboard; the graded copy is the locked slate (mlb.etl.slate_record). The
+        betting slip is already the locked one by this point, so what the dashboard
+        shows is always the card that went to Slack.
+        """
         try:
             from mlb.api.routes.predictions import cache_predictions
             from mlb.api.routes.betting import cache_betting_slip
@@ -1974,14 +2002,15 @@ def main():
         "--send-mode",
         choices=["full", "preview", "wave"],
         default="full",
-        help="full=whole slate (default); preview=morning review + full slate + "
-        "due bets; wave=only games starting within --lead-hours, de-duped",
+        help="full=whole slate (default); preview=the main card — review + full "
+        "slate + the day's whole betting card, and locks the slate of record; "
+        "wave=only games starting within --lead-hours, de-duped, no bets",
     )
     parser.add_argument(
         "--lead-hours",
         type=float,
         default=4.0,
-        help="For preview/wave: send a game when first pitch is within this many hours",
+        help="For waves: send a game when first pitch is within this many hours",
     )
     args = parser.parse_args()
 
