@@ -1,0 +1,49 @@
+{
+  "date": "2026-07-29",
+  "tracked_at": "2026-07-30T17:57:50.580140",
+  "results": [
+    {
+      "game_id": "824002",
+      "home_team": "LAA",
+      "away_team": "HOU",
+      "home_win_prob": 0.3547,
+      "confidence": 77.9,
+      "predicted_winner": "HOU",
+      "actual_home_score": 4,
+      "actual_away_score": 7,
+      "actual_winner": "HOU",
+      "correct": true
+    },
+    {
+      "game_id": "824973",
+      "home_team": "OAK",
+      "away_team": "BOS",
+      "home_win_prob": 0.4398,
+      "confidence": 58.5,
+      "predicted_winner": "BOS",
+      "actual_home_score": 2,
+      "actual_away_score": 4,
+      "actual_winner": "BOS",
+      "correct": true
+    },
+    {
+      "game_id": "823924",
+      "home_team": "LAD",
+      "away_team": "SEA",
+      "home_win_prob": 0.6064,
+      "confidence": 73.4,
+      "predicted_winner": "LAD",
+      "actual_home_score": 4,
+      "actual_away_score": 2,
+      "actual_winner": "LAD",
+      "correct": true
+    }
+  ],
+  "summary": {
+    "total_games": 3,
+    "correct": 3,
+    "incorrect": 0,
+    "accuracy": 1.0,
+    "brier_score": 0.1581
+  }
+}
