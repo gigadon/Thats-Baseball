@@ -1,27 +1,34 @@
-"""Tests for bet settlement — score matching and the daily review builder."""
+"""Tests for bet settlement — score matching, the P&L chain, and the daily review."""
 
 import json
 from datetime import date
 from pathlib import Path
 
-from mlb.betting.settlement import _score_on_date, settle_day
+import pytest
+
+from mlb.betting.settlement import load_settlement, rechain_settlements, settle_day
 from mlb.models.accuracy import build_daily_review
 
 
-class TestScoreOnDate:
-    def test_matches_evening_game_in_et(self):
-        # 7:05 PM ET first pitch → stored as the next UTC day, still July 7 in ET.
-        score = {"commence_time": "2026-07-07T23:05:00Z"}
-        assert _score_on_date(score, date(2026, 7, 7))
-        assert not _score_on_date(score, date(2026, 7, 8))
+class _NoFinalsClient:
+    """MLB API stub with nothing final — pushes settle_day down its fallback chain."""
 
-    def test_after_midnight_utc_still_prior_et_date(self):
-        score = {"commence_time": "2026-07-08T01:10:00Z"}  # 9:10 PM ET on the 7th
-        assert _score_on_date(score, date(2026, 7, 7))
+    def __init__(self, games=None):
+        self._games = games or []
 
-    def test_missing_or_bad_commence_time_is_lenient(self):
-        assert _score_on_date({}, date(2026, 7, 7))
-        assert _score_on_date({"commence_time": "not-a-date"}, date(2026, 7, 7))
+    async def get_schedule(self, target_date):
+        return self._games
+
+    async def close(self):
+        pass
+
+
+@pytest.fixture
+def no_mlb_finals(monkeypatch):
+    """The MLB API is the primary score source now; keep tests off the network."""
+    import mlb.data.mlb_api as api
+
+    monkeypatch.setattr(api, "MLBApiClient", lambda *a, **k: _NoFinalsClient())
 
 
 def _write_slip(tmp_path: Path, date_str: str, bets: list[dict]) -> None:
@@ -31,7 +38,18 @@ def _write_slip(tmp_path: Path, date_str: str, bets: list[dict]) -> None:
     (pred_dir / f"{date_str}.json").write_text(json.dumps({"betting_slip": slip}))
 
 
-async def test_settlement_ignores_adjacent_series_game(tmp_path, monkeypatch):
+def _bet(game_id, home, away, selection="home", stake=100.0):
+    return {
+        "game_id": game_id, "game_date": "2026-07-22",
+        "home_team": home, "away_team": away,
+        "bet_type": "moneyline", "selection": selection,
+        "odds": -110, "recommended_stake": stake,
+    }
+
+
+async def test_settlement_ignores_adjacent_series_game(
+    tmp_path, monkeypatch, no_mlb_finals
+):
     """A same-matchup game from the next day must not settle today's slip.
 
     Regression: a multi-day scores window keyed only on (home, away) let the
@@ -58,9 +76,9 @@ async def test_settlement_ignores_adjacent_series_game(tmp_path, monkeypatch):
              "away_team": "LAA", "home_score": 1, "away_score": 13, "completed": True},
         ]
 
-    monkeypatch.setattr("mlb.betting.settlement.OddsApiClient.get_scores", fake_scores)
-    # Keep settle_day on the Odds-API path (recent date) regardless of wall clock.
-    monkeypatch.setattr("mlb.betting.settlement._today_et", lambda: date(2026, 7, 8))
+    monkeypatch.setattr("mlb.data.odds_api.OddsApiClient.get_scores", fake_scores)
+    # Keep the lookup on the Odds-API path (recent date) regardless of wall clock.
+    monkeypatch.setattr("mlb.data.scores._today_et", lambda: date(2026, 7, 8))
 
     result = await settle_day(date(2026, 7, 7), data_dir=tmp_path)
 
@@ -68,6 +86,114 @@ async def test_settlement_ignores_adjacent_series_game(tmp_path, monkeypatch):
     assert result["summary"]["bets_won"] == 1
     assert result["summary"]["bets_lost"] == 0
     assert result["bets"][0]["actual_home_score"] == 8  # the 7th, not the 8th
+
+
+class TestDoubleheaders:
+    async def test_each_leg_settles_against_its_own_score(self, tmp_path, monkeypatch):
+        """Two bets on one matchup must not both take the same score.
+
+        Regression: keying scores by (home, away) collapsed a twin bill into one
+        entry, so both bets graded off whichever leg landed in the map last —
+        2W or 2L, never the truth. 2026-07-22 really had two of these.
+        """
+        import mlb.data.mlb_api as api
+
+        monkeypatch.setattr(api, "MLBApiClient", lambda *a, **k: _NoFinalsClient([
+            {"game_id": "824735", "status": "Final", "home_team_id": "BOS",
+             "away_team_id": "BAL", "home_score": 7, "away_score": 2},   # home wins
+            {"game_id": "824732", "status": "Final", "home_team_id": "BOS",
+             "away_team_id": "BAL", "home_score": 1, "away_score": 9},   # home loses
+        ]))
+        _write_slip(tmp_path, "2026-07-22", [
+            _bet("824735", "BOS", "BAL"),
+            _bet("824732", "BOS", "BAL"),
+        ])
+
+        result = await settle_day(date(2026, 7, 22), data_dir=tmp_path)
+
+        assert result["summary"]["bets_won"] == 1
+        assert result["summary"]["bets_lost"] == 1
+
+    async def test_a_leg_without_an_id_is_skipped_not_guessed(
+        self, tmp_path, monkeypatch
+    ):
+        import mlb.data.mlb_api as api
+
+        monkeypatch.setattr(api, "MLBApiClient", lambda *a, **k: _NoFinalsClient([
+            {"game_id": "824735", "status": "Final", "home_team_id": "BOS",
+             "away_team_id": "BAL", "home_score": 7, "away_score": 2},
+            {"game_id": "824732", "status": "Final", "home_team_id": "BOS",
+             "away_team_id": "BAL", "home_score": 1, "away_score": 9},
+        ]))
+        _write_slip(tmp_path, "2026-07-22", [
+            _bet("824735", "BOS", "BAL"),
+            _bet(None, "BOS", "BAL"),          # ambiguous — which leg?
+        ])
+
+        result = await settle_day(date(2026, 7, 22), data_dir=tmp_path)
+
+        assert result["summary"]["bets_placed"] == 1
+        assert result["summary"]["bets_on_card"] == 2   # the shortfall is recorded
+
+
+def _write_settlement(tmp_path, date_str, daily_pnl, cumulative, staked=100.0):
+    betting = tmp_path / "betting"
+    betting.mkdir(parents=True, exist_ok=True)
+    (betting / f"{date_str}.json").write_text(json.dumps({
+        "date": date_str,
+        "bets": [],
+        "summary": {
+            "bets_placed": 1, "bets_won": 1, "bets_lost": 0, "bets_pushed": 0,
+            "total_staked": staked, "daily_pnl": daily_pnl, "roi": 0.0,
+            "cumulative_pnl": cumulative, "max_drawdown": 0.0,
+        },
+    }))
+
+
+class TestCumulativeChain:
+    async def test_gap_day_chains_off_the_prior_date_not_the_newest_file(
+        self, tmp_path, monkeypatch
+    ):
+        """Backfilling a gap day must not inherit a later day's running total.
+
+        Regression: the baseline was load_all_settlements()[-1] — newest file by
+        name — so settling an old day chained off the future.
+        """
+        import mlb.data.mlb_api as api
+
+        monkeypatch.setattr(api, "MLBApiClient", lambda *a, **k: _NoFinalsClient([
+            {"game_id": "824735", "status": "Final", "home_team_id": "BOS",
+             "away_team_id": "BAL", "home_score": 7, "away_score": 2},
+        ]))
+        _write_settlement(tmp_path, "2026-07-20", daily_pnl=50.0, cumulative=50.0)
+        _write_settlement(tmp_path, "2026-07-27", daily_pnl=900.0, cumulative=950.0)
+        _write_slip(tmp_path, "2026-07-22", [_bet("824735", "BOS", "BAL")])
+
+        result = await settle_day(date(2026, 7, 22), data_dir=tmp_path)
+
+        # 7/22 chains off 7/20 ($50), not off 7/27 ($950).
+        daily = result["summary"]["daily_pnl"]
+        assert result["summary"]["cumulative_pnl"] == round(50.0 + daily, 2)
+        # ...and 7/27, which now sits downstream of a new day, is repaired too.
+        assert load_settlement(date(2026, 7, 27), tmp_path)["summary"][
+            "cumulative_pnl"
+        ] == round(50.0 + daily + 900.0, 2)
+
+    def test_rechain_is_a_no_op_on_a_consistent_chain(self, tmp_path):
+        _write_settlement(tmp_path, "2026-07-20", daily_pnl=50.0, cumulative=50.0)
+        _write_settlement(tmp_path, "2026-07-21", daily_pnl=25.0, cumulative=75.0)
+
+        assert rechain_settlements(tmp_path) == {}
+
+    def test_rechain_repairs_a_broken_chain_and_then_settles(self, tmp_path):
+        _write_settlement(tmp_path, "2026-07-20", daily_pnl=50.0, cumulative=50.0)
+        _write_settlement(tmp_path, "2026-07-21", daily_pnl=25.0, cumulative=999.0)
+
+        rewritten = rechain_settlements(tmp_path)
+
+        assert set(rewritten) == {"2026-07-21"}
+        assert rewritten["2026-07-21"]["cumulative_pnl"] == 75.0
+        assert rechain_settlements(tmp_path) == {}   # idempotent
 
 
 class TestDailyReview:
@@ -102,3 +228,5 @@ class TestDailyReview:
         assert review["high_conf_window"]["correct"] == 3
         assert review["high_conf_window"]["total"] == 4
         assert review["card"] is None  # no settlement file written
+        # Legacy records carry no coverage block; the review must not invent one.
+        assert review["coverage"] is None

@@ -128,6 +128,19 @@ class TestApplySlateRecord:
         assert locked_betting_slip(DAY, tmp_path)["total_stake"] == 100.0
         assert later["betting_slip"]["total_stake"] == 100.0
 
+    def test_a_real_run_upgrades_a_reconstructed_slate(self, tmp_path):
+        """A slate rebuilt from git history is a stand-in for a run that never
+        locked; an actual run replaces it rather than deferring to it."""
+        r = _runner(tmp_path)
+        lock_slate(DAY, _preds(), _slip(stake=100.0), tmp_path,
+                   reconstructed_from={"commit": "abc123"})
+
+        real = {"predictions": _preds(), "betting_slip": _slip(stake=250.0)}
+        r._apply_slate_record(DAY, real, "full")
+
+        assert locked_betting_slip(DAY, tmp_path)["total_stake"] == 250.0
+        assert "reconstructed" not in load_slate(DAY, tmp_path)
+
 
 # ── Grading reads the record, not the live cache ─────────────────────
 
@@ -153,6 +166,14 @@ def _write_scores_csv(tmp_path, home_score, away_score):
 
 
 class TestSettlementUsesTheRecord:
+    @pytest.fixture(autouse=True)
+    def _no_mlb_finals(self, monkeypatch):
+        """Scores now come from the MLB API first; these tests exercise the CSV
+        fallback, so hand the API back an empty day (and stay off the network)."""
+        import mlb.data.mlb_api as api
+
+        monkeypatch.setattr(api, "MLBApiClient", lambda *a, **k: _FakeMLBClient(games=[]))
+
     async def test_settles_locked_card_not_the_refreshed_one(self, tmp_path):
         from mlb.betting.settlement import settle_day
 
@@ -191,14 +212,22 @@ class TestSettlementUsesTheRecord:
 
 
 class _FakeMLBClient:
-    """Stands in for MLBApiClient — track_accuracy only needs final scores."""
+    """Stands in for MLBApiClient — grading only needs final scores.
 
-    def __init__(self, home_score=2, away_score=5):
+    Pass `games` to return an explicit schedule (an empty list stands in for a
+    day the API has nothing final for).
+    """
+
+    def __init__(self, home_score=2, away_score=5, games=None):
         self._scores = (home_score, away_score)
+        self._games = games
 
     async def get_schedule(self, target_date):
+        if self._games is not None:
+            return self._games
         home, away = self._scores
         return [{
+            "game_id": "g1",
             "status": "Final", "home_team_id": "NYY", "away_team_id": "BOS",
             "home_score": home, "away_score": away,
         }]

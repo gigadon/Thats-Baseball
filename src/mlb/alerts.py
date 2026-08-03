@@ -91,14 +91,20 @@ class AlertService:
         review = result.get("review")
         if review:
             lines.append(f"Yesterday ({review.get('yesterday', '?')}) review:")
-            lines.append(f"  Full slate:        {self._record_str(review.get('full'))}")
+            coverage = self._coverage_str(review.get("coverage"), emoji=False)
+            lines.append(
+                f"  Full slate:        {self._record_str(review.get('full'))}{coverage}"
+            )
             lines.append(f"  High-conf (≥65):   {self._record_str(review.get('high_conf'))}")
             win = review.get("high_conf_window") or {}
             lines.append(f"  High-conf last {win.get('days', 5)}d: {self._record_str(win)}")
             card = review.get("card")
             if card:
                 rec = f"{card['won']}W-{card['lost']}L" + (f"-{card['pushed']}P" if card.get("pushed") else "")
-                lines.append(f"  Betting card:     {rec}  ${card['pnl']:+,.2f} ({card['roi']:+.1%})")
+                lines.append(
+                    f"  Betting card:     {rec}  ${card['pnl']:+,.2f} "
+                    f"({card['roi']:+.1%}){self._settled_str(card)}"
+                )
             else:
                 lines.append("  Betting card:     no bets settled")
             lines.append("")
@@ -136,12 +142,40 @@ class AlertService:
         pct = rec["correct"] / rec["total"]
         return f"{rec['correct']}-{rec['incorrect']} ({pct:.1%})"
 
+    @staticmethod
+    def _coverage_str(cov: dict | None, emoji: bool = True) -> str:
+        """' · 9 of 15 graded' when a day graded partially, '' otherwise.
+
+        A record built from four of eleven games reads exactly like a complete one
+        unless the shortfall is stated, so say it on the line itself. Empty for
+        records written before coverage was tracked, and for complete days.
+        """
+        if not cov or not cov.get("final"):
+            return ""
+        graded = cov.get("graded") or 0
+        if graded >= cov["final"]:
+            return ""
+        suffix = " :warning:" if emoji else ""
+        return f" · only {graded} of {cov['final']} graded{suffix}"
+
+    @staticmethod
+    def _settled_str(card: dict) -> str:
+        """' · 3 of 5 bets settled' when some bet on the card never got a score."""
+        on_card = card.get("on_card")
+        settled = card.get("settled")
+        if not on_card or settled is None or settled >= on_card:
+            return ""
+        return f" · {settled} of {on_card} bets settled"
+
     def _format_review_text(self, review: dict) -> str:
         """Build the yesterday-review mrkdwn block for the top of the card."""
         lines = [f":bar_chart: *Yesterday ({review.get('yesterday', '?')}) — Review*"]
         # "Full slate", not "full card" — the betting card is the line below it, and
         # having both read as "card" is exactly what made these reports hard to read.
-        lines.append(f"• Full slate: {self._record_str(review.get('full'))}")
+        lines.append(
+            f"• Full slate: {self._record_str(review.get('full'))}"
+            f"{self._coverage_str(review.get('coverage'))}"
+        )
         lines.append(f"• High-conf (≥65): {self._record_str(review.get('high_conf'))}")
         win = review.get("high_conf_window") or {}
         days = win.get("days", 5)
@@ -156,6 +190,7 @@ class AlertService:
             lines.append(
                 f"• Betting card: {emoji} {rec} · "
                 f"${card['pnl']:+,.2f} ({card['roi']:+.1%}) on ${card['staked']:,.2f}"
+                f"{self._settled_str(card)}"
             )
         else:
             lines.append("• Betting card: no bets settled")

@@ -62,20 +62,27 @@ jobs:
             --end "$(date -u +%F)" \
             --delay 0.3
 
-      - name: Settle yesterday's bets
-        if: github.event.schedule == '30 16 * * *' || github.event_name == 'workflow_dispatch'
+      # Grading runs on EVERY cron, over a two-week window. Both steps are
+      # continue-on-error, and they used to run only on the morning cron with a
+      # 2-day window — so one failed morning meant that day was never graded
+      # again (2026-07-10, 07-13..07-15, 07-22, 07-23 were lost that way). A wide
+      # window on every run means any later run repairs the gap. Re-grading is
+      # cheap and idempotent: settlement skips days it already settled, and
+      # accuracy keeps the existing record unless the new grade ranks higher
+      # (mlb.models.accuracy._grade_quality). Scores come from the free MLB API
+      # first now, so this costs no Odds API quota.
+      - name: Settle recent bets
         continue-on-error: true   # missing scores must not block today's slate
         env:
           PYTHONPATH: src
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
-        run: python -m mlb.betting.settlement --backfill 2
+        run: python -m mlb.betting.settlement --backfill 14
 
-      - name: Score yesterday's predictions
-        if: github.event.schedule == '30 16 * * *' || github.event_name == 'workflow_dispatch'
+      - name: Score recent predictions
         continue-on-error: true
         env:
           PYTHONPATH: src
-        run: python -m mlb.models.accuracy --backfill 2
+        run: python -m mlb.models.accuracy --backfill 14
 
       - name: Run daily predictions (posts to Slack)
         env:
