@@ -1,0 +1,25 @@
+{
+  "date": "2026-08-02",
+  "tracked_at": "2026-08-03T18:17:03.950596",
+  "results": [
+    {
+      "game_id": "823919",
+      "home_team": "LAD",
+      "away_team": "BOS",
+      "home_win_prob": 0.4536,
+      "confidence": 55.1,
+      "predicted_winner": "BOS",
+      "actual_home_score": 4,
+      "actual_away_score": 8,
+      "actual_winner": "BOS",
+      "correct": true
+    }
+  ],
+  "summary": {
+    "total_games": 1,
+    "correct": 1,
+    "incorrect": 0,
+    "accuracy": 1.0,
+    "brier_score": 0.2058
+  }
+}

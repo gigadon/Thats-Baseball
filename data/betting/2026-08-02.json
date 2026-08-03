@@ -1,0 +1,41 @@
+{
+  "date": "2026-08-02",
+  "settled_at": "2026-08-03T18:17:03",
+  "bankroll": 10000.0,
+  "bets": [
+    {
+      "game_id": "823919",
+      "game_date": "2026-08-02",
+      "home_team": "LAD",
+      "away_team": "BOS",
+      "bet_type": "moneyline",
+      "selection": "home",
+      "odds": 140,
+      "model_prob": 0.4536,
+      "implied_prob": 0.4037,
+      "edge": 0.0499,
+      "edge_pct": 4.99,
+      "kelly_fraction": 0.0633,
+      "recommended_stake": 221.6,
+      "confidence": 55.1,
+      "ev_per_dollar": 0.0886,
+      "decimal_odds": 2.4,
+      "total_line": null,
+      "actual_home_score": 4,
+      "actual_away_score": 8,
+      "result": "loss",
+      "pnl": -221.6
+    }
+  ],
+  "summary": {
+    "bets_placed": 1,
+    "bets_won": 0,
+    "bets_lost": 1,
+    "bets_pushed": 0,
+    "total_staked": 221.6,
+    "daily_pnl": -221.6,
+    "roi": -1.0,
+    "cumulative_pnl": 2490.26,
+    "max_drawdown": 0.1092
+  }
+}
