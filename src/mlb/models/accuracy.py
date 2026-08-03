@@ -8,6 +8,7 @@ Usage:
     python -m mlb.models.accuracy                    # Track today
     python -m mlb.models.accuracy --date 2026-05-14  # Specific date
     python -m mlb.models.accuracy --backfill 7       # Last 7 days
+    python -m mlb.models.accuracy --date X --force   # Re-grade regardless
 """
 
 from __future__ import annotations
@@ -27,9 +28,44 @@ def _today_et() -> date:
     return datetime.now(ZoneInfo("America/New_York")).date()
 
 
+def is_stub_prediction(pred: dict) -> bool:
+    """True when no model call was made for this game: no confidence, coin-flip prob.
+
+    `daily_runner` injects these placeholders for games that had already finished
+    when it ran, so the dashboard still lists them. Grading a coin flip the model
+    never actually called would pollute the scoreboard with an arbitrary
+    correct/incorrect, so they are counted as ungraded instead.
+    """
+    return not pred.get("confidence") and pred.get("home_win_prob", 0.5) == 0.5
+
+
+# Grading sources, worst to best. The locked slate is what the main card actually
+# sent; a reconstruction recovers that same snapshot from git history; the live
+# prediction cache is whatever the last run of the night left behind, which is
+# routinely degraded (see mlb.etl.slate_record).
+_SOURCE_RANK = {"cache": 0, "slate:reconstructed": 1, "slate": 2}
+
+
+def _grade_quality(record: dict | None) -> tuple[int, int]:
+    """Rank a record as (source, coverage) — higher wins, missing records lose.
+
+    Deliberately a total order: a rule like "better source OR more coverage" can
+    flip-flop between two runs, and the daily backfill re-grades the same days
+    repeatedly.
+    """
+    if not record:
+        return (-1, -1)
+    return (
+        _SOURCE_RANK.get(record.get("graded_from", "cache"), 0),
+        record.get("summary", {}).get("total_games", 0),
+    )
+
+
 async def track_accuracy(
     target_date: date,
     data_dir: Path = Path("data"),
+    *,
+    force: bool = False,
 ) -> dict | None:
     """Compare predictions for *target_date* against actual outcomes.
 
@@ -38,13 +74,20 @@ async def track_accuracy(
     in data/predictions for the dashboard. Days from before the lock existed fall
     back to that cache.
 
+    The daily backfill re-runs this over a two-week window, so a fresh grade only
+    replaces an existing one when it ranks higher (`_grade_quality`); pass
+    `force=True` to overwrite regardless.
+
     Returns the accuracy record dict, or None if no predictions/scores found.
     """
-    from mlb.etl.slate_record import locked_predictions
+    from mlb.data.scores import load_scorebook
+    from mlb.etl.slate_record import load_slate
 
-    graded_from = "slate"
-    predictions = locked_predictions(target_date, data_dir)
-    if predictions is None:
+    slate = load_slate(target_date, data_dir)
+    if slate is not None:
+        predictions = slate.get("predictions") or []
+        graded_from = "slate:reconstructed" if slate.get("reconstructed") else "slate"
+    else:
         graded_from = "cache"
         pred_path = data_dir / "predictions" / f"{target_date.isoformat()}.json"
         if not pred_path.exists():
@@ -59,31 +102,16 @@ async def track_accuracy(
         logger.info("No predictions for %s", target_date)
         return None
 
-    # Fetch actual scores from MLB API
-    from mlb.data.mlb_api import MLBApiClient
-
-    client = MLBApiClient()
-    try:
-        games = await client.get_schedule(target_date)
-    finally:
-        await client.close()
-
-    # Build lookup: (home_team, away_team) -> scores
-    scores: dict[tuple[str, str], dict] = {}
-    for g in games:
-        if g["status"] == "Final" and g.get("home_score") is not None:
-            key = (g["home_team_id"], g["away_team_id"])
-            scores[key] = {
-                "home_score": g["home_score"],
-                "away_score": g["away_score"],
-            }
-
-    if not scores:
+    book = await load_scorebook(target_date, data_dir)
+    if not len(book):
         logger.info("No final scores yet for %s", target_date)
         return None
 
+    ambiguous = set(book.ambiguous_pairs())
+
     # Match predictions to scores
     results: list[dict] = []
+    ungraded: list[dict] = []
     correct = 0
     total = 0
     brier_sum = 0.0
@@ -91,18 +119,27 @@ async def track_accuracy(
     for pred in predictions:
         home = pred.get("home_team")
         away = pred.get("away_team")
-        score = scores.get((home, away))
-        if not score:
+
+        reason = None
+        score = None
+        if is_stub_prediction(pred):
+            reason = "stub"
+        else:
+            score = book.lookup(pred.get("game_id"), home, away)
+            if score is None:
+                reason = "ambiguous_pair" if (home, away) in ambiguous else "no_score"
+
+        if reason:
+            ungraded.append({
+                "game_id": pred.get("game_id"),
+                "home_team": home,
+                "away_team": away,
+                "reason": reason,
+            })
             continue
 
-        # Skip no-prediction placeholders (TBD pitchers → prob 0.5, confidence
-        # 0): grading a coin-flip the model never actually called pollutes the
-        # scoreboard with an arbitrary correct/incorrect.
-        if not pred.get("confidence") and pred.get("home_win_prob", 0.5) == 0.5:
-            continue
-
-        home_score = score["home_score"]
-        away_score = score["away_score"]
+        home_score = score.home_score
+        away_score = score.away_score
         home_won = home_score > away_score
         pred_home_win = pred.get("home_win_prob", 0.5) > 0.5
 
@@ -138,15 +175,32 @@ async def track_accuracy(
         "date": target_date.isoformat(),
         "tracked_at": datetime.now().isoformat(),
         "graded_from": graded_from,
+        "score_source": book.source,
         "results": results,
+        "ungraded": ungraded,
         "summary": {
             "total_games": total,
             "correct": correct,
             "incorrect": total - correct,
             "accuracy": round(accuracy, 4),
             "brier_score": round(brier, 4),
+            # Coverage: how much of the day actually got graded. `final_games`
+            # (not scheduled) is the denominator, so a rainout doesn't read as a
+            # permanent grading failure.
+            "slate_games": len(predictions),
+            "final_games": len(book),
+            "graded_games": total,
         },
     }
+
+    existing = load_accuracy(target_date, data_dir)
+    if existing and not force and _grade_quality(record) <= _grade_quality(existing):
+        logger.info(
+            "Keeping existing %s record for %s (%d games) over new %s (%d games)",
+            existing.get("graded_from"), target_date,
+            existing.get("summary", {}).get("total_games", 0), graded_from, total,
+        )
+        return existing
 
     # Save to disk
     acc_dir = data_dir / "accuracy"
@@ -156,8 +210,9 @@ async def track_accuracy(
         json.dump(record, f, indent=2)
 
     logger.info(
-        "Accuracy for %s (%s): %d/%d (%.1f%%), Brier: %.4f",
+        "Accuracy for %s (%s): %d/%d (%.1f%%), Brier: %.4f — graded %d of %d final",
         target_date, graded_from, correct, total, accuracy * 100, brier,
+        total, len(book),
     )
     return record
 
@@ -197,6 +252,17 @@ def _record_from_results(results: list[dict], high_conf_only: bool = False) -> d
     return {"correct": correct, "total": total, "incorrect": total - correct}
 
 
+def _coverage_from_summary(summary: dict) -> dict | None:
+    """How much of the day got graded, or None for records written before this existed."""
+    if summary.get("final_games") is None:
+        return None
+    return {
+        "graded": summary.get("graded_games", summary.get("total_games")),
+        "final": summary["final_games"],
+        "slate": summary.get("slate_games"),
+    }
+
+
 def build_daily_review(
     target_date: date,
     data_dir: Path = Path("data"),
@@ -219,9 +285,11 @@ def build_daily_review(
         results = y_acc.get("results", [])
         review["full"] = _record_from_results(results)
         review["high_conf"] = _record_from_results(results, high_conf_only=True)
+        review["coverage"] = _coverage_from_summary(y_acc.get("summary", {}))
     else:
         review["full"] = None
         review["high_conf"] = None
+        review["coverage"] = None
 
     # Trailing high-conf record (inclusive of yesterday, back high_conf_window days).
     window = {"correct": 0, "total": 0, "incorrect": 0, "days": high_conf_window}
@@ -246,6 +314,8 @@ def build_daily_review(
             "pnl": s["daily_pnl"],
             "roi": s["roi"],
             "cumulative": s.get("cumulative_pnl"),
+            "settled": s["bets_placed"],
+            "on_card": s.get("bets_on_card"),
         }
     else:
         review["card"] = None
@@ -290,6 +360,10 @@ async def _main():
     parser.add_argument("--date", type=str, default=None, help="Date (YYYY-MM-DD)")
     parser.add_argument("--backfill", type=int, default=0, help="Backfill N days")
     parser.add_argument("--data-dir", type=str, default="data")
+    parser.add_argument(
+        "--force", action="store_true",
+        help="Overwrite an existing record even if the new grade ranks lower",
+    )
     args = parser.parse_args()
 
     data_dir = Path(args.data_dir)
@@ -298,10 +372,10 @@ async def _main():
         today = _today_et()
         for i in range(args.backfill, 0, -1):
             d = today - timedelta(days=i)
-            await track_accuracy(d, data_dir)
+            await track_accuracy(d, data_dir, force=args.force)
     else:
         target = date.fromisoformat(args.date) if args.date else _today_et()
-        await track_accuracy(target, data_dir)
+        await track_accuracy(target, data_dir, force=args.force)
 
 
 def main():

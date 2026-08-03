@@ -348,8 +348,11 @@ class DailyRunner:
         """
         locked = load_slate(target_date, self.data_dir)
         # A manual "full" run is a re-run or a test, so it fills a gap but never
-        # overwrites a slate the main card already set.
-        if send_mode == "preview" or (send_mode == "full" and locked is None):
+        # overwrites a slate the main card already set. A slate reconstructed from
+        # git history (mlb.etl.slate_repair) is a stand-in, so a real run replaces it.
+        if send_mode == "preview" or (
+            send_mode == "full" and (locked is None or locked.get("reconstructed"))
+        ):
             lock_slate(
                 target_date,
                 result.get("predictions", []),

@@ -224,13 +224,30 @@ async def get_line_movement_data(
     return {"date": target_date, "games": result}
 
 
+# Fields a later run may legitimately refresh on a game it can no longer predict:
+# status, first pitch, closing odds and current records. Everything else on a
+# stub is placeholder filler.
+_LIVE_FIELDS = (
+    "status", "game_time", "home_moneyline", "away_moneyline", "total_line",
+    "home_wins", "home_losses", "away_wins", "away_losses",
+    "home_streak", "away_streak",
+)
+
+
 def cache_predictions(date_str: str, predictions: list[dict]):
     """Store predictions in memory and write to JSON file.
 
     Merges by game_id so re-running mid-day doesn't drop finished games.
+
+    A later run only predicts games that haven't finished; everything else comes
+    back as a stub (prob 0.5, confidence 0). Letting a stub overwrite the morning's
+    real prediction is what made the evening cache — and the grading that reads
+    it — forget most of the day's calls, so real predictions win the merge and the
+    stub contributes only its live display fields.
     """
     import fcntl
     from mlb.api.fileutil import safe_json_read, safe_json_write
+    from mlb.models.accuracy import is_stub_prediction
 
     path = _CACHE_DIR / f"{date_str}.json"
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -244,7 +261,15 @@ def cache_predictions(date_str: str, predictions: list[dict]):
             # Merge: keep existing games, update/add from new predictions
             existing_preds = {g["game_id"]: g for g in existing.get("predictions", [])}
             for g in predictions:
-                existing_preds[g["game_id"]] = g
+                gid = g["game_id"]
+                prior = existing_preds.get(gid)
+                if prior is not None and is_stub_prediction(g) and not is_stub_prediction(prior):
+                    existing_preds[gid] = {
+                        **prior,
+                        **{k: g[k] for k in _LIVE_FIELDS if k in g},
+                    }
+                    continue
+                existing_preds[gid] = g
             merged = list(existing_preds.values())
             existing["date"] = date_str
             existing["predictions"] = merged

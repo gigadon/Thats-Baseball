@@ -50,12 +50,19 @@ def lock_slate(
     predictions: list[dict],
     betting_slip: dict | None,
     data_dir: Path = Path("data"),
+    *,
+    reconstructed_from: dict | None = None,
 ) -> dict:
     """Write the slate of record for `target_date` and return it.
 
     Called once a day, by the run that sends the main card. `betting_slip` is
     stored as-is — including None, which is the honest record of a main card that
     went out with no bets on it.
+
+    `reconstructed_from` marks a slate recovered after the fact from git history
+    (mlb.etl.slate_repair) rather than locked live. Such a slate is still far
+    better than the degraded prediction cache, but it ranks below a genuine lock:
+    a real run may replace it, and accuracy records it as `slate:reconstructed`.
     """
     record = {
         "date": target_date.isoformat(),
@@ -65,6 +72,8 @@ def lock_slate(
         "predictions": predictions,
         "betting_slip": betting_slip,
     }
+    if reconstructed_from:
+        record["reconstructed"] = reconstructed_from
     path = slate_path(target_date, data_dir)
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w") as f:
