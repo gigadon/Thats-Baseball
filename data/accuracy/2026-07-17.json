@@ -1,6 +1,8 @@
 {
   "date": "2026-07-17",
-  "tracked_at": "2026-07-19T17:32:22.333543",
+  "tracked_at": "2026-08-03T17:02:29.653194",
+  "graded_from": "slate:reconstructed",
+  "score_source": "mlb_api",
   "results": [
     {
       "game_id": "824766",
@@ -9,8 +11,8 @@
       "home_win_prob": 0.5003,
       "confidence": 29.9,
       "predicted_winner": "BOS",
-      "actual_home_score": 5,
-      "actual_away_score": 3,
+      "actual_home_score": 10,
+      "actual_away_score": 0,
       "actual_winner": "BOS",
       "correct": true
     },
@@ -171,11 +173,22 @@
       "correct": false
     }
   ],
+  "ungraded": [
+    {
+      "game_id": "824414",
+      "home_team": "CLE",
+      "away_team": "PIT",
+      "reason": "no_score"
+    }
+  ],
   "summary": {
     "total_games": 14,
     "correct": 6,
     "incorrect": 8,
     "accuracy": 0.4286,
-    "brier_score": 0.2701
+    "brier_score": 0.2701,
+    "slate_games": 15,
+    "final_games": 14,
+    "graded_games": 14
   }
 }

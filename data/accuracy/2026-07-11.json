@@ -1,6 +1,8 @@
 {
   "date": "2026-07-11",
-  "tracked_at": "2026-07-13T18:18:09.746323",
+  "tracked_at": "2026-08-03T17:02:28.858557",
+  "graded_from": "slate:reconstructed",
+  "score_source": "mlb_api",
   "results": [
     {
       "game_id": "823357",
@@ -9,8 +11,8 @@
       "home_win_prob": 0.6027,
       "confidence": 60.9,
       "predicted_winner": "PIT",
-      "actual_home_score": 3,
-      "actual_away_score": 2,
+      "actual_home_score": 7,
+      "actual_away_score": 6,
       "actual_winner": "PIT",
       "correct": true
     },
@@ -195,11 +197,15 @@
       "correct": false
     }
   ],
+  "ungraded": [],
   "summary": {
     "total_games": 16,
     "correct": 10,
     "incorrect": 6,
     "accuracy": 0.625,
-    "brier_score": 0.2479
+    "brier_score": 0.2479,
+    "slate_games": 16,
+    "final_games": 16,
+    "graded_games": 16
   }
 }
