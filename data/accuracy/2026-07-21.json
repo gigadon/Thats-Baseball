@@ -1,6 +1,8 @@
 {
   "date": "2026-07-21",
-  "tracked_at": "2026-07-23T17:56:14.213350",
+  "tracked_at": "2026-08-03T17:02:30.921787",
+  "graded_from": "slate:reconstructed",
+  "score_source": "mlb_api",
   "results": [
     {
       "game_id": "824409",
@@ -159,11 +161,28 @@
       "correct": false
     }
   ],
+  "ungraded": [
+    {
+      "game_id": "823519",
+      "home_team": "NYY",
+      "away_team": "PIT",
+      "reason": "no_score"
+    },
+    {
+      "game_id": "824735",
+      "home_team": "BOS",
+      "away_team": "BAL",
+      "reason": "no_score"
+    }
+  ],
   "summary": {
     "total_games": 13,
     "correct": 6,
     "incorrect": 7,
     "accuracy": 0.4615,
-    "brier_score": 0.2617
+    "brier_score": 0.2617,
+    "slate_games": 15,
+    "final_games": 13,
+    "graded_games": 13
   }
 }

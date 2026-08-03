@@ -1,6 +1,8 @@
 {
   "date": "2026-07-09",
-  "tracked_at": "2026-07-11T17:30:40.839406",
+  "tracked_at": "2026-08-03T17:02:28.596049",
+  "graded_from": "slate:reconstructed",
+  "score_source": "mlb_api",
   "results": [
     {
       "game_id": "823606",
@@ -147,11 +149,22 @@
       "correct": true
     }
   ],
+  "ungraded": [
+    {
+      "game_id": "823359",
+      "home_team": "PIT",
+      "away_team": "ATL",
+      "reason": "stub"
+    }
+  ],
   "summary": {
     "total_games": 12,
     "correct": 6,
     "incorrect": 6,
     "accuracy": 0.5,
-    "brier_score": 0.2491
+    "brier_score": 0.2491,
+    "slate_games": 13,
+    "final_games": 13,
+    "graded_games": 12
   }
 }
