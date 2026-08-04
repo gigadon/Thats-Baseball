@@ -21,6 +21,58 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 
+class _ClosingLines:
+    """Closing home-win probabilities for a date, addressable by game.
+
+    The Odds API only knows the team pair, so the snapshot files this reads used
+    to collapse a doubleheader into one series and hand both bets the same
+    closing line. Snapshots now carry the MLB game_id (mlb.data.line_movement);
+    where they don't — files written before that — an ambiguous pair yields
+    nothing rather than the wrong leg's line.
+    """
+
+    def __init__(self, games: list[dict]):
+        self._by_id: dict[str, float] = {}
+        self._by_pair: dict[tuple[str, str], list[float]] = {}
+        for g in games:
+            prob = g.get("home_prob")
+            if prob is None:
+                continue
+            game_id = str(g.get("game_id") or "")
+            if game_id:
+                self._by_id[game_id] = prob
+            self._by_pair.setdefault(
+                (g.get("home_team", ""), g.get("away_team", "")), []
+            ).append(prob)
+
+    def lookup(self, game_id: Any, home: str, away: str) -> float | None:
+        gid = str(game_id or "")
+        if gid and gid in self._by_id:
+            return self._by_id[gid]
+
+        candidates = self._by_pair.get((home, away), [])
+        if len(candidates) == 1:
+            return candidates[0]
+        if len(candidates) > 1:
+            logger.warning(
+                "Ambiguous closing line for %s@%s (%d games) — skipping CLV",
+                away, home, len(candidates),
+            )
+        return None
+
+
+def _closing_probs(target_date: str, data_dir: Path) -> _ClosingLines:
+    """The last snapshot of the day — the closing line."""
+    lm_path = data_dir / "line_movement" / f"{target_date}.json"
+    if not lm_path.exists():
+        return _ClosingLines([])
+
+    snapshots = json.loads(lm_path.read_text()).get("snapshots", [])
+    if not snapshots:
+        return _ClosingLines([])
+    return _ClosingLines(snapshots[-1].get("games", []))
+
+
 def compute_daily_clv(
     target_date: str, data_dir: Path = Path("data")
 ) -> list[dict]:
@@ -47,27 +99,15 @@ def compute_daily_clv(
     if not slip or not slip.get("bets"):
         return []
 
-    # Load closing lines from line movement
-    lm_path = data_dir / "line_movement" / f"{target_date}.json"
-    closing_probs: dict[tuple[str, str], float] = {}
-    if lm_path.exists():
-        lm_data = json.loads(lm_path.read_text())
-        snapshots = lm_data.get("snapshots", [])
-        if snapshots:
-            # Last snapshot = closing line
-            last_snap = snapshots[-1]
-            for g in last_snap.get("games", []):
-                key = (g["home_team"], g["away_team"])
-                closing_probs[key] = g["home_prob"]
+    closing = _closing_probs(target_date, data_dir)
 
     results = []
     for bet in slip["bets"]:
         home = bet.get("home_team", "")
         away = bet.get("away_team", "")
-        key = (home, away)
 
         model_prob = bet.get("model_prob", 0.5)
-        closing_home_prob = closing_probs.get(key)
+        closing_home_prob = closing.lookup(bet.get("game_id"), home, away)
 
         if closing_home_prob is None:
             # No line movement data — use implied prob from odds as fallback

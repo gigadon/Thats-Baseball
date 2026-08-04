@@ -191,13 +191,21 @@ def _enrich_with_line_movement(date_str: str, games: list[dict]) -> list[dict]:
     if not movements:
         return games
 
+    # Fall back to the matchup only when it's unique on the date — a doubleheader
+    # pair matches two entries and neither is safe to attach.
+    by_pair: dict[tuple[str, str], list[dict]] = {}
+    for m in movements.values():
+        by_pair.setdefault((m["home_team"], m["away_team"]), []).append(m)
+
     enriched = []
     for g in games:
         g = dict(g)
-        key = (g.get("home_team", ""), g.get("away_team", ""))
-        probs = movements.get(key, [])
-        if probs:
-            g["line_movement"] = probs
+        entry = movements.get(str(g.get("game_id", "")))
+        if entry is None:
+            pair = by_pair.get((g.get("home_team", ""), g.get("away_team", "")), [])
+            entry = pair[0] if len(pair) == 1 else None
+        if entry and entry["probs"]:
+            g["line_movement"] = entry["probs"]
         enriched.append(g)
     return enriched
 
@@ -211,10 +219,12 @@ async def get_line_movement_data(
     movements = get_all_line_movements(target_date)
 
     result = []
-    for (home, away), probs in movements.items():
+    for entry in movements.values():
+        probs = entry["probs"]
         result.append({
-            "home_team": home,
-            "away_team": away,
+            "game_id": entry["game_id"],
+            "home_team": entry["home_team"],
+            "away_team": entry["away_team"],
             "snapshots": probs,
             "open": probs[0] if probs else None,
             "current": probs[-1] if probs else None,

@@ -23,6 +23,7 @@ import pandas as pd
 
 from mlb.data.mlb_api import MLBApiClient
 from mlb.data.odds_api import OddsApiClient
+from mlb.data.odds_match import index_odds_by_game
 from mlb.data.weather import WeatherClient
 from mlb.etl.build_training_data import (
     DOME_TEAMS, PARK_DEFAULT, PARK_FACTORS, RETRACTABLE_TEAMS,
@@ -187,11 +188,15 @@ class DailyRunner:
             except Exception as e:
                 logger.warning("Early odds fetch failed, continuing without: %s", e)
 
-            # Build odds lookup keyed by (home_team, away_team) for feature injection
-            odds_by_matchup: dict[tuple[str, str], dict] = {}
-            for odds in odds_data:
-                key = (odds["home_team"], odds["away_team"])
-                odds_by_matchup[key] = odds
+            # Odds keyed by MLB game_id, not by matchup: a team pair is not unique
+            # on a doubleheader date, and keying on it fed both legs the second
+            # leg's line (mlb.data.odds_match).
+            odds_by_game = index_odds_by_game(odds_data, all_games)
+            if odds_data and len(odds_by_game) < len(odds_data):
+                logger.info(
+                    "Matched %d of %d odds event(s) to games",
+                    len(odds_by_game), len(odds_data),
+                )
 
             # Persist odds for future retraining
             if odds_data:
@@ -201,9 +206,7 @@ class DailyRunner:
             predictions: list[GamePrediction] = []
             for game in scheduled:
                 try:
-                    matched_odds = odds_by_matchup.get(
-                        (game["home_team_id"], game["away_team_id"])
-                    )
+                    matched_odds = odds_by_game.get(game["game_id"])
                     pred = self._predict_game(
                         game, team_features, weather_data, target_date,
                         sp_stats=sp_stats,
@@ -234,9 +237,7 @@ class DailyRunner:
                     sp_stats=sp_stats,
                     live_standings=live_standings,
                     weather_data=weather_data,
-                    game_odds=odds_by_matchup.get(
-                        (p.home_team_id, p.away_team_id)
-                    ),
+                    game_odds=odds_by_game.get(p.game_id),
                 )
                 for p in predictions
             ]
@@ -273,9 +274,9 @@ class DailyRunner:
                         "home_streak": h_std.get("streak", ""),
                         "away_streak": a_std.get("streak", ""),
                         "game_time": game.get("game_time", ""),
-                        "home_moneyline": odds_by_matchup.get((home_id, away_id), {}).get("home_moneyline"),
-                        "away_moneyline": odds_by_matchup.get((home_id, away_id), {}).get("away_moneyline"),
-                        "total_line": odds_by_matchup.get((home_id, away_id), {}).get("total_line"),
+                        "home_moneyline": odds_by_game.get(gid, {}).get("home_moneyline"),
+                        "away_moneyline": odds_by_game.get(gid, {}).get("away_moneyline"),
+                        "total_line": odds_by_game.get(gid, {}).get("total_line"),
                         "status": game.get("status", ""),
                     })
 
@@ -290,7 +291,7 @@ class DailyRunner:
                         and p.get("away_sp_name", "TBD") != "TBD"
                     }
                     bet_preds = [p for p in predictions if p.game_id in eligible_ids]
-                    odds_matched = self._match_odds_to_games(bet_preds, odds_data)
+                    odds_matched = self._match_odds_to_games(bet_preds, odds_by_game)
                     slip = self.betting_engine.find_value_bets(bet_preds, odds_matched)
                     result["betting_slip"] = self._slip_to_dict(slip)
                     logger.info(
@@ -1165,28 +1166,30 @@ class DailyRunner:
 
         return self.prediction_service.predict_game(game_fv)
 
+    @staticmethod
     def _match_odds_to_games(
-        self,
         predictions: list[GamePrediction],
-        odds_data: list[dict],
+        odds_by_game: dict[str, dict],
     ) -> list[dict]:
-        """Match odds data to predictions by team matchups."""
+        """Pair each prediction with its own game's odds.
+
+        Matching on the team pair used to hand both legs of a doubleheader to
+        whichever prediction came first — that leg got priced (and bet) twice on
+        two different lines, and the other leg was never priced at all.
+        """
         matched = []
-        for odds in odds_data:
-            for pred in predictions:
-                if (
-                    odds["home_team"] == pred.home_team_id
-                    and odds["away_team"] == pred.away_team_id
-                ):
-                    matched.append({
-                        "game_id": pred.game_id,
-                        "home_moneyline": odds["home_moneyline"],
-                        "away_moneyline": odds["away_moneyline"],
-                        "total_line": odds["total_line"],
-                        "over_odds": odds.get("over_odds", -110),
-                        "under_odds": odds.get("under_odds", -110),
-                    })
-                    break
+        for pred in predictions:
+            odds = odds_by_game.get(pred.game_id)
+            if odds is None:
+                continue
+            matched.append({
+                "game_id": pred.game_id,
+                "home_moneyline": odds["home_moneyline"],
+                "away_moneyline": odds["away_moneyline"],
+                "total_line": odds["total_line"],
+                "over_odds": odds.get("over_odds", -110),
+                "under_odds": odds.get("under_odds", -110),
+            })
         return matched
 
     def _generate_rankings(
