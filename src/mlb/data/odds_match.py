@@ -30,7 +30,8 @@ logger = logging.getLogger(__name__)
 DEFAULT_TOLERANCE_MINUTES = 120
 
 
-def _parse_dt(value: Any) -> datetime | None:
+def parse_dt(value: Any) -> datetime | None:
+    """Parse an ISO timestamp (the feeds use a trailing Z), or None if unusable."""
     if not value or not isinstance(value, str):
         return None
     try:
@@ -90,8 +91,8 @@ def _resolve_one(
     if not event_id:
         return {}
 
-    event_dt = _parse_dt(event.get("commence_time"))
-    game_dt = _parse_dt(game.get("game_time"))
+    event_dt = parse_dt(event.get("commence_time"))
+    game_dt = parse_dt(game.get("game_time"))
     if event_dt and game_dt:
         delta = abs((game_dt - event_dt).total_seconds())
         if delta > tolerance_minutes * 60:
@@ -114,12 +115,12 @@ def _resolve_by_time(
     """Separate same-matchup games by first pitch."""
     timed_events = [
         (dt, e) for e in events
-        if (dt := _parse_dt(e.get("commence_time"))) is not None
+        if (dt := parse_dt(e.get("commence_time"))) is not None
         and e.get("odds_event_id")
     ]
     timed_games = [
         (dt, g) for g in candidates
-        if (dt := _parse_dt(g.get("game_time"))) is not None
+        if (dt := parse_dt(g.get("game_time"))) is not None
     ]
 
     if not timed_events or not timed_games:

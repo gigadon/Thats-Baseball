@@ -106,7 +106,11 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/odds_history.csv data/accuracy data/predictions data/betting data/sent data/slates data/feature_defaults.json \
+          # data/line_movement accumulates one snapshot per run: each job is a
+          # fresh checkout, so it has to be committed back or CLV only ever sees
+          # a single price instead of open-to-close.
+          git add data/odds_history.csv data/accuracy data/predictions data/betting data/sent data/slates \
+                  data/line_movement data/feature_defaults.json \
                   data/games_*.csv data/batting_*.csv data/pitching_*.csv || true
           if git diff --cached --quiet; then
             echo "No data changes to commit."

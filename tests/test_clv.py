@@ -5,12 +5,16 @@ doubleheader into one series and both bets took whichever leg was written last.
 """
 
 import json
-from datetime import date
+from datetime import date, datetime, timezone
 
 import pytest
 
 from mlb.betting.clv import compute_daily_clv
-from mlb.data.line_movement import get_all_line_movements, get_line_movement
+from mlb.data.line_movement import (
+    get_all_line_movements,
+    get_line_movement,
+    record_snapshot,
+)
 from mlb.etl.slate_record import lock_slate
 
 DAY = "2026-07-22"
@@ -114,6 +118,150 @@ class TestSingleGames:
         results = compute_daily_clv(DAY, tmp_path)
 
         assert results[0]["closing_prob"] == pytest.approx(0.58)
+
+
+class TestClosingLineAcrossSnapshots:
+    """The pipeline appends a snapshot per run; the close is the last pre-game one."""
+
+    def test_uses_the_last_snapshot_the_game_appears_in(self, tmp_path):
+        # An afternoon game is gone from the odds feed by the evening runs, so
+        # the day's final snapshot doesn't contain it at all.
+        _write_snapshots(
+            tmp_path,
+            [_snapshot_game("824700", "NYY", "TOR", 0.50),      # main card
+             _snapshot_game("824900", "SD", "LAD", 0.60)],
+            [_snapshot_game("824700", "NYY", "TOR", 0.55),      # last before 1:05pm
+             _snapshot_game("824900", "SD", "LAD", 0.62)],
+            [_snapshot_game("824900", "SD", "LAD", 0.68)],      # evening: NYY gone
+        )
+        _lock(tmp_path, [
+            _bet("824700", "NYY", "TOR", model_prob=0.62),
+            _bet("824900", "SD", "LAD", model_prob=0.62),
+        ])
+
+        clv = {r["game_id"]: r["closing_prob"] for r in compute_daily_clv(DAY, tmp_path)}
+
+        assert clv["824700"] == pytest.approx(0.55)   # not the 0.50 open
+        assert clv["824900"] == pytest.approx(0.68)
+
+    def test_a_legacy_doubleheader_stays_ambiguous_across_snapshots(self, tmp_path):
+        # Grouping per snapshot must not let dedup collapse two id-less legs.
+        _write_snapshots(
+            tmp_path,
+            [_snapshot_game("", "BOS", "BAL", 0.55),
+             _snapshot_game("", "BOS", "BAL", 0.70)],
+            [_snapshot_game("", "BOS", "BAL", 0.57),
+             _snapshot_game("", "BOS", "BAL", 0.72)],
+        )
+        _lock(tmp_path, [_bet("824735", "BOS", "BAL", model_prob=0.62)])
+
+        results = compute_daily_clv(DAY, tmp_path)
+
+        assert results[0]["closing_prob"] == pytest.approx(0.58)  # implied fallback
+
+
+class TestRecordSnapshot:
+    # Noon ET on game day: first pitch is still ahead.
+    PREGAME = datetime(2026, 7, 22, 16, 0, tzinfo=timezone.utc)
+
+    def _odds(self, **overrides):
+        base = {
+            "home_team": "NYY", "away_team": "TOR",
+            "commence_time": "2026-07-22T23:05:00Z",
+            "home_moneyline": -140, "away_moneyline": 120, "total_line": 8.5,
+        }
+        base.update(overrides)
+        return {"824700": base}
+
+    def _read(self, tmp_path):
+        return json.loads((tmp_path / "line_movement" / f"{DAY}.json").read_text())
+
+    def test_appends_one_snapshot_per_call(self, tmp_path):
+        day = date.fromisoformat(DAY)
+
+        assert record_snapshot(self._odds(), day, tmp_path, now=self.PREGAME) == 1
+        record_snapshot(self._odds(), day, tmp_path, now=self.PREGAME)
+
+        data = self._read(tmp_path)
+        assert len(data["snapshots"]) == 2
+        assert data["snapshots"][0]["games"][0]["game_id"] == "824700"
+
+    def test_probability_is_devigged(self, tmp_path):
+        # -110 both sides is a 50/50 market once the vig comes out.
+        record_snapshot(
+            self._odds(home_moneyline=-110, away_moneyline=-110),
+            date.fromisoformat(DAY), tmp_path, now=self.PREGAME,
+        )
+
+        game = self._read(tmp_path)["snapshots"][0]["games"][0]
+        assert game["home_prob"] == pytest.approx(0.5)
+
+    def test_games_without_moneylines_are_skipped(self, tmp_path):
+        n = record_snapshot(
+            self._odds(home_moneyline=None, away_moneyline=None),
+            date.fromisoformat(DAY), tmp_path, now=self.PREGAME,
+        )
+
+        assert n == 0
+        assert not (tmp_path / "line_movement" / f"{DAY}.json").exists()
+
+    def test_in_play_lines_are_not_recorded(self, tmp_path):
+        """The feed keeps some games after first pitch and switches them to
+        in-play prices; a 3% home side two hours in is not a closing line."""
+        two_hours_in = datetime(2026, 7, 23, 1, 5, tzinfo=timezone.utc)
+
+        n = record_snapshot(
+            self._odds(home_moneyline=3300, away_moneyline=-8000),
+            date.fromisoformat(DAY), tmp_path, now=two_hours_in,
+        )
+
+        assert n == 0
+
+    def test_a_game_with_no_start_time_is_kept(self, tmp_path):
+        n = record_snapshot(
+            self._odds(commence_time=""),
+            date.fromisoformat(DAY), tmp_path, now=self.PREGAME,
+        )
+
+        assert n == 1
+
+
+class TestSummaryCountsOnlyRealClosingLines:
+    @pytest.fixture(autouse=True)
+    def _pin_today(self, monkeypatch):
+        monkeypatch.setattr("mlb.betting.clv._today_et", lambda: date(2026, 7, 23))
+
+    def test_fallback_bets_are_excluded_and_counted(self, tmp_path):
+        from mlb.betting.clv import compute_clv_summary
+
+        # 7/22 has a snapshot; 7/21 does not, so its bet only has the price it was
+        # struck at — that is edge, not line value, and must not skew the average.
+        _write_snapshots(tmp_path, [_snapshot_game("824700", "NYY", "TOR", 0.55)])
+        _lock(tmp_path, [_bet("824700", "NYY", "TOR", model_prob=0.62)])
+        lock_slate(
+            date(2026, 7, 21), [],
+            {"bankroll": 10000.0, "num_bets": 1,
+             "bets": [_bet("824999", "SD", "LAD", model_prob=0.80)]},
+            tmp_path,
+        )
+
+        summary = compute_clv_summary(3, tmp_path)
+
+        assert summary["total_bets"] == 1
+        assert summary["bets_without_closing_line"] == 1
+        assert summary["avg_clv"] == pytest.approx(0.07)
+
+    def test_results_mark_where_the_closing_price_came_from(self, tmp_path):
+        _write_snapshots(tmp_path, [_snapshot_game("824700", "NYY", "TOR", 0.55)])
+        _lock(tmp_path, [
+            _bet("824700", "NYY", "TOR"),
+            _bet("824999", "SD", "LAD"),      # no snapshot for this one
+        ])
+
+        sources = {r["game_id"]: r["closing_source"]
+                   for r in compute_daily_clv(DAY, tmp_path)}
+
+        assert sources == {"824700": "line_movement", "824999": "bet_implied"}
 
 
 class TestLineMovementReaders:

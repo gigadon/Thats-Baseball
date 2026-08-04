@@ -22,6 +22,7 @@ import numpy as np
 import pandas as pd
 
 from mlb.data.mlb_api import MLBApiClient
+from mlb.data.line_movement import record_snapshot
 from mlb.data.odds_api import OddsApiClient
 from mlb.data.odds_match import index_odds_by_game
 from mlb.data.weather import WeatherClient
@@ -197,6 +198,18 @@ class DailyRunner:
                     "Matched %d of %d odds event(s) to games",
                     len(odds_by_game), len(odds_data),
                 )
+
+            # Record the line as it stands right now. Every run appends one
+            # snapshot, so across the day's crons the file holds the open (main
+            # card) through to the last price before first pitch — which is what
+            # CLV grades against (mlb.betting.clv). Free: these odds are already
+            # fetched, and the Odds API allowance is small.
+            if odds_by_game:
+                try:
+                    n = record_snapshot(odds_by_game, target_date, self.data_dir)
+                    logger.info("Line snapshot: %d game(s) recorded", n)
+                except Exception as e:
+                    logger.warning("Line snapshot failed: %s", e)
 
             # Persist odds for future retraining
             if odds_data:

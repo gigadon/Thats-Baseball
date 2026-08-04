@@ -67,10 +67,12 @@ mlartifacts/
 *.feather
 data/raw/
 data/processed/
-# data/predictions/, data/slates/, data/sent/ and data/betting/ are TRACKED
-# (small daily JSONs): the GitHub Actions daily job commits them back so next-day
-# CI runs can settle bets and score yesterday's predictions (accuracy.py /
-# settlement.py). data/slates/ is the slate of record — what was actually sent.
+# data/predictions/, data/slates/, data/sent/, data/betting/ and
+# data/line_movement/ are TRACKED (small daily JSONs): the GitHub Actions daily
+# job commits them back so next-day CI runs can settle bets and score yesterday's
+# predictions (accuracy.py / settlement.py). data/slates/ is the slate of record
+# — what was actually sent. data/line_movement/ accumulates across the day's runs,
+# giving CLV the closing price (clv.py).
 
 # Keep training data + models for deployment
 !data/*.csv
