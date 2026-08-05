@@ -1710,11 +1710,11 @@ game_id,game_date,home_team_id,away_team_id,home_score,away_score,status
 823516,2026-08-05,NYY,STL,,,Scheduled
 823753,2026-08-05,MIL,PIT,,,Scheduled
 824082,2026-08-05,KC,MIN,,,Scheduled
-824158,2026-08-05,HOU,TOR,0,0,Pre-Game
+824158,2026-08-05,HOU,TOR,0,0,Warmup
 824322,2026-08-05,COL,TB,0,0,Pre-Game
 824402,2026-08-05,CLE,NYM,,,Scheduled
 824482,2026-08-05,CIN,OAK,,,Scheduled
-824646,2026-08-05,CHC,LAD,0,0,Pre-Game
+824646,2026-08-05,CHC,LAD,0,0,Warmup
 824728,2026-08-05,BOS,CWS,,,Scheduled
 824806,2026-08-05,BAL,LAA,,,Scheduled
 824889,2026-08-05,ATL,MIA,,,Scheduled
