@@ -14,11 +14,91 @@ from __future__ import annotations
 
 import json
 import logging
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Any
+from zoneinfo import ZoneInfo
 
 logger = logging.getLogger(__name__)
+
+
+def _today_et() -> date:
+    """Today in US Eastern — naive date.today() is tomorrow on UTC hosts after 8 PM ET."""
+    return datetime.now(ZoneInfo("America/New_York")).date()
+
+
+class _ClosingLines:
+    """Closing home-win probabilities for a date, addressable by game.
+
+    The Odds API only knows the team pair, so the snapshot files this reads used
+    to collapse a doubleheader into one series and hand both bets the same
+    closing line. Snapshots now carry the MLB game_id (mlb.data.line_movement);
+    where they don't — files written before that — an ambiguous pair yields
+    nothing rather than the wrong leg's line.
+    """
+
+    def __init__(self, games: list[dict]):
+        self._by_id: dict[str, float] = {}
+        self._by_pair: dict[tuple[str, str], list[float]] = {}
+        for g in games:
+            prob = g.get("home_prob")
+            if prob is None:
+                continue
+            game_id = str(g.get("game_id") or "")
+            if game_id:
+                self._by_id[game_id] = prob
+            self._by_pair.setdefault(
+                (g.get("home_team", ""), g.get("away_team", "")), []
+            ).append(prob)
+
+    def lookup(self, game_id: Any, home: str, away: str) -> float | None:
+        gid = str(game_id or "")
+        if gid and gid in self._by_id:
+            return self._by_id[gid]
+
+        candidates = self._by_pair.get((home, away), [])
+        if len(candidates) == 1:
+            return candidates[0]
+        if len(candidates) > 1:
+            logger.warning(
+                "Ambiguous closing line for %s@%s (%d games) — skipping CLV",
+                away, home, len(candidates),
+            )
+        return None
+
+
+def _closing_probs(target_date: str, data_dir: Path) -> _ClosingLines:
+    """Each game's last price before first pitch.
+
+    Not simply the day's final snapshot: the odds feed drops a game once it
+    starts, so by the evening run an afternoon game is gone from it entirely.
+    Taking the last snapshot each game still *appears* in gives the closing line
+    for early and late games alike.
+    """
+    lm_path = data_dir / "line_movement" / f"{target_date}.json"
+    if not lm_path.exists():
+        return _ClosingLines([])
+
+    snapshots = json.loads(lm_path.read_text()).get("snapshots", [])
+
+    # Later snapshots replace earlier ones per game. Entries are grouped rather
+    # than overwritten one by one so that a legacy file, where both legs of a
+    # doubleheader share the same key, still presents as two games — and so stays
+    # correctly ambiguous instead of collapsing into one arbitrary leg.
+    latest: dict[str, list[dict]] = {}
+    for snap in snapshots:
+        in_snap: dict[str, list[dict]] = {}
+        for g in snap.get("games", []):
+            in_snap.setdefault(_game_key(g), []).append(g)
+        latest.update(in_snap)
+
+    return _ClosingLines([g for group in latest.values() for g in group])
+
+
+def _game_key(game: dict) -> str:
+    return str(game.get("game_id") or "") or (
+        f"{game.get('away_team', '')}@{game.get('home_team', '')}"
+    )
 
 
 def compute_daily_clv(
@@ -31,41 +111,40 @@ def compute_daily_clv(
 
     Returns list of {game_id, selection, model_prob, closing_prob, clv}.
     """
-    # Load the prediction file (contains betting slip)
-    pred_path = data_dir / "predictions" / f"{target_date}.json"
-    if not pred_path.exists():
-        return []
+    # The card as sent (mlb.etl.slate_record) — CLV on bets that were never
+    # alerted is meaningless. Pre-lock days fall back to the prediction cache.
+    from mlb.etl.slate_record import load_slate
 
-    pred_data = json.loads(pred_path.read_text())
-    slip = pred_data.get("betting_slip")
+    slate = load_slate(date.fromisoformat(target_date), data_dir)
+    if slate is not None:
+        slip = slate.get("betting_slip")
+    else:
+        pred_path = data_dir / "predictions" / f"{target_date}.json"
+        if not pred_path.exists():
+            return []
+        slip = json.loads(pred_path.read_text()).get("betting_slip")
+
     if not slip or not slip.get("bets"):
         return []
 
-    # Load closing lines from line movement
-    lm_path = data_dir / "line_movement" / f"{target_date}.json"
-    closing_probs: dict[tuple[str, str], float] = {}
-    if lm_path.exists():
-        lm_data = json.loads(lm_path.read_text())
-        snapshots = lm_data.get("snapshots", [])
-        if snapshots:
-            # Last snapshot = closing line
-            last_snap = snapshots[-1]
-            for g in last_snap.get("games", []):
-                key = (g["home_team"], g["away_team"])
-                closing_probs[key] = g["home_prob"]
+    closing = _closing_probs(target_date, data_dir)
 
     results = []
     for bet in slip["bets"]:
         home = bet.get("home_team", "")
         away = bet.get("away_team", "")
-        key = (home, away)
 
         model_prob = bet.get("model_prob", 0.5)
-        closing_home_prob = closing_probs.get(key)
+        closing_home_prob = closing.lookup(bet.get("game_id"), home, away)
+        closing_source = "line_movement"
 
         if closing_home_prob is None:
-            # No line movement data — use implied prob from odds as fallback
+            # No snapshot for this game — fall back to the price we bet at. That
+            # is the *opening* line from our point of view, so the result is the
+            # edge at bet time, not closing line value; `closing_source` marks it
+            # so the summary can leave it out of the CLV average.
             closing_home_prob = bet.get("implied_prob")
+            closing_source = "bet_implied"
 
         if closing_home_prob is None:
             continue
@@ -96,6 +175,7 @@ def compute_daily_clv(
             "bet_type": bet_type,
             "model_prob": round(model_prob, 4),
             "closing_prob": round(closing_side_prob, 4),
+            "closing_source": closing_source,
             "clv": round(clv, 4),
         })
 
@@ -107,23 +187,32 @@ def compute_clv_summary(
 ) -> dict[str, Any]:
     """Compute aggregate CLV stats over the last N days.
 
-    Returns {avg_clv, total_bets, positive_clv_pct, daily_series}.
+    Only bets with a real closing line count toward the average. A bet with no
+    snapshot falls back to the price it was struck at, which measures edge rather
+    than line value — averaging the two together would report a number that is
+    neither. `bets_without_closing_line` says how many were left out.
+
+    Returns {avg_clv, total_bets, positive_clv_pct, bets_without_closing_line,
+    daily_series}.
     """
-    today = date.today()
+    today = _today_et()
     all_bets: list[dict] = []
+    skipped = 0
     daily_series: list[dict] = []
 
     for i in range(days):
         d = (today - timedelta(days=i)).isoformat()
         day_clv = compute_daily_clv(d, data_dir)
-        if day_clv:
-            avg = sum(b["clv"] for b in day_clv) / len(day_clv)
+        graded = [b for b in day_clv if b.get("closing_source") == "line_movement"]
+        skipped += len(day_clv) - len(graded)
+        if graded:
+            avg = sum(b["clv"] for b in graded) / len(graded)
             daily_series.append({
                 "date": d,
                 "avg_clv": round(avg, 4),
-                "num_bets": len(day_clv),
+                "num_bets": len(graded),
             })
-            all_bets.extend(day_clv)
+            all_bets.extend(graded)
 
     daily_series.reverse()  # Chronological order
 
@@ -132,6 +221,7 @@ def compute_clv_summary(
             "avg_clv": 0.0,
             "total_bets": 0,
             "positive_clv_pct": 0.0,
+            "bets_without_closing_line": skipped,
             "daily_series": [],
         }
 
@@ -141,6 +231,7 @@ def compute_clv_summary(
     return {
         "avg_clv": round(avg_clv, 4),
         "total_bets": len(all_bets),
+        "bets_without_closing_line": skipped,
         "positive_clv_pct": round(positive / len(all_bets), 4),
         "daily_series": daily_series,
     }

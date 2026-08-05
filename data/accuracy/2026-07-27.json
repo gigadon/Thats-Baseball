@@ -1,25 +1,111 @@
 {
   "date": "2026-07-27",
-  "tracked_at": "2026-07-29T17:48:19.935066",
+  "tracked_at": "2026-08-03T17:02:32.713357",
+  "graded_from": "slate:reconstructed",
+  "score_source": "mlb_api",
   "results": [
+    {
+      "game_id": "822868",
+      "home_team": "TEX",
+      "away_team": "SEA",
+      "home_win_prob": 0.4534,
+      "confidence": 58.7,
+      "predicted_winner": "SEA",
+      "actual_home_score": 7,
+      "actual_away_score": 3,
+      "actual_winner": "TEX",
+      "correct": false
+    },
+    {
+      "game_id": "824245",
+      "home_team": "DET",
+      "away_team": "BAL",
+      "home_win_prob": 0.5448,
+      "confidence": 54.4,
+      "predicted_winner": "DET",
+      "actual_home_score": 5,
+      "actual_away_score": 8,
+      "actual_winner": "BAL",
+      "correct": false
+    },
+    {
+      "game_id": "823353",
+      "home_team": "PIT",
+      "away_team": "ARI",
+      "home_win_prob": 0.537,
+      "confidence": 52.8,
+      "predicted_winner": "PIT",
+      "actual_home_score": 3,
+      "actual_away_score": 2,
+      "actual_winner": "PIT",
+      "correct": true
+    },
+    {
+      "game_id": "823839",
+      "home_team": "MIA",
+      "away_team": "PHI",
+      "home_win_prob": 0.4852,
+      "confidence": 44.9,
+      "predicted_winner": "PHI",
+      "actual_home_score": 8,
+      "actual_away_score": 7,
+      "actual_winner": "MIA",
+      "correct": false
+    },
+    {
+      "game_id": "822705",
+      "home_team": "WSH",
+      "away_team": "TOR",
+      "home_win_prob": 0.5598,
+      "confidence": 57.7,
+      "predicted_winner": "WSH",
+      "actual_home_score": 2,
+      "actual_away_score": 3,
+      "actual_winner": "TOR",
+      "correct": false
+    },
+    {
+      "game_id": "823597",
+      "home_team": "NYM",
+      "away_team": "ATL",
+      "home_win_prob": 0.3966,
+      "confidence": 71.6,
+      "predicted_winner": "ATL",
+      "actual_home_score": 14,
+      "actual_away_score": 3,
+      "actual_winner": "NYM",
+      "correct": false
+    },
+    {
+      "game_id": "824570",
+      "home_team": "CWS",
+      "away_team": "NYY",
+      "home_win_prob": 0.4245,
+      "confidence": 63.0,
+      "predicted_winner": "NYY",
+      "actual_home_score": 5,
+      "actual_away_score": 9,
+      "actual_winner": "NYY",
+      "correct": true
+    },
     {
       "game_id": "823025",
       "home_team": "STL",
       "away_team": "CHC",
-      "home_win_prob": 0.5155,
-      "confidence": 50.3,
-      "predicted_winner": "STL",
+      "home_win_prob": 0.4167,
+      "confidence": 61.1,
+      "predicted_winner": "CHC",
       "actual_home_score": 3,
       "actual_away_score": 7,
       "actual_winner": "CHC",
-      "correct": false
+      "correct": true
     },
     {
       "game_id": "824001",
       "home_team": "LAA",
       "away_team": "HOU",
-      "home_win_prob": 0.5392,
-      "confidence": 53.1,
+      "home_win_prob": 0.5544,
+      "confidence": 56.7,
       "predicted_winner": "LAA",
       "actual_home_score": 4,
       "actual_away_score": 6,
@@ -30,8 +116,8 @@
       "game_id": "824977",
       "home_team": "OAK",
       "away_team": "BOS",
-      "home_win_prob": 0.3987,
-      "confidence": 69.3,
+      "home_win_prob": 0.3825,
+      "confidence": 74.6,
       "predicted_winner": "BOS",
       "actual_home_score": 2,
       "actual_away_score": 4,
@@ -42,8 +128,8 @@
       "game_id": "823195",
       "home_team": "SF",
       "away_team": "MIL",
-      "home_win_prob": 0.4552,
-      "confidence": 53.5,
+      "home_win_prob": 0.4088,
+      "confidence": 67.3,
       "predicted_winner": "MIL",
       "actual_home_score": 3,
       "actual_away_score": 0,
@@ -51,11 +137,22 @@
       "correct": false
     }
   ],
+  "ungraded": [
+    {
+      "game_id": "824490",
+      "home_team": "CIN",
+      "away_team": "CLE",
+      "reason": "no_score"
+    }
+  ],
   "summary": {
-    "total_games": 4,
-    "correct": 1,
-    "incorrect": 3,
-    "accuracy": 0.25,
-    "brier_score": 0.2531
+    "total_games": 11,
+    "correct": 4,
+    "incorrect": 7,
+    "accuracy": 0.3636,
+    "brier_score": 0.2645,
+    "slate_games": 12,
+    "final_games": 11,
+    "graded_games": 11
   }
 }

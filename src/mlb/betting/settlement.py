@@ -1,13 +1,14 @@
-"""Bet settlement — match predictions against actual scores and track P&L.
+"""Bet settlement — match the card that was sent against actual scores, track P&L.
 
-Loads a day's betting slip from the prediction cache, fetches final scores
-from The Odds API, settles each bet, and persists results to
+Loads a day's betting slip from the locked slate (mlb.etl.slate_record), fetches
+final scores via mlb.data.scores, settles each bet, and persists results to
 data/betting/{date}.json.
 
 Usage:
     python -m mlb.betting.settlement                    # Settle today
     python -m mlb.betting.settlement --date 2026-05-11  # Settle specific date
     python -m mlb.betting.settlement --backfill 7       # Settle last 7 days
+    python -m mlb.betting.settlement --date X --force   # Re-settle a settled day
 """
 
 from __future__ import annotations
@@ -20,7 +21,6 @@ from pathlib import Path
 from typing import Any
 
 from mlb.betting.engine import american_to_decimal
-from mlb.data.odds_api import OddsApiClient
 
 logger = logging.getLogger(__name__)
 
@@ -28,23 +28,6 @@ logger = logging.getLogger(__name__)
 def _today_et() -> date:
     """Today in US Eastern — naive date.today() is tomorrow on UTC hosts after 8 PM ET."""
     return datetime.now(ZoneInfo("America/New_York")).date()
-
-
-def _score_on_date(score: dict, target_date: date) -> bool:
-    """True if an Odds API score's first pitch (ET) falls on target_date.
-
-    Used to keep a multi-day scores window from settling a slip with an
-    adjacent series game's result. When commence_time is absent, fall back to
-    True so we don't silently drop otherwise-matchable scores.
-    """
-    commence = score.get("commence_time")
-    if not commence:
-        return True
-    try:
-        dt = datetime.fromisoformat(commence.replace("Z", "+00:00"))
-    except (ValueError, AttributeError):
-        return True
-    return dt.astimezone(ZoneInfo("America/New_York")).date() == target_date
 
 
 # ── Core settlement ──────────────────────────────────────────
@@ -56,57 +39,48 @@ async def settle_day(
 ) -> dict | None:
     """Settle all bets for a given date.
 
+    Settles the card that was actually sent — the slip locked when the main card
+    went out (mlb.etl.slate_record). Days from before the lock existed fall back to
+    the prediction cache.
+
     Returns the settlement dict, or None if there's nothing to settle.
     """
+    from mlb.data.scores import load_scorebook
+    from mlb.etl.slate_record import load_slate
+
     date_str = target_date.isoformat()
-    pred_file = data_dir / "predictions" / f"{date_str}.json"
+    slate = load_slate(target_date, data_dir)
 
-    if not pred_file.exists():
-        logger.info("No prediction file for %s", date_str)
-        return None
+    if slate is not None:
+        slip = slate.get("betting_slip")
+    else:
+        pred_file = data_dir / "predictions" / f"{date_str}.json"
+        if not pred_file.exists():
+            logger.info("No prediction file for %s", date_str)
+            return None
 
-    with open(pred_file) as f:
-        pred_data = json.load(f)
+        with open(pred_file) as f:
+            pred_data = json.load(f)
+        slip = pred_data.get("betting_slip")
 
-    slip = pred_data.get("betting_slip")
     if not slip or not slip.get("bets"):
         logger.info("No bets to settle for %s", date_str)
         return None
 
-    # Fetch final scores — try Odds API for recent, fall back to local CSV
-    score_map: dict[tuple[str, str], dict] = {}
-    days_ago = (_today_et() - target_date).days
-
-    if days_ago <= 3:
-        try:
-            client = OddsApiClient()
-            scores = await client.get_scores(days_from=days_ago + 1)
-            for s in scores:
-                # The scores window spans several days, so the same matchup from
-                # an adjacent series game can appear. Keep only games that
-                # actually played on target_date (by ET first-pitch date);
-                # otherwise a later game overwrites and mis-settles the slip.
-                if not _score_on_date(s, target_date):
-                    continue
-                score_map[(s["home_team"], s["away_team"])] = s
-        except Exception as e:
-            logger.debug("Odds API scores failed: %s", e)
-
-    # Fall back to local games CSV if needed
-    if not score_map:
-        score_map = _load_scores_from_csv(target_date, data_dir)
-
-    if not score_map:
+    # Final scores, keyed by game_id so a doubleheader settles leg by leg.
+    book = await load_scorebook(target_date, data_dir)
+    if not len(book):
         logger.warning("No scores available for %s", date_str)
         return None
 
     # Settle each bet
     settled_bets = []
     for bet in slip["bets"]:
-        key = (bet["home_team"], bet["away_team"])
-        game_score = score_map.get(key)
+        game_score = book.lookup(
+            bet.get("game_id"), bet["home_team"], bet["away_team"]
+        )
 
-        if not game_score:
+        if game_score is None:
             logger.warning(
                 "No score found for %s vs %s — skipping",
                 bet["away_team"], bet["home_team"],
@@ -114,7 +88,7 @@ async def settle_day(
             continue
 
         settled = _settle_single_bet(
-            bet, game_score["home_score"], game_score["away_score"]
+            bet, game_score.home_score, game_score.away_score
         )
         settled_bets.append(settled)
 
@@ -123,7 +97,8 @@ async def settle_day(
         return None
 
     # Compute summary
-    summary = _compute_summary(settled_bets, data_dir)
+    summary = _compute_summary(settled_bets, data_dir, target_date)
+    summary["bets_on_card"] = len(slip["bets"])
 
     result = {
         "date": date_str,
@@ -140,9 +115,15 @@ async def settle_day(
     with open(out_file, "w") as f:
         json.dump(result, f, indent=2)
 
+    # Settling a gap day invalidates the running total on every later file, so
+    # re-walk the chain. Settling the newest day (the normal case) is a no-op.
+    rewritten = rechain_settlements(data_dir)
+    if date_str in rewritten:
+        result["summary"] = rewritten[date_str]
+
     logger.info(
-        "Settled %d bets for %s — P&L: $%.2f",
-        len(settled_bets), date_str, summary["daily_pnl"],
+        "Settled %d of %d bets for %s — P&L: $%.2f",
+        len(settled_bets), summary["bets_on_card"], date_str, summary["daily_pnl"],
     )
     return result
 
@@ -198,7 +179,7 @@ def _determine_result(
 
 
 def _compute_summary(
-    settled_bets: list[dict], data_dir: Path
+    settled_bets: list[dict], data_dir: Path, target_date: date
 ) -> dict[str, Any]:
     """Compute daily and cumulative P&L summary."""
     bets_won = sum(1 for b in settled_bets if b["result"] == "win")
@@ -207,8 +188,12 @@ def _compute_summary(
     total_staked = sum(b.get("recommended_stake", 0) for b in settled_bets)
     daily_pnl = sum(b.get("pnl", 0) for b in settled_bets)
 
-    # Load prior settlements for cumulative P&L
-    prior = load_all_settlements(data_dir)
+    # Chain off the last settlement *before* this date, not the newest file on
+    # disk — backfilling a gap day would otherwise pick up a later day's total.
+    prior = [
+        s for s in load_all_settlements(data_dir)
+        if s["date"] < target_date.isoformat()
+    ]
     prior_cumulative = prior[-1]["summary"]["cumulative_pnl"] if prior else 0.0
     cumulative_pnl = round(prior_cumulative + daily_pnl, 2)
 
@@ -238,35 +223,41 @@ def _compute_summary(
     }
 
 
-def _load_scores_from_csv(
-    target_date: date, data_dir: Path
-) -> dict[tuple[str, str], dict]:
-    """Load game scores from local CSV as fallback for Odds API."""
-    import pandas as pd
+def rechain_settlements(data_dir: Path = Path("data")) -> dict[str, dict]:
+    """Re-walk cumulative P&L and drawdown across every settlement, in date order.
 
-    csv_path = data_dir / f"games_{target_date.year}.csv"
-    if not csv_path.exists():
-        return {}
+    Daily P&L belongs to its day alone, but the running total doesn't: settling a
+    gap day after later days already exist leaves every file after it wrong.
+    Rewrites only the files whose numbers actually change, and returns
+    {date: summary} for those.
+    """
+    rewritten: dict[str, dict] = {}
+    cumulative = 0.0
+    peak = 0.0
+    max_dd = 0.0
 
-    df = pd.read_csv(csv_path)
-    day_games = df[
-        (df["game_date"] == target_date.isoformat()) & (df["status"] == "Final")
-    ]
+    for settlement in load_all_settlements(data_dir):
+        summary = settlement["summary"]
+        cumulative = round(cumulative + summary["daily_pnl"], 2)
+        peak = max(peak, cumulative)
+        dd = (peak - cumulative) / max(peak, 1) if peak > 0 else 0
+        max_dd = max(max_dd, dd)
 
-    score_map: dict[tuple[str, str], dict] = {}
-    for _, row in day_games.iterrows():
-        key = (row["home_team_id"], row["away_team_id"])
-        score_map[key] = {
-            "home_team": row["home_team_id"],
-            "away_team": row["away_team_id"],
-            "home_score": int(row["home_score"]),
-            "away_score": int(row["away_score"]),
-            "completed": True,
-        }
+        if (
+            summary.get("cumulative_pnl") != cumulative
+            or summary.get("max_drawdown") != round(max_dd, 4)
+        ):
+            summary["cumulative_pnl"] = cumulative
+            summary["max_drawdown"] = round(max_dd, 4)
+            path = data_dir / "betting" / f"{settlement['date']}.json"
+            with open(path, "w") as f:
+                json.dump(settlement, f, indent=2)
+            rewritten[settlement["date"]] = summary
+            logger.info(
+                "Rechained %s: cumulative $%.2f", settlement["date"], cumulative
+            )
 
-    if score_map:
-        logger.info("Loaded %d scores from CSV for %s", len(score_map), target_date)
-    return score_map
+    return rewritten
 
 
 # ── File I/O ─────────────────────────────────────────────────
@@ -312,21 +303,27 @@ def main():
     parser.add_argument("--date", type=str, help="Date to settle (YYYY-MM-DD)")
     parser.add_argument("--backfill", type=int, help="Settle last N days")
     parser.add_argument("--data-dir", type=str, default="data")
+    parser.add_argument(
+        "--force", action="store_true",
+        help="Re-settle days that already have a settlement file",
+    )
     args = parser.parse_args()
 
     data_dir = Path(args.data_dir)
 
     async def run():
+        from mlb.etl.slate_record import slate_path
+
         if args.backfill:
             today = _today_et()
             for i in range(args.backfill, 0, -1):
                 d = today - timedelta(days=i)
                 settlement_file = data_dir / "betting" / f"{d.isoformat()}.json"
                 pred_file = data_dir / "predictions" / f"{d.isoformat()}.json"
-                if settlement_file.exists():
+                if settlement_file.exists() and not args.force:
                     logger.info("Already settled %s — skipping", d)
                     continue
-                if not pred_file.exists():
+                if not slate_path(d, data_dir).exists() and not pred_file.exists():
                     continue
                 result = await settle_day(d, data_dir)
                 if result:

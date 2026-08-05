@@ -1,0 +1,116 @@
+{
+  "date": "2026-07-16",
+  "locked_at": "2026-08-03T18:02:29-04:00",
+  "predictions": [
+    {
+      "game_id": "823440",
+      "game_date": "2026-07-16",
+      "home_team": "PHI",
+      "away_team": "NYM",
+      "home_win_prob": 0.6142,
+      "away_win_prob": 0.3858,
+      "predicted_home_runs": 4.5,
+      "predicted_away_runs": 4.3,
+      "predicted_total": 8.8,
+      "confidence": 65.4,
+      "model_agreement": 0.806,
+      "predicted_winner": "PHI",
+      "model_predictions": {
+        "XGBoost": 0.5604785680770874,
+        "LightGBM": 0.6514423980080213,
+        "CatBoost": 0.5641199112225708,
+        "RandomForest": 0.5741749952212066,
+        "LogisticRegression": 0.6755011148261966
+      },
+      "top_factors": [
+        [
+          "Away Elo",
+          "Away team rating",
+          168.4
+        ],
+        [
+          "H Gp",
+          "",
+          34.3
+        ],
+        [
+          "A Gp",
+          "",
+          32.9
+        ],
+        [
+          "H Sp Season Ip",
+          "",
+          26.1
+        ],
+        [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          17.7
+        ],
+        [
+          "A Sp Season Ip",
+          "",
+          13.8
+        ],
+        [
+          "Elo Diff",
+          "",
+          10.4
+        ],
+        [
+          "Sp Season Ip",
+          "",
+          9.2
+        ],
+        [
+          "A Sp Recent K9",
+          "",
+          2.5
+        ],
+        [
+          "H Sp K9 14",
+          "",
+          2.0
+        ]
+      ],
+      "home_power_score": 50.4,
+      "away_power_score": 46.4,
+      "home_sp_name": "Aaron Nola",
+      "away_sp_name": "Christian Scott",
+      "home_wins": 54,
+      "home_losses": 43,
+      "away_wins": 40,
+      "away_losses": 57,
+      "home_streak": "W2",
+      "away_streak": "L3",
+      "home_sp_era": 5.75,
+      "away_sp_era": 3.17,
+      "home_sp_wins": 3,
+      "home_sp_losses": 6,
+      "away_sp_wins": 2,
+      "away_sp_losses": 1,
+      "game_time": "2026-07-16T23:10:00Z",
+      "home_moneyline": null,
+      "away_moneyline": null,
+      "total_line": null,
+      "over_odds": null,
+      "under_odds": null,
+      "weather": {
+        "temp": 90.9,
+        "wind": 4.0,
+        "wind_dir": "cross",
+        "humidity": 0.59,
+        "is_dome": false
+      }
+    }
+  ],
+  "betting_slip": null,
+  "reconstructed": {
+    "commit": "00b21411d4bac1df0a182e6a52ab9c1bf1df1f25",
+    "committed_at": "2026-07-16T17:47:26+00:00",
+    "rule": "first-commit-at-or-after-16:30Z-among-max-coverage",
+    "confidence": "high",
+    "repaired_at": "2026-08-03T22:02:29+00:00"
+  }
+}
