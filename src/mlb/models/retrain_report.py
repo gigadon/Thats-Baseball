@@ -110,6 +110,14 @@ def run_win_gates(
 def run_totals_gates(
     staging: Path, served: Path, data_dir: Path
 ) -> tuple[list[Gate], list[str]]:
+    # A win-model-only retrain leaves models/runs_model_new absent. Skipping is
+    # right here: there is no candidate to grade, so there is nothing to gate.
+    # Never treat a missing *served* runs model the same way — that would drop a
+    # real gate silently.
+    if not (staging / "runs_regressor.joblib").exists():
+        logger.info("No staging runs model at %s — skipping totals gates", staging)
+        return [], [f"skipped: no staging runs model at {staging}"]
+
     def bt(model_dir: Path):
         return TotalsBacktester(data_dir=data_dir, model_dir=model_dir).run()
 
