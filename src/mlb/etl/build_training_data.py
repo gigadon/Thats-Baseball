@@ -298,9 +298,18 @@ class TrainingDataBuilder:
             row["a_elo"] = a_elo
             row["elo_diff"] = h_elo - a_elo
 
-            # Market odds features — use real odds when available, NaN otherwise.
-            # The old synthetic Elo-derived proxy was collinear with existing
-            # features and didn't match the real odds seen at inference time.
+            # Market odds features — real odds when available, otherwise the
+            # shared missing-odds default, which is byte-for-byte what the live
+            # runner inserts when the feed has no line for a game (daily_runner
+            # _build_features). has_real_odds tells the model which of the two
+            # it is looking at. The old synthetic Elo-derived proxy was
+            # collinear with existing features and didn't match the real odds
+            # seen at inference time.
+            #
+            # NOTE: _DEFAULTS["market_home_prob"] is the training median of this
+            # same column, so writing it back for odds-less games is a fixed
+            # point — regenerating feature_defaults.json after a rebuild does
+            # not drift the value.
             odds_key = (game_date.isoformat() if hasattr(game_date, 'isoformat') else str(game_date), home, away)
             real_odds = odds_history.get(odds_key)
             if real_odds:
@@ -308,7 +317,7 @@ class TrainingDataBuilder:
                 row["has_real_odds"] = 1.0
                 row["market_total"] = real_odds["total_line"] if real_odds["total_line"] else np.nan
             else:
-                row["market_home_prob"] = np.nan
+                row["market_home_prob"] = _DEFAULTS["market_home_prob"]
                 row["has_real_odds"] = 0.0
                 row["market_total"] = np.nan
 
@@ -509,22 +518,33 @@ class TrainingDataBuilder:
             if (idx + 1) % 500 == 0:
                 logger.info("Processed %d / %d games", idx + 1, len(games_sorted))
 
-        # Keep every game that has a real moneyline (market_home_prob). The win
-        # model only needs the moneyline, so gating the whole dataset on the
-        # totals line — which the odds feed captures far less often for recent
-        # games — needlessly starved the win model of the most recent, highest
-        # time-decay-weight games. The runs model, whose target is deviation from
-        # market_total, filters to real-total_line rows itself (see train_runs).
-        # market_total stays NaN when unavailable and is imputed for the win model.
+        # Keep EVERY completed game, including those the odds feed never matched.
+        # Odds-less games used to be dropped here, which left has_real_odds a
+        # constant 1.0 in training — a forced feature with zero variance — while
+        # the live runner predicts every scheduled game and hands the model
+        # has_real_odds=0.0 whenever a line is missing. That value simply never
+        # appeared in training: textbook train/serve skew on a forced feature.
+        # Keeping the rows (market_home_prob = the shared missing-odds default,
+        # has_real_odds = 0.0) makes the flag informative and puts the served
+        # value inside the training distribution.
+        #
+        # Gating the dataset on the *totals* line stays wrong for a different
+        # reason: the feed captures it far less often for recent games and would
+        # starve the win model of the highest time-decay-weight rows. The runs
+        # model, whose target is deviation from market_total, filters to
+        # real-total_line rows itself (see train_runs); market_total stays NaN
+        # when unavailable and is excluded from the win model's features.
         def _missing(v: object) -> bool:
             return v is None or (isinstance(v, float) and np.isnan(v))
 
-        before = len(feature_rows)
-        feature_rows = [r for r in feature_rows if not _missing(r.get("market_home_prob"))]
+        no_odds = sum(1 for r in feature_rows if not r.get("has_real_odds"))
         with_total = sum(1 for r in feature_rows if not _missing(r.get("market_total")))
         logger.info(
-            "Dropped %d rows without a real moneyline (%d remaining; %d also have a totals line)",
-            before - len(feature_rows), len(feature_rows), with_total,
+            "Kept %d rows: %d with a real moneyline (%d of those also have a "
+            "totals line), %d without one (has_real_odds=0, market_home_prob "
+            "imputed at the %.4f default)",
+            len(feature_rows), len(feature_rows) - no_odds, with_total, no_odds,
+            _DEFAULTS["market_home_prob"],
         )
 
         df = pd.DataFrame(feature_rows)

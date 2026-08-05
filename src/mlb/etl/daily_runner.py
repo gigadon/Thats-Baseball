@@ -891,23 +891,26 @@ class DailyRunner:
         # shared transform that builds odds_history.csv (training's source) —
         # see mlb.features.formulas.devig_home_prob. Using the raw vig-inflated
         # home implied prob here previously biased live picks toward home.
+        # has_real_odds is 1.0/0.0 (not a bool) to match the training column
+        # exactly; build_training_data pairs the same 0.0 with the same
+        # _D["market_home_prob"] fallback for games the odds feed never matched.
         if game_odds:
             h_ml = game_odds.get("home_moneyline")
             a_ml = game_odds.get("away_moneyline")
             if h_ml and a_ml:
                 features["market_home_prob"] = devig_home_prob(h_ml, a_ml)
-                features["has_real_odds"] = True
+                features["has_real_odds"] = 1.0
             elif h_ml:
                 features["market_home_prob"] = american_implied(h_ml)  # away side missing
-                features["has_real_odds"] = True
+                features["has_real_odds"] = 1.0
             else:
                 features["market_home_prob"] = _D["market_home_prob"]
-                features["has_real_odds"] = False
+                features["has_real_odds"] = 0.0
             features["market_total"] = game_odds.get("total_line") or _D["market_total"]
         else:
             features["market_home_prob"] = _D["market_home_prob"]
             features["market_total"] = _D["market_total"]
-            features["has_real_odds"] = False
+            features["has_real_odds"] = 0.0
 
         # Elo ratings
         h_elo = self._elo_ratings.get(home, _D["elo"])

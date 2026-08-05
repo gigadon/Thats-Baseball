@@ -41,8 +41,9 @@ class BacktestResult:
     """Summary of an honest out-of-sample backtest."""
 
     oos_start: str
-    total_games: int          # out-of-sample games scored
-    games_with_odds: int      # games matched to a real moneyline
+    total_games: int          # out-of-sample games in the parquet
+    games_with_odds: int      # games matched to a real moneyline — every
+                              # metric below is computed on THESE games only
 
     # Discrimination/calibration — model vs the de-vigged market line
     model_auc: float
@@ -173,13 +174,31 @@ class Backtester:
 
         oddmap = self._load_odds()
 
+        # The parquet now keeps games the odds feed never matched, so the win
+        # model sees the has_real_odds=0 / imputed-market_home_prob combination
+        # it is actually served in production. Those rows carry a CONSTANT
+        # market_home_prob, so scoring "the market" on them would smear the
+        # model-vs-market comparison with rows where no market exists. Restrict
+        # the whole comparison — both sides, and calibration — to the same
+        # odds-matched games the betting simulation already bets on.
+        scored = np.array([
+            (df["game_date"].iloc[i], df["home_team"].iloc[i], df["away_team"].iloc[i]) in oddmap
+            for i in range(len(df))
+        ], dtype=bool)
+        games_with_odds = int(scored.sum())
+        if games_with_odds == 0:
+            raise ValueError(
+                "No out-of-sample game matched a real moneyline in odds_history.csv "
+                "— cannot compare the model against the market."
+            )
+        p_model_s, p_mkt_s, y_s = p_model[scored], p_mkt[scored], y[scored]
+
         # Discrimination / calibration vs market
-        model_auc = float(roc_auc_score(y, p_model))
-        market_auc = float(roc_auc_score(y, p_mkt))
+        model_auc = float(roc_auc_score(y_s, p_model_s))
+        market_auc = float(roc_auc_score(y_s, p_mkt_s))
 
         # Per-game betting records (computed once at edge 0, filtered per threshold)
         records = self._build_records(df, p_model, p_mkt, y, oddmap)
-        games_with_odds = len(records)
 
         thresholds = [
             self._simulate(records, me) for me in (0.0, 0.01, 0.02, 0.03, 0.05, 0.08)
@@ -197,12 +216,12 @@ class Backtester:
             total_games=len(df),
             games_with_odds=games_with_odds,
             model_auc=round(model_auc, 4),
-            model_brier=round(float(brier_score_loss(y, p_model)), 4),
-            model_accuracy=round(float(((p_model >= 0.5) == y).mean()), 4),
+            model_brier=round(float(brier_score_loss(y_s, p_model_s)), 4),
+            model_accuracy=round(float(((p_model_s >= 0.5) == y_s).mean()), 4),
             market_auc=round(market_auc, 4),
-            market_brier=round(float(brier_score_loss(y, p_mkt)), 4),
-            market_accuracy=round(float(((p_mkt >= 0.5) == y).mean()), 4),
-            mean_prob_gap=round(float(np.abs(p_model - p_mkt).mean()), 4),
+            market_brier=round(float(brier_score_loss(y_s, p_mkt_s)), 4),
+            market_accuracy=round(float(((p_mkt_s >= 0.5) == y_s).mean()), 4),
+            mean_prob_gap=round(float(np.abs(p_model_s - p_mkt_s).mean()), 4),
             thresholds=thresholds,
             headline_edge=self.min_edge,
             headline_bets=len(rets),
@@ -211,7 +230,7 @@ class Backtester:
             headline_ci=(round(sig["ci_low"], 4), round(sig["ci_high"], 4)),
             headline_p_positive=round(sig["p_positive"], 4),
             favorite_baseline_roi=round(fav, 4),
-            calibration=self._compute_calibration(p_model, y),
+            calibration=self._compute_calibration(p_model_s, y_s),
             monthly=self._monthly(df, p_model, p_mkt, y, oddmap),
         )
 
@@ -396,9 +415,10 @@ def main():
     print(f"\n{'='*64}")
     print(f"  HONEST OUT-OF-SAMPLE BACKTEST  (OOS from {r.oos_start})")
     print(f"{'='*64}")
-    print(f"  Games scored:      {r.total_games}  (with real odds: {r.games_with_odds})")
+    print(f"  OOS games:         {r.total_games}  "
+          f"(scored below: {r.games_with_odds} with a real moneyline)")
     print()
-    print(f"  PREDICTION vs MARKET")
+    print(f"  PREDICTION vs MARKET  (odds-matched games only)")
     print(f"  {'':14}{'AUC':>8}{'Brier':>9}{'Acc':>8}")
     print(f"  {'Model':14}{r.model_auc:>8.4f}{r.model_brier:>9.4f}{r.model_accuracy:>8.3f}")
     print(f"  {'Market':14}{r.market_auc:>8.4f}{r.market_brier:>9.4f}{r.market_accuracy:>8.3f}")
