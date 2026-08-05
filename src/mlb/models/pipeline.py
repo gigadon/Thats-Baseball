@@ -37,6 +37,23 @@ NON_FEATURE_COLS = {
     "market_total",
 }
 
+# Extra sample weight for games the odds feed never matched (has_real_odds=0).
+# Those rows are the only place the model can learn what to do when it is served
+# without a line, and they are both rare and old — 549 of 13,587 rows, ~71% of
+# them 2021 games already discounted to ~2^-5 by the time decay below, which
+# leaves them ~1.6% of total weight. 5x lifts that to ~7.7%.
+#
+# This is paired with the neutral 0.500 missing-odds default in
+# mlb.features.defaults; measured over 5 shared row-sets the pair improves
+# no-odds Brier by 0.0006 (same sign every run) and regresses nothing on
+# odds-matched games. NEITHER HALF WORKS ALONE — 5x at the old 0.537 default was
+# neutral-to-worse, and a year-matched placebo that upweights the same mass of
+# odds-MATCHED rows is worse still, which is what rules out "this is really just
+# softening the time decay on old data". 5x was picked from {1,3,5} on the same
+# out-of-sample window that measured it, so treat it as a sane setting rather
+# than an optimum.
+ODDS_LESS_WEIGHT = 5.0
+
 
 @dataclass
 class PipelineConfig:
@@ -580,10 +597,13 @@ class TrainingPipeline:
     @staticmethod
     def load_training_data(
         path: str | Path = "data/training_data.parquet",
+        odds_less_weight: float = ODDS_LESS_WEIGHT,
     ) -> tuple[pd.DataFrame, pd.Series, pd.Series, np.ndarray]:
         """Load training parquet and return (features, target, dates, sample_weights).
 
-        Drops non-feature columns (scores, IDs) and computes time-decay weights.
+        Drops non-feature columns (scores, IDs) and computes time-decay weights,
+        then scales the odds-less rows by ``odds_less_weight`` (pass 1.0 to get
+        pure time decay). See ODDS_LESS_WEIGHT for why that multiplier exists.
         """
         df = pd.read_parquet(path)
         feature_cols = [c for c in df.columns if c not in NON_FEATURE_COLS]
@@ -594,5 +614,14 @@ class TrainingPipeline:
         max_date = dates.max()
         days_ago = (max_date - dates).dt.days.values
         sample_weight = np.exp(-np.log(2) * days_ago / 365)
+
+        if odds_less_weight != 1.0 and "has_real_odds" in df.columns:
+            odds_less = df["has_real_odds"].to_numpy() == 0.0
+            sample_weight = sample_weight * np.where(odds_less, odds_less_weight, 1.0)
+            logger.info(
+                "Upweighted %d odds-less rows by %.1fx — %.2f%% of total weight",
+                int(odds_less.sum()), odds_less_weight,
+                100 * sample_weight[odds_less].sum() / sample_weight.sum(),
+            )
 
         return X, y, dates, sample_weight

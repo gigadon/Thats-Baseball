@@ -16,16 +16,21 @@ logging.basicConfig(
     format="%(asctime)s %(name)s %(levelname)s %(message)s",
 )
 
-from mlb.models.pipeline import PipelineConfig, TrainingPipeline
+from mlb.models.pipeline import ODDS_LESS_WEIGHT, PipelineConfig, TrainingPipeline
 
 parser = argparse.ArgumentParser(description="Tune + train the win ensemble")
 parser.add_argument("--out", default="models/win_model_new",
                     help="Output dir for the tuned model (staging; promote after backtest)")
 parser.add_argument("--trials", type=int, default=50, help="Optuna trials per base model")
+parser.add_argument("--odds-less-weight", type=float, default=ODDS_LESS_WEIGHT,
+                    help="Sample-weight multiplier for games with no real odds "
+                         "(1.0 = pure time decay; see pipeline.ODDS_LESS_WEIGHT)")
 args = parser.parse_args()
 
 pipeline = TrainingPipeline(PipelineConfig(model_dir=args.out))
-X, y, dates, sample_weight = pipeline.load_training_data()
+X, y, dates, sample_weight = pipeline.load_training_data(
+    odds_less_weight=args.odds_less_weight
+)
 
 print(f"Loaded {len(X)} samples, {X.shape[1]} features")
 print(f"Home win rate: {y.mean():.3f}")

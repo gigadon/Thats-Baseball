@@ -19,7 +19,9 @@ Two kinds of entries:
     which are ~0.55/0.45 and would re-tilt picks home);
   - elo 1500 is the definitional new-team rating;
   - sp_season_ip 0.0 signals "no data" to confidence scoring;
-  - bvp_ops has no training column (live-only injection), league avg 0.750.
+  - bvp_ops has no training column (live-only injection), league avg 0.750;
+  - market_home_prob 0.500 means "no market", not "the median market" — its
+    own comment below explains why it must not be a median.
 
 Usage:
     from mlb.features.defaults import load_defaults
@@ -51,7 +53,7 @@ MEDIAN_FEATURES: list[str] = [
     "sp_recent_era", "sp_recent_whip", "sp_recent_k9",
     "bp_relievers_used_3d", "bp_freshness",
     "venue_home_rs_per_game", "venue_away_rs_per_game",
-    "market_home_prob", "market_total",
+    "market_total",
 ]
 
 # Deliberately fixed values — see module docstring for the reason each exists.
@@ -64,6 +66,21 @@ CONVENTION_DEFAULTS: dict[str, float] = {
     "elo": 1500.0,
     "sp_season_ip": 0.0,
     "bvp_ops": 0.750,
+    # A neutral 0.500 for "no line available" — NOT the training median. This has
+    # to be a convention: the median of market_home_prob is ~0.537, so leaving it
+    # in MEDIAN_FEATURES would let generate_defaults() silently walk the value
+    # back toward 0.537 on every retrain (weekly-retrain.yml regenerates this
+    # file), undoing the change without producing a diff anyone would notice.
+    #
+    # 0.537 is the median of a HOME-FAVOURING distribution, so using it as the
+    # missing-odds fallback told the model "the market slightly likes the home
+    # team" when the truth was "there is no market". Paired over 5 shared
+    # row-sets, moving to 0.500 *together with* the odds-less upweighting in
+    # mlb.models.pipeline improves no-odds Brier by 0.0006 with the same sign
+    # every run, and regresses nothing on odds-matched games. Neither half works
+    # alone — 0.500 at 1x was the worst arm tested. The interaction is not
+    # mechanistically understood; re-measure both together if you touch either.
+    "market_home_prob": 0.500,
     # Missing-data sentinels shared with build_training_data (a missing value
     # here means "season start / no prior game", where training also inserts 5
     # — the median of NON-missing games would be the wrong reference).
@@ -83,8 +100,8 @@ _FROZEN_DEFAULTS: dict[str, float] = {
     "sp_recent_era": 3.78, "sp_recent_whip": 1.24, "sp_recent_k9": 8.1,
     "bp_relievers_used_3d": 7.0, "bp_freshness": 0.9341,
     "venue_home_rs_per_game": 4.4, "venue_away_rs_per_game": 4.4,
-    "market_home_prob": 0.537, "market_total": 8.5,
-    **CONVENTION_DEFAULTS,
+    "market_total": 8.5,
+    **CONVENTION_DEFAULTS,   # supplies market_home_prob (see above)
 }
 
 _cached: dict[str, float] | None = None
