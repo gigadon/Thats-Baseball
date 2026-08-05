@@ -35,6 +35,51 @@ def devig_home_prob(home_ml: float, away_ml: float) -> float:
     return h_imp / (h_imp + a_imp)
 
 
+# Bounds on what a *pregame* MLB line can be. Both the original dataset import
+# and (until the fix in daily_runner._save_odds_history) the live capture wrote
+# in-play quotes into odds_history.csv: a game in the 8th with a big lead prices
+# at -50000 with 3.5 runs left on the total. Those are not the market's opinion
+# before first pitch, and they corrupt both sides at once — market_home_prob is a
+# model feature, and the same file is the market baseline mlb.models.backtest
+# grades the model against.
+#
+# Real pregame lines sit well inside these: the biggest MLB favorites land around
+# -400, and totals run 6.5 to 12.5 (13.5 at Coors in thin air).
+MAX_PREGAME_MONEYLINE = 600
+MIN_PREGAME_TOTAL = 5.5
+MAX_PREGAME_TOTAL = 14.0
+
+
+def is_pregame_line(
+    home_ml: object, away_ml: object, total_line: object = None
+) -> bool:
+    """True if a moneyline/total triple is plausibly a line posted before first pitch.
+
+    Shared by every odds_history.csv reader — the training builder, the backtest's
+    market baseline — so they agree on what counts as a real market price.
+    """
+    try:
+        h = float(home_ml)  # type: ignore[arg-type]
+        a = float(away_ml)  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        return False
+    if h != h or a != a:  # NaN
+        return False
+
+    if abs(h) > MAX_PREGAME_MONEYLINE or abs(a) > MAX_PREGAME_MONEYLINE:
+        return False
+
+    if total_line not in (None, "", "nan", "None"):
+        try:
+            t = float(total_line)  # type: ignore[arg-type]
+        except (TypeError, ValueError):
+            return True  # unparseable total, moneyline still usable
+        if t == t and not (MIN_PREGAME_TOTAL <= t <= MAX_PREGAME_TOTAL):
+            return False
+
+    return True
+
+
 def lineup_obp(hits: float, walks: float, at_bats: float, default: float) -> float:
     """Training's OBP formula: (H+BB)/(AB+BB) — deliberately omits HBP/SF.
 

@@ -1,0 +1,104 @@
+name: Weekly Model Retrain (staging)
+
+# The Monday retrain in mlb.etl.scheduler never fires — that scheduler was the
+# Railway deployment, which is dead. Nothing has retrained on a schedule since;
+# it only happens when someone remembers. This restores the cadence.
+#
+# Staging only, on purpose. It trains into models/*_new, grades the candidate
+# against the model currently served on a common out-of-sample window
+# (mlb.models.retrain_report), and reports. It does NOT commit models: promotion
+# stays a human copying models/*_new over models/win_model + models/runs_model
+# and committing, because that is what makes it live on the daily card.
+on:
+  schedule:
+    #   09:00 UTC Monday = 5 AM EDT / 4 AM CDT — after Sunday's slate has settled
+    #   and well clear of the 16:30 daily card.
+    - cron: "0 9 * * 1"
+  workflow_dispatch:
+    inputs:
+      trials:
+        description: "Optuna trials per base model"
+        required: false
+        default: "20"
+
+permissions:
+  contents: read   # staging models leave as artifacts, never as a commit
+
+concurrency:
+  # Separate from daily-predictions: that job commits data back, and a retrain
+  # rebuilding the parquet underneath it would race the commit.
+  group: weekly-retrain
+  cancel-in-progress: false
+
+jobs:
+  retrain:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+
+      - name: Rebuild training data
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m mlb.etl.build_training_data \
+            --data-dir data --seasons 2021 2022 2023 2024 2025 2026
+
+      - name: Regenerate feature defaults
+        env:
+          PYTHONPATH: src
+        run: python -m mlb.features.defaults
+
+      - name: Train win ensemble to staging
+        env:
+          PYTHONPATH: src
+        # Fewer trials than a local run (50): the runner is slower and the tuning
+        # curve is flat past ~20. Override via workflow_dispatch when it matters.
+        run: |
+          python run_optuna_tuning.py \
+            --out models/win_model_new \
+            --trials "${{ github.event.inputs.trials || '20' }}"
+
+      - name: Train runs model to staging
+        env:
+          PYTHONPATH: src
+        run: python -m mlb.models.train_runs --out models/runs_model_new --trials 20
+
+      - name: Grade candidate against the served model
+        id: gates
+        env:
+          PYTHONPATH: src
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        # Exits non-zero when a gate fails, which is the point — a red run means
+        # "do not promote". The Slack report goes out either way.
+        run: python -m mlb.models.retrain_report --slack
+
+      - name: Upload staging models
+        if: always()   # a failed candidate is still worth inspecting
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-models-${{ github.run_id }}
+          path: |
+            models/win_model_new/
+            models/runs_model_new/
+          retention-days: 14
+
+      - name: Upload rebuilt training data
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: training-data-${{ github.run_id }}
+          path: |
+            data/training_data.parquet
+            data/feature_defaults.json
+          retention-days: 14

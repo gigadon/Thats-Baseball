@@ -19,7 +19,7 @@ import numpy as np
 import pandas as pd
 
 from mlb.features.defaults import load_defaults
-from mlb.features.formulas import compute_interaction_features
+from mlb.features.formulas import compute_interaction_features, is_pregame_line
 
 logger = logging.getLogger(__name__)
 
@@ -573,6 +573,10 @@ class TrainingDataBuilder:
         """Load historical odds from odds_history.csv.
 
         Returns {(date_str, home_team, away_team): {"market_home_prob": ..., "total_line": ...}}
+
+        Rows that cannot be a pregame line are dropped (see ``_is_pregame_line``).
+        The file is append-only and a game can appear several times; the last
+        surviving row wins, being the closest to first pitch.
         """
         odds_file = self.data_dir / "odds_history.csv"
         if not odds_file.exists():
@@ -585,9 +589,17 @@ class TrainingDataBuilder:
         # keeps "OAK"; without this alias those rows never join.
         aliases = {"Athletics": "OAK"}
         result: dict[tuple, dict] = {}
+        rejected = 0
         with open(odds_file) as f:
             reader = csv.DictReader(f)
             for row in reader:
+                if not is_pregame_line(
+                    row.get("home_moneyline"),
+                    row.get("away_moneyline"),
+                    row.get("total_line"),
+                ):
+                    rejected += 1
+                    continue
                 home = aliases.get(row["home_team"], row["home_team"])
                 away = aliases.get(row["away_team"], row["away_team"])
                 key = (row["game_date"], home, away)
@@ -596,6 +608,11 @@ class TrainingDataBuilder:
                     "total_line": float(row["total_line"]) if row.get("total_line") else None,
                 }
 
+        if rejected:
+            logger.info(
+                "Rejected %d in-play odds row(s) — those games fall back to has_real_odds=0",
+                rejected,
+            )
         logger.info("Loaded %d historical odds records", len(result))
         return result
 

@@ -13,7 +13,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from dataclasses import asdict
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
@@ -24,7 +24,7 @@ import pandas as pd
 from mlb.data.mlb_api import MLBApiClient
 from mlb.data.line_movement import record_snapshot
 from mlb.data.odds_api import OddsApiClient
-from mlb.data.odds_match import index_odds_by_game
+from mlb.data.odds_match import index_odds_by_game, parse_dt
 from mlb.data.weather import WeatherClient
 from mlb.etl.build_training_data import (
     DOME_TEAMS, PARK_DEFAULT, PARK_FACTORS, RETRACTABLE_TEAMS,
@@ -211,9 +211,10 @@ class DailyRunner:
                 except Exception as e:
                     logger.warning("Line snapshot failed: %s", e)
 
-            # Persist odds for future retraining
-            if odds_data:
-                self._save_odds_history(target_date, odds_data)
+            # Persist odds for future retraining — the game-matched set, not the
+            # raw feed, and pregame only (see _save_odds_history).
+            if odds_by_game:
+                self._save_odds_history(odds_by_game, all_games)
 
             # 6. Generate predictions for each game
             predictions: list[GamePrediction] = []
@@ -1685,15 +1686,53 @@ class DailyRunner:
 
         return records
 
-    def _save_odds_history(self, target_date: date, odds_data: list[dict]):
-        """Persist fetched odds to CSV for future model retraining."""
+    def _save_odds_history(self, odds_by_game: dict[str, dict], games: list[dict]):
+        """Persist pregame odds to CSV for future model retraining.
+
+        Takes odds already resolved to a game_id (mlb.data.odds_match), not the
+        raw feed. Two things went wrong when this wrote the raw feed under
+        ``target_date``:
+
+        - The feed covers several dates at once, so every one of its events was
+          written as if it were today's game — one date's slate inheriting
+          another's prices.
+        - The later crons run after first pitch, and a started game's quote is an
+          *in-play* price. Those landed in the training source as if they were the
+          market's pregame opinion: 3.5-run totals, -50000 moneylines. Since
+          ``market_home_prob`` is a model feature and the same file is the market
+          baseline the backtest grades against, they corrupted both sides.
+
+        A row is written only for a game on today's schedule that has not started.
+        Date and team codes come from the MLB game, so the key matches the games
+        CSV exactly (mlb.etl.build_training_data._load_odds_history).
+        """
         import csv
 
         odds_file = self.data_dir / "odds_history.csv"
         file_exists = odds_file.exists()
+        now = datetime.now(timezone.utc)
+
+        games_by_id = {g["game_id"]: g for g in games}
+        # Anything past Warmup is underway or over; its quote is no longer a
+        # pregame line. Belt and braces with the clock below: status can be stale
+        # and game_time can be missing, but they are rarely both wrong.
+        PREGAME_STATUSES = {"Scheduled", "Pre-Game", "Warmup", "Preview"}
 
         rows = []
-        for odds in odds_data:
+        skipped_started = 0
+        for game_id, odds in odds_by_game.items():
+            game = games_by_id.get(game_id)
+            if game is None:
+                continue
+
+            if game.get("status") not in PREGAME_STATUSES:
+                skipped_started += 1
+                continue
+            game_dt = parse_dt(game.get("game_time"))
+            if game_dt is not None and now >= game_dt:
+                skipped_started += 1
+                continue
+
             home_ml = odds.get("home_moneyline")
             away_ml = odds.get("away_moneyline")
             if home_ml is None or away_ml is None:
@@ -1702,14 +1741,20 @@ class DailyRunner:
             # so training (this CSV) and live market_home_prob stay identical.
             h_prob = devig_home_prob(home_ml, away_ml)
             rows.append({
-                "game_date": target_date.isoformat(),
-                "home_team": odds["home_team"],
-                "away_team": odds["away_team"],
+                "game_date": game["game_date"],
+                "home_team": game["home_team_id"],
+                "away_team": game["away_team_id"],
                 "home_moneyline": home_ml,
                 "away_moneyline": away_ml,
                 "total_line": odds.get("total_line"),
                 "market_home_prob": round(h_prob, 4),
             })
+
+        if skipped_started:
+            logger.info(
+                "Skipped %d started game(s) — in-play prices are not training data",
+                skipped_started,
+            )
 
         if rows:
             with open(odds_file, "a", newline="") as f:
@@ -1717,7 +1762,7 @@ class DailyRunner:
                 if not file_exists:
                     writer.writeheader()
                 writer.writerows(rows)
-            logger.info("Saved %d odds records to history", len(rows))
+            logger.info("Saved %d pregame odds records to history", len(rows))
 
     def _cache_results(self, target_date: date, result: dict):
         """Push results into the API cache — the live view, refreshed every run.
