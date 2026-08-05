@@ -13,7 +13,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from dataclasses import asdict
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
@@ -22,7 +22,9 @@ import numpy as np
 import pandas as pd
 
 from mlb.data.mlb_api import MLBApiClient
+from mlb.data.line_movement import record_snapshot
 from mlb.data.odds_api import OddsApiClient
+from mlb.data.odds_match import index_odds_by_game, parse_dt
 from mlb.data.weather import WeatherClient
 from mlb.etl.build_training_data import (
     DOME_TEAMS, PARK_DEFAULT, PARK_FACTORS, RETRACTABLE_TEAMS,
@@ -39,6 +41,7 @@ from mlb.features.formulas import (
 )
 from mlb.features.stadium import compute_stadium_features, calculate_stadium_factor
 from mlb.etl.sent_log import append_sent, due_game_ids, load_sent
+from mlb.etl.slate_record import load_slate, lock_slate
 from mlb.models.accuracy import build_daily_review
 from mlb.models.predict import GamePrediction, PredictionService
 from mlb.features.assembler import GameFeatureVector
@@ -93,10 +96,15 @@ class DailyRunner:
         The full slate is always computed and cached. `send_mode` controls what gets
         pushed to Slack:
           - "full":    the whole slate in one card (default; manual/legacy runs).
-          - "preview": yesterday-review + full-slate preview + bets for games
-                       starting within `lead_hours` (the morning card).
+          - "preview": the main card — yesterday-review + full-slate preview + the
+                       day's entire betting card.
           - "wave":    only games starting within `lead_hours` that haven't been sent
-                       yet today (later runs, close to first pitch).
+                       yet today (later runs, close to first pitch). No bets: the
+                       card was already sent on the main run.
+
+        Bets ride on the main card alone, and that card is the day's slate of record
+        (see `_apply_slate_record`) — what later runs recompute is never sent, so it
+        never gets recorded or graded.
 
         Returns a summary dict with predictions, betting slip, and metadata.
         """
@@ -181,23 +189,38 @@ class DailyRunner:
             except Exception as e:
                 logger.warning("Early odds fetch failed, continuing without: %s", e)
 
-            # Build odds lookup keyed by (home_team, away_team) for feature injection
-            odds_by_matchup: dict[tuple[str, str], dict] = {}
-            for odds in odds_data:
-                key = (odds["home_team"], odds["away_team"])
-                odds_by_matchup[key] = odds
+            # Odds keyed by MLB game_id, not by matchup: a team pair is not unique
+            # on a doubleheader date, and keying on it fed both legs the second
+            # leg's line (mlb.data.odds_match).
+            odds_by_game = index_odds_by_game(odds_data, all_games)
+            if odds_data and len(odds_by_game) < len(odds_data):
+                logger.info(
+                    "Matched %d of %d odds event(s) to games",
+                    len(odds_by_game), len(odds_data),
+                )
 
-            # Persist odds for future retraining
-            if odds_data:
-                self._save_odds_history(target_date, odds_data)
+            # Record the line as it stands right now. Every run appends one
+            # snapshot, so across the day's crons the file holds the open (main
+            # card) through to the last price before first pitch — which is what
+            # CLV grades against (mlb.betting.clv). Free: these odds are already
+            # fetched, and the Odds API allowance is small.
+            if odds_by_game:
+                try:
+                    n = record_snapshot(odds_by_game, target_date, self.data_dir)
+                    logger.info("Line snapshot: %d game(s) recorded", n)
+                except Exception as e:
+                    logger.warning("Line snapshot failed: %s", e)
+
+            # Persist odds for future retraining — the game-matched set, not the
+            # raw feed, and pregame only (see _save_odds_history).
+            if odds_by_game:
+                self._save_odds_history(odds_by_game, all_games)
 
             # 6. Generate predictions for each game
             predictions: list[GamePrediction] = []
             for game in scheduled:
                 try:
-                    matched_odds = odds_by_matchup.get(
-                        (game["home_team_id"], game["away_team_id"])
-                    )
+                    matched_odds = odds_by_game.get(game["game_id"])
                     pred = self._predict_game(
                         game, team_features, weather_data, target_date,
                         sp_stats=sp_stats,
@@ -228,9 +251,7 @@ class DailyRunner:
                     sp_stats=sp_stats,
                     live_standings=live_standings,
                     weather_data=weather_data,
-                    game_odds=odds_by_matchup.get(
-                        (p.home_team_id, p.away_team_id)
-                    ),
+                    game_odds=odds_by_game.get(p.game_id),
                 )
                 for p in predictions
             ]
@@ -267,9 +288,9 @@ class DailyRunner:
                         "home_streak": h_std.get("streak", ""),
                         "away_streak": a_std.get("streak", ""),
                         "game_time": game.get("game_time", ""),
-                        "home_moneyline": odds_by_matchup.get((home_id, away_id), {}).get("home_moneyline"),
-                        "away_moneyline": odds_by_matchup.get((home_id, away_id), {}).get("away_moneyline"),
-                        "total_line": odds_by_matchup.get((home_id, away_id), {}).get("total_line"),
+                        "home_moneyline": odds_by_game.get(gid, {}).get("home_moneyline"),
+                        "away_moneyline": odds_by_game.get(gid, {}).get("away_moneyline"),
+                        "total_line": odds_by_game.get(gid, {}).get("total_line"),
                         "status": game.get("status", ""),
                     })
 
@@ -284,7 +305,7 @@ class DailyRunner:
                         and p.get("away_sp_name", "TBD") != "TBD"
                     }
                     bet_preds = [p for p in predictions if p.game_id in eligible_ids]
-                    odds_matched = self._match_odds_to_games(bet_preds, odds_data)
+                    odds_matched = self._match_odds_to_games(bet_preds, odds_by_game)
                     slip = self.betting_engine.find_value_bets(bet_preds, odds_matched)
                     result["betting_slip"] = self._slip_to_dict(slip)
                     logger.info(
@@ -296,6 +317,10 @@ class DailyRunner:
             except Exception as e:
                 logger.warning("Odds fetch failed: %s", e)
                 result["errors"].append(f"Odds: {e}")
+
+            # 7b. Lock the day's slate of record (main run), or adopt the locked
+            # betting card (wave runs) — must happen before the cache write below.
+            self._apply_slate_record(target_date, result, send_mode)
 
             # 8. Cache predictions for the API
             self._cache_results(target_date, result)
@@ -326,14 +351,48 @@ class DailyRunner:
 
         return result
 
+    def _apply_slate_record(
+        self, target_date: date, result: dict[str, Any], send_mode: str
+    ) -> None:
+        """Lock the day's slate on the main run; adopt the locked card afterwards.
+
+        Every run recomputes a slip from the odds available at that moment, but only
+        the main card's slip is ever sent — so only it may be recorded. Wave runs
+        drop their freshly computed slip and take the locked one instead, which keeps
+        Slack, the dashboard, and settlement on one identical set of bets.
+        """
+        locked = load_slate(target_date, self.data_dir)
+        # A manual "full" run is a re-run or a test, so it fills a gap but never
+        # overwrites a slate the main card already set. A slate reconstructed from
+        # git history (mlb.etl.slate_repair) is a stand-in, so a real run replaces it.
+        if send_mode == "preview" or (
+            send_mode == "full" and (locked is None or locked.get("reconstructed"))
+        ):
+            lock_slate(
+                target_date,
+                result.get("predictions", []),
+                result.get("betting_slip"),
+                self.data_dir,
+            )
+            return
+
+        result["betting_slip"] = (locked or {}).get("betting_slip")
+        if locked is None:
+            logger.warning(
+                "No locked slate for %s — the main card never ran, so this run "
+                "sends and records no bets", target_date,
+            )
+
     async def _send_cards(
         self, target_date: date, result: dict[str, Any], send_mode: str, lead_hours: float
     ) -> None:
         """Push the Slack card(s) according to `send_mode` (see `run`).
 
-        "full" sends the whole slate unchanged. "preview"/"wave" filter to games due
-        within `lead_hours`, de-duplicated against today's sent log, and record what
-        was sent so later waves don't repeat a game.
+        The betting card rides on the main ("preview") send only — splitting bets
+        across four sends left the Slack history impossible to reconcile against
+        what was recorded and graded. Waves are reminders: the games about to start,
+        no bets, no review. Games sent are recorded so a later wave doesn't repeat
+        one.
         """
         if send_mode not in ("preview", "wave"):
             await self.alert_service.send_betting_alert(result)
@@ -344,52 +403,33 @@ class DailyRunner:
         already = set(load_sent(target_date, self.data_dir))
         due = due_game_ids(all_preds, now, lead_hours) - already
 
-        if send_mode == "wave" and not due:
-            logger.info(
-                "Wave: no new games within %.0fh window — nothing to send", lead_hours
-            )
-            return
-
-        due_slip = self._filter_slip(result.get("betting_slip"), due)
-
         if send_mode == "preview":
-            # Morning card: yesterday review + full-slate preview + bets for the
-            # games already inside the window.
+            # The main card: yesterday's grades, the full slate, and every bet.
             send_result = {
                 "date": result["date"],
                 "kind": "preview",
                 "predictions": all_preds,
-                "betting_slip": due_slip,
+                "betting_slip": result.get("betting_slip"),
                 "review": result.get("review"),
             }
         else:  # wave
+            if not due:
+                logger.info(
+                    "Wave: no new games within %.0fh window — nothing to send", lead_hours
+                )
+                return
             send_result = {
                 "date": result["date"],
                 "kind": "wave",
                 "predictions": [p for p in all_preds if str(p.get("game_id")) in due],
-                "betting_slip": due_slip,
             }
 
         await self.alert_service.send_betting_alert(send_result)
         if due:
             append_sent(target_date, due, self.data_dir)
-            logger.info("%s send: %d game(s): %s", send_mode, len(due), sorted(due))
-
-    @staticmethod
-    def _filter_slip(slip: dict | None, game_ids: set[str]) -> dict | None:
-        """Return a copy of `slip` keeping only bets on `game_ids`, totals recomputed."""
-        if not slip or not slip.get("bets"):
-            return slip
-        bets = [b for b in slip["bets"] if str(b.get("game_id")) in game_ids]
-        return {
-            **slip,
-            "bets": bets,
-            "num_bets": len(bets),
-            "total_stake": round(sum(b.get("recommended_stake", 0) for b in bets), 2),
-            "total_ev": round(
-                sum(b.get("ev_per_dollar", 0) * b.get("recommended_stake", 0) for b in bets), 2
-            ),
-        }
+            logger.info(
+                "%s send: %d game(s) marked sent: %s", send_mode, len(due), sorted(due)
+            )
 
     def _build_team_features(self, target_date: date) -> dict[str, dict[str, float]]:
         """Build current team features from CSV rolling stats."""
@@ -1143,28 +1183,30 @@ class DailyRunner:
 
         return self.prediction_service.predict_game(game_fv)
 
+    @staticmethod
     def _match_odds_to_games(
-        self,
         predictions: list[GamePrediction],
-        odds_data: list[dict],
+        odds_by_game: dict[str, dict],
     ) -> list[dict]:
-        """Match odds data to predictions by team matchups."""
+        """Pair each prediction with its own game's odds.
+
+        Matching on the team pair used to hand both legs of a doubleheader to
+        whichever prediction came first — that leg got priced (and bet) twice on
+        two different lines, and the other leg was never priced at all.
+        """
         matched = []
-        for odds in odds_data:
-            for pred in predictions:
-                if (
-                    odds["home_team"] == pred.home_team_id
-                    and odds["away_team"] == pred.away_team_id
-                ):
-                    matched.append({
-                        "game_id": pred.game_id,
-                        "home_moneyline": odds["home_moneyline"],
-                        "away_moneyline": odds["away_moneyline"],
-                        "total_line": odds["total_line"],
-                        "over_odds": odds.get("over_odds", -110),
-                        "under_odds": odds.get("under_odds", -110),
-                    })
-                    break
+        for pred in predictions:
+            odds = odds_by_game.get(pred.game_id)
+            if odds is None:
+                continue
+            matched.append({
+                "game_id": pred.game_id,
+                "home_moneyline": odds["home_moneyline"],
+                "away_moneyline": odds["away_moneyline"],
+                "total_line": odds["total_line"],
+                "over_odds": odds.get("over_odds", -110),
+                "under_odds": odds.get("under_odds", -110),
+            })
         return matched
 
     def _generate_rankings(
@@ -1647,15 +1689,53 @@ class DailyRunner:
 
         return records
 
-    def _save_odds_history(self, target_date: date, odds_data: list[dict]):
-        """Persist fetched odds to CSV for future model retraining."""
+    def _save_odds_history(self, odds_by_game: dict[str, dict], games: list[dict]):
+        """Persist pregame odds to CSV for future model retraining.
+
+        Takes odds already resolved to a game_id (mlb.data.odds_match), not the
+        raw feed. Two things went wrong when this wrote the raw feed under
+        ``target_date``:
+
+        - The feed covers several dates at once, so every one of its events was
+          written as if it were today's game — one date's slate inheriting
+          another's prices.
+        - The later crons run after first pitch, and a started game's quote is an
+          *in-play* price. Those landed in the training source as if they were the
+          market's pregame opinion: 3.5-run totals, -50000 moneylines. Since
+          ``market_home_prob`` is a model feature and the same file is the market
+          baseline the backtest grades against, they corrupted both sides.
+
+        A row is written only for a game on today's schedule that has not started.
+        Date and team codes come from the MLB game, so the key matches the games
+        CSV exactly (mlb.etl.build_training_data._load_odds_history).
+        """
         import csv
 
         odds_file = self.data_dir / "odds_history.csv"
         file_exists = odds_file.exists()
+        now = datetime.now(timezone.utc)
+
+        games_by_id = {g["game_id"]: g for g in games}
+        # Anything past Warmup is underway or over; its quote is no longer a
+        # pregame line. Belt and braces with the clock below: status can be stale
+        # and game_time can be missing, but they are rarely both wrong.
+        PREGAME_STATUSES = {"Scheduled", "Pre-Game", "Warmup", "Preview"}
 
         rows = []
-        for odds in odds_data:
+        skipped_started = 0
+        for game_id, odds in odds_by_game.items():
+            game = games_by_id.get(game_id)
+            if game is None:
+                continue
+
+            if game.get("status") not in PREGAME_STATUSES:
+                skipped_started += 1
+                continue
+            game_dt = parse_dt(game.get("game_time"))
+            if game_dt is not None and now >= game_dt:
+                skipped_started += 1
+                continue
+
             home_ml = odds.get("home_moneyline")
             away_ml = odds.get("away_moneyline")
             if home_ml is None or away_ml is None:
@@ -1664,14 +1744,20 @@ class DailyRunner:
             # so training (this CSV) and live market_home_prob stay identical.
             h_prob = devig_home_prob(home_ml, away_ml)
             rows.append({
-                "game_date": target_date.isoformat(),
-                "home_team": odds["home_team"],
-                "away_team": odds["away_team"],
+                "game_date": game["game_date"],
+                "home_team": game["home_team_id"],
+                "away_team": game["away_team_id"],
                 "home_moneyline": home_ml,
                 "away_moneyline": away_ml,
                 "total_line": odds.get("total_line"),
                 "market_home_prob": round(h_prob, 4),
             })
+
+        if skipped_started:
+            logger.info(
+                "Skipped %d started game(s) — in-play prices are not training data",
+                skipped_started,
+            )
 
         if rows:
             with open(odds_file, "a", newline="") as f:
@@ -1679,10 +1765,16 @@ class DailyRunner:
                 if not file_exists:
                     writer.writeheader()
                 writer.writerows(rows)
-            logger.info("Saved %d odds records to history", len(rows))
+            logger.info("Saved %d pregame odds records to history", len(rows))
 
     def _cache_results(self, target_date: date, result: dict):
-        """Push results into the API cache."""
+        """Push results into the API cache — the live view, refreshed every run.
+
+        Predictions here track the latest data (fresh lineups/odds) for the
+        dashboard; the graded copy is the locked slate (mlb.etl.slate_record). The
+        betting slip is already the locked one by this point, so what the dashboard
+        shows is always the card that went to Slack.
+        """
         try:
             from mlb.api.routes.predictions import cache_predictions
             from mlb.api.routes.betting import cache_betting_slip
@@ -1977,14 +2069,15 @@ def main():
         "--send-mode",
         choices=["full", "preview", "wave"],
         default="full",
-        help="full=whole slate (default); preview=morning review + full slate + "
-        "due bets; wave=only games starting within --lead-hours, de-duped",
+        help="full=whole slate (default); preview=the main card — review + full "
+        "slate + the day's whole betting card, and locks the slate of record; "
+        "wave=only games starting within --lead-hours, de-duped, no bets",
     )
     parser.add_argument(
         "--lead-hours",
         type=float,
         default=4.0,
-        help="For preview/wave: send a game when first pitch is within this many hours",
+        help="For waves: send a game when first pitch is within this many hours",
     )
     args = parser.parse_args()
 

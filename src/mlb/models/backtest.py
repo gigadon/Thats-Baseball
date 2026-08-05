@@ -24,6 +24,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from mlb.features.formulas import is_pregame_line
 from mlb.models.pipeline import TrainingPipeline
 
 logger = logging.getLogger(__name__)
@@ -130,7 +131,14 @@ class Backtester:
 
     # ── Odds ──────────────────────────────────────────────────
     def _load_odds(self) -> dict[tuple, tuple[float, float]]:
-        """Real moneylines keyed by (game_date, home_team, away_team)."""
+        """Real *pregame* moneylines keyed by (game_date, home_team, away_team).
+
+        In-play quotes are rejected (mlb.features.formulas.is_pregame_line). They
+        were being priced as if they were the market's pregame opinion, which
+        flatters the model twice over: the backtest "beats" a -50000 line that no
+        one could have bet, and the same rows are the market baseline the edge is
+        measured against.
+        """
         path = self.data_dir / "odds_history.csv"
         if not path.exists():
             raise FileNotFoundError(
@@ -138,11 +146,14 @@ class Backtester:
             )
         odds = pd.read_csv(path)
         odds["game_date"] = pd.to_datetime(odds["game_date"])
-        return {
+        result = {
             (r.game_date, r.home_team, r.away_team): (float(r.home_moneyline), float(r.away_moneyline))
             for r in odds.itertuples()
             if pd.notna(r.home_moneyline) and pd.notna(r.away_moneyline)
+            and is_pregame_line(r.home_moneyline, r.away_moneyline, r.total_line)
         }
+        logger.info("Loaded %d pregame moneylines from %s", len(result), path.name)
+        return result
 
     def run(self, seasons: list[int] | None = None) -> BacktestResult:
         from sklearn.metrics import roc_auc_score, brier_score_loss

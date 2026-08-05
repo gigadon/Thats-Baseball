@@ -5,17 +5,20 @@ name: Daily MLB Predictions to Slack
 # and commits the accumulated data back so retraining data keeps growing.
 on:
   schedule:
-    # Wave sends: each run pushes only the games starting within the next ~4h that
-    # haven't been sent yet, so every game gets a card close to first pitch with
-    # fresh starters/odds/lineups. Times are UTC; CDT (summer) shown. In winter
-    # (CST) they land 1h earlier — accepted DST drift; add an hour to each for CST.
-    #   16:30 UTC = 11:30 AM CDT — morning: yesterday review + full preview + due bets
+    # The 16:30 UTC run is the MAIN card: yesterday's review (full slate, high-conf,
+    # betting card), today's full slate, and the day's entire betting card. It also
+    # locks data/slates/{date}.json — the slate of record that settlement and
+    # accuracy grade. The later runs are wave reminders: the games starting within
+    # the next ~4h that haven't been sent yet, with fresh starters/lineups and NO
+    # bets (see mlb.etl.slate_record). Times are UTC; EDT/CDT (summer) shown. In
+    # winter they land 1h earlier — accepted DST drift.
+    #   16:30 UTC = 12:30 PM EDT / 11:30 AM CDT — main card (review + slate + bets)
     - cron: "30 16 * * *"
-    #   19:30 UTC = 2:30 PM CDT — afternoon wave
+    #   19:30 UTC = 3:30 PM EDT / 2:30 PM CDT — afternoon wave
     - cron: "30 19 * * *"
-    #   22:30 UTC = 5:30 PM CDT — early-evening wave
+    #   22:30 UTC = 6:30 PM EDT / 5:30 PM CDT — early-evening wave
     - cron: "30 22 * * *"
-    #   00:30 UTC = 7:30 PM CDT — late/West-coast wave
+    #   00:30 UTC = 8:30 PM EDT / 7:30 PM CDT — late/West-coast wave
     - cron: "30 0 * * *"
   workflow_dispatch: {}   # manual test runs from the Actions tab (sends full slate)
 
@@ -59,20 +62,27 @@ jobs:
             --end "$(date -u +%F)" \
             --delay 0.3
 
-      - name: Settle yesterday's bets
-        if: github.event.schedule == '30 16 * * *' || github.event_name == 'workflow_dispatch'
+      # Grading runs on EVERY cron, over a two-week window. Both steps are
+      # continue-on-error, and they used to run only on the morning cron with a
+      # 2-day window — so one failed morning meant that day was never graded
+      # again (2026-07-10, 07-13..07-15, 07-22, 07-23 were lost that way). A wide
+      # window on every run means any later run repairs the gap. Re-grading is
+      # cheap and idempotent: settlement skips days it already settled, and
+      # accuracy keeps the existing record unless the new grade ranks higher
+      # (mlb.models.accuracy._grade_quality). Scores come from the free MLB API
+      # first now, so this costs no Odds API quota.
+      - name: Settle recent bets
         continue-on-error: true   # missing scores must not block today's slate
         env:
           PYTHONPATH: src
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
-        run: python -m mlb.betting.settlement --backfill 2
+        run: python -m mlb.betting.settlement --backfill 14
 
-      - name: Score yesterday's predictions
-        if: github.event.schedule == '30 16 * * *' || github.event_name == 'workflow_dispatch'
+      - name: Score recent predictions
         continue-on-error: true
         env:
           PYTHONPATH: src
-        run: python -m mlb.models.accuracy --backfill 2
+        run: python -m mlb.models.accuracy --backfill 14
 
       - name: Run daily predictions (posts to Slack)
         env:
@@ -80,9 +90,9 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
           WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY }}
-        # Morning cron = preview (review + full slate + due bets). Every other cron
-        # = wave (only games starting within the next 4h, de-duped via data/sent).
-        # Manual dispatch = full slate.
+        # Main cron = preview (review + full slate + the whole betting card, and it
+        # locks data/slates). Every other cron = wave (only games starting within the
+        # next 4h, de-duped via data/sent, no bets). Manual dispatch = full slate.
         run: |
           if [ "${{ github.event.schedule }}" = "30 16 * * *" ]; then
             python -m mlb.etl.daily_runner --send-mode preview --lead-hours 4
@@ -96,7 +106,11 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/odds_history.csv data/accuracy data/predictions data/betting data/sent data/feature_defaults.json \
+          # data/line_movement accumulates one snapshot per run: each job is a
+          # fresh checkout, so it has to be committed back or CLV only ever sees
+          # a single price instead of open-to-close.
+          git add data/odds_history.csv data/accuracy data/predictions data/betting data/sent data/slates \
+                  data/line_movement data/feature_defaults.json \
                   data/games_*.csv data/batting_*.csv data/pitching_*.csv || true
           if git diff --cached --quiet; then
             echo "No data changes to commit."

@@ -3,6 +3,18 @@
 Uses asyncio scheduling (no external dependencies like APScheduler).
 Designed to run as a long-lived process alongside the API server.
 
+NOTHING RUNS THIS IN PRODUCTION. It was the Railway deployment, which died with
+the trial; the live cadence is GitHub Actions:
+
+    .github/workflows/daily-predictions.yml  — backfill, predictions, settlement
+    .github/workflows/weekly-retrain.yml     — Monday retrain to staging
+
+That is not a cosmetic distinction. The weekly retrain and the drift-triggered
+retrain below silently stopped happening when Railway went away, and no model was
+retrained on a schedule for weeks — the miss is invisible precisely because this
+code still reads as if it were running. Change the workflows, not this file, to
+change what actually happens; keep this in sync only if the process is revived.
+
 Usage:
     python -m mlb.etl.scheduler                   # Run scheduler
     python -m mlb.etl.scheduler --run-now          # Run once immediately, then schedule

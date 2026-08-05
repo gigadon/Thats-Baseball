@@ -1,6 +1,8 @@
 {
   "date": "2026-07-16",
-  "tracked_at": "2026-07-18T17:30:38.513143",
+  "tracked_at": "2026-08-03T17:02:29.415267",
+  "graded_from": "slate:reconstructed",
+  "score_source": "mlb_api",
   "results": [
     {
       "game_id": "823440",
@@ -15,11 +17,15 @@
       "correct": false
     }
   ],
+  "ungraded": [],
   "summary": {
     "total_games": 1,
     "correct": 0,
     "incorrect": 1,
     "accuracy": 0.0,
-    "brier_score": 0.3772
+    "brier_score": 0.3772,
+    "slate_games": 1,
+    "final_games": 1,
+    "graded_games": 1
   }
 }

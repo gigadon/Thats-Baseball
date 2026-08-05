@@ -1,6 +1,8 @@
 {
   "date": "2026-07-19",
-  "tracked_at": "2026-07-21T17:54:04.558273",
+  "tracked_at": "2026-08-03T17:02:30.221992",
+  "graded_from": "slate:reconstructed",
+  "score_source": "mlb_api",
   "results": [
     {
       "game_id": "822786",
@@ -22,9 +24,9 @@
       "confidence": 79.3,
       "predicted_winner": "NYY",
       "actual_home_score": 2,
-      "actual_away_score": 1,
-      "actual_winner": "NYY",
-      "correct": true
+      "actual_away_score": 8,
+      "actual_winner": "LAD",
+      "correct": false
     },
     {
       "game_id": "823521",
@@ -195,11 +197,15 @@
       "correct": true
     }
   ],
+  "ungraded": [],
   "summary": {
     "total_games": 16,
-    "correct": 8,
-    "incorrect": 8,
-    "accuracy": 0.5,
-    "brier_score": 0.2522
+    "correct": 7,
+    "incorrect": 9,
+    "accuracy": 0.4375,
+    "brier_score": 0.2723,
+    "slate_games": 16,
+    "final_games": 16,
+    "graded_games": 16
   }
 }
