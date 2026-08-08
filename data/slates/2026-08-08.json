@@ -1,0 +1,1680 @@
+{
+  "date": "2026-08-08",
+  "locked_at": "2026-08-08T13:04:55-04:00",
+  "predictions": [
+    {
+      "game_id": "823514",
+      "game_date": "2026-08-08",
+      "home_team": "NYY",
+      "away_team": "ATL",
+      "home_win_prob": 0.5229,
+      "away_win_prob": 0.4771,
+      "predicted_home_runs": 4.0,
+      "predicted_away_runs": 3.8,
+      "predicted_total": 7.8,
+      "confidence": 47.0,
+      "model_agreement": 0.924,
+      "predicted_winner": "NYY",
+      "model_predictions": {
+        "XGBoost": 0.5171908140182495,
+        "LightGBM": 0.523838159173971,
+        "CatBoost": 0.4735962872525576,
+        "RandomForest": 0.4910965019747655,
+        "LogisticRegression": 0.4876538118334562
+      },
+      "top_factors": [
+        [
+          "Away Elo",
+          "Away team rating",
+          383.0
+        ],
+        [
+          "A Sp Season Ip",
+          "",
+          53.1
+        ],
+        [
+          "H Gp",
+          "",
+          39.0
+        ],
+        [
+          "H Sp Season Ip",
+          "",
+          33.3
+        ],
+        [
+          "A Gp",
+          "",
+          22.4
+        ],
+        [
+          "Sp Season Ip",
+          "",
+          -20.0
+        ],
+        [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          13.0
+        ],
+        [
+          "L10 Rd",
+          "",
+          -4.8
+        ],
+        [
+          "A Sp Recent K9",
+          "",
+          3.6
+        ],
+        [
+          "H Bp K9 7",
+          "",
+          2.5
+        ]
+      ],
+      "home_power_score": 53.4,
+      "away_power_score": 48.6,
+      "home_sp_name": "Gerrit Cole",
+      "away_sp_name": "Chris Sale",
+      "home_wins": 65,
+      "home_losses": 51,
+      "away_wins": 70,
+      "away_losses": 46,
+      "home_streak": "W1",
+      "away_streak": "L1",
+      "home_sp_era": 3.42,
+      "away_sp_era": 2.08,
+      "home_sp_wins": 5,
+      "home_sp_losses": 5,
+      "away_sp_wins": 12,
+      "away_sp_losses": 6,
+      "game_time": "2026-08-08T19:05:00Z",
+      "home_moneyline": 134,
+      "away_moneyline": -144,
+      "total_line": 7.5,
+      "over_odds": -112,
+      "under_odds": -108,
+      "weather": {
+        "temp": 88.4,
+        "wind": 3.0,
+        "wind_dir": "in",
+        "humidity": 0.63,
+        "is_dome": false
+      }
+    },
+    {
+      "game_id": "824726",
+      "game_date": "2026-08-08",
+      "home_team": "BOS",
+      "away_team": "OAK",
+      "home_win_prob": 0.6801,
+      "away_win_prob": 0.3199,
+      "predicted_home_runs": 4.7,
+      "predicted_away_runs": 4.6,
+      "predicted_total": 9.3,
+      "confidence": 90.3,
+      "model_agreement": 0.931,
+      "predicted_winner": "BOS",
+      "model_predictions": {
+        "XGBoost": 0.6796669363975525,
+        "LightGBM": 0.662701720841464,
+        "CatBoost": 0.6700498103672453,
+        "RandomForest": 0.6640972023646338,
+        "LogisticRegression": 0.7095041264951745
+      },
+      "top_factors": [
+        [
+          "Away Elo",
+          "Away team rating",
+          356.7
+        ],
+        [
+          "Elo Diff",
+          "",
+          44.7
+        ],
+        [
+          "H Gp",
+          "",
+          39.3
+        ],
+        [
+          "H Sp Season Ip",
+          "",
+          32.2
+        ],
+        [
+          "A Sp Season Ip",
+          "",
+          30.2
+        ],
+        [
+          "A Gp",
+          "",
+          22.3
+        ],
+        [
+          "L10 Rd",
+          "",
+          13.2
+        ],
+        [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          13.1
+        ],
+        [
+          "A Sp Recent K9",
+          "",
+          3.1
+        ],
+        [
+          "H Bp K9 7",
+          "",
+          2.4
+        ]
+      ],
+      "home_power_score": 49.8,
+      "away_power_score": 42.5,
+      "home_sp_name": "Jake Bennett",
+      "away_sp_name": "Gage Jump",
+      "home_wins": 64,
+      "home_losses": 51,
+      "away_wins": 45,
+      "away_losses": 71,
+      "home_streak": "W9",
+      "away_streak": "L9",
+      "home_sp_era": 2.9,
+      "away_sp_era": 4.59,
+      "home_sp_wins": 7,
+      "home_sp_losses": 4,
+      "away_sp_wins": 4,
+      "away_sp_losses": 7,
+      "game_time": "2026-08-08T20:10:00Z",
+      "home_moneyline": -250,
+      "away_moneyline": 230,
+      "total_line": 9.0,
+      "over_odds": -106,
+      "under_odds": -114,
+      "weather": {
+        "temp": 89.3,
+        "wind": 5.0,
+        "wind_dir": "in",
+        "humidity": 0.6,
+        "is_dome": false
+      }
+    },
+    {
+      "game_id": "823834",
+      "game_date": "2026-08-08",
+      "home_team": "MIA",
+      "away_team": "LAA",
+      "home_win_prob": 0.6374,
+      "away_win_prob": 0.3626,
+      "predicted_home_runs": 4.0,
+      "predicted_away_runs": 3.8,
+      "predicted_total": 7.8,
+      "confidence": 81.7,
+      "model_agreement": 0.938,
+      "predicted_winner": "MIA",
+      "model_predictions": {
+        "XGBoost": 0.6382418274879456,
+        "LightGBM": 0.6508745044983457,
+        "CatBoost": 0.6301946678727655,
+        "RandomForest": 0.6070372889864588,
+        "LogisticRegression": 0.6159830569378284
+      },
+      "top_factors": [
+        [
+          "Away Elo",
+          "Away team rating",
+          357.3
+        ],
+        [
+          "H Sp Season Ip",
+          "",
+          70.8
+        ],
+        [
+          "A Sp Season Ip",
+          "",
+          45.1
+        ],
+        [
+          "H Gp",
+          "",
+          39.4
+        ],
+        [
+          "Sp Season Ip",
+          "",
+          26.5
+        ],
+        [
+          "A Gp",
+          "",
+          22.3
+        ],
+        [
+          "Elo Diff",
+          "",
+          21.8
+        ],
+        [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          10.6
+        ],
+        [
+          "A Sp Recent K9",
+          "",
+          2.5
+        ],
+        [
+          "H Bp K9 7",
+          "",
+          2.4
+        ]
+      ],
+      "home_power_score": 44.6,
+      "away_power_score": 39.5,
+      "home_sp_name": "Sandy Alcantara",
+      "away_sp_name": "Walbert Ure\u00f1a",
+      "home_wins": 58,
+      "home_losses": 59,
+      "away_wins": 45,
+      "away_losses": 71,
+      "home_streak": "L4",
+      "away_streak": "W2",
+      "home_sp_era": 3.68,
+      "away_sp_era": 2.54,
+      "home_sp_wins": 12,
+      "home_sp_losses": 6,
+      "away_sp_wins": 7,
+      "away_sp_losses": 7,
+      "game_time": "2026-08-08T20:10:00Z",
+      "home_moneyline": -154,
+      "away_moneyline": 142,
+      "total_line": 7.5,
+      "over_odds": -104,
+      "under_odds": -118,
+      "weather": {
+        "temp": 91.6,
+        "wind": 2.0,
+        "wind_dir": "calm",
+        "humidity": 0.7,
+        "is_dome": true
+      }
+    },
+    {
+      "game_id": "823426",
+      "game_date": "2026-08-08",
+      "home_team": "PHI",
+      "away_team": "TOR",
+      "home_win_prob": 0.6232,
+      "away_win_prob": 0.3768,
+      "predicted_home_runs": 5.0,
+      "predicted_away_runs": 4.8,
+      "predicted_total": 9.7,
+      "confidence": 76.7,
+      "model_agreement": 0.909,
+      "predicted_winner": "PHI",
+      "model_predictions": {
+        "XGBoost": 0.5959256887435913,
+        "LightGBM": 0.6487517081149463,
+        "CatBoost": 0.602560785884369,
+        "RandomForest": 0.5852286805848956,
+        "LogisticRegression": 0.6258124180089171
+      },
+      "top_factors": [
+        [
+          "Away Elo",
+          "Away team rating",
+          375.2
+        ],
+        [
+          "H Sp Season Ip",
+          "",
+          54.2
+        ],
+        [
+          "Sp Season Ip",
+          "",
+          41.3
+        ],
+        [
+          "H Gp",
+          "",
+          39.3
+        ],
+        [
+          "A Gp",
+          "",
+          22.3
+        ],
+        [
+          "A Sp Season Ip",
+          "",
+          13.9
+        ],
+        [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          13.1
+        ],
+        [
+          "Elo Diff",
+          "",
+          7.7
+        ],
+        [
+          "H Bp K9 7",
+          "",
+          3.3
+        ],
+        [
+          "H Sp Season K9",
+          "",
+          2.3
+        ]
+      ],
+      "home_power_score": 50.0,
+      "away_power_score": 46.7,
+      "home_sp_name": "Aaron Nola",
+      "away_sp_name": "Max Scherzer",
+      "home_wins": 62,
+      "home_losses": 55,
+      "away_wins": 55,
+      "away_losses": 62,
+      "home_streak": "L1",
+      "away_streak": "W1",
+      "home_sp_era": 5.55,
+      "away_sp_era": 7.92,
+      "home_sp_wins": 3,
+      "home_sp_losses": 9,
+      "away_sp_wins": 1,
+      "away_sp_losses": 4,
+      "game_time": "2026-08-08T22:05:00Z",
+      "home_moneyline": -158,
+      "away_moneyline": 146,
+      "total_line": 9.5,
+      "over_odds": -110,
+      "under_odds": -110,
+      "weather": {
+        "temp": 89.0,
+        "wind": 7.0,
+        "wind_dir": "in",
+        "humidity": 0.64,
+        "is_dome": false
+      }
+    },
+    {
+      "game_id": "823348",
+      "game_date": "2026-08-08",
+      "home_team": "PIT",
+      "away_team": "NYM",
+      "home_win_prob": 0.5835,
+      "away_win_prob": 0.4165,
+      "predicted_home_runs": 4.8,
+      "predicted_away_runs": 4.6,
+      "predicted_total": 9.5,
+      "confidence": 64.7,
+      "model_agreement": 0.904,
+      "predicted_winner": "PIT",
+      "model_predictions": {
+        "XGBoost": 0.5574013590812683,
+        "LightGBM": 0.5884488324442722,
+        "CatBoost": 0.5693894729605267,
+        "RandomForest": 0.5165277427901378,
+        "LogisticRegression": 0.5675883244225907
+      },
+      "top_factors": [
+        [
+          "Away Elo",
+          "Away team rating",
+          367.7
+        ],
+        [
+          "H Sp Season Ip",
+          "",
+          49.8
+        ],
+        [
+          "Sp Season Ip",
+          "",
+          48.7
+        ],
+        [
+          "H Gp",
+          "",
+          39.5
+        ],
+        [
+          "A Gp",
+          "",
+          22.4
+        ],
+        [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          11.4
+        ],
+        [
+          "L10 Rd",
+          "",
+          -4.0
+        ],
+        [
+          "H Bp K9 7",
+          "",
+          3.3
+        ],
+        [
+          "Elo Diff",
+          "",
+          3.0
+        ],
+        [
+          "H Sp Season K9",
+          "",
+          2.3
+        ]
+      ],
+      "home_power_score": 43.3,
+      "away_power_score": 46.8,
+      "home_sp_name": "Bubba Chandler",
+      "away_sp_name": "Robert Stock",
+      "home_wins": 57,
+      "home_losses": 61,
+      "away_wins": 51,
+      "away_losses": 66,
+      "home_streak": "L4",
+      "away_streak": "W4",
+      "home_sp_era": 4.49,
+      "away_sp_era": 1.8,
+      "home_sp_wins": 4,
+      "home_sp_losses": 8,
+      "away_sp_wins": 0,
+      "away_sp_losses": 1,
+      "game_time": "2026-08-08T22:40:00Z",
+      "home_moneyline": -122,
+      "away_moneyline": 114,
+      "total_line": 9.0,
+      "over_odds": -108,
+      "under_odds": -112,
+      "weather": {
+        "temp": 77.5,
+        "wind": 4.0,
+        "wind_dir": "cross",
+        "humidity": 0.87,
+        "is_dome": false
+      }
+    },
+    {
+      "game_id": "822701",
+      "game_date": "2026-08-08",
+      "home_team": "WSH",
+      "away_team": "CIN",
+      "home_win_prob": 0.4529,
+      "away_win_prob": 0.5471,
+      "predicted_home_runs": 3.8,
+      "predicted_away_runs": 4.9,
+      "predicted_total": 8.7,
+      "confidence": 53.8,
+      "model_agreement": 0.907,
+      "predicted_winner": "CIN",
+      "model_predictions": {
+        "XGBoost": 0.39567336440086365,
+        "LightGBM": 0.4115325035927279,
+        "CatBoost": 0.3955008872867188,
+        "RandomForest": 0.42350342822198783,
+        "LogisticRegression": 0.4585659584619677
+      },
+      "top_factors": [
+        [
+          "Away Elo",
+          "Away team rating",
+          372.8
+        ],
+        [
+          "A Sp Season Ip",
+          "",
+          53.8
+        ],
+        [
+          "H Gp",
+          "",
+          39.5
+        ],
+        [
+          "H Sp Season Ip",
+          "",
+          28.9
+        ],
+        [
+          "Sp Season Ip",
+          "",
+          -25.3
+        ],
+        [
+          "A Gp",
+          "",
+          22.4
+        ],
+        [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          13.5
+        ],
+        [
+          "Elo Diff",
+          "",
+          -8.4
+        ],
+        [
+          "L10 Rd",
+          "",
+          -3.4
+        ],
+        [
+          "A Sp Recent K9",
+          "",
+          3.1
+        ]
+      ],
+      "home_power_score": 41.3,
+      "away_power_score": 45.2,
+      "home_sp_name": "Andrew Alvarez",
+      "away_sp_name": "Chase Burns",
+      "home_wins": 57,
+      "home_losses": 61,
+      "away_wins": 56,
+      "away_losses": 59,
+      "home_streak": "W1",
+      "away_streak": "L1",
+      "home_sp_era": 3.94,
+      "away_sp_era": 2.35,
+      "home_sp_wins": 2,
+      "home_sp_losses": 3,
+      "away_sp_wins": 13,
+      "away_sp_losses": 1,
+      "game_time": "2026-08-08T22:45:00Z",
+      "home_moneyline": 130,
+      "away_moneyline": -140,
+      "total_line": 8.5,
+      "over_odds": -115,
+      "under_odds": -105,
+      "weather": {
+        "temp": 92.3,
+        "wind": 4.0,
+        "wind_dir": "cross",
+        "humidity": 0.54,
+        "is_dome": false
+      }
+    },
+    {
+      "game_id": "824079",
+      "game_date": "2026-08-08",
+      "home_team": "KC",
+      "away_team": "CHC",
+      "home_win_prob": 0.4939,
+      "away_win_prob": 0.5061,
+      "predicted_home_runs": 4.1,
+      "predicted_away_runs": 5.1,
+      "predicted_total": 9.3,
+      "confidence": 42.9,
+      "model_agreement": 0.962,
+      "predicted_winner": "CHC",
+      "model_predictions": {
+        "XGBoost": 0.4620031416416168,
+        "LightGBM": 0.47307795701163285,
+        "CatBoost": 0.45480995559664184,
+        "RandomForest": 0.4482683547368884,
+        "LogisticRegression": 0.4717800565037635
+      },
+      "top_factors": [
+        [
+          "Away Elo",
+          "Away team rating",
+          386.5
+        ],
+        [
+          "H Sp Season Ip",
+          "",
+          58.1
+        ],
+        [
+          "H Gp",
+          "",
+          39.4
+        ],
+        [
+          "Sp Season Ip",
+          "",
+          35.1
+        ],
+        [
+          "Elo Diff",
+          "",
+          -31.4
+        ],
+        [
+          "A Sp Season Ip",
+          "",
+          23.9
+        ],
+        [
+          "A Gp",
+          "",
+          22.2
+        ],
+        [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          12.6
+        ],
+        [
+          "Pitcher rest",
+          "Away edge \u00b7 Days since last start",
+          -7.2
+        ],
+        [
+          "L10 Rd",
+          "",
+          -3.7
+        ]
+      ],
+      "home_power_score": 42.4,
+      "away_power_score": 51.3,
+      "home_sp_name": "Seth Lugo",
+      "away_sp_name": "Clay Holmes",
+      "home_wins": 48,
+      "home_losses": 69,
+      "away_wins": 68,
+      "away_losses": 49,
+      "home_streak": "L2",
+      "away_streak": "W5",
+      "home_sp_era": 4.41,
+      "away_sp_era": 2.39,
+      "home_sp_wins": 4,
+      "home_sp_losses": 7,
+      "away_sp_wins": 4,
+      "away_sp_losses": 4,
+      "game_time": "2026-08-08T23:10:00Z",
+      "home_moneyline": 147,
+      "away_moneyline": -158,
+      "total_line": 9.0,
+      "over_odds": -120,
+      "under_odds": 100,
+      "weather": {
+        "temp": 85.8,
+        "wind": 1.0,
+        "wind_dir": "calm",
+        "humidity": 0.67,
+        "is_dome": false
+      }
+    },
+    {
+      "game_id": "823752",
+      "game_date": "2026-08-08",
+      "home_team": "MIL",
+      "away_team": "MIN",
+      "home_win_prob": 0.6011,
+      "away_win_prob": 0.3989,
+      "predicted_home_runs": 4.3,
+      "predicted_away_runs": 4.1,
+      "predicted_total": 8.4,
+      "confidence": 69.7,
+      "model_agreement": 0.895,
+      "predicted_winner": "MIL",
+      "model_predictions": {
+        "XGBoost": 0.6065926551818848,
+        "LightGBM": 0.6348969429942181,
+        "CatBoost": 0.5686038187143516,
+        "RandomForest": 0.5908782802729824,
+        "LogisticRegression": 0.5632876530143449
+      },
+      "top_factors": [
+        [
+          "Away Elo",
+          "Away team rating",
+          369.9
+        ],
+        [
+          "A Sp Season Ip",
+          "",
+          57.5
+        ],
+        [
+          "H Gp",
+          "",
+          39.3
+        ],
+        [
+          "Sp Season Ip",
+          "",
+          -29.7
+        ],
+        [
+          "Elo Diff",
+          "",
+          28.6
+        ],
+        [
+          "H Sp Season Ip",
+          "",
+          28.2
+        ],
+        [
+          "A Gp",
+          "",
+          22.3
+        ],
+        [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          10.6
+        ],
+        [
+          "H Bp K9 7",
+          "",
+          3.0
+        ],
+        [
+          "A Sp Recent K9",
+          "",
+          2.4
+        ]
+      ],
+      "home_power_score": 52.9,
+      "away_power_score": 43.3,
+      "home_sp_name": "Robert Gasser",
+      "away_sp_name": "Taj Bradley",
+      "home_wins": 72,
+      "home_losses": 44,
+      "away_wins": 58,
+      "away_losses": 59,
+      "home_streak": "L1",
+      "away_streak": "W2",
+      "home_sp_era": 4.48,
+      "away_sp_era": 3.69,
+      "home_sp_wins": 3,
+      "home_sp_losses": 4,
+      "away_sp_wins": 9,
+      "away_sp_losses": 4,
+      "game_time": "2026-08-08T23:10:00Z",
+      "home_moneyline": -132,
+      "away_moneyline": 122,
+      "total_line": 8.0,
+      "over_odds": -112,
+      "under_odds": -108,
+      "weather": {
+        "temp": 79.5,
+        "wind": 6.0,
+        "wind_dir": "cross",
+        "humidity": 0.49,
+        "is_dome": false
+      }
+    },
+    {
+      "game_id": "823267",
+      "game_date": "2026-08-08",
+      "home_team": "SD",
+      "away_team": "HOU",
+      "home_win_prob": 0.5803,
+      "away_win_prob": 0.4197,
+      "predicted_home_runs": 4.1,
+      "predicted_away_runs": 3.9,
+      "predicted_total": 8.0,
+      "confidence": 63.7,
+      "model_agreement": 0.905,
+      "predicted_winner": "SD",
+      "model_predictions": {
+        "XGBoost": 0.5775040984153748,
+        "LightGBM": 0.5828534917889805,
+        "CatBoost": 0.5739272723350274,
+        "RandomForest": 0.5272382095661164,
+        "LogisticRegression": 0.533363829676089
+      },
+      "top_factors": [
+        [
+          "Away Elo",
+          "Away team rating",
+          378.4
+        ],
+        [
+          "H Sp Season Ip",
+          "",
+          58.9
+        ],
+        [
+          "A Sp Season Ip",
+          "",
+          49.3
+        ],
+        [
+          "H Gp",
+          "",
+          39.4
+        ],
+        [
+          "A Gp",
+          "",
+          22.3
+        ],
+        [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          11.8
+        ],
+        [
+          "Sp Season Ip",
+          "",
+          10.0
+        ],
+        [
+          "L10 Rd",
+          "",
+          -3.4
+        ],
+        [
+          "A Sp Recent K9",
+          "",
+          2.7
+        ],
+        [
+          "H Bp K9 7",
+          "",
+          2.5
+        ]
+      ],
+      "home_power_score": 46.0,
+      "away_power_score": 47.6,
+      "home_sp_name": "Michael King",
+      "away_sp_name": "Peter Lambert",
+      "home_wins": 60,
+      "home_losses": 57,
+      "away_wins": 60,
+      "away_losses": 57,
+      "home_streak": "L1",
+      "away_streak": "W1",
+      "home_sp_era": 3.45,
+      "away_sp_era": 3.06,
+      "home_sp_wins": 6,
+      "home_sp_losses": 8,
+      "away_sp_wins": 8,
+      "away_sp_losses": 5,
+      "game_time": "2026-08-08T23:15:00Z",
+      "home_moneyline": -116,
+      "away_moneyline": 106,
+      "total_line": 8.0,
+      "over_odds": -105,
+      "under_odds": -115,
+      "weather": {
+        "temp": 80.7,
+        "wind": 6.0,
+        "wind_dir": "cross",
+        "humidity": 0.71,
+        "is_dome": false
+      }
+    },
+    {
+      "game_id": "823188",
+      "game_date": "2026-08-08",
+      "home_team": "SF",
+      "away_team": "DET",
+      "home_win_prob": 0.5695,
+      "away_win_prob": 0.4305,
+      "predicted_home_runs": 4.5,
+      "predicted_away_runs": 4.3,
+      "predicted_total": 8.7,
+      "confidence": 56.3,
+      "model_agreement": 0.897,
+      "predicted_winner": "SF",
+      "model_predictions": {
+        "XGBoost": 0.5486577153205872,
+        "LightGBM": 0.5624546899978535,
+        "CatBoost": 0.5593664195108511,
+        "RandomForest": 0.4915325767347431,
+        "LogisticRegression": 0.5437725388992701
+      },
+      "top_factors": [
+        [
+          "Away Elo",
+          "Away team rating",
+          373.3
+        ],
+        [
+          "Sp Season Ip",
+          "",
+          54.7
+        ],
+        [
+          "H Sp Season Ip",
+          "",
+          53.4
+        ],
+        [
+          "H Gp",
+          "",
+          39.0
+        ],
+        [
+          "A Gp",
+          "",
+          22.2
+        ],
+        [
+          "Elo Diff",
+          "",
+          -11.8
+        ],
+        [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          8.7
+        ],
+        [
+          "L10 Rd",
+          "",
+          -7.7
+        ],
+        [
+          "H Sp Season K9",
+          "",
+          2.3
+        ],
+        [
+          "A Sp Recent K9",
+          "",
+          2.3
+        ]
+      ],
+      "home_power_score": 44.2,
+      "away_power_score": 48.4,
+      "home_sp_name": "Landen Roupp",
+      "away_sp_name": "Jackson Jobe",
+      "home_wins": 49,
+      "home_losses": 67,
+      "away_wins": 56,
+      "away_losses": 60,
+      "home_streak": "W1",
+      "away_streak": "L1",
+      "home_sp_era": 4.34,
+      "away_sp_era": null,
+      "home_sp_wins": 7,
+      "home_sp_losses": 10,
+      "away_sp_wins": null,
+      "away_sp_losses": null,
+      "game_time": "2026-08-08T23:15:00Z",
+      "home_moneyline": 104,
+      "away_moneyline": -112,
+      "total_line": 8.0,
+      "over_odds": -110,
+      "under_odds": -110,
+      "weather": {
+        "temp": 59.3,
+        "wind": 8.0,
+        "wind_dir": "cross",
+        "humidity": 0.92,
+        "is_dome": false
+      }
+    },
+    {
+      "game_id": "823021",
+      "game_date": "2026-08-08",
+      "home_team": "STL",
+      "away_team": "COL",
+      "home_win_prob": 0.6477,
+      "away_win_prob": 0.3523,
+      "predicted_home_runs": 4.4,
+      "predicted_away_runs": 4.2,
+      "predicted_total": 8.6,
+      "confidence": 84.7,
+      "model_agreement": 0.936,
+      "predicted_winner": "STL",
+      "model_predictions": {
+        "XGBoost": 0.6645888090133667,
+        "LightGBM": 0.6472928259952344,
+        "CatBoost": 0.6461917658357198,
+        "RandomForest": 0.6281071846095836,
+        "LogisticRegression": 0.61843500085003
+      },
+      "top_factors": [
+        [
+          "Away Elo",
+          "Away team rating",
+          350.5
+        ],
+        [
+          "A Sp Season Ip",
+          "",
+          49.1
+        ],
+        [
+          "H Sp Season Ip",
+          "",
+          49.1
+        ],
+        [
+          "H Gp",
+          "",
+          39.1
+        ],
+        [
+          "Elo Diff",
+          "",
+          28.7
+        ],
+        [
+          "A Gp",
+          "",
+          22.3
+        ],
+        [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          12.8
+        ],
+        [
+          "H Sp Season K9",
+          "",
+          2.3
+        ],
+        [
+          "H Bp K9 7",
+          "",
+          2.0
+        ],
+        [
+          "A Sp Recent K9",
+          "",
+          1.8
+        ]
+      ],
+      "home_power_score": 42.9,
+      "away_power_score": 33.0,
+      "home_sp_name": "Matthew Liberatore",
+      "away_sp_name": "Kyle Freeland",
+      "home_wins": 58,
+      "home_losses": 58,
+      "away_wins": 45,
+      "away_losses": 71,
+      "home_streak": "W2",
+      "away_streak": "L4",
+      "home_sp_era": 4.97,
+      "away_sp_era": 6.81,
+      "home_sp_wins": 5,
+      "home_sp_losses": 8,
+      "away_sp_wins": 3,
+      "away_sp_losses": 10,
+      "game_time": "2026-08-08T23:15:00Z",
+      "home_moneyline": -148,
+      "away_moneyline": 138,
+      "total_line": 8.5,
+      "over_odds": -115,
+      "under_odds": -105,
+      "weather": {
+        "temp": 87.1,
+        "wind": 1.0,
+        "wind_dir": "calm",
+        "humidity": 0.63,
+        "is_dome": false
+      }
+    },
+    {
+      "game_id": "822864",
+      "game_date": "2026-08-08",
+      "home_team": "TEX",
+      "away_team": "BAL",
+      "home_win_prob": 0.5629,
+      "away_win_prob": 0.4371,
+      "predicted_home_runs": 4.1,
+      "predicted_away_runs": 3.9,
+      "predicted_total": 8.0,
+      "confidence": 59.8,
+      "model_agreement": 0.96,
+      "predicted_winner": "TEX",
+      "model_predictions": {
+        "XGBoost": 0.5333641171455383,
+        "LightGBM": 0.5593000306017262,
+        "CatBoost": 0.5334130275859057,
+        "RandomForest": 0.5486376601944205,
+        "LogisticRegression": 0.5496506563698287
+      },
+      "top_factors": [
+        [
+          "Away Elo",
+          "Away team rating",
+          372.8
+        ],
+        [
+          "A Sp Season Ip",
+          "",
+          54.9
+        ],
+        [
+          "H Sp Season Ip",
+          "",
+          51.3
+        ],
+        [
+          "H Gp",
+          "",
+          39.3
+        ],
+        [
+          "A Gp",
+          "",
+          22.2
+        ],
+        [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          10.6
+        ],
+        [
+          "Sp Season Ip",
+          "",
+          -3.4
+        ],
+        [
+          "H Sp Season K9",
+          "",
+          2.3
+        ],
+        [
+          "H Bp K9 7",
+          "",
+          2.3
+        ],
+        [
+          "A Sp Recent K9",
+          "",
+          2.1
+        ]
+      ],
+      "home_power_score": 45.8,
+      "away_power_score": 42.9,
+      "home_sp_name": "Jacob deGrom",
+      "away_sp_name": "Kyle Bradish",
+      "home_wins": 58,
+      "home_losses": 58,
+      "away_wins": 56,
+      "away_losses": 60,
+      "home_streak": "W3",
+      "away_streak": "L2",
+      "home_sp_era": 3.96,
+      "away_sp_era": 3.79,
+      "home_sp_wins": 7,
+      "home_sp_losses": 7,
+      "away_sp_wins": 7,
+      "away_sp_losses": 10,
+      "game_time": "2026-08-08T23:15:00Z",
+      "home_moneyline": -140,
+      "away_moneyline": 130,
+      "total_line": 7.5,
+      "over_odds": -105,
+      "under_odds": -115,
+      "weather": {
+        "temp": 95.6,
+        "wind": 2.0,
+        "wind_dir": "calm",
+        "humidity": 0.46,
+        "is_dome": true
+      }
+    },
+    {
+      "game_id": "824565",
+      "game_date": "2026-08-08",
+      "home_team": "CWS",
+      "away_team": "CLE",
+      "home_win_prob": 0.526,
+      "away_win_prob": 0.474,
+      "predicted_home_runs": 4.0,
+      "predicted_away_runs": 3.8,
+      "predicted_total": 7.8,
+      "confidence": 48.4,
+      "model_agreement": 0.945,
+      "predicted_winner": "CWS",
+      "model_predictions": {
+        "XGBoost": 0.49294495582580566,
+        "LightGBM": 0.49324134703226524,
+        "CatBoost": 0.49218974792497594,
+        "RandomForest": 0.4764854173077061,
+        "LogisticRegression": 0.5189979147905995
+      },
+      "top_factors": [
+        [
+          "Away Elo",
+          "Away team rating",
+          374.2
+        ],
+        [
+          "A Sp Season Ip",
+          "",
+          63.0
+        ],
+        [
+          "H Sp Season Ip",
+          "",
+          49.7
+        ],
+        [
+          "H Gp",
+          "",
+          38.7
+        ],
+        [
+          "A Gp",
+          "",
+          22.5
+        ],
+        [
+          "Sp Season Ip",
+          "",
+          -13.4
+        ],
+        [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          12.0
+        ],
+        [
+          "Elo Diff",
+          "",
+          -5.1
+        ],
+        [
+          "A Sp Recent K9",
+          "",
+          4.4
+        ],
+        [
+          "H Sp Season K9",
+          "",
+          2.3
+        ]
+      ],
+      "home_power_score": 41.7,
+      "away_power_score": 45.2,
+      "home_sp_name": "Anthony Kay",
+      "away_sp_name": "Gavin Williams",
+      "home_wins": 59,
+      "home_losses": 56,
+      "away_wins": 58,
+      "away_losses": 59,
+      "home_streak": "L4",
+      "away_streak": "W1",
+      "home_sp_era": 4.01,
+      "away_sp_era": 3.56,
+      "home_sp_wins": 8,
+      "home_sp_losses": 5,
+      "away_sp_wins": 11,
+      "away_sp_losses": 6,
+      "game_time": "2026-08-08T23:15:00Z",
+      "home_moneyline": 122,
+      "away_moneyline": -132,
+      "total_line": 7.5,
+      "over_odds": -102,
+      "under_odds": -120,
+      "weather": {
+        "temp": 81.5,
+        "wind": 1.0,
+        "wind_dir": "calm",
+        "humidity": 0.67,
+        "is_dome": false
+      }
+    },
+    {
+      "game_id": "825049",
+      "game_date": "2026-08-08",
+      "home_team": "ARI",
+      "away_team": "LAD",
+      "home_win_prob": 0.5015,
+      "away_win_prob": 0.4985,
+      "predicted_home_runs": 4.4,
+      "predicted_away_runs": 4.2,
+      "predicted_total": 8.6,
+      "confidence": 40.7,
+      "model_agreement": 0.928,
+      "predicted_winner": "ARI",
+      "model_predictions": {
+        "XGBoost": 0.48546895384788513,
+        "LightGBM": 0.49674854154512726,
+        "CatBoost": 0.4680014479253236,
+        "RandomForest": 0.49809326583488556,
+        "LogisticRegression": 0.451080644919206
+      },
+      "top_factors": [
+        [
+          "Away Elo",
+          "Away team rating",
+          384.7
+        ],
+        [
+          "A Sp Season Ip",
+          "",
+          60.6
+        ],
+        [
+          "H Gp",
+          "",
+          39.5
+        ],
+        [
+          "H Sp Season Ip",
+          "",
+          35.5
+        ],
+        [
+          "Sp Season Ip",
+          "",
+          -25.4
+        ],
+        [
+          "A Gp",
+          "",
+          22.1
+        ],
+        [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          10.6
+        ],
+        [
+          "Elo Diff",
+          "",
+          -10.2
+        ],
+        [
+          "L10 Rd",
+          "",
+          3.8
+        ],
+        [
+          "H Sp Season K9",
+          "",
+          2.3
+        ]
+      ],
+      "home_power_score": 46.3,
+      "away_power_score": 52.3,
+      "home_sp_name": "Brandon Pfaadt",
+      "away_sp_name": "Yoshinobu Yamamoto",
+      "home_wins": 62,
+      "home_losses": 55,
+      "away_wins": 69,
+      "away_losses": 47,
+      "home_streak": "W1",
+      "away_streak": "L7",
+      "home_sp_era": 3.66,
+      "away_sp_era": 2.76,
+      "home_sp_wins": 6,
+      "home_sp_losses": 1,
+      "away_sp_wins": 11,
+      "away_sp_losses": 7,
+      "game_time": "2026-08-09T00:10:00Z",
+      "home_moneyline": 170,
+      "away_moneyline": -184,
+      "total_line": 8.5,
+      "over_odds": -110,
+      "under_odds": -110,
+      "weather": {
+        "temp": 101.6,
+        "wind": 5.0,
+        "wind_dir": "out",
+        "humidity": 0.28,
+        "is_dome": true
+      }
+    },
+    {
+      "game_id": "823102",
+      "game_date": "2026-08-08",
+      "home_team": "SEA",
+      "away_team": "TB",
+      "home_win_prob": 0.5089,
+      "away_win_prob": 0.4911,
+      "predicted_home_runs": 3.9,
+      "predicted_away_runs": 3.7,
+      "predicted_total": 7.5,
+      "confidence": 42.0,
+      "model_agreement": 0.894,
+      "predicted_winner": "SEA",
+      "model_predictions": {
+        "XGBoost": 0.47294703125953674,
+        "LightGBM": 0.4948369342074594,
+        "CatBoost": 0.447536480748237,
+        "RandomForest": 0.44833916771452403,
+        "LogisticRegression": 0.5158712564315656
+      },
+      "top_factors": [
+        [
+          "Away Elo",
+          "Away team rating",
+          382.1
+        ],
+        [
+          "H Sp Season Ip",
+          "",
+          57.4
+        ],
+        [
+          "A Sp Season Ip",
+          "",
+          41.6
+        ],
+        [
+          "H Gp",
+          "",
+          39.4
+        ],
+        [
+          "A Gp",
+          "",
+          22.2
+        ],
+        [
+          "Sp Season Ip",
+          "",
+          16.3
+        ],
+        [
+          "Elo Diff",
+          "",
+          -12.4
+        ],
+        [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          10.6
+        ],
+        [
+          "H Bp K9 7",
+          "",
+          3.8
+        ],
+        [
+          "L10 Rd",
+          "",
+          -3.7
+        ]
+      ],
+      "home_power_score": 48.2,
+      "away_power_score": 48.1,
+      "home_sp_name": "George Kirby",
+      "away_sp_name": "Griffin Jax",
+      "home_wins": 56,
+      "home_losses": 61,
+      "away_wins": 69,
+      "away_losses": 46,
+      "home_streak": "L2",
+      "away_streak": "W4",
+      "home_sp_era": 3.76,
+      "away_sp_era": 3.63,
+      "home_sp_wins": 8,
+      "home_sp_losses": 9,
+      "away_sp_wins": 6,
+      "away_sp_losses": 9,
+      "game_time": "2026-08-09T01:50:00Z",
+      "home_moneyline": -116,
+      "away_moneyline": 106,
+      "total_line": 7.0,
+      "over_odds": -108,
+      "under_odds": -112,
+      "weather": {
+        "temp": 67.8,
+        "wind": 4.0,
+        "wind_dir": "in",
+        "humidity": 0.76,
+        "is_dome": false
+      }
+    }
+  ],
+  "betting_slip": {
+    "slip_date": "2026-08-08",
+    "bankroll": 10000.0,
+    "total_stake": 2000.0,
+    "num_bets": 7,
+    "bets": [
+      {
+        "game_id": "823188",
+        "game_date": "2026-08-08",
+        "home_team": "SF",
+        "away_team": "DET",
+        "bet_type": "moneyline",
+        "selection": "home",
+        "odds": 104,
+        "model_prob": 0.5695,
+        "implied_prob": 0.4813,
+        "edge": 0.0882,
+        "edge_pct": 8.82,
+        "kelly_fraction": 0.1556,
+        "recommended_stake": 500.0,
+        "confidence": 56.3,
+        "ev_per_dollar": 0.1618,
+        "decimal_odds": 2.04,
+        "total_line": null
+      },
+      {
+        "game_id": "823021",
+        "game_date": "2026-08-08",
+        "home_team": "STL",
+        "away_team": "COL",
+        "bet_type": "moneyline",
+        "selection": "home",
+        "odds": -148,
+        "model_prob": 0.6477,
+        "implied_prob": 0.5868,
+        "edge": 0.0609,
+        "edge_pct": 6.09,
+        "kelly_fraction": 0.1263,
+        "recommended_stake": 442.04,
+        "confidence": 84.7,
+        "ev_per_dollar": 0.0853,
+        "decimal_odds": 1.676,
+        "total_line": null
+      },
+      {
+        "game_id": "823267",
+        "game_date": "2026-08-08",
+        "home_team": "SD",
+        "away_team": "HOU",
+        "bet_type": "moneyline",
+        "selection": "home",
+        "odds": -116,
+        "model_prob": 0.5803,
+        "implied_prob": 0.5252,
+        "edge": 0.0551,
+        "edge_pct": 5.51,
+        "kelly_fraction": 0.0934,
+        "recommended_stake": 327.07,
+        "confidence": 63.7,
+        "ev_per_dollar": 0.0806,
+        "decimal_odds": 1.862,
+        "total_line": null
+      },
+      {
+        "game_id": "823348",
+        "game_date": "2026-08-08",
+        "home_team": "PIT",
+        "away_team": "NYM",
+        "bet_type": "moneyline",
+        "selection": "home",
+        "odds": -122,
+        "model_prob": 0.5835,
+        "implied_prob": 0.5404,
+        "edge": 0.0431,
+        "edge_pct": 4.31,
+        "kelly_fraction": 0.0754,
+        "recommended_stake": 263.8,
+        "confidence": 64.7,
+        "ev_per_dollar": 0.0618,
+        "decimal_odds": 1.82,
+        "total_line": null
+      },
+      {
+        "game_id": "823752",
+        "game_date": "2026-08-08",
+        "home_team": "MIL",
+        "away_team": "MIN",
+        "bet_type": "moneyline",
+        "selection": "home",
+        "odds": -132,
+        "model_prob": 0.6011,
+        "implied_prob": 0.5581,
+        "edge": 0.043,
+        "edge_pct": 4.3,
+        "kelly_fraction": 0.0746,
+        "recommended_stake": 260.93,
+        "confidence": 69.7,
+        "ev_per_dollar": 0.0565,
+        "decimal_odds": 1.758,
+        "total_line": null
+      },
+      {
+        "game_id": "824726",
+        "game_date": "2026-08-08",
+        "home_team": "BOS",
+        "away_team": "OAK",
+        "bet_type": "moneyline",
+        "selection": "away",
+        "odds": 230,
+        "model_prob": 0.3199,
+        "implied_prob": 0.2979,
+        "edge": 0.022,
+        "edge_pct": 2.2,
+        "kelly_fraction": 0.0242,
+        "recommended_stake": 84.72,
+        "confidence": 90.3,
+        "ev_per_dollar": 0.0557,
+        "decimal_odds": 3.3,
+        "total_line": null
+      },
+      {
+        "game_id": "823834",
+        "game_date": "2026-08-08",
+        "home_team": "MIA",
+        "away_team": "LAA",
+        "bet_type": "moneyline",
+        "selection": "home",
+        "odds": -154,
+        "model_prob": 0.6374,
+        "implied_prob": 0.5947,
+        "edge": 0.0427,
+        "edge_pct": 4.27,
+        "kelly_fraction": 0.079,
+        "recommended_stake": 121.44,
+        "confidence": 81.7,
+        "ev_per_dollar": 0.0513,
+        "decimal_odds": 1.649,
+        "total_line": null
+      }
+    ],
+    "total_ev": 186.96,
+    "max_exposure": 2000.0,
+    "risk_level": "aggressive"
+  }
+}
