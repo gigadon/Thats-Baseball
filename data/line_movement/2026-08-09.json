@@ -190,6 +190,21 @@
           "total_line": 9.0
         }
       ]
+    },
+    {
+      "timestamp": "2026-08-09T23:03:42",
+      "games": [
+        {
+          "game_id": "823268",
+          "home_team": "SD",
+          "away_team": "HOU",
+          "commence_time": "2026-08-10T00:20:00Z",
+          "home_prob": 0.5164,
+          "home_moneyline": -111,
+          "away_moneyline": 103,
+          "total_line": 9.0
+        }
+      ]
     }
   ]
 }
