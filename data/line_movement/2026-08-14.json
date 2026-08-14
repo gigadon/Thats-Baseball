@@ -1,0 +1,150 @@
+{
+  "date": "2026-08-14",
+  "snapshots": [
+    {
+      "timestamp": "2026-08-14T17:29:57",
+      "games": [
+        {
+          "game_id": "824643",
+          "home_team": "CHC",
+          "away_team": "STL",
+          "commence_time": "2026-08-14T18:20:00Z",
+          "home_prob": 0.6327,
+          "home_moneyline": -180,
+          "away_moneyline": 168,
+          "total_line": 8.0
+        },
+        {
+          "game_id": "824479",
+          "home_team": "CIN",
+          "away_team": "MIA",
+          "commence_time": "2026-08-14T22:11:00Z",
+          "home_prob": 0.5162,
+          "home_moneyline": -112,
+          "away_moneyline": 102,
+          "total_line": 7.5
+        },
+        {
+          "game_id": "823346",
+          "home_team": "PIT",
+          "away_team": "BOS",
+          "commence_time": "2026-08-14T22:41:00Z",
+          "home_prob": 0.4724,
+          "home_moneyline": 108,
+          "away_moneyline": -116,
+          "total_line": 8.0
+        },
+        {
+          "game_id": "824237",
+          "home_team": "DET",
+          "away_team": "CWS",
+          "commence_time": "2026-08-14T22:41:00Z",
+          "home_prob": 0.5486,
+          "home_moneyline": -126,
+          "away_moneyline": 118,
+          "total_line": 8.5
+        },
+        {
+          "game_id": "822942",
+          "home_team": "TB",
+          "away_team": "BAL",
+          "commence_time": "2026-08-14T23:11:00Z",
+          "home_prob": 0.5947,
+          "home_moneyline": -154,
+          "away_moneyline": 142,
+          "total_line": 8.0
+        },
+        {
+          "game_id": "824399",
+          "home_team": "CLE",
+          "away_team": "SD",
+          "commence_time": "2026-08-14T23:11:00Z",
+          "home_prob": 0.5463,
+          "home_moneyline": -126,
+          "away_moneyline": 116,
+          "total_line": 7.5
+        },
+        {
+          "game_id": "823591",
+          "home_team": "NYM",
+          "away_team": "WSH",
+          "commence_time": "2026-08-14T23:11:00Z",
+          "home_prob": 0.5252,
+          "home_moneyline": -116,
+          "away_moneyline": 106,
+          "total_line": 8.5
+        },
+        {
+          "game_id": "824882",
+          "home_team": "ATL",
+          "away_team": "ARI",
+          "commence_time": "2026-08-14T23:16:00Z",
+          "home_prob": 0.6363,
+          "home_moneyline": -184,
+          "away_moneyline": 170,
+          "total_line": 8.0
+        },
+        {
+          "game_id": "822777",
+          "home_team": "TOR",
+          "away_team": "NYY",
+          "commence_time": "2026-08-14T23:16:00Z",
+          "home_prob": 0.427,
+          "home_moneyline": 130,
+          "away_moneyline": -140,
+          "total_line": 8.0
+        },
+        {
+          "game_id": "824159",
+          "home_team": "HOU",
+          "away_team": "SEA",
+          "commence_time": "2026-08-15T00:11:00Z",
+          "home_prob": 0.5232,
+          "home_moneyline": -114,
+          "away_moneyline": 106,
+          "total_line": 8.5
+        },
+        {
+          "game_id": "823993",
+          "home_team": "LAA",
+          "away_team": "KC",
+          "commence_time": "2026-08-15T01:39:00Z",
+          "home_prob": 0.4906,
+          "home_moneyline": 100,
+          "away_moneyline": -108,
+          "total_line": 8.5
+        },
+        {
+          "game_id": "824968",
+          "home_team": "OAK",
+          "away_team": "TEX",
+          "commence_time": "2026-08-15T01:41:00Z",
+          "home_prob": 0.4953,
+          "home_moneyline": -102,
+          "away_moneyline": -106,
+          "total_line": 9.5
+        },
+        {
+          "game_id": "823913",
+          "home_team": "LAD",
+          "away_team": "MIL",
+          "commence_time": "2026-08-15T02:11:00Z",
+          "home_prob": 0.62,
+          "home_moneyline": -172,
+          "away_moneyline": 158,
+          "total_line": 7.5
+        },
+        {
+          "game_id": "823185",
+          "home_team": "SF",
+          "away_team": "COL",
+          "commence_time": "2026-08-15T02:16:00Z",
+          "home_prob": 0.5486,
+          "home_moneyline": -126,
+          "away_moneyline": 118,
+          "total_line": 7.5
+        }
+      ]
+    }
+  ]
+}
