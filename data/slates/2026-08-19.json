@@ -1,26 +1,26 @@
 {
   "date": "2026-08-19",
-  "locked_at": "2026-08-19T09:42:10-04:00",
+  "locked_at": "2026-08-19T12:59:11-04:00",
   "predictions": [
     {
       "game_id": "823342",
       "game_date": "2026-08-19",
       "home_team": "PIT",
       "away_team": "DET",
-      "home_win_prob": 0.5959,
-      "away_win_prob": 0.4041,
-      "predicted_home_runs": 4.3,
-      "predicted_away_runs": 4.1,
-      "predicted_total": 8.3,
-      "confidence": 68.6,
-      "model_agreement": 0.913,
+      "home_win_prob": 0.6099,
+      "away_win_prob": 0.3901,
+      "predicted_home_runs": 4.5,
+      "predicted_away_runs": 4.3,
+      "predicted_total": 8.8,
+      "confidence": 72.7,
+      "model_agreement": 0.907,
       "predicted_winner": "PIT",
       "model_predictions": {
-        "XGBoost": 0.5742627382278442,
-        "LightGBM": 0.5950632501150926,
-        "CatBoost": 0.5604069736857827,
-        "RandomForest": 0.543323224857102,
-        "LogisticRegression": 0.6020935039485323
+        "XGBoost": 0.5897413492202759,
+        "LightGBM": 0.5978178432953436,
+        "CatBoost": 0.5791421642872264,
+        "RandomForest": 0.5530142628240917,
+        "LogisticRegression": 0.6237512822528537
       },
       "top_factors": [
         [
@@ -31,12 +31,12 @@
         [
           "H Sp Season Ip",
           "",
-          60.8
+          61.3
         ],
         [
           "Sp Season Ip",
           "",
-          58.2
+          58.5
         ],
         [
           "H Gp",
@@ -51,12 +51,12 @@
         [
           "Temperature",
           "Game-time temp (\u00b0F)",
-          10.6
+          11.4
         ],
         [
           "A Sp Season Ip",
           "",
-          3.9
+          4.1
         ],
         [
           "Elo Diff",
@@ -64,14 +64,14 @@
           -3.6
         ],
         [
+          "Wind speed",
+          "Wind at stadium (mph)",
+          2.8
+        ],
+        [
           "H Bp K9 7",
           "",
           2.7
-        ],
-        [
-          "A Sp Recent K9",
-          "",
-          2.4
         ]
       ],
       "home_power_score": 43.3,
@@ -84,23 +84,23 @@
       "away_losses": 65,
       "home_streak": "W1",
       "away_streak": "L1",
-      "home_sp_era": 3.88,
-      "away_sp_era": 6.23,
+      "home_sp_era": 3.85,
+      "away_sp_era": 6.0,
       "home_sp_wins": 9,
       "home_sp_losses": 11,
       "away_sp_wins": 1,
       "away_sp_losses": 1,
       "game_time": "2026-08-19T16:35:00Z",
-      "home_moneyline": -154,
-      "away_moneyline": 142,
-      "total_line": 8.0,
-      "over_odds": -112,
-      "under_odds": -108,
+      "home_moneyline": -220,
+      "away_moneyline": 195,
+      "total_line": 8.5,
+      "over_odds": -104,
+      "under_odds": -128,
       "weather": {
-        "temp": 72.3,
-        "wind": 6.9,
-        "wind_dir": "in",
-        "humidity": 0.81,
+        "temp": 77.5,
+        "wind": 11.5,
+        "wind_dir": "cross",
+        "humidity": 0.71,
         "is_dome": false
       }
     },
@@ -109,20 +109,20 @@
       "game_date": "2026-08-19",
       "home_team": "NYM",
       "away_team": "SD",
-      "home_win_prob": 0.4743,
-      "away_win_prob": 0.5257,
+      "home_win_prob": 0.4643,
+      "away_win_prob": 0.5357,
       "predicted_home_runs": 3.9,
       "predicted_away_runs": 5.0,
       "predicted_total": 8.9,
-      "confidence": 48.9,
-      "model_agreement": 0.969,
+      "confidence": 55.8,
+      "model_agreement": 0.963,
       "predicted_winner": "SD",
       "model_predictions": {
-        "XGBoost": 0.4331417679786682,
-        "LightGBM": 0.4527957760079492,
-        "CatBoost": 0.44353228860335586,
-        "RandomForest": 0.45432517026663566,
-        "LogisticRegression": 0.44160044628752226
+        "XGBoost": 0.4243161678314209,
+        "LightGBM": 0.42943879856246314,
+        "CatBoost": 0.4303983019313087,
+        "RandomForest": 0.4511103510142297,
+        "LogisticRegression": 0.43346830832890787
       },
       "top_factors": [
         [
@@ -158,7 +158,7 @@
         [
           "Temperature",
           "Game-time temp (\u00b0F)",
-          11.6
+          12.4
         ],
         [
           "H Sp Season Ip",
@@ -193,16 +193,16 @@
       "away_sp_wins": 8,
       "away_sp_losses": 8,
       "game_time": "2026-08-19T17:10:00Z",
-      "home_moneyline": 122,
-      "away_moneyline": -132,
+      "home_moneyline": 126,
+      "away_moneyline": -136,
       "total_line": 8.5,
       "over_odds": -115,
       "under_odds": -105,
       "weather": {
-        "temp": 79.4,
-        "wind": 5.8,
-        "wind_dir": "cross",
-        "humidity": 0.58,
+        "temp": 84.7,
+        "wind": 10.4,
+        "wind_dir": "in",
+        "humidity": 0.49,
         "is_dome": false
       }
     },
@@ -211,20 +211,20 @@
       "game_date": "2026-08-19",
       "home_team": "MIN",
       "away_team": "ATL",
-      "home_win_prob": 0.548,
-      "away_win_prob": 0.452,
-      "predicted_home_runs": 4.3,
-      "predicted_away_runs": 4.1,
-      "predicted_total": 8.5,
-      "confidence": 54.1,
-      "model_agreement": 0.907,
+      "home_win_prob": 0.536,
+      "away_win_prob": 0.464,
+      "predicted_home_runs": 4.6,
+      "predicted_away_runs": 4.4,
+      "predicted_total": 9.0,
+      "confidence": 50.6,
+      "model_agreement": 0.911,
       "predicted_winner": "MIN",
       "model_predictions": {
-        "XGBoost": 0.5046404004096985,
-        "LightGBM": 0.5502346126841771,
-        "CatBoost": 0.5207668888352682,
-        "RandomForest": 0.4876111080884587,
-        "LogisticRegression": 0.5421564108328436
+        "XGBoost": 0.4845655560493469,
+        "LightGBM": 0.5251374488209789,
+        "CatBoost": 0.5060642103050459,
+        "RandomForest": 0.4822322496645528,
+        "LogisticRegression": 0.5390507622055403
       },
       "top_factors": [
         [
@@ -260,7 +260,7 @@
         [
           "Temperature",
           "Game-time temp (\u00b0F)",
-          9.6
+          11.1
         ],
         [
           "A Sp Recent K9",
@@ -295,16 +295,16 @@
       "away_sp_wins": 0,
       "away_sp_losses": 0,
       "game_time": "2026-08-19T17:40:00Z",
-      "home_moneyline": -104,
-      "away_moneyline": -104,
-      "total_line": 8.5,
-      "over_odds": -114,
-      "under_odds": -105,
+      "home_moneyline": 100,
+      "away_moneyline": -108,
+      "total_line": 9.0,
+      "over_odds": -102,
+      "under_odds": -119,
       "weather": {
-        "temp": 65.3,
-        "wind": 4.6,
+        "temp": 75.8,
+        "wind": 5.8,
         "wind_dir": "cross",
-        "humidity": 0.71,
+        "humidity": 0.4,
         "is_dome": false
       }
     },
@@ -313,20 +313,20 @@
       "game_date": "2026-08-19",
       "home_team": "CHC",
       "away_team": "CWS",
-      "home_win_prob": 0.6089,
-      "away_win_prob": 0.3911,
-      "predicted_home_runs": 4.2,
-      "predicted_away_runs": 4.0,
-      "predicted_total": 8.3,
-      "confidence": 72.8,
-      "model_agreement": 0.926,
+      "home_win_prob": 0.6024,
+      "away_win_prob": 0.3976,
+      "predicted_home_runs": 4.0,
+      "predicted_away_runs": 3.8,
+      "predicted_total": 7.8,
+      "confidence": 71.0,
+      "model_agreement": 0.929,
       "predicted_winner": "CHC",
       "model_predictions": {
-        "XGBoost": 0.5965045094490051,
-        "LightGBM": 0.615595342695898,
-        "CatBoost": 0.5723570532248713,
-        "RandomForest": 0.5711632231477185,
-        "LogisticRegression": 0.6100546825060957
+        "XGBoost": 0.5804046392440796,
+        "LightGBM": 0.5971733014620674,
+        "CatBoost": 0.5664381845422446,
+        "RandomForest": 0.5676430423182504,
+        "LogisticRegression": 0.6127005072262154
       },
       "top_factors": [
         [
@@ -362,7 +362,7 @@
         [
           "Temperature",
           "Game-time temp (\u00b0F)",
-          10.2
+          11.2
         ],
         [
           "A Sp Recent K9",
@@ -397,16 +397,16 @@
       "away_sp_wins": 1,
       "away_sp_losses": 3,
       "game_time": "2026-08-19T18:20:00Z",
-      "home_moneyline": -140,
-      "away_moneyline": 130,
-      "total_line": 8.0,
-      "over_odds": -110,
-      "under_odds": -110,
+      "home_moneyline": -142,
+      "away_moneyline": 132,
+      "total_line": 7.5,
+      "over_odds": -115,
+      "under_odds": -105,
       "weather": {
-        "temp": 69.6,
-        "wind": 4.6,
-        "wind_dir": "out",
-        "humidity": 0.92,
+        "temp": 76.6,
+        "wind": 6.0,
+        "wind_dir": "cross",
+        "humidity": 0.75,
         "is_dome": false
       }
     },
@@ -415,20 +415,20 @@
       "game_date": "2026-08-19",
       "home_team": "BOS",
       "away_team": "ARI",
-      "home_win_prob": 0.6034,
-      "away_win_prob": 0.3966,
+      "home_win_prob": 0.6089,
+      "away_win_prob": 0.3911,
       "predicted_home_runs": 4.2,
       "predicted_away_runs": 4.0,
       "predicted_total": 8.2,
-      "confidence": 71.6,
-      "model_agreement": 0.944,
+      "confidence": 73.5,
+      "model_agreement": 0.951,
       "predicted_winner": "BOS",
       "model_predictions": {
-        "XGBoost": 0.5777840614318848,
-        "LightGBM": 0.616503171393643,
-        "CatBoost": 0.5798519131287497,
-        "RandomForest": 0.5890694579766487,
-        "LogisticRegression": 0.596627370468169
+        "XGBoost": 0.5902923345565796,
+        "LightGBM": 0.6209414523757737,
+        "CatBoost": 0.586648077698995,
+        "RandomForest": 0.5927089628777507,
+        "LogisticRegression": 0.598474211065349
       },
       "top_factors": [
         [
@@ -464,7 +464,7 @@
         [
           "Temperature",
           "Game-time temp (\u00b0F)",
-          11.4
+          12.5
         ],
         [
           "Sp Season Ip",
@@ -505,10 +505,10 @@
       "over_odds": -114,
       "under_odds": -106,
       "weather": {
-        "temp": 77.6,
-        "wind": 5.8,
-        "wind_dir": "out",
-        "humidity": 0.72,
+        "temp": 85.2,
+        "wind": 6.9,
+        "wind_dir": "cross",
+        "humidity": 0.5,
         "is_dome": false
       }
     },
@@ -517,20 +517,20 @@
       "game_date": "2026-08-19",
       "home_team": "PHI",
       "away_team": "MIA",
-      "home_win_prob": 0.5793,
-      "away_win_prob": 0.4207,
-      "predicted_home_runs": 4.5,
-      "predicted_away_runs": 4.3,
-      "predicted_total": 8.7,
-      "confidence": 64.6,
-      "model_agreement": 0.954,
+      "home_win_prob": 0.5678,
+      "away_win_prob": 0.4322,
+      "predicted_home_runs": 4.7,
+      "predicted_away_runs": 4.5,
+      "predicted_total": 9.3,
+      "confidence": 61.3,
+      "model_agreement": 0.957,
       "predicted_winner": "PHI",
       "model_predictions": {
-        "XGBoost": 0.5580635070800781,
-        "LightGBM": 0.5827696441586979,
-        "CatBoost": 0.5645231331630982,
-        "RandomForest": 0.5505680979987637,
-        "LogisticRegression": 0.5529128799059014
+        "XGBoost": 0.5340123772621155,
+        "LightGBM": 0.5672825539545286,
+        "CatBoost": 0.5527706585970344,
+        "RandomForest": 0.5454506323354205,
+        "LogisticRegression": 0.5481286304773763
       },
       "top_factors": [
         [
@@ -564,14 +564,14 @@
           -18.8
         ],
         [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          12.7
+        ],
+        [
           "Elo Diff",
           "",
           12.2
-        ],
-        [
-          "Temperature",
-          "Game-time temp (\u00b0F)",
-          11.7
         ],
         [
           "H Bp K9 7",
@@ -601,16 +601,16 @@
       "away_sp_wins": 13,
       "away_sp_losses": 7,
       "game_time": "2026-08-19T22:05:00Z",
-      "home_moneyline": -124,
-      "away_moneyline": 115,
-      "total_line": 8.5,
-      "over_odds": -110,
-      "under_odds": -110,
+      "home_moneyline": -123,
+      "away_moneyline": 114,
+      "total_line": 9.0,
+      "over_odds": -106,
+      "under_odds": -114,
       "weather": {
-        "temp": 79.5,
-        "wind": 2.0,
-        "wind_dir": "calm",
-        "humidity": 0.71,
+        "temp": 86.3,
+        "wind": 6.9,
+        "wind_dir": "in",
+        "humidity": 0.5,
         "is_dome": false
       }
     },
@@ -619,20 +619,20 @@
       "game_date": "2026-08-19",
       "home_team": "BAL",
       "away_team": "NYY",
-      "home_win_prob": 0.4729,
-      "away_win_prob": 0.5271,
+      "home_win_prob": 0.4694,
+      "away_win_prob": 0.5306,
       "predicted_home_runs": 4.2,
-      "predicted_away_runs": 5.3,
+      "predicted_away_runs": 5.4,
       "predicted_total": 9.6,
-      "confidence": 48.8,
-      "model_agreement": 0.948,
+      "confidence": 50.0,
+      "model_agreement": 0.954,
       "predicted_winner": "NYY",
       "model_predictions": {
-        "XGBoost": 0.44248637557029724,
-        "LightGBM": 0.4664053802182847,
-        "CatBoost": 0.4353479993957792,
-        "RandomForest": 0.4523882659160926,
-        "LogisticRegression": 0.43002351492796836
+        "XGBoost": 0.43891292810440063,
+        "LightGBM": 0.4566626210688757,
+        "CatBoost": 0.43397411944408704,
+        "RandomForest": 0.4519198993430732,
+        "LogisticRegression": 0.42512746660048856
       },
       "top_factors": [
         [
@@ -673,7 +673,7 @@
         [
           "Temperature",
           "Game-time temp (\u00b0F)",
-          11.4
+          12.7
         ],
         [
           "H Bp K9 7",
@@ -681,9 +681,9 @@
           2.7
         ],
         [
-          "A Sp Recent K9",
-          "",
-          2.4
+          "Wind speed",
+          "Wind at stadium (mph)",
+          2.5
         ]
       ],
       "home_power_score": 43.1,
@@ -709,10 +709,10 @@
       "over_odds": 100,
       "under_odds": -122,
       "weather": {
-        "temp": 77.9,
-        "wind": 4.6,
+        "temp": 86.7,
+        "wind": 10.4,
         "wind_dir": "cross",
-        "humidity": 0.65,
+        "humidity": 0.48,
         "is_dome": false
       }
     },
@@ -721,8 +721,8 @@
       "game_date": "2026-08-19",
       "home_team": "CLE",
       "away_team": "SF",
-      "home_win_prob": 0.7052,
-      "away_win_prob": 0.2948,
+      "home_win_prob": 0.7065,
+      "away_win_prob": 0.2935,
       "predicted_home_runs": 4.1,
       "predicted_away_runs": 3.9,
       "predicted_total": 8.0,
@@ -730,11 +730,11 @@
       "model_agreement": 0.873,
       "predicted_winner": "CLE",
       "model_predictions": {
-        "XGBoost": 0.7541708946228027,
-        "LightGBM": 0.7324550676898995,
-        "CatBoost": 0.7176027294528906,
-        "RandomForest": 0.668855144401225,
-        "LogisticRegression": 0.6808886454376509
+        "XGBoost": 0.7537637948989868,
+        "LightGBM": 0.7368983354223353,
+        "CatBoost": 0.7176916416876152,
+        "RandomForest": 0.6682813743390057,
+        "LogisticRegression": 0.6853865091712523
       },
       "top_factors": [
         [
@@ -770,7 +770,7 @@
         [
           "Temperature",
           "Game-time temp (\u00b0F)",
-          10.6
+          11.3
         ],
         [
           "L10 Rd",
@@ -783,9 +783,9 @@
           3.2
         ],
         [
-          "Wind speed",
-          "Wind at stadium (mph)",
-          2.5
+          "H Sp Season K9",
+          "",
+          2.3
         ]
       ],
       "home_power_score": 45.1,
@@ -805,14 +805,14 @@
       "away_sp_wins": null,
       "away_sp_losses": null,
       "game_time": "2026-08-19T22:40:00Z",
-      "home_moneyline": -210,
-      "away_moneyline": 194,
+      "home_moneyline": -220,
+      "away_moneyline": 200,
       "total_line": 7.5,
       "over_odds": -102,
       "under_odds": -120,
       "weather": {
-        "temp": 72.3,
-        "wind": 10.4,
+        "temp": 76.9,
+        "wind": 5.8,
         "wind_dir": "cross",
         "humidity": 0.77,
         "is_dome": false
@@ -823,20 +823,20 @@
       "game_date": "2026-08-19",
       "home_team": "CIN",
       "away_team": "STL",
-      "home_win_prob": 0.5734,
-      "away_win_prob": 0.4266,
+      "home_win_prob": 0.5735,
+      "away_win_prob": 0.4265,
       "predicted_home_runs": 4.6,
       "predicted_away_runs": 4.4,
       "predicted_total": 9.0,
-      "confidence": 62.2,
-      "model_agreement": 0.927,
+      "confidence": 62.1,
+      "model_agreement": 0.923,
       "predicted_winner": "CIN",
       "model_predictions": {
-        "XGBoost": 0.5487133264541626,
-        "LightGBM": 0.5689044466552577,
-        "CatBoost": 0.5668586151072217,
-        "RandomForest": 0.5182431876668987,
-        "LogisticRegression": 0.5464067504051158
+        "XGBoost": 0.5527569055557251,
+        "LightGBM": 0.5709554155003902,
+        "CatBoost": 0.5681374568432451,
+        "RandomForest": 0.5185121328349207,
+        "LogisticRegression": 0.541032653431628
       },
       "top_factors": [
         [
@@ -867,7 +867,7 @@
         [
           "Temperature",
           "Game-time temp (\u00b0F)",
-          10.7
+          11.4
         ],
         [
           "L10 Rd",
@@ -907,16 +907,16 @@
       "away_sp_wins": 5,
       "away_sp_losses": 10,
       "game_time": "2026-08-19T22:40:00Z",
-      "home_moneyline": -148,
-      "away_moneyline": 138,
+      "home_moneyline": -140,
+      "away_moneyline": 131,
       "total_line": 8.5,
       "over_odds": -105,
       "under_odds": -114,
       "weather": {
-        "temp": 72.9,
-        "wind": 5.8,
+        "temp": 77.8,
+        "wind": 6.9,
         "wind_dir": "cross",
-        "humidity": 0.83,
+        "humidity": 0.76,
         "is_dome": false
       }
     },
@@ -938,7 +938,7 @@
         "LightGBM": 0.6939760137875984,
         "CatBoost": 0.6868956940786373,
         "RandomForest": 0.6207395549732089,
-        "LogisticRegression": 0.6694663687676294
+        "LogisticRegression": 0.6691206093114321
       },
       "top_factors": [
         [
@@ -1009,16 +1009,16 @@
       "away_sp_wins": 1,
       "away_sp_losses": 5,
       "game_time": "2026-08-19T22:40:00Z",
-      "home_moneyline": -194,
-      "away_moneyline": 180,
+      "home_moneyline": -193,
+      "away_moneyline": 179,
       "total_line": 7.5,
       "over_odds": 100,
-      "under_odds": -120,
+      "under_odds": -121,
       "weather": {
-        "temp": 88.0,
-        "wind": 10.4,
+        "temp": 91.6,
+        "wind": 13.8,
         "wind_dir": "out",
-        "humidity": 0.76,
+        "humidity": 0.68,
         "is_dome": true
       }
     },
@@ -1027,20 +1027,20 @@
       "game_date": "2026-08-19",
       "home_team": "KC",
       "away_team": "OAK",
-      "home_win_prob": 0.609,
-      "away_win_prob": 0.391,
+      "home_win_prob": 0.6229,
+      "away_win_prob": 0.3771,
       "predicted_home_runs": 4.5,
       "predicted_away_runs": 4.3,
       "predicted_total": 8.9,
-      "confidence": 65.6,
-      "model_agreement": 0.955,
+      "confidence": 69.4,
+      "model_agreement": 0.942,
       "predicted_winner": "KC",
       "model_predictions": {
-        "XGBoost": 0.6129175424575806,
-        "LightGBM": 0.6027057572250281,
-        "CatBoost": 0.5886462450501657,
-        "RandomForest": 0.5851851474695734,
-        "LogisticRegression": 0.5841448897922314
+        "XGBoost": 0.6356180310249329,
+        "LightGBM": 0.6118488725186829,
+        "CatBoost": 0.604958392004539,
+        "RandomForest": 0.5942506994363089,
+        "LogisticRegression": 0.5994679276764834
       },
       "top_factors": [
         [
@@ -1059,14 +1059,14 @@
           23.1
         ],
         [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          10.8
+        ],
+        [
           "Elo Diff",
           "",
           10.7
-        ],
-        [
-          "Temperature",
-          "Game-time temp (\u00b0F)",
-          10.4
         ],
         [
           "H Sp Season K9",
@@ -1111,16 +1111,16 @@
       "away_sp_wins": null,
       "away_sp_losses": null,
       "game_time": "2026-08-19T23:40:00Z",
-      "home_moneyline": -136,
-      "away_moneyline": 126,
+      "home_moneyline": -160,
+      "away_moneyline": 148,
       "total_line": 8.5,
-      "over_odds": -110,
-      "under_odds": -110,
+      "over_odds": -122,
+      "under_odds": 100,
       "weather": {
-        "temp": 70.9,
-        "wind": 4.6,
-        "wind_dir": "out",
-        "humidity": 0.8,
+        "temp": 73.6,
+        "wind": 0.0,
+        "wind_dir": "calm",
+        "humidity": 0.7,
         "is_dome": false
       }
     },
@@ -1219,10 +1219,10 @@
       "over_odds": -112,
       "under_odds": -107,
       "weather": {
-        "temp": 66.7,
-        "wind": 5.8,
+        "temp": 75.1,
+        "wind": 5.0,
         "wind_dir": "cross",
-        "humidity": 0.91,
+        "humidity": 0.65,
         "is_dome": false
       }
     },
@@ -1243,7 +1243,7 @@
         "XGBoost": 0.5789722800254822,
         "LightGBM": 0.5751326465971991,
         "CatBoost": 0.5530994100299449,
-        "RandomForest": 0.5650308252228659,
+        "RandomForest": 0.5650308252228657,
         "LogisticRegression": 0.5574402158685281
       },
       "top_factors": [
@@ -1318,14 +1318,14 @@
       "home_moneyline": -128,
       "away_moneyline": 120,
       "total_line": 7.5,
-      "over_odds": -114,
-      "under_odds": -106,
+      "over_odds": -115,
+      "under_odds": -105,
       "weather": {
-        "temp": 83.8,
-        "wind": 11.5,
+        "temp": 98.2,
+        "wind": 8.1,
         "wind_dir": "in",
-        "humidity": 0.63,
-        "is_dome": false
+        "humidity": 0.38,
+        "is_dome": true
       }
     },
     {
@@ -1423,10 +1423,10 @@
       "over_odds": -115,
       "under_odds": -105,
       "weather": {
-        "temp": 83.2,
-        "wind": 9.2,
+        "temp": 92.6,
+        "wind": 10.4,
         "wind_dir": "in",
-        "humidity": 0.86,
+        "humidity": 0.62,
         "is_dome": false
       }
     },
@@ -1435,20 +1435,20 @@
       "game_date": "2026-08-19",
       "home_team": "COL",
       "away_team": "LAD",
-      "home_win_prob": 0.4741,
-      "away_win_prob": 0.5259,
-      "predicted_home_runs": 5.0,
-      "predicted_away_runs": 6.4,
+      "home_win_prob": 0.4873,
+      "away_win_prob": 0.5127,
+      "predicted_home_runs": 5.1,
+      "predicted_away_runs": 6.3,
       "predicted_total": 11.4,
-      "confidence": 47.9,
-      "model_agreement": 0.926,
+      "confidence": 43.6,
+      "model_agreement": 0.91,
       "predicted_winner": "LAD",
       "model_predictions": {
-        "XGBoost": 0.4475010335445404,
-        "LightGBM": 0.47446404522774854,
-        "CatBoost": 0.4478392247311552,
-        "RandomForest": 0.4384081049514748,
-        "LogisticRegression": 0.41723891906168786
+        "XGBoost": 0.47143808007240295,
+        "LightGBM": 0.48495485248437226,
+        "CatBoost": 0.46873778685865564,
+        "RandomForest": 0.4445718831335738,
+        "LogisticRegression": 0.42138559892581223
       },
       "top_factors": [
         [
@@ -1484,7 +1484,7 @@
         [
           "Temperature",
           "Game-time temp (\u00b0F)",
-          9.6
+          11.4
         ],
         [
           "Sp Season Ip",
@@ -1525,10 +1525,10 @@
       "over_odds": -102,
       "under_odds": -119,
       "weather": {
-        "temp": 65.7,
-        "wind": 8.1,
-        "wind_dir": "out",
-        "humidity": 0.75,
+        "temp": 78.0,
+        "wind": 1.0,
+        "wind_dir": "calm",
+        "humidity": 0.49,
         "is_dome": false
       }
     }
@@ -1536,9 +1536,28 @@
   "betting_slip": {
     "slip_date": "2026-08-19",
     "bankroll": 10000.0,
-    "total_stake": 1800.45,
+    "total_stake": 1874.78,
     "num_bets": 12,
     "bets": [
+      {
+        "game_id": "823342",
+        "game_date": "2026-08-19",
+        "home_team": "PIT",
+        "away_team": "DET",
+        "bet_type": "moneyline",
+        "selection": "away",
+        "odds": 195,
+        "model_prob": 0.3901,
+        "implied_prob": 0.3302,
+        "edge": 0.0599,
+        "edge_pct": 5.99,
+        "kelly_fraction": 0.0773,
+        "recommended_stake": 270.66,
+        "confidence": 72.7,
+        "ev_per_dollar": 0.1508,
+        "decimal_odds": 2.95,
+        "total_line": null
+      },
       {
         "game_id": "823748",
         "game_date": "2026-08-19",
@@ -1565,54 +1584,35 @@
         "away_team": "ATL",
         "bet_type": "moneyline",
         "selection": "home",
-        "odds": -104,
-        "model_prob": 0.548,
-        "implied_prob": 0.5,
-        "edge": 0.048,
-        "edge_pct": 4.8,
-        "kelly_fraction": 0.0779,
-        "recommended_stake": 272.72,
-        "confidence": 54.1,
-        "ev_per_dollar": 0.0749,
-        "decimal_odds": 1.962,
+        "odds": 100,
+        "model_prob": 0.536,
+        "implied_prob": 0.4906,
+        "edge": 0.0454,
+        "edge_pct": 4.54,
+        "kelly_fraction": 0.072,
+        "recommended_stake": 252.0,
+        "confidence": 50.6,
+        "ev_per_dollar": 0.072,
+        "decimal_odds": 2.0,
         "total_line": null
       },
       {
-        "game_id": "823424",
+        "game_id": "823587",
         "game_date": "2026-08-19",
-        "home_team": "PHI",
-        "away_team": "MIA",
+        "home_team": "NYM",
+        "away_team": "SD",
         "bet_type": "moneyline",
         "selection": "home",
-        "odds": -124,
-        "model_prob": 0.5793,
-        "implied_prob": 0.5434,
-        "edge": 0.0359,
-        "edge_pct": 3.59,
-        "kelly_fraction": 0.0576,
-        "recommended_stake": 201.71,
-        "confidence": 64.6,
-        "ev_per_dollar": 0.0465,
-        "decimal_odds": 1.806,
-        "total_line": null
-      },
-      {
-        "game_id": "824640",
-        "game_date": "2026-08-19",
-        "home_team": "CHC",
-        "away_team": "CWS",
-        "bet_type": "moneyline",
-        "selection": "home",
-        "odds": -140,
-        "model_prob": 0.6089,
-        "implied_prob": 0.573,
-        "edge": 0.0359,
-        "edge_pct": 3.59,
-        "kelly_fraction": 0.0614,
-        "recommended_stake": 214.76,
-        "confidence": 72.8,
-        "ev_per_dollar": 0.0438,
-        "decimal_odds": 1.714,
+        "odds": 126,
+        "model_prob": 0.4643,
+        "implied_prob": 0.4343,
+        "edge": 0.03,
+        "edge_pct": 3.0,
+        "kelly_fraction": 0.0391,
+        "recommended_stake": 136.99,
+        "confidence": 55.8,
+        "ev_per_dollar": 0.0493,
+        "decimal_odds": 2.26,
         "total_line": null
       },
       {
@@ -1635,23 +1635,23 @@
         "total_line": null
       },
       {
-        "game_id": "823664",
+        "game_id": "823424",
         "game_date": "2026-08-19",
-        "home_team": "MIN",
-        "away_team": "ATL",
-        "bet_type": "total",
-        "selection": "under",
-        "odds": -105,
-        "model_prob": 0.53,
-        "implied_prob": 0.4902,
-        "edge": 0.0398,
-        "edge_pct": 3.98,
-        "kelly_fraction": 0.0365,
-        "recommended_stake": 127.61,
-        "confidence": 54.1,
-        "ev_per_dollar": 0.0347,
-        "decimal_odds": 1.952,
-        "total_line": 8.5
+        "home_team": "PHI",
+        "away_team": "MIA",
+        "bet_type": "moneyline",
+        "selection": "home",
+        "odds": -123,
+        "model_prob": 0.5678,
+        "implied_prob": 0.5414,
+        "edge": 0.0264,
+        "edge_pct": 2.64,
+        "kelly_fraction": 0.0362,
+        "recommended_stake": 126.68,
+        "confidence": 61.3,
+        "ev_per_dollar": 0.0294,
+        "decimal_odds": 1.813,
+        "total_line": null
       },
       {
         "game_id": "822937",
@@ -1660,35 +1660,35 @@
         "away_team": "TOR",
         "bet_type": "moneyline",
         "selection": "home",
-        "odds": -194,
+        "odds": -193,
         "model_prob": 0.6773,
-        "implied_prob": 0.6488,
-        "edge": 0.0285,
-        "edge_pct": 2.85,
-        "kelly_fraction": 0.0513,
-        "recommended_stake": 179.42,
+        "implied_prob": 0.6476,
+        "edge": 0.0297,
+        "edge_pct": 2.97,
+        "kelly_fraction": 0.0545,
+        "recommended_stake": 190.71,
         "confidence": 89.3,
-        "ev_per_dollar": 0.0264,
-        "decimal_odds": 1.515,
+        "ev_per_dollar": 0.0282,
+        "decimal_odds": 1.518,
         "total_line": null
       },
       {
-        "game_id": "824476",
+        "game_id": "824640",
         "game_date": "2026-08-19",
-        "home_team": "CIN",
-        "away_team": "STL",
+        "home_team": "CHC",
+        "away_team": "CWS",
         "bet_type": "moneyline",
-        "selection": "away",
-        "odds": 138,
-        "model_prob": 0.4266,
-        "implied_prob": 0.4132,
-        "edge": 0.0134,
-        "edge_pct": 1.34,
-        "kelly_fraction": 0.0111,
-        "recommended_stake": 38.82,
-        "confidence": 62.2,
-        "ev_per_dollar": 0.0153,
-        "decimal_odds": 2.38,
+        "selection": "home",
+        "odds": -142,
+        "model_prob": 0.6024,
+        "implied_prob": 0.5765,
+        "edge": 0.0259,
+        "edge_pct": 2.59,
+        "kelly_fraction": 0.0378,
+        "recommended_stake": 132.33,
+        "confidence": 71.0,
+        "ev_per_dollar": 0.0266,
+        "decimal_odds": 1.704,
         "total_line": null
       },
       {
@@ -1738,9 +1738,9 @@
         "selection": "over",
         "odds": 100,
         "model_prob": 0.5033,
-        "implied_prob": 0.4783,
-        "edge": 0.025,
-        "edge_pct": 2.5,
+        "implied_prob": 0.4773,
+        "edge": 0.026,
+        "edge_pct": 2.6,
         "kelly_fraction": 0.0066,
         "recommended_stake": 23.02,
         "confidence": 89.3,
@@ -1762,14 +1762,14 @@
         "edge_pct": 2.36,
         "kelly_fraction": 0.0007,
         "recommended_stake": 2.38,
-        "confidence": 71.6,
+        "confidence": 73.5,
         "ev_per_dollar": 0.0006,
         "decimal_odds": 1.943,
         "total_line": 8.0
       }
     ],
-    "total_ev": 127.12,
-    "max_exposure": 1800.45,
+    "total_ev": 156.49,
+    "max_exposure": 1874.78,
     "risk_level": "aggressive"
   }
 }
