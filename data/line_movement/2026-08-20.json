@@ -1,0 +1,90 @@
+{
+  "date": "2026-08-20",
+  "snapshots": [
+    {
+      "timestamp": "2026-08-20T17:02:55",
+      "games": [
+        {
+          "game_id": "824395",
+          "home_team": "CLE",
+          "away_team": "SF",
+          "commence_time": "2026-08-20T17:11:00Z",
+          "home_prob": 0.6609,
+          "home_moneyline": -205,
+          "away_moneyline": 190,
+          "total_line": 6.5
+        },
+        {
+          "game_id": "822934",
+          "home_team": "TB",
+          "away_team": "TOR",
+          "commence_time": "2026-08-20T17:11:00Z",
+          "home_prob": 0.6041,
+          "home_moneyline": -160,
+          "away_moneyline": 148,
+          "total_line": 7.0
+        },
+        {
+          "game_id": "824589",
+          "home_team": "CWS",
+          "away_team": "ATL",
+          "commence_time": "2026-08-20T18:10:00Z",
+          "home_prob": 0.5012,
+          "home_moneyline": -104,
+          "away_moneyline": -103,
+          "total_line": 8.5
+        },
+        {
+          "game_id": "824074",
+          "home_team": "KC",
+          "away_team": "OAK",
+          "commence_time": "2026-08-20T18:11:00Z",
+          "home_prob": 0.5526,
+          "home_moneyline": -128,
+          "away_moneyline": 120,
+          "total_line": 8.5
+        },
+        {
+          "game_id": "823747",
+          "home_team": "MIL",
+          "away_team": "SEA",
+          "commence_time": "2026-08-20T18:11:00Z",
+          "home_prob": 0.5672,
+          "home_moneyline": -138,
+          "away_moneyline": 126,
+          "total_line": 7.5
+        },
+        {
+          "game_id": "824802",
+          "home_team": "BAL",
+          "away_team": "NYY",
+          "commence_time": "2026-08-20T22:36:00Z",
+          "home_prob": 0.4906,
+          "home_moneyline": 100,
+          "away_moneyline": -108,
+          "total_line": 7.5
+        },
+        {
+          "game_id": "822861",
+          "home_team": "TEX",
+          "away_team": "WSH",
+          "commence_time": "2026-08-21T00:06:00Z",
+          "home_prob": 0.62,
+          "home_moneyline": -172,
+          "away_moneyline": 158,
+          "total_line": 7.5
+        },
+        {
+          "game_id": "824153",
+          "home_team": "HOU",
+          "away_team": "LAA",
+          "commence_time": "2026-08-21T00:11:00Z",
+          "home_prob": 0.6283,
+          "home_moneyline": -178,
+          "away_moneyline": 164,
+          "total_line": 8.5
+        }
+      ]
+    }
+  ]
+}
