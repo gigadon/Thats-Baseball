@@ -120,6 +120,31 @@
           "total_line": 8.5
         }
       ]
+    },
+    {
+      "timestamp": "2026-08-20T22:59:15",
+      "games": [
+        {
+          "game_id": "822861",
+          "home_team": "TEX",
+          "away_team": "WSH",
+          "commence_time": "2026-08-21T00:06:00Z",
+          "home_prob": 0.631,
+          "home_moneyline": -180,
+          "away_moneyline": 166,
+          "total_line": 7.5
+        },
+        {
+          "game_id": "824153",
+          "home_team": "HOU",
+          "away_team": "LAA",
+          "commence_time": "2026-08-21T00:11:00Z",
+          "home_prob": 0.631,
+          "home_moneyline": -180,
+          "away_moneyline": 166,
+          "total_line": 8.5
+        }
+      ]
     }
   ]
 }
