@@ -445,6 +445,31 @@
           "total_line": 8.0
         }
       ]
+    },
+    {
+      "timestamp": "2026-08-22T01:59:19",
+      "games": [
+        {
+          "game_id": "823101",
+          "home_team": "SEA",
+          "away_team": "CHC",
+          "commence_time": "2026-08-22T02:11:00Z",
+          "home_prob": 0.5094,
+          "home_moneyline": -108,
+          "away_moneyline": 100,
+          "total_line": 7.5
+        },
+        {
+          "game_id": "823911",
+          "home_team": "LAD",
+          "away_team": "PIT",
+          "commence_time": "2026-08-22T02:11:00Z",
+          "home_prob": 0.6786,
+          "home_moneyline": -225,
+          "away_moneyline": 205,
+          "total_line": 8.0
+        }
+      ]
     }
   ]
 }
