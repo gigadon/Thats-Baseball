@@ -210,6 +210,21 @@
           "total_line": 7.5
         }
       ]
+    },
+    {
+      "timestamp": "2026-08-23T22:52:49",
+      "games": [
+        {
+          "game_id": "823745",
+          "home_team": "MIL",
+          "away_team": "ATL",
+          "commence_time": "2026-08-23T23:11:00Z",
+          "home_prob": 0.5208,
+          "home_moneyline": -114,
+          "away_moneyline": 104,
+          "total_line": 7.5
+        }
+      ]
     }
   ]
 }
