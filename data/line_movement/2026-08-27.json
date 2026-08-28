@@ -75,6 +75,21 @@
           "total_line": 8.0
         }
       ]
+    },
+    {
+      "timestamp": "2026-08-28T01:04:34",
+      "games": [
+        {
+          "game_id": "823179",
+          "home_team": "SF",
+          "away_team": "ARI",
+          "commence_time": "2026-08-28T01:46:00Z",
+          "home_prob": 0.468,
+          "home_moneyline": 110,
+          "away_moneyline": -118,
+          "total_line": 8.0
+        }
+      ]
     }
   ]
 }
