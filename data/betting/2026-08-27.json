@@ -1,0 +1,42 @@
+{
+  "date": "2026-08-27",
+  "settled_at": "2026-08-28T06:16:01",
+  "bankroll": 10000.0,
+  "bets": [
+    {
+      "game_id": "823581",
+      "game_date": "2026-08-27",
+      "home_team": "NYM",
+      "away_team": "MIL",
+      "bet_type": "total",
+      "selection": "over",
+      "odds": 118,
+      "model_prob": 0.4851,
+      "implied_prob": 0.4283,
+      "edge": 0.0568,
+      "edge_pct": 5.68,
+      "kelly_fraction": 0.0488,
+      "recommended_stake": 170.65,
+      "confidence": 54.0,
+      "ev_per_dollar": 0.0575,
+      "decimal_odds": 2.18,
+      "total_line": 10.5,
+      "actual_home_score": 2,
+      "actual_away_score": 8,
+      "result": "loss",
+      "pnl": -170.65
+    }
+  ],
+  "summary": {
+    "bets_placed": 1,
+    "bets_won": 0,
+    "bets_lost": 1,
+    "bets_pushed": 0,
+    "total_staked": 170.65,
+    "daily_pnl": -170.65,
+    "roi": -1.0,
+    "cumulative_pnl": 1233.27,
+    "max_drawdown": 0.8801,
+    "bets_on_card": 1
+  }
+}
