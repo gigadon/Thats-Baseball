@@ -180,6 +180,21 @@
           "total_line": 9.0
         }
       ]
+    },
+    {
+      "timestamp": "2026-08-30T22:00:08",
+      "games": [
+        {
+          "game_id": "824636",
+          "home_team": "CHC",
+          "away_team": "CIN",
+          "commence_time": "2026-08-30T23:21:00Z",
+          "home_prob": 0.5947,
+          "home_moneyline": -154,
+          "away_moneyline": 142,
+          "total_line": 9.0
+        }
+      ]
     }
   ]
 }
