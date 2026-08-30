@@ -145,6 +145,41 @@
           "total_line": 9.0
         }
       ]
+    },
+    {
+      "timestamp": "2026-08-30T19:25:56",
+      "games": [
+        {
+          "game_id": "824959",
+          "home_team": "OAK",
+          "away_team": "BAL",
+          "commence_time": "2026-08-30T20:06:00Z",
+          "home_prob": 0.42,
+          "home_moneyline": 134,
+          "away_moneyline": -144,
+          "total_line": 9.5
+        },
+        {
+          "game_id": "823987",
+          "home_team": "LAA",
+          "away_team": "PHI",
+          "commence_time": "2026-08-30T20:07:00Z",
+          "home_prob": 0.3934,
+          "home_moneyline": 150,
+          "away_moneyline": -161,
+          "total_line": 7.5
+        },
+        {
+          "game_id": "824636",
+          "home_team": "CHC",
+          "away_team": "CIN",
+          "commence_time": "2026-08-30T23:21:00Z",
+          "home_prob": 0.5868,
+          "home_moneyline": -148,
+          "away_moneyline": 138,
+          "total_line": 9.0
+        }
+      ]
     }
   ]
 }
