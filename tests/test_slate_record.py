@@ -9,6 +9,7 @@ from mlb.etl.slate_record import (
     lock_slate,
     locked_betting_slip,
     locked_predictions,
+    resolve_send_mode,
     slate_path,
 )
 
@@ -266,3 +267,21 @@ class TestAccuracyUsesTheRecord:
 
         assert record["graded_from"] == "cache"
         assert record["summary"]["correct"] == 1  # BOS pick, BOS won
+
+
+class TestResolveSendMode:
+    """Which run takes the main card is decided by state, not by cron identity."""
+
+    def test_unlocked_day_gets_the_main_card(self, tmp_path):
+        assert resolve_send_mode(DAY, tmp_path) == "preview"
+
+    def test_once_locked_every_later_run_is_a_wave(self, tmp_path):
+        lock_slate(DAY, _preds(), _slip(), tmp_path)
+        assert resolve_send_mode(DAY, tmp_path) == "wave"
+
+    def test_a_dropped_cron_does_not_cost_the_day(self, tmp_path):
+        """The 2026-08-27 case: the 16:30 cron never fired, so the next run
+        must still be able to send the main card."""
+        assert resolve_send_mode(DAY, tmp_path) == "preview"
+        lock_slate(DAY, _preds(), _slip(), tmp_path)   # backstop run takes it
+        assert resolve_send_mode(DAY, tmp_path) == "wave"

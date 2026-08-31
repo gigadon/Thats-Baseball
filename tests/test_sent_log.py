@@ -8,6 +8,7 @@ from mlb.etl.sent_log import (
     due_game_ids,
     load_sent,
     parse_game_time,
+    unstarted_game_ids,
 )
 
 ET = ZoneInfo("America/New_York")
@@ -49,6 +50,38 @@ class TestDueGameIds:
         now = datetime(2026, 7, 21, 18, 0, tzinfo=ET)
         due = due_game_ids(self._preds(), now, lead_hours=6)  # horizon = midnight ET
         assert {"in", "far", "notime"} <= due
+
+
+class TestUnstartedGameIds:
+    """The main card's filter: what is still bettable, with no upper horizon."""
+
+    def _preds(self):
+        return [
+            {"game_id": "soon", "game_time": "2026-07-21T23:05:00Z"},   # 7:05 PM ET
+            {"game_id": "late", "game_time": "2026-07-22T03:00:00Z"},   # 11:00 PM ET
+            {"game_id": "started", "game_time": "2026-07-21T20:00:00Z"},  # 4:00 PM ET
+            {"game_id": "notime", "game_time": ""},
+        ]
+
+    def test_excludes_started_keeps_everything_ahead(self):
+        now = datetime(2026, 7, 21, 18, 0, tzinfo=ET)  # 6 PM ET
+        got = unstarted_game_ids(self._preds(), now)
+        assert got == {"soon", "late", "notime"}
+
+    def test_no_upper_horizon_unlike_due_game_ids(self):
+        """A game 5h out is not 'due' but is still bettable."""
+        now = datetime(2026, 7, 21, 18, 0, tzinfo=ET)
+        assert "late" not in due_game_ids(self._preds(), now, lead_hours=4)
+        assert "late" in unstarted_game_ids(self._preds(), now)
+
+    def test_late_card_leaves_only_the_night_games(self):
+        """The 8:36 PM ET case that motivated this: most of the slate is gone."""
+        now = datetime(2026, 7, 21, 20, 36, tzinfo=ET)
+        assert unstarted_game_ids(self._preds(), now) == {"late", "notime"}
+
+    def test_unparseable_time_is_kept(self):
+        now = datetime(2026, 7, 22, 12, 0, tzinfo=ET)  # everything has started
+        assert unstarted_game_ids(self._preds(), now) == {"notime"}
 
 
 class TestSentLog:

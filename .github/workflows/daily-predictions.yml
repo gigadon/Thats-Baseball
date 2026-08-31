@@ -5,15 +5,30 @@ name: Daily MLB Predictions to Slack
 # and commits the accumulated data back so retraining data keeps growing.
 on:
   schedule:
-    # The 16:30 UTC run is the MAIN card: yesterday's review (full slate, high-conf,
-    # betting card), today's full slate, and the day's entire betting card. It also
-    # locks data/slates/{date}.json — the slate of record that settlement and
-    # accuracy grade. The later runs are wave reminders: the games starting within
-    # the next ~4h that haven't been sent yet, with fresh starters/lineups and NO
-    # bets (see mlb.etl.slate_record). Times are UTC; EDT/CDT (summer) shown. In
-    # winter they land 1h earlier — accepted DST drift.
-    #   16:30 UTC = 12:30 PM EDT / 11:30 AM CDT — main card (review + slate + bets)
+    # No cron is "the main card" any more. Whichever run arrives first on a given
+    # slate date does the MAIN card — yesterday's review, today's full slate, the
+    # day's entire betting card — and locks data/slates/{date}.json. Every run
+    # after that is a wave reminder: games starting within the next ~4h that
+    # haven't been sent yet, fresh starters/lineups, NO bets. The runner decides
+    # from that lock file, not from which cron fired
+    # (mlb.etl.slate_record.resolve_send_mode).
+    #
+    # Why: GitHub delays scheduled workflows under load, and binding the main card
+    # to `github.event.schedule == '30 16 * * *'` made that one cron a single point
+    # of failure. Observed 2026-08-26..08-30 — the 16:30 cron landed at 18:12,
+    # then 01:01 and 00:36 UTC (9:01 PM and 8:36 PM ET, after most of the slate had
+    # started), and on 2026-08-27 it never fired at all, so that day got no card
+    # and no bets. The first three crons below are all main-card candidates, so a
+    # delay or a drop costs timeliness instead of the whole day.
+    #
+    # Times are UTC; EDT/CDT (summer) shown. In winter they land 1h earlier —
+    # accepted DST drift.
+    #   16:30 UTC = 12:30 PM EDT / 11:30 AM CDT — intended main card
     - cron: "30 16 * * *"
+    #   17:30 UTC = 1:30 PM EDT / 12:30 PM CDT — backstop if 16:30 is delayed/dropped
+    - cron: "30 17 * * *"
+    #   18:30 UTC = 2:30 PM EDT / 1:30 PM CDT — second backstop
+    - cron: "30 18 * * *"
     #   19:30 UTC = 3:30 PM EDT / 2:30 PM CDT — afternoon wave
     - cron: "30 19 * * *"
     #   22:30 UTC = 6:30 PM EDT / 5:30 PM CDT — early-evening wave
@@ -46,10 +61,27 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e .
 
+      - name: Decide whether this run is the main card
+        id: mode
+        env:
+          PYTHONPATH: src
+        # Same answer the runner's --send-mode auto will reach a moment later:
+        # "preview" while the day is unlocked, "wave" once the card has gone out.
+        # Nothing between here and there locks the slate, and the concurrency
+        # group serialises runs, so the two cannot disagree.
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          from mlb.etl.daily_runner import _today_et
+          from mlb.etl.slate_record import resolve_send_mode
+
+          print(f"mode={resolve_send_mode(_today_et())}")
+          PY
+
       - name: Backfill recent game results (rolling team stats source)
-        # Once/day work — only on the morning cron (and manual runs). Later waves
-        # reuse the data the morning run committed, saving time and API quota.
-        if: github.event.schedule == '30 16 * * *' || github.event_name == 'workflow_dispatch'
+        # Once/day work — only on the run that turns out to be the main card (and
+        # manual runs). Later waves reuse the data it committed, saving time and
+        # API quota.
+        if: steps.mode.outputs.mode == 'preview' || github.event_name == 'workflow_dispatch'
         continue-on-error: true   # a backfill hiccup must not block predictions
         env:
           PYTHONPATH: src
@@ -90,14 +122,13 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
           WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY }}
-        # Main cron = preview (review + full slate + the whole betting card, and it
-        # locks data/slates). Every other cron = wave (only games starting within the
-        # next 4h, de-duped via data/sent, no bets). Manual dispatch = full slate.
+        # Scheduled runs use auto: preview (review + full slate + the whole betting
+        # card, and it locks data/slates) until the day is locked, wave after
+        # (games starting within the next 4h, de-duped via data/sent, no bets).
+        # Manual dispatch = full slate, unchanged.
         run: |
-          if [ "${{ github.event.schedule }}" = "30 16 * * *" ]; then
-            python -m mlb.etl.daily_runner --send-mode preview --lead-hours 4
-          elif [ -n "${{ github.event.schedule }}" ]; then
-            python -m mlb.etl.daily_runner --send-mode wave --lead-hours 4
+          if [ -n "${{ github.event.schedule }}" ]; then
+            python -m mlb.etl.daily_runner --send-mode auto --lead-hours 4
           else
             python -m mlb.etl.daily_runner --send-mode full
           fi

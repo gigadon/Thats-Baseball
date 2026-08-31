@@ -40,8 +40,8 @@ from mlb.features.formulas import (
     lineup_obp,
 )
 from mlb.features.stadium import compute_stadium_features, calculate_stadium_factor
-from mlb.etl.sent_log import append_sent, due_game_ids, load_sent
-from mlb.etl.slate_record import load_slate, lock_slate
+from mlb.etl.sent_log import append_sent, due_game_ids, load_sent, unstarted_game_ids
+from mlb.etl.slate_record import load_slate, lock_slate, resolve_send_mode
 from mlb.models.accuracy import build_daily_review
 from mlb.models.predict import GamePrediction, PredictionService
 from mlb.features.assembler import GameFeatureVector
@@ -109,6 +109,11 @@ class DailyRunner:
         Returns a summary dict with predictions, betting slip, and metadata.
         """
         target_date = target_date or _today_et()
+        # "auto" lets whichever scheduled run arrives first take the main card and
+        # the rest fall back to waves — see slate_record.resolve_send_mode.
+        if send_mode == "auto":
+            send_mode = resolve_send_mode(target_date, self.data_dir)
+            logger.info("send-mode auto resolved to %s for %s", send_mode, target_date)
         logger.info("=== Daily Runner: %s ===", target_date)
 
         result: dict[str, Any] = {
@@ -304,6 +309,23 @@ class DailyRunner:
                         if p.get("home_sp_name", "TBD") != "TBD"
                         and p.get("away_sp_name", "TBD") != "TBD"
                     }
+                    # ...and, on a live card, only games that haven't started.
+                    # A main card delayed into the evening would otherwise
+                    # recommend, lock and later grade bets that were never
+                    # placeable, putting fictional wagers into the ROI record.
+                    # Historical re-runs (target_date in the past) skip this:
+                    # every game there is "started" and the filter would empty
+                    # the slip.
+                    if target_date == _today_et():
+                        now_et = datetime.now(ZoneInfo("America/New_York"))
+                        bettable = unstarted_game_ids(result["predictions"], now_et)
+                        dropped = eligible_ids - bettable
+                        if dropped:
+                            logger.warning(
+                                "Card is late: %d game(s) already underway, excluded "
+                                "from betting: %s", len(dropped), sorted(dropped),
+                            )
+                        eligible_ids &= bettable
                     bet_preds = [p for p in predictions if p.game_id in eligible_ids]
                     odds_matched = self._match_odds_to_games(bet_preds, odds_by_game)
                     slip = self.betting_engine.find_value_bets(bet_preds, odds_matched)
@@ -2067,11 +2089,12 @@ def main():
     parser.add_argument("--model-dir", type=str, default="models")
     parser.add_argument(
         "--send-mode",
-        choices=["full", "preview", "wave"],
+        choices=["full", "preview", "wave", "auto"],
         default="full",
         help="full=whole slate (default); preview=the main card — review + full "
         "slate + the day's whole betting card, and locks the slate of record; "
-        "wave=only games starting within --lead-hours, de-duped, no bets",
+        "wave=only games starting within --lead-hours, de-duped, no bets; "
+        "auto=preview until the day is locked, wave after (what the schedule uses)",
     )
     parser.add_argument(
         "--lead-hours",

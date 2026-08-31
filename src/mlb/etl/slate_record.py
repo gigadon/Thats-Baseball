@@ -32,6 +32,21 @@ def slate_path(target_date: date, data_dir: Path = Path("data")) -> Path:
     return data_dir / "slates" / f"{target_date.isoformat()}.json"
 
 
+def resolve_send_mode(target_date: date, data_dir: Path = Path("data")) -> str:
+    """What a scheduled run should do right now: `preview` if the day is still
+    unlocked, `wave` once the main card has gone out.
+
+    Binding the main card to one cron's identity made it a single point of
+    failure. GitHub delays scheduled workflows under load — the 16:30 UTC cron
+    has landed as late as 00:36 UTC (20:36 ET the evening before), and on
+    2026-08-27 it never fired at all, so that day got no card and no bets.
+    Deciding from state instead means whichever run arrives first does the main
+    card and the rest fall back to waves, so a delayed or dropped cron costs
+    timeliness rather than the whole day.
+    """
+    return "wave" if load_slate(target_date, data_dir) is not None else "preview"
+
+
 def load_slate(target_date: date, data_dir: Path = Path("data")) -> dict | None:
     """The locked slate for `target_date`, or None if the main run never wrote one."""
     path = slate_path(target_date, data_dir)

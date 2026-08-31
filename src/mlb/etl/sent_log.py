@@ -6,6 +6,7 @@ haven't been sent yet today, so every game gets one card shortly before it start
 with fresh starters, odds, lineups, and weather.
 
 - `due_game_ids()` selects games in the `[now, now + lead_hours]` window.
+- `unstarted_game_ids()` selects everything still ahead of first pitch.
 - `data/sent/{date}.json` records game_ids already sent today so waves don't repeat.
 """
 
@@ -53,6 +54,25 @@ def due_game_ids(
         if now <= dt <= horizon:
             due.add(gid)
     return due
+
+
+def unstarted_game_ids(predictions: list[dict], now: datetime) -> set[str]:
+    """Game_ids whose first pitch is still ahead of `now` — i.e. still bettable.
+
+    `due_game_ids` answers "what should I remind about in the next few hours";
+    this answers "what can still be bet at all", with no upper horizon. The main
+    card needs the second question: GitHub has delayed the 16:30 UTC cron past
+    20:00 ET, and a card built then would otherwise recommend, lock and grade
+    bets on games that had already started.
+
+    Games with no parseable `game_time` are included, matching `due_game_ids` —
+    a scheduling quirk should never silently drop a game.
+    """
+    return {
+        str(p.get("game_id"))
+        for p in predictions
+        if (dt := parse_game_time(p.get("game_time"))) is None or dt >= now
+    }
 
 
 def _sent_path(target_date: date, data_dir: Path) -> Path:
