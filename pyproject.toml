@@ -18,7 +18,10 @@ dependencies = [
     # Model-critical libraries are PINNED: the committed model artifacts
     # (models/win_model, models/runs_model) are pickles created with these
     # exact versions and must load identically in CI (GitHub Actions daily
-    # job). Bump these only together with a model retrain.
+    # job). Bump these only together with a model retrain. pyarrow is in this
+    # block because data/training_data.parquet is the training set: without it
+    # build_training_data dies on to_parquet and the weekly retrain never gets
+    # as far as training anything (it did exactly that, silently, for 3 weeks).
     "numpy==2.2.0",
     "pandas==2.2.3",
     "scikit-learn==1.6.1",
@@ -26,6 +29,7 @@ dependencies = [
     "lightgbm==4.6.0",
     "catboost==1.2.10",
     "joblib==1.4.2",
+    "pyarrow==24.0.0",
     "fastapi>=0.111,<1.0",
     "uvicorn[standard]>=0.29,<1.0",
     "scipy>=1.13,<2.0",
