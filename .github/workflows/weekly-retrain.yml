@@ -102,3 +102,31 @@ jobs:
             data/training_data.parquet
             data/feature_defaults.json
           retention-days: 14
+
+      # Without this, a job that dies before the gate step reports NOTHING: the
+      # only Slack message came from `retrain_report --slack`, which is the last
+      # step. Three consecutive runs (2026-08-10/17/24) failed in "Rebuild
+      # training data" on a missing pyarrow and nobody heard about it for three
+      # weeks. This fires for any red run, gate failures included — the gate
+      # already sends its own detailed report, so keep this one generic.
+      - name: Report a failed run to Slack
+        if: failure()
+        env:
+          PYTHONPATH: src
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          python - <<'PY'
+          import asyncio
+          import os
+
+          from mlb.alerts import AlertService
+
+          run_url = (
+              f"{os.environ['GITHUB_SERVER_URL']}/{os.environ['GITHUB_REPOSITORY']}"
+              f"/actions/runs/{os.environ['GITHUB_RUN_ID']}"
+          )
+          asyncio.run(AlertService().send_alert(
+              ":x: *Weekly retrain run failed* — check the log before trusting "
+              f"any staging artifact.\n{run_url}"
+          ))
+          PY

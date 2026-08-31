@@ -1,5 +1,5 @@
 {
- "bp_freshness": 0.9381,
+ "bp_freshness": 0.9398,
  "bp_relievers_used_3d": 7.0,
  "bvp_ops": 0.75,
  "elo": 1500.0,
@@ -14,7 +14,7 @@
  "market_home_prob": 0.5,
  "market_total": 8.5,
  "platoon_adv": 0.5556,
- "platoon_wt_adv": 0.5456,
+ "platoon_wt_adv": 0.5462,
  "rest_days": 5.0,
  "sp_recent_era": 3.78,
  "sp_recent_k9": 8.1,
