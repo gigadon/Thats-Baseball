@@ -1,0 +1,97 @@
+name: Tests
+
+# Nothing in this repo ever installed the project from pyproject alone, so a
+# dependency that existed locally but not in pyproject was invisible until a
+# scheduled job died of it. That is exactly how weekly-retrain.yml failed on
+# 2026-08-10, 08-17 and 08-24: pyarrow was installed on the dev machine and
+# absent from [project.dependencies], so every `pd.read_parquet` on the runner
+# raised ImportError. Three silent Mondays.
+#
+# This job is the general guard for that class of bug, not a fix for that one:
+# a clean `pip install -e ".[dev]"` on a runner that has nothing preinstalled,
+# then the entry-point imports and the suite, on every push and PR.
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read   # reads the tree, writes nothing back
+
+concurrency:
+  # A branch with an open PR fires push AND pull_request; a fast follow-up push
+  # supersedes both. Only the newest run of a ref is worth finishing.
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15   # ~3 min install, <10s of tests — a longer run is stuck
+    steps:
+      - uses: actions/checkout@v4
+
+      # 3.12 to match daily-predictions.yml and weekly-retrain.yml. Testing on a
+      # version the scheduled jobs don't use would defeat the point.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        # From pyproject ONLY. Never add a package to this step to turn a run
+        # green: if an import fails here, the dependency is missing from
+        # pyproject and the scheduled workflows are already broken in production.
+        # Fix pyproject instead.
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Import the scheduled entry points
+        # The suite doesn't import every module the crons invoke, and the pyarrow
+        # break lived in a module no test happened to touch. These are the exact
+        # entry points of daily-predictions.yml and weekly-retrain.yml: a missing
+        # transitive dependency surfaces here in seconds instead of at 09:00 on a
+        # Monday. Keep this list in step with the `python -m` calls in those two
+        # workflows.
+        env:
+          PYTHONPATH: src
+        run: |
+          for module in mlb.etl.backfill \
+                        mlb.betting.settlement \
+                        mlb.models.accuracy \
+                        mlb.etl.daily_runner \
+                        mlb.etl.build_training_data \
+                        mlb.features.defaults \
+                        mlb.models.train_runs \
+                        mlb.models.retrain_report; do
+            echo "import $module"
+            python -c "import $module"
+          done
+
+      - name: Run tests
+        # PYTHONPATH=src on every invocation — the package is under src/ and the
+        # editable install alone doesn't put it on the path the way the local
+        # `PYTHONPATH=src python3 -m pytest` workflow expects.
+        env:
+          PYTHONPATH: src
+        run: python -m pytest -q
+
+      - name: Lint
+        # Advisory on purpose, for now. `ruff check .` reports 306 pre-existing
+        # violations on this tree: 119 E501, 75 N803/N806 (every one of them the
+        # sklearn `X` / `X_train` / `X_test` convention, which is correct code and
+        # wants a pyproject ignore rather than a rename), 51 F401, 17 I001, and a
+        # real F821 — undefined `pd` at src/mlb/etl/scheduler.py:209. Gating on
+        # that backlog would paint every run red and train us to ignore the test
+        # result sitting next to it.
+        #
+        # To make lint blocking: clear the backlog (`ruff check . --fix` handles
+        # 76 of them), decide on N803/N806 in [tool.ruff.lint], then delete the
+        # `continue-on-error` line below.
+        continue-on-error: true
+        # always() because a failing test step would otherwise skip this one, and
+        # a red suite is exactly when you are already looking at the run.
+        if: always()
+        # github format annotates the offending lines directly in the PR diff,
+        # which is what makes an advisory step useful for chipping away at it.
+        run: ruff check . --output-format=github
