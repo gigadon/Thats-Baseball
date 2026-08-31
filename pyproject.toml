@@ -30,9 +30,15 @@ dependencies = [
     "catboost==1.2.10",
     "joblib==1.4.2",
     "pyarrow==24.0.0",
+    # scipy is pinned for the same reason, one step removed: sklearn estimators
+    # can carry scipy objects inside their fitted state (IsotonicRegression holds
+    # a scipy.interpolate.interp1d, for one). Nothing in the current ensemble does
+    # — the calibrator is PlattCalibrator over a LogisticRegression — but that is a
+    # property of today's model shape, not a guarantee, and a range here means CI
+    # resolves a different scipy than the machine that authored the pickles.
+    "scipy==1.17.1",
     "fastapi>=0.111,<1.0",
     "uvicorn[standard]>=0.29,<1.0",
-    "scipy>=1.13,<2.0",
     "jinja2>=3.1,<4.0",
     "optuna>=3.5,<5.0",
 ]
