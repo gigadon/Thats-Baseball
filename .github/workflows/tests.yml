@@ -89,6 +89,9 @@ jobs:
         # 76 of them), decide on N803/N806 in [tool.ruff.lint], then delete the
         # `continue-on-error` line below.
         continue-on-error: true
+        # always() because a failing test step would otherwise skip this one, and
+        # a red suite is exactly when you are already looking at the run.
+        if: always()
         # github format annotates the offending lines directly in the PR diff,
         # which is what makes an advisory step useful for chipping away at it.
         run: ruff check . --output-format=github
