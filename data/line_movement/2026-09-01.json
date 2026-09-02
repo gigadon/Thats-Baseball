@@ -775,6 +775,51 @@
           "total_line": 8.5
         }
       ]
+    },
+    {
+      "timestamp": "2026-09-02T00:29:18",
+      "games": [
+        {
+          "game_id": "824313",
+          "home_team": "COL",
+          "away_team": "BAL",
+          "commence_time": "2026-09-02T00:41:00Z",
+          "home_prob": 0.4176,
+          "home_moneyline": 130,
+          "away_moneyline": -154,
+          "total_line": 11.0
+        },
+        {
+          "game_id": "823984",
+          "home_team": "LAA",
+          "away_team": "NYY",
+          "commence_time": "2026-09-02T01:39:00Z",
+          "home_prob": 0.3726,
+          "home_moneyline": 158,
+          "away_moneyline": -188,
+          "total_line": 7.5
+        },
+        {
+          "game_id": "825038",
+          "home_team": "ARI",
+          "away_team": "PHI",
+          "commence_time": "2026-09-02T01:41:00Z",
+          "home_prob": 0.4493,
+          "home_moneyline": 114,
+          "away_moneyline": -134,
+          "total_line": 7.5
+        },
+        {
+          "game_id": "823908",
+          "home_team": "LAD",
+          "away_team": "STL",
+          "commence_time": "2026-09-02T02:11:00Z",
+          "home_prob": 0.6361,
+          "home_moneyline": -196,
+          "away_moneyline": 164,
+          "total_line": 8.5
+        }
+      ]
     }
   ]
 }
