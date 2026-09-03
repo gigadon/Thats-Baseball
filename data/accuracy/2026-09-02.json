@@ -1,6 +1,6 @@
 {
   "date": "2026-09-02",
-  "tracked_at": "2026-09-03T04:52:24.146159",
+  "tracked_at": "2026-09-03T19:22:14.923601",
   "graded_from": "slate",
   "score_source": "mlb_api",
   "results": [
@@ -171,24 +171,29 @@
       "actual_away_score": 6,
       "actual_winner": "NYY",
       "correct": true
-    }
-  ],
-  "ungraded": [
+    },
     {
       "game_id": "823906",
       "home_team": "LAD",
       "away_team": "STL",
-      "reason": "no_score"
+      "home_win_prob": 0.6686,
+      "confidence": 86.3,
+      "predicted_winner": "LAD",
+      "actual_home_score": 6,
+      "actual_away_score": 8,
+      "actual_winner": "STL",
+      "correct": false
     }
   ],
+  "ungraded": [],
   "summary": {
-    "total_games": 14,
+    "total_games": 15,
     "correct": 4,
-    "incorrect": 10,
-    "accuracy": 0.2857,
-    "brier_score": 0.3023,
+    "incorrect": 11,
+    "accuracy": 0.2667,
+    "brier_score": 0.3119,
     "slate_games": 15,
-    "final_games": 14,
-    "graded_games": 14
+    "final_games": 15,
+    "graded_games": 15
   }
 }
