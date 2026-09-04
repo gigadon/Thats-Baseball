@@ -1,0 +1,116 @@
+{
+  "date": "2026-09-03",
+  "tracked_at": "2026-09-04T04:55:10.414990",
+  "graded_from": "slate",
+  "score_source": "mlb_api",
+  "results": [
+    {
+      "game_id": "823337",
+      "home_team": "PIT",
+      "away_team": "SF",
+      "home_win_prob": 0.6305,
+      "confidence": 78.9,
+      "predicted_winner": "PIT",
+      "actual_home_score": 5,
+      "actual_away_score": 2,
+      "actual_winner": "PIT",
+      "correct": true
+    },
+    {
+      "game_id": "824388",
+      "home_team": "CLE",
+      "away_team": "TOR",
+      "home_win_prob": 0.5507,
+      "confidence": 55.2,
+      "predicted_winner": "CLE",
+      "actual_home_score": 3,
+      "actual_away_score": 6,
+      "actual_winner": "TOR",
+      "correct": false
+    },
+    {
+      "game_id": "824144",
+      "home_team": "HOU",
+      "away_team": "CWS",
+      "home_win_prob": 0.5189,
+      "confidence": 31.5,
+      "predicted_winner": "HOU",
+      "actual_home_score": 6,
+      "actual_away_score": 2,
+      "actual_winner": "HOU",
+      "correct": true
+    },
+    {
+      "game_id": "824796",
+      "home_team": "BAL",
+      "away_team": "BOS",
+      "home_win_prob": 0.5433,
+      "confidence": 53.8,
+      "predicted_winner": "BAL",
+      "actual_home_score": 5,
+      "actual_away_score": 6,
+      "actual_winner": "BOS",
+      "correct": false
+    },
+    {
+      "game_id": "824632",
+      "home_team": "CHC",
+      "away_team": "MIL",
+      "home_win_prob": 0.5781,
+      "confidence": 62.7,
+      "predicted_winner": "CHC",
+      "actual_home_score": 2,
+      "actual_away_score": 1,
+      "actual_winner": "CHC",
+      "correct": true
+    },
+    {
+      "game_id": "824069",
+      "home_team": "KC",
+      "away_team": "MIA",
+      "home_win_prob": 0.5263,
+      "confidence": 47.3,
+      "predicted_winner": "KC",
+      "actual_home_score": 7,
+      "actual_away_score": 3,
+      "actual_winner": "KC",
+      "correct": true
+    },
+    {
+      "game_id": "822853",
+      "home_team": "TEX",
+      "away_team": "TB",
+      "home_win_prob": 0.41,
+      "confidence": 58.6,
+      "predicted_winner": "TB",
+      "actual_home_score": 6,
+      "actual_away_score": 0,
+      "actual_winner": "TEX",
+      "correct": false
+    }
+  ],
+  "ungraded": [
+    {
+      "game_id": "823095",
+      "home_team": "SEA",
+      "away_team": "OAK",
+      "reason": "no_score"
+    },
+    {
+      "game_id": "823907",
+      "home_team": "LAD",
+      "away_team": "STL",
+      "reason": "no_score"
+    }
+  ],
+  "summary": {
+    "total_games": 7,
+    "correct": 4,
+    "incorrect": 3,
+    "accuracy": 0.5714,
+    "brier_score": 0.2453,
+    "slate_games": 9,
+    "final_games": 7,
+    "graded_games": 7
+  }
+}
