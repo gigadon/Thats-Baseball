@@ -315,6 +315,21 @@
           "total_line": 8.5
         }
       ]
+    },
+    {
+      "timestamp": "2026-09-07T00:17:19",
+      "games": [
+        {
+          "game_id": "823903",
+          "home_team": "LAD",
+          "away_team": "WSH",
+          "commence_time": "2026-09-07T02:11:00Z",
+          "home_prob": 0.6464,
+          "home_moneyline": -205,
+          "away_moneyline": 172,
+          "total_line": 8.5
+        }
+      ]
     }
   ]
 }
