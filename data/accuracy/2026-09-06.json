@@ -1,6 +1,6 @@
 {
   "date": "2026-09-06",
-  "tracked_at": "2026-09-07T05:02:11.632388",
+  "tracked_at": "2026-09-07T20:05:07.633440",
   "graded_from": "slate",
   "score_source": "mlb_api",
   "results": [
@@ -171,24 +171,29 @@
       "actual_away_score": 1,
       "actual_winner": "CWS",
       "correct": true
-    }
-  ],
-  "ungraded": [
+    },
     {
       "game_id": "823903",
       "home_team": "LAD",
       "away_team": "WSH",
-      "reason": "no_score"
+      "home_win_prob": 0.6671,
+      "confidence": 89.6,
+      "predicted_winner": "LAD",
+      "actual_home_score": 7,
+      "actual_away_score": 5,
+      "actual_winner": "LAD",
+      "correct": true
     }
   ],
+  "ungraded": [],
   "summary": {
-    "total_games": 14,
-    "correct": 7,
+    "total_games": 15,
+    "correct": 8,
     "incorrect": 7,
-    "accuracy": 0.5,
-    "brier_score": 0.2312,
+    "accuracy": 0.5333,
+    "brier_score": 0.2232,
     "slate_games": 15,
-    "final_games": 14,
-    "graded_games": 14
+    "final_games": 15,
+    "graded_games": 15
   }
 }
