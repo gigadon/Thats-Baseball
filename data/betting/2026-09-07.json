@@ -1,0 +1,42 @@
+{
+  "date": "2026-09-07",
+  "settled_at": "2026-09-08T05:00:23",
+  "bankroll": 10000.0,
+  "bets": [
+    {
+      "game_id": "823254",
+      "game_date": "2026-09-07",
+      "home_team": "SD",
+      "away_team": "WSH",
+      "bet_type": "moneyline",
+      "selection": "away",
+      "odds": 172,
+      "model_prob": 0.4112,
+      "implied_prob": 0.3536,
+      "edge": 0.0576,
+      "edge_pct": 5.76,
+      "kelly_fraction": 0.0689,
+      "recommended_stake": 241.06,
+      "confidence": 66.8,
+      "ev_per_dollar": 0.1185,
+      "decimal_odds": 2.72,
+      "total_line": null,
+      "actual_home_score": 3,
+      "actual_away_score": 2,
+      "result": "loss",
+      "pnl": -241.06
+    }
+  ],
+  "summary": {
+    "bets_placed": 1,
+    "bets_won": 0,
+    "bets_lost": 1,
+    "bets_pushed": 0,
+    "total_staked": 241.06,
+    "daily_pnl": -241.06,
+    "roi": -1.0,
+    "cumulative_pnl": 974.3,
+    "max_drawdown": 0.8801,
+    "bets_on_card": 2
+  }
+}
