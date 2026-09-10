@@ -1,0 +1,546 @@
+{
+  "date": "2026-09-10",
+  "locked_at": "2026-09-10T01:03:57-04:00",
+  "predictions": [
+    {
+      "game_id": "824872",
+      "game_date": "2026-09-10",
+      "home_team": "ATL",
+      "away_team": "TB",
+      "home_win_prob": 0.5527,
+      "away_win_prob": 0.4473,
+      "predicted_home_runs": 4.6,
+      "predicted_away_runs": 4.4,
+      "predicted_total": 8.9,
+      "confidence": 55.3,
+      "model_agreement": 0.901,
+      "predicted_winner": "ATL",
+      "model_predictions": {
+        "XGBoost": 0.5249638557434082,
+        "LightGBM": 0.5766751764217777,
+        "CatBoost": 0.5483457460660816,
+        "RandomForest": 0.509801614616298,
+        "LogisticRegression": 0.5140425592708274
+      },
+      "top_factors": [
+        [
+          "A Sp Season Ip",
+          "",
+          74.1
+        ],
+        [
+          "H Sp Season Ip",
+          "",
+          62.9
+        ],
+        [
+          "A Gp",
+          "",
+          39.0
+        ],
+        [
+          "H Gp",
+          "",
+          37.5
+        ],
+        [
+          "Sp Season Ip",
+          "",
+          -22.3
+        ],
+        [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          14.0
+        ],
+        [
+          "Elo Diff",
+          "",
+          -5.1
+        ],
+        [
+          "A Bp Era 7",
+          "",
+          1.9
+        ],
+        [
+          "H Bp K9 7",
+          "",
+          1.8
+        ],
+        [
+          "A Sp Recent K9",
+          "",
+          1.6
+        ]
+      ],
+      "home_power_score": 47.9,
+      "away_power_score": 48.5,
+      "home_sp_name": "Mart\u00edn P\u00e9rez",
+      "away_sp_name": "Nick Martinez",
+      "home_wins": 85,
+      "home_losses": 61,
+      "away_wins": 87,
+      "away_losses": 58,
+      "home_streak": "L3",
+      "away_streak": "W2",
+      "home_sp_era": 3.25,
+      "away_sp_era": 3.04,
+      "home_sp_wins": 8,
+      "home_sp_losses": 9,
+      "away_sp_wins": 14,
+      "away_sp_losses": 4,
+      "game_time": "2026-09-10T16:15:00Z",
+      "home_moneyline": -123,
+      "away_moneyline": 102,
+      "total_line": 8.5,
+      "over_odds": -103,
+      "under_odds": -117,
+      "weather": {
+        "temp": 76.5,
+        "wind": 0.0,
+        "wind_dir": "calm",
+        "humidity": 0.72,
+        "is_dome": false
+      }
+    },
+    {
+      "game_id": "823413",
+      "game_date": "2026-09-10",
+      "home_team": "PHI",
+      "away_team": "HOU",
+      "home_win_prob": 0.6285,
+      "away_win_prob": 0.3715,
+      "predicted_home_runs": 4.4,
+      "predicted_away_runs": 4.2,
+      "predicted_total": 8.7,
+      "confidence": 78.8,
+      "model_agreement": 0.932,
+      "predicted_winner": "PHI",
+      "model_predictions": {
+        "XGBoost": 0.6420677900314331,
+        "LightGBM": 0.6477028797276709,
+        "CatBoost": 0.6295562287315534,
+        "RandomForest": 0.601713472696627,
+        "LogisticRegression": 0.6146415457374094
+      },
+      "top_factors": [
+        [
+          "H Sp Season Ip",
+          "",
+          68.7
+        ],
+        [
+          "Sp Season Ip",
+          "",
+          54.7
+        ],
+        [
+          "A Gp",
+          "",
+          39.0
+        ],
+        [
+          "H Gp",
+          "",
+          37.2
+        ],
+        [
+          "A Sp Season Ip",
+          "",
+          23.0
+        ],
+        [
+          "Elo Diff",
+          "",
+          18.5
+        ],
+        [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          13.5
+        ],
+        [
+          "A Sp Recent K9",
+          "",
+          3.7
+        ],
+        [
+          "A Bp Era 14",
+          "",
+          1.9
+        ],
+        [
+          "A Bp K9 7",
+          "",
+          1.7
+        ]
+      ],
+      "home_power_score": 50.6,
+      "away_power_score": 47.1,
+      "home_sp_name": "Zack Wheeler",
+      "away_sp_name": "Cristian Javier",
+      "home_wins": 82,
+      "home_losses": 64,
+      "away_wins": 74,
+      "away_losses": 72,
+      "home_streak": "W1",
+      "away_streak": "L1",
+      "home_sp_era": 3.23,
+      "away_sp_era": 5.98,
+      "home_sp_wins": 12,
+      "home_sp_losses": 5,
+      "away_sp_wins": 2,
+      "away_sp_losses": 5,
+      "game_time": "2026-09-10T17:05:00Z",
+      "home_moneyline": -178,
+      "away_moneyline": 150,
+      "total_line": 8.5,
+      "over_odds": -110,
+      "under_odds": -110,
+      "weather": {
+        "temp": 74.0,
+        "wind": 4.0,
+        "wind_dir": "in",
+        "humidity": 0.76,
+        "is_dome": false
+      }
+    },
+    {
+      "game_id": "823088",
+      "game_date": "2026-09-10",
+      "home_team": "SEA",
+      "away_team": "TEX",
+      "home_win_prob": 0.5517,
+      "away_win_prob": 0.4483,
+      "predicted_home_runs": 3.8,
+      "predicted_away_runs": 3.6,
+      "predicted_total": 7.3,
+      "confidence": 39.6,
+      "model_agreement": 0.285,
+      "predicted_winner": "SEA",
+      "model_predictions": {
+        "XGBoost": 0.6152253746986389,
+        "LightGBM": 0.6232282791269061,
+        "CatBoost": 0.6209262399501607,
+        "RandomForest": 0.5930333245522658,
+        "LogisticRegression": 0.16733381538926312
+      },
+      "top_factors": [
+        [
+          "H Sp Season Ip",
+          "",
+          83.2
+        ],
+        [
+          "A Sp Season Ip",
+          "",
+          66.4
+        ],
+        [
+          "A Gp",
+          "",
+          39.1
+        ],
+        [
+          "H Gp",
+          "",
+          37.4
+        ],
+        [
+          "Sp Season Ip",
+          "",
+          13.7
+        ],
+        [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          13.1
+        ],
+        [
+          "Humidity",
+          "Stadium humidity %",
+          6.4
+        ],
+        [
+          "A Sp Recent K9",
+          "",
+          2.5
+        ],
+        [
+          "A Bp Era 14",
+          "",
+          2.1
+        ],
+        [
+          "H Bp K9 7",
+          "",
+          1.8
+        ]
+      ],
+      "home_power_score": 47.0,
+      "away_power_score": 45.6,
+      "home_sp_name": "Logan Gilbert",
+      "away_sp_name": "Jacob deGrom",
+      "home_wins": 68,
+      "home_losses": 78,
+      "away_wins": 72,
+      "away_losses": 74,
+      "home_streak": "W1",
+      "away_streak": "L1",
+      "home_sp_era": 3.71,
+      "away_sp_era": 3.96,
+      "home_sp_wins": 11,
+      "home_sp_losses": 9,
+      "away_sp_wins": 10,
+      "away_sp_losses": 9,
+      "game_time": "2026-09-10T20:10:00Z",
+      "home_moneyline": -131,
+      "away_moneyline": 109,
+      "total_line": 7.0,
+      "over_odds": 103,
+      "under_odds": -124,
+      "weather": {
+        "temp": 64.9,
+        "wind": 3.4,
+        "wind_dir": "out",
+        "humidity": 0.75,
+        "is_dome": false
+      }
+    },
+    {
+      "game_id": "823499",
+      "game_date": "2026-09-10",
+      "home_team": "NYY",
+      "away_team": "COL",
+      "home_win_prob": 0.6494,
+      "away_win_prob": 0.3506,
+      "predicted_home_runs": 4.8,
+      "predicted_away_runs": 4.6,
+      "predicted_total": 9.3,
+      "confidence": 84.7,
+      "model_agreement": 0.917,
+      "predicted_winner": "NYY",
+      "model_predictions": {
+        "XGBoost": 0.618432343006134,
+        "LightGBM": 0.6705130582926537,
+        "CatBoost": 0.6779771241857675,
+        "RandomForest": 0.6621045671186974,
+        "LogisticRegression": 0.6506556537094197
+      },
+      "top_factors": [
+        [
+          "Elo Diff",
+          "",
+          67.8
+        ],
+        [
+          "A Sp Season Ip",
+          "",
+          49.4
+        ],
+        [
+          "H Sp Season Ip",
+          "",
+          48.2
+        ],
+        [
+          "A Gp",
+          "",
+          39.0
+        ],
+        [
+          "H Gp",
+          "",
+          37.0
+        ],
+        [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          13.7
+        ],
+        [
+          "Sp Season Ip",
+          "",
+          -6.9
+        ],
+        [
+          "A Sp Recent K9",
+          "",
+          2.9
+        ],
+        [
+          "Wind speed",
+          "Wind at stadium (mph)",
+          2.5
+        ],
+        [
+          "A Bp Era 7",
+          "",
+          2.2
+        ]
+      ],
+      "home_power_score": 53.5,
+      "away_power_score": 33.2,
+      "home_sp_name": "Max Fried",
+      "away_sp_name": "Ryan Feltner",
+      "home_wins": 83,
+      "home_losses": 62,
+      "away_wins": 55,
+      "away_losses": 90,
+      "home_streak": "W2",
+      "away_streak": "L3",
+      "home_sp_era": 2.73,
+      "away_sp_era": 5.91,
+      "home_sp_wins": 4,
+      "home_sp_losses": 4,
+      "away_sp_wins": 5,
+      "away_sp_losses": 9,
+      "game_time": "2026-09-10T23:05:00Z",
+      "home_moneyline": -344,
+      "away_moneyline": 270,
+      "total_line": 9.0,
+      "over_odds": -101,
+      "under_odds": -120,
+      "weather": {
+        "temp": 75.0,
+        "wind": 15.0,
+        "wind_dir": "in",
+        "humidity": 0.72,
+        "is_dome": false
+      }
+    },
+    {
+      "game_id": "824550",
+      "game_date": "2026-09-10",
+      "home_team": "CWS",
+      "away_team": "PIT",
+      "home_win_prob": 0.5046,
+      "away_win_prob": 0.4954,
+      "predicted_home_runs": 4.0,
+      "predicted_away_runs": 3.8,
+      "predicted_total": 7.9,
+      "confidence": 41.3,
+      "model_agreement": 0.915,
+      "predicted_winner": "CWS",
+      "model_predictions": {
+        "XGBoost": 0.46679186820983887,
+        "LightGBM": 0.4943024444497922,
+        "CatBoost": 0.47174000695207274,
+        "RandomForest": 0.44999399680155305,
+        "LogisticRegression": 0.510081981249183
+      },
+      "top_factors": [
+        [
+          "Sp Season Ip",
+          "",
+          -39.6
+        ],
+        [
+          "A Gp",
+          "",
+          39.1
+        ],
+        [
+          "H Gp",
+          "",
+          36.9
+        ],
+        [
+          "A Sp Season Ip",
+          "",
+          36.4
+        ],
+        [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          13.1
+        ],
+        [
+          "H Sp Season Ip",
+          "",
+          8.1
+        ],
+        [
+          "A Sp Recent K9",
+          "",
+          3.4
+        ],
+        [
+          "Elo Diff",
+          "",
+          -3.0
+        ],
+        [
+          "A Sp K9 7",
+          "",
+          2.2
+        ],
+        [
+          "H Sp Era Season",
+          "",
+          1.8
+        ]
+      ],
+      "home_power_score": 42.2,
+      "away_power_score": 43.6,
+      "home_sp_name": "Hagen Smith",
+      "away_sp_name": "Jared Jones",
+      "home_wins": 75,
+      "home_losses": 70,
+      "away_wins": 73,
+      "away_losses": 73,
+      "home_streak": "L2",
+      "away_streak": "W3",
+      "home_sp_era": 0.56,
+      "away_sp_era": 4.46,
+      "home_sp_wins": 3,
+      "home_sp_losses": 1,
+      "away_sp_wins": 3,
+      "away_sp_losses": 6,
+      "game_time": "2026-09-10T23:40:00Z",
+      "home_moneyline": -106,
+      "away_moneyline": -110,
+      "total_line": 7.5,
+      "over_odds": -122,
+      "under_odds": 100,
+      "weather": {
+        "temp": 72.1,
+        "wind": 6.9,
+        "wind_dir": "cross",
+        "humidity": 0.92,
+        "is_dome": false
+      }
+    }
+  ],
+  "betting_slip": {
+    "slip_date": "2026-09-10",
+    "bankroll": 10000.0,
+    "total_stake": 8.82,
+    "num_bets": 1,
+    "bets": [
+      {
+        "game_id": "824872",
+        "game_date": "2026-09-10",
+        "home_team": "ATL",
+        "away_team": "TB",
+        "bet_type": "moneyline",
+        "selection": "home",
+        "odds": -123,
+        "model_prob": 0.5527,
+        "implied_prob": 0.527,
+        "edge": 0.0257,
+        "edge_pct": 2.57,
+        "kelly_fraction": 0.0025,
+        "recommended_stake": 8.82,
+        "confidence": 55.3,
+        "ev_per_dollar": 0.002,
+        "decimal_odds": 1.813,
+        "total_line": null
+      }
+    ],
+    "total_ev": 0.02,
+    "max_exposure": 8.82,
+    "risk_level": "conservative"
+  }
+}
