@@ -55,6 +55,41 @@
           "total_line": 7.5
         }
       ]
+    },
+    {
+      "timestamp": "2026-09-10T19:12:28",
+      "games": [
+        {
+          "game_id": "823088",
+          "home_team": "SEA",
+          "away_team": "TEX",
+          "commence_time": "2026-09-10T20:10:00Z",
+          "home_prob": 0.5248,
+          "home_moneyline": -122,
+          "away_moneyline": 101,
+          "total_line": 7.0
+        },
+        {
+          "game_id": "823499",
+          "home_team": "NYY",
+          "away_team": "COL",
+          "commence_time": "2026-09-10T23:05:00Z",
+          "home_prob": 0.7179,
+          "home_moneyline": -301,
+          "away_moneyline": 239,
+          "total_line": 8.5
+        },
+        {
+          "game_id": "824550",
+          "home_team": "CWS",
+          "away_team": "PIT",
+          "commence_time": "2026-09-10T23:41:00Z",
+          "home_prob": 0.5,
+          "home_moneyline": -108,
+          "away_moneyline": -108,
+          "total_line": 7.5
+        }
+      ]
     }
   ]
 }
