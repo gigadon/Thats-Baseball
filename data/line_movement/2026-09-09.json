@@ -615,6 +615,31 @@
           "total_line": 8.5
         }
       ]
+    },
+    {
+      "timestamp": "2026-09-10T00:30:57",
+      "games": [
+        {
+          "game_id": "824064",
+          "home_team": "KC",
+          "away_team": "ARI",
+          "commence_time": "2026-09-10T00:31:00Z",
+          "home_prob": 0.4758,
+          "home_moneyline": 102,
+          "away_moneyline": -120,
+          "total_line": 8.5
+        },
+        {
+          "game_id": "823900",
+          "home_team": "LAD",
+          "away_team": "CIN",
+          "commence_time": "2026-09-10T02:11:00Z",
+          "home_prob": 0.7044,
+          "home_moneyline": -275,
+          "away_moneyline": 225,
+          "total_line": 8.5
+        }
+      ]
     }
   ]
 }
