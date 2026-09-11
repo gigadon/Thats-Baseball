@@ -1,0 +1,79 @@
+{
+  "date": "2026-09-10",
+  "tracked_at": "2026-09-11T04:59:37.258276",
+  "graded_from": "slate",
+  "score_source": "mlb_api",
+  "results": [
+    {
+      "game_id": "824872",
+      "home_team": "ATL",
+      "away_team": "TB",
+      "home_win_prob": 0.5527,
+      "confidence": 55.3,
+      "predicted_winner": "ATL",
+      "actual_home_score": 3,
+      "actual_away_score": 1,
+      "actual_winner": "ATL",
+      "correct": true
+    },
+    {
+      "game_id": "823413",
+      "home_team": "PHI",
+      "away_team": "HOU",
+      "home_win_prob": 0.6285,
+      "confidence": 78.8,
+      "predicted_winner": "PHI",
+      "actual_home_score": 1,
+      "actual_away_score": 2,
+      "actual_winner": "HOU",
+      "correct": false
+    },
+    {
+      "game_id": "823088",
+      "home_team": "SEA",
+      "away_team": "TEX",
+      "home_win_prob": 0.5517,
+      "confidence": 39.6,
+      "predicted_winner": "SEA",
+      "actual_home_score": 4,
+      "actual_away_score": 3,
+      "actual_winner": "SEA",
+      "correct": true
+    },
+    {
+      "game_id": "823499",
+      "home_team": "NYY",
+      "away_team": "COL",
+      "home_win_prob": 0.6494,
+      "confidence": 84.7,
+      "predicted_winner": "NYY",
+      "actual_home_score": 10,
+      "actual_away_score": 3,
+      "actual_winner": "NYY",
+      "correct": true
+    },
+    {
+      "game_id": "824550",
+      "home_team": "CWS",
+      "away_team": "PIT",
+      "home_win_prob": 0.5046,
+      "confidence": 41.3,
+      "predicted_winner": "CWS",
+      "actual_home_score": 0,
+      "actual_away_score": 2,
+      "actual_winner": "PIT",
+      "correct": false
+    }
+  ],
+  "ungraded": [],
+  "summary": {
+    "total_games": 5,
+    "correct": 3,
+    "incorrect": 2,
+    "accuracy": 0.6,
+    "brier_score": 0.2347,
+    "slate_games": 5,
+    "final_games": 5,
+    "graded_games": 5
+  }
+}
