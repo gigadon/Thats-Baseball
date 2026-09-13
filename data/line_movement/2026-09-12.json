@@ -515,6 +515,21 @@
           "total_line": 9.5
         }
       ]
+    },
+    {
+      "timestamp": "2026-09-13T00:13:12",
+      "games": [
+        {
+          "game_id": "824955",
+          "home_team": "OAK",
+          "away_team": "SEA",
+          "commence_time": "2026-09-13T01:41:00Z",
+          "home_prob": 0.4004,
+          "home_moneyline": 140,
+          "away_moneyline": -166,
+          "total_line": 9.5
+        }
+      ]
     }
   ]
 }
