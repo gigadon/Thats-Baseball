@@ -240,6 +240,21 @@
           "total_line": 7.5
         }
       ]
+    },
+    {
+      "timestamp": "2026-09-13T21:36:35",
+      "games": [
+        {
+          "game_id": "823171",
+          "home_team": "SF",
+          "away_team": "SD",
+          "commence_time": "2026-09-13T23:21:00Z",
+          "home_prob": 0.4365,
+          "home_moneyline": 120,
+          "away_moneyline": -142,
+          "total_line": 7.5
+        }
+      ]
     }
   ]
 }
