@@ -1,6 +1,6 @@
 {
   "date": "2026-09-15",
-  "tracked_at": "2026-09-16T05:04:53.010722",
+  "tracked_at": "2026-09-16T19:38:54.782012",
   "graded_from": "slate",
   "score_source": "mlb_api",
   "results": [
@@ -171,24 +171,29 @@
       "actual_away_score": 1,
       "actual_winner": "LAA",
       "correct": false
-    }
-  ],
-  "ungraded": [
+    },
     {
       "game_id": "825030",
       "home_team": "ARI",
       "away_team": "MIA",
-      "reason": "no_score"
+      "home_win_prob": 0.5657,
+      "confidence": 43.3,
+      "predicted_winner": "ARI",
+      "actual_home_score": 2,
+      "actual_away_score": 4,
+      "actual_winner": "MIA",
+      "correct": false
     }
   ],
+  "ungraded": [],
   "summary": {
-    "total_games": 14,
+    "total_games": 15,
     "correct": 5,
-    "incorrect": 9,
-    "accuracy": 0.3571,
-    "brier_score": 0.2726,
+    "incorrect": 10,
+    "accuracy": 0.3333,
+    "brier_score": 0.2757,
     "slate_games": 15,
-    "final_games": 14,
-    "graded_games": 14
+    "final_games": 15,
+    "graded_games": 15
   }
 }
