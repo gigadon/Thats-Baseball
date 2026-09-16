@@ -765,6 +765,31 @@
           "total_line": 8.5
         }
       ]
+    },
+    {
+      "timestamp": "2026-09-16T00:45:50",
+      "games": [
+        {
+          "game_id": "823980",
+          "home_team": "LAA",
+          "away_team": "SEA",
+          "commence_time": "2026-09-16T01:38:00Z",
+          "home_prob": 0.3988,
+          "home_moneyline": 140,
+          "away_moneyline": -169,
+          "total_line": 8.0
+        },
+        {
+          "game_id": "825030",
+          "home_team": "ARI",
+          "away_team": "MIA",
+          "commence_time": "2026-09-16T01:40:00Z",
+          "home_prob": 0.5809,
+          "home_moneyline": -155,
+          "away_moneyline": 128,
+          "total_line": 8.5
+        }
+      ]
     }
   ]
 }
