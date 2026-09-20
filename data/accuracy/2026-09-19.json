@@ -1,6 +1,6 @@
 {
   "date": "2026-09-19",
-  "tracked_at": "2026-09-20T05:11:09.373486",
+  "tracked_at": "2026-09-20T18:58:05.317002",
   "graded_from": "slate",
   "score_source": "mlb_api",
   "results": [
@@ -171,24 +171,29 @@
       "actual_away_score": 4,
       "actual_winner": "LAD",
       "correct": true
-    }
-  ],
-  "ungraded": [
+    },
     {
       "game_id": "823976",
       "home_team": "LAA",
       "away_team": "MIN",
-      "reason": "no_score"
+      "home_win_prob": 0.5537,
+      "confidence": 50.1,
+      "predicted_winner": "LAA",
+      "actual_home_score": 6,
+      "actual_away_score": 5,
+      "actual_winner": "LAA",
+      "correct": true
     }
   ],
+  "ungraded": [],
   "summary": {
-    "total_games": 14,
-    "correct": 9,
+    "total_games": 15,
+    "correct": 10,
     "incorrect": 5,
-    "accuracy": 0.6429,
-    "brier_score": 0.2173,
+    "accuracy": 0.6667,
+    "brier_score": 0.2161,
     "slate_games": 15,
-    "final_games": 14,
-    "graded_games": 14
+    "final_games": 15,
+    "graded_games": 15
   }
 }
