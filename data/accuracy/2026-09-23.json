@@ -1,6 +1,6 @@
 {
   "date": "2026-09-23",
-  "tracked_at": "2026-09-24T05:10:51.112603",
+  "tracked_at": "2026-09-24T20:04:30.814686",
   "graded_from": "slate",
   "score_source": "mlb_api",
   "results": [
@@ -171,30 +171,41 @@
       "actual_away_score": 3,
       "actual_winner": "OAK",
       "correct": true
-    }
-  ],
-  "ungraded": [
+    },
     {
       "game_id": "823894",
       "home_team": "LAD",
       "away_team": "SD",
-      "reason": "no_score"
+      "home_win_prob": 0.6053,
+      "confidence": 64.0,
+      "predicted_winner": "LAD",
+      "actual_home_score": 1,
+      "actual_away_score": 5,
+      "actual_winner": "SD",
+      "correct": false
     },
     {
       "game_id": "823086",
       "home_team": "SEA",
       "away_team": "HOU",
-      "reason": "no_score"
+      "home_win_prob": 0.5592,
+      "confidence": 31.7,
+      "predicted_winner": "SEA",
+      "actual_home_score": 6,
+      "actual_away_score": 5,
+      "actual_winner": "SEA",
+      "correct": true
     }
   ],
+  "ungraded": [],
   "summary": {
-    "total_games": 14,
-    "correct": 9,
-    "incorrect": 5,
-    "accuracy": 0.6429,
-    "brier_score": 0.2489,
+    "total_games": 16,
+    "correct": 10,
+    "incorrect": 6,
+    "accuracy": 0.625,
+    "brier_score": 0.2528,
     "slate_games": 16,
-    "final_games": 14,
-    "graded_games": 14
+    "final_games": 16,
+    "graded_games": 16
   }
 }
