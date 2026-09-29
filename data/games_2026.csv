@@ -2429,3 +2429,7 @@ game_id,game_date,home_team_id,away_team_id,home_score,away_score,status
 824542,2026-09-27,CWS,COL,4,2,Final
 824705,2026-09-27,BOS,CHC,2,6,Final
 824948,2026-09-27,OAK,HOU,0,9,Final
+849843,2026-09-29,SD,CHC,,,Scheduled
+849845,2026-09-29,ATL,PHI,,,Scheduled
+849849,2026-09-29,HOU,CWS,,,Scheduled
+849851,2026-09-29,NYY,BOS,,,Scheduled
