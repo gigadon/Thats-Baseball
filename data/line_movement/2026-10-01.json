@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-01",
+  "snapshots": [
+    {
+      "timestamp": "2026-10-01T06:20:59",
+      "games": [
+        {
+          "game_id": "849844",
+          "home_team": "ATL",
+          "away_team": "PHI",
+          "commence_time": "2026-10-02T00:11:00Z",
+          "home_prob": 0.4846,
+          "home_moneyline": -102,
+          "away_moneyline": -116,
+          "total_line": 7.5
+        }
+      ]
+    }
+  ]
+}

@@ -50444,7 +50444,7 @@ game_id,game_date,team_id,side,player_id,player_name,at_bats,runs,hits,doubles,t
 824785,2026-09-23,BAL,home,691723,Coby Mayo,4,0,0,0,0,0,0,0,2,0
 824785,2026-09-23,TOR,away,676391,Ernie Clement,4,0,2,1,0,0,0,0,0,0
 824785,2026-09-23,TOR,away,665926,Andrés Giménez,4,0,2,2,0,0,0,0,1,0
-824785,2026-09-23,TOR,away,678218,Brandon Valenzuela,4,0,2,0,0,0,1,0,0,0
+824785,2026-09-23,TOR,away,678218,Brandon Valenzuela,4,0,1,0,0,0,0,0,0,0
 824785,2026-09-23,TOR,away,676914,Davis Schneider,1,0,0,0,0,0,0,0,0,0
 824785,2026-09-23,TOR,away,664770,Nathan Lukes,5,0,1,0,0,0,0,0,1,0
 824785,2026-09-23,TOR,away,543807,George Springer,4,1,1,0,0,0,0,0,1,0
@@ -50705,7 +50705,7 @@ game_id,game_date,team_id,side,player_id,player_name,at_bats,runs,hits,doubles,t
 824707,2026-09-24,BOS,home,702332,Caleb Durbin,3,0,0,0,0,0,0,1,1,0
 824707,2026-09-24,BOS,home,686765,Nick Sogard,4,0,1,0,0,0,0,0,1,0
 824707,2026-09-24,BOS,home,680776,Jarren Duran,3,0,1,0,0,0,0,0,0,1
-824707,2026-09-24,BOS,home,678882,Ceddanne Rafaela,3,0,0,0,0,0,0,1,1,0
+824707,2026-09-24,BOS,home,678882,Ceddanne Rafaela,3,0,1,0,0,0,0,1,1,0
 824707,2026-09-24,CLE,away,694197,Angel Genao,0,0,0,0,0,0,0,0,0,0
 824707,2026-09-24,CLE,away,800050,Chase DeLauter,4,0,0,0,0,0,0,0,3,0
 824707,2026-09-24,CLE,away,683953,Travis Bazzana,3,0,0,0,0,0,0,0,1,0
@@ -50917,7 +50917,7 @@ game_id,game_date,team_id,side,player_id,player_name,at_bats,runs,hits,doubles,t
 823491,2026-09-25,NYY,home,683011,Anthony Volpe,4,0,2,0,0,0,0,0,2,0
 823491,2026-09-25,NYY,home,806146,George Lombard Jr.,4,0,0,0,0,0,0,0,2,0
 823491,2026-09-25,BAL,away,669236,Jeremiah Jackson,4,1,1,0,0,1,1,1,2,0
-823491,2026-09-25,BAL,away,683002,Gunnar Henderson,5,0,2,0,0,0,1,0,2,0
+823491,2026-09-25,BAL,away,683002,Gunnar Henderson,5,0,1,0,0,0,0,0,2,0
 823491,2026-09-25,BAL,away,681047,Christian Franklin,5,2,2,0,0,0,1,0,1,0
 823491,2026-09-25,BAL,away,687637,Dylan Beavers,4,2,1,0,0,1,4,2,2,0
 823491,2026-09-25,BAL,away,624413,Pete Alonso,5,2,3,0,0,2,3,0,1,0
@@ -50991,7 +50991,7 @@ game_id,game_date,team_id,side,player_id,player_name,at_bats,runs,hits,doubles,t
 824058,2026-09-25,KC,home,695600,Carter Jensen,4,2,2,0,0,2,5,0,1,0
 824058,2026-09-25,KC,home,521692,Salvador Perez,4,1,1,0,0,1,2,1,0,0
 824058,2026-09-25,KC,home,670231,John Rave,3,2,1,0,0,0,0,1,0,1
-824058,2026-09-25,KC,home,686681,Michael Massey,5,0,1,0,0,0,0,0,2,0
+824058,2026-09-25,KC,home,686681,Michael Massey,5,0,2,0,0,0,0,0,2,0
 824058,2026-09-25,KC,home,686469,Vinnie Pasquantino,4,0,1,0,0,0,0,1,1,0
 824058,2026-09-25,KC,home,664728,Kyle Isbel,3,1,1,0,0,0,0,0,0,0
 824058,2026-09-25,KC,home,672580,Maikel Garcia,4,1,2,0,0,0,0,1,0,0
@@ -51125,7 +51125,7 @@ game_id,game_date,team_id,side,player_id,player_name,at_bats,runs,hits,doubles,t
 822678,2026-09-26,NYM,away,666182,Bo Bichette,4,0,1,0,0,0,0,1,1,0
 822678,2026-09-26,NYM,away,682626,Francisco Alvarez,3,1,0,0,0,0,0,1,1,0
 822678,2026-09-26,NYM,away,668901,Mark Vientos,5,0,0,0,0,0,0,0,1,0
-822678,2026-09-26,NYM,away,683146,Brett Baty,4,0,0,0,0,0,0,0,1,0
+822678,2026-09-26,NYM,away,683146,Brett Baty,4,0,1,0,0,0,0,0,1,0
 822678,2026-09-26,NYM,away,701807,Carson Benge,5,2,3,1,0,0,0,0,0,0
 822678,2026-09-26,NYM,away,703492,Nick Morabito,0,0,0,0,0,0,0,0,0,0
 822678,2026-09-26,NYM,away,596019,Francisco Lindor,4,0,0,0,0,0,0,1,2,0
@@ -51142,7 +51142,7 @@ game_id,game_date,team_id,side,player_id,player_name,at_bats,runs,hits,doubles,t
 822759,2026-09-26,TOR,home,672386,Alejandro Kirk,4,0,0,0,0,0,0,0,0,0
 822759,2026-09-26,TOR,home,672960,Kazuma Okamoto,3,1,0,0,0,0,0,1,1,0
 822759,2026-09-26,CIN,away,682829,Elly De La Cruz,4,0,0,0,0,0,0,1,1,0
-822759,2026-09-26,CIN,away,701398,Sal Stewart,5,0,1,0,0,0,0,0,1,0
+822759,2026-09-26,CIN,away,701398,Sal Stewart,5,0,1,0,0,0,1,0,1,0
 822759,2026-09-26,CIN,away,680574,Matt McLain,3,1,0,0,0,0,0,1,1,1
 822759,2026-09-26,CIN,away,663647,Ke'Bryan Hayes,0,0,0,0,0,0,0,0,0,0
 822759,2026-09-26,CIN,away,699115,Carlos Jorge,3,1,1,0,0,0,0,2,1,1
@@ -51778,3 +51778,92 @@ game_id,game_date,team_id,side,player_id,player_name,at_bats,runs,hits,doubles,t
 849851,2026-09-29,BOS,away,686765,Nick Sogard,3,0,0,0,0,0,0,0,0,0
 849851,2026-09-29,BOS,away,680776,Jarren Duran,2,0,0,0,0,0,0,1,1,0
 849851,2026-09-29,BOS,away,678882,Ceddanne Rafaela,3,0,0,0,0,0,0,0,0,0
+849841,2026-09-30,ATL,home,671739,Michael Harris II,5,0,1,0,0,0,0,0,1,0
+849841,2026-09-30,ATL,home,643289,Mauricio Dubón,5,0,2,0,0,0,0,0,0,0
+849841,2026-09-30,ATL,home,686948,Drake Baldwin,5,0,2,1,0,0,1,0,2,0
+849841,2026-09-30,ATL,home,621566,Matt Olson,4,0,1,0,0,0,2,0,2,0
+849841,2026-09-30,ATL,home,642086,Dominic Smith,1,0,0,0,0,0,0,0,1,0
+849841,2026-09-30,ATL,home,669221,Sean Murphy,3,1,1,1,0,0,0,1,0,0
+849841,2026-09-30,ATL,home,660670,Ronald Acuña Jr.,3,1,0,0,0,0,0,2,2,2
+849841,2026-09-30,ATL,home,645277,Ozzie Albies,4,0,1,0,0,0,0,1,0,0
+849841,2026-09-30,ATL,home,663586,Austin Riley,4,0,1,0,0,0,0,1,1,0
+849841,2026-09-30,ATL,home,573262,Mike Yastrzemski,1,0,0,0,0,0,0,0,0,0
+849841,2026-09-30,ATL,home,673490,Ha-Seong Kim,1,1,0,0,0,0,0,1,0,0
+849841,2026-09-30,PHI,away,669016,Brandon Marsh,3,0,1,0,0,0,0,0,1,0
+849841,2026-09-30,PHI,away,650559,Bryan De La Cruz,2,0,1,0,0,0,0,0,0,0
+849841,2026-09-30,PHI,away,702222,Justin Crawford,4,0,1,0,0,0,0,0,0,0
+849841,2026-09-30,PHI,away,547180,Bryce Harper,5,1,2,0,0,1,2,0,1,0
+849841,2026-09-30,PHI,away,592663,J.T. Realmuto,4,0,1,0,0,0,0,0,1,0
+849841,2026-09-30,PHI,away,624641,Edmundo Sosa,4,0,1,0,0,0,0,0,0,0
+849841,2026-09-30,PHI,away,664761,Alec Bohm,4,1,2,0,0,1,1,1,0,0
+849841,2026-09-30,PHI,away,681082,Bryson Stott,5,0,1,0,0,0,0,0,1,0
+849841,2026-09-30,PHI,away,656941,Kyle Schwarber,5,1,1,0,0,1,1,0,3,0
+849841,2026-09-30,PHI,away,607208,Trea Turner,5,1,1,1,0,0,0,0,1,0
+849841,2026-09-30,PHI,away,656537,Derek Hill,1,0,0,0,0,0,0,0,1,0
+849842,2026-09-30,SD,home,666023,Freddy Fermin,0,0,0,0,0,0,0,0,0,0
+849842,2026-09-30,SD,home,701538,Jackson Merrill,3,1,2,0,0,0,0,1,1,1
+849842,2026-09-30,SD,home,687957,Dustin Harris,4,0,0,0,0,0,0,0,0,0
+849842,2026-09-30,SD,home,669392,Samad Taylor,1,0,0,0,0,0,0,0,1,0
+849842,2026-09-30,SD,home,657757,Gavin Sheets,1,1,1,0,0,1,2,0,0,0
+849842,2026-09-30,SD,home,806956,Ethan Salas,1,0,0,0,0,0,1,0,1,0
+849842,2026-09-30,SD,home,592518,Manny Machado,4,0,1,0,0,0,0,0,1,0
+849842,2026-09-30,SD,home,669720,Austin Hays,1,0,0,0,0,0,0,0,0,0
+849842,2026-09-30,SD,home,609280,Miguel Andujar,1,0,0,0,0,0,0,0,0,0
+849842,2026-09-30,SD,home,665487,Fernando Tatis Jr.,4,0,0,0,0,0,0,0,1,0
+849842,2026-09-30,SD,home,664034,Ty France,4,1,2,1,0,0,0,0,1,0
+849842,2026-09-30,SD,home,593428,Xander Bogaerts,4,1,2,1,0,0,1,0,0,0
+849842,2026-09-30,SD,home,687749,Jase Bowen,0,0,0,0,0,0,0,0,0,0
+849842,2026-09-30,SD,home,630105,Jake Cronenworth,2,0,0,0,0,0,0,0,0,0
+849842,2026-09-30,CHC,away,621438,Tyrone Taylor,1,0,1,0,0,0,0,0,0,0
+849842,2026-09-30,CHC,away,624424,Michael Conforto,1,0,0,0,0,0,0,0,1,0
+849842,2026-09-30,CHC,away,664023,Ian Happ,3,0,0,0,0,0,0,1,1,0
+849842,2026-09-30,CHC,away,608324,Alex Bregman,4,0,0,0,0,0,0,0,1,0
+849842,2026-09-30,CHC,away,699393,Pedro Ramírez,0,0,0,0,0,0,0,0,0,0
+849842,2026-09-30,CHC,away,683737,Michael Busch,2,0,0,0,0,0,0,1,0,0
+849842,2026-09-30,CHC,away,608348,Carson Kelly,3,0,1,0,0,0,0,0,0,0
+849842,2026-09-30,CHC,away,691718,Pete Crow-Armstrong,4,0,0,0,0,0,0,0,1,0
+849842,2026-09-30,CHC,away,673548,Seiya Suzuki,4,1,1,0,0,0,0,0,2,0
+849842,2026-09-30,CHC,away,621020,Dansby Swanson,3,0,0,0,0,0,0,0,1,0
+849842,2026-09-30,CHC,away,663538,Nico Hoerner,4,0,2,1,0,0,1,0,0,0
+849842,2026-09-30,CHC,away,807713,Matt Shaw,2,0,0,0,0,0,0,1,1,0
+849846,2026-09-30,HOU,home,670623,Isaac Paredes,2,0,0,0,0,0,0,1,1,0
+849846,2026-09-30,HOU,home,669397,Nick Allen,3,0,0,0,0,0,0,0,1,0
+849846,2026-09-30,HOU,home,701358,Cam Smith,3,1,1,0,0,1,1,0,2,0
+849846,2026-09-30,HOU,home,514888,Jose Altuve,4,1,2,0,0,1,1,0,1,0
+849846,2026-09-30,HOU,home,665161,Jeremy Peña,4,1,2,0,0,1,1,0,2,0
+849846,2026-09-30,HOU,home,572233,Christian Walker,4,0,0,0,0,0,0,0,3,0
+849846,2026-09-30,HOU,home,828599,Lucas Spence,4,0,0,0,0,0,0,0,1,0
+849846,2026-09-30,HOU,home,673237,Yainer Diaz,4,0,0,0,0,0,0,0,2,0
+849846,2026-09-30,HOU,home,670541,Yordan Alvarez,4,0,0,0,0,0,0,0,2,0
+849846,2026-09-30,CWS,away,671976,Tristan Peters,3,1,1,0,0,0,1,1,1,1
+849846,2026-09-30,CWS,away,682668,Luisangel Acuña,1,1,0,0,0,0,0,0,0,2
+849846,2026-09-30,CWS,away,808959,Munetaka Murakami,5,0,0,0,0,0,0,0,3,0
+849846,2026-09-30,CWS,away,691019,Kyle Teel,5,1,2,0,0,0,1,0,3,0
+849846,2026-09-30,CWS,away,805367,Chase Meidroth,3,1,2,0,0,1,3,1,0,0
+849846,2026-09-30,CWS,away,695657,Colson Montgomery,3,0,0,0,0,0,0,1,2,0
+849846,2026-09-30,CWS,away,695731,Braden Montgomery,4,0,0,0,0,0,0,0,1,0
+849846,2026-09-30,CWS,away,643217,Andrew Benintendi,2,1,1,0,0,0,1,1,0,0
+849846,2026-09-30,CWS,away,686668,Brenton Doyle,1,0,1,0,0,0,0,0,0,0
+849846,2026-09-30,CWS,away,803011,Sam Antonacci,4,1,1,1,0,0,0,0,1,0
+849846,2026-09-30,CWS,away,678246,Miguel Vargas,5,1,0,0,0,0,0,0,2,0
+849848,2026-09-30,NYY,home,676609,José Caballero,0,0,0,0,0,0,0,0,0,0
+849848,2026-09-30,NYY,home,682987,Spencer Jones,5,1,1,0,0,0,0,0,4,1
+849848,2026-09-30,NYY,home,641857,Ryan McMahon,3,0,1,0,0,0,1,0,1,0
+849848,2026-09-30,NYY,home,502671,Paul Goldschmidt,1,0,0,0,0,0,0,0,0,0
+849848,2026-09-30,NYY,home,669224,Austin Wells,3,1,1,0,0,0,2,0,0,0
+849848,2026-09-30,NYY,home,700250,Ben Rice,4,1,1,0,0,0,0,1,1,0
+849848,2026-09-30,NYY,home,641355,Cody Bellinger,5,1,2,0,0,1,4,0,1,0
+849848,2026-09-30,NYY,home,665862,Jazz Chisholm Jr.,3,2,2,0,0,0,0,1,0,2
+849848,2026-09-30,NYY,home,663757,Trent Grisham,3,1,2,0,0,0,0,1,0,1
+849848,2026-09-30,NYY,home,806146,George Lombard Jr.,4,1,1,0,0,0,1,0,2,0
+849848,2026-09-30,NYY,home,671277,Luis García Jr.,5,1,3,0,0,1,1,0,1,0
+849848,2026-09-30,BOS,away,575929,Willson Contreras,2,1,2,0,0,1,1,2,0,0
+849848,2026-09-30,BOS,away,663330,Jahmai Jones,4,0,0,0,0,0,0,0,2,0
+849848,2026-09-30,BOS,away,668939,Adley Rutschman,4,0,0,0,0,0,0,0,1,0
+849848,2026-09-30,BOS,away,596115,Trevor Story,3,0,0,0,0,0,0,0,1,0
+849848,2026-09-30,BOS,away,677800,Wilyer Abreu,4,0,0,0,0,0,0,0,1,0
+849848,2026-09-30,BOS,away,702332,Caleb Durbin,4,0,0,0,0,0,0,0,1,0
+849848,2026-09-30,BOS,away,681987,Nate Eaton,2,0,1,1,0,0,0,0,1,0
+849848,2026-09-30,BOS,away,686765,Nick Sogard,3,1,1,0,0,1,1,0,1,0
+849848,2026-09-30,BOS,away,680776,Jarren Duran,1,0,0,0,0,0,0,0,0,0
+849848,2026-09-30,BOS,away,678882,Ceddanne Rafaela,4,0,0,0,0,0,0,0,0,0

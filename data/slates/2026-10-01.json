@@ -1,0 +1,118 @@
+{
+  "date": "2026-10-01",
+  "locked_at": "2026-10-01T02:21:00-04:00",
+  "predictions": [
+    {
+      "game_id": "849844",
+      "game_date": "2026-10-01",
+      "home_team": "ATL",
+      "away_team": "PHI",
+      "home_win_prob": 0.5625,
+      "away_win_prob": 0.4375,
+      "predicted_home_runs": 4.3,
+      "predicted_away_runs": 4.1,
+      "predicted_total": 8.4,
+      "confidence": 51.1,
+      "model_agreement": 0.933,
+      "predicted_winner": "ATL",
+      "model_predictions": {
+        "XGBoost": 0.5720933079719543,
+        "LightGBM": 0.5559591508473029,
+        "CatBoost": 0.5236202408458321,
+        "RandomForest": 0.5348742168331848,
+        "LogisticRegression": 0.549059910584854
+      },
+      "top_factors": [
+        [
+          "A Gp",
+          "",
+          41.3
+        ],
+        [
+          "H Gp",
+          "",
+          39.7
+        ],
+        [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          12.4
+        ],
+        [
+          "A Bp Era 14",
+          "",
+          2.6
+        ],
+        [
+          "A Bp Era 7",
+          "",
+          2.3
+        ],
+        [
+          "A Sp Recent K9",
+          "",
+          2.2
+        ],
+        [
+          "A Sp K9 7",
+          "",
+          2.1
+        ],
+        [
+          "A Bp K9 7",
+          "",
+          1.7
+        ],
+        [
+          "H Bp K9 14",
+          "",
+          1.6
+        ],
+        [
+          "H Sp Era Season",
+          "",
+          1.6
+        ]
+      ],
+      "home_power_score": 48.0,
+      "away_power_score": 49.9,
+      "home_sp_name": "TBD",
+      "away_sp_name": "TBD",
+      "home_wins": 94,
+      "home_losses": 68,
+      "away_wins": 88,
+      "away_losses": 74,
+      "home_streak": "L1",
+      "away_streak": "W1",
+      "home_sp_era": null,
+      "away_sp_era": null,
+      "home_sp_wins": null,
+      "home_sp_losses": null,
+      "away_sp_wins": null,
+      "away_sp_losses": null,
+      "game_time": "2026-10-02T00:00:00Z",
+      "home_moneyline": -102,
+      "away_moneyline": -116,
+      "total_line": 7.5,
+      "over_odds": -104,
+      "under_odds": -118,
+      "weather": {
+        "temp": 67.8,
+        "wind": 4.6,
+        "wind_dir": "out",
+        "humidity": 0.78,
+        "is_dome": false
+      }
+    }
+  ],
+  "betting_slip": {
+    "slip_date": "2026-10-01",
+    "bankroll": 10000.0,
+    "total_stake": 0,
+    "num_bets": 0,
+    "bets": [],
+    "total_ev": 0,
+    "max_exposure": 0,
+    "risk_level": "conservative"
+  }
+}
