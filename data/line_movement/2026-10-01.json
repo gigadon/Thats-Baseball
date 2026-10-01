@@ -15,6 +15,21 @@
           "total_line": 7.5
         }
       ]
+    },
+    {
+      "timestamp": "2026-10-01T21:13:00",
+      "games": [
+        {
+          "game_id": "849844",
+          "home_team": "ATL",
+          "away_team": "PHI",
+          "commence_time": "2026-10-02T00:11:00Z",
+          "home_prob": 0.4955,
+          "home_moneyline": -106,
+          "away_moneyline": -110,
+          "total_line": 7.5
+        }
+      ]
     }
   ]
 }
