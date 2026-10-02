@@ -1,0 +1,31 @@
+{
+  "date": "2026-10-01",
+  "tracked_at": "2026-10-02T06:00:08.563664",
+  "graded_from": "slate",
+  "score_source": "mlb_api",
+  "results": [
+    {
+      "game_id": "849844",
+      "home_team": "ATL",
+      "away_team": "PHI",
+      "home_win_prob": 0.5625,
+      "confidence": 51.1,
+      "predicted_winner": "ATL",
+      "actual_home_score": 6,
+      "actual_away_score": 2,
+      "actual_winner": "ATL",
+      "correct": true
+    }
+  ],
+  "ungraded": [],
+  "summary": {
+    "total_games": 1,
+    "correct": 1,
+    "incorrect": 0,
+    "accuracy": 1.0,
+    "brier_score": 0.1914,
+    "slate_games": 1,
+    "final_games": 1,
+    "graded_games": 1
+  }
+}
