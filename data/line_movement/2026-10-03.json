@@ -1,0 +1,50 @@
+{
+  "date": "2026-10-03",
+  "snapshots": [
+    {
+      "timestamp": "2026-10-03T05:35:33",
+      "games": [
+        {
+          "game_id": "849829",
+          "home_team": "CLE",
+          "away_team": "CWS",
+          "commence_time": "2026-10-03T17:01:00Z",
+          "home_prob": 0.5824,
+          "home_moneyline": -154,
+          "away_moneyline": 130,
+          "total_line": 6.5
+        },
+        {
+          "game_id": "849828",
+          "home_team": "LAD",
+          "away_team": "ATL",
+          "commence_time": "2026-10-03T20:00:00Z",
+          "home_prob": 0.6621,
+          "home_moneyline": -225,
+          "away_moneyline": 183,
+          "total_line": 8.5
+        },
+        {
+          "game_id": "849835",
+          "home_team": "TB",
+          "away_team": "NYY",
+          "commence_time": "2026-10-03T22:31:00Z",
+          "home_prob": 0.5507,
+          "home_moneyline": -134,
+          "away_moneyline": 114,
+          "total_line": 6.5
+        },
+        {
+          "game_id": "849830",
+          "home_team": "MIL",
+          "away_team": "SD",
+          "commence_time": "2026-10-04T00:30:00Z",
+          "home_prob": 0.6406,
+          "home_moneyline": -203,
+          "away_moneyline": 166,
+          "total_line": 7.0
+        }
+      ]
+    }
+  ]
+}
