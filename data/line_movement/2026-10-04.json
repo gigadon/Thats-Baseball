@@ -50,6 +50,21 @@
           "total_line": 7.5
         }
       ]
+    },
+    {
+      "timestamp": "2026-10-04T20:20:06",
+      "games": [
+        {
+          "game_id": "849823",
+          "home_team": "LAD",
+          "away_team": "ATL",
+          "commence_time": "2026-10-05T00:00:00Z",
+          "home_prob": 0.6735,
+          "home_moneyline": -235,
+          "away_moneyline": 194,
+          "total_line": 7.5
+        }
+      ]
     }
   ]
 }
