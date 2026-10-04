@@ -1,0 +1,220 @@
+{
+  "date": "2026-10-04",
+  "locked_at": "2026-10-04T02:11:05-04:00",
+  "predictions": [
+    {
+      "game_id": "849825",
+      "game_date": "2026-10-04",
+      "home_team": "MIL",
+      "away_team": "SD",
+      "home_win_prob": 0.5354,
+      "away_win_prob": 0.4646,
+      "predicted_home_runs": 4.1,
+      "predicted_away_runs": 3.9,
+      "predicted_total": 8.0,
+      "confidence": 35.3,
+      "model_agreement": 0.306,
+      "predicted_winner": "MIL",
+      "model_predictions": {
+        "XGBoost": 0.5941023826599121,
+        "LightGBM": 0.5947116711161253,
+        "CatBoost": 0.6000575604288817,
+        "RandomForest": 0.5760194961036978,
+        "LogisticRegression": 0.15774681381619998
+      },
+      "top_factors": [
+        [
+          "A Sp Season Ip",
+          "",
+          85.7
+        ],
+        [
+          "Sp Season Ip",
+          "",
+          -54.7
+        ],
+        [
+          "H Sp Season Ip",
+          "",
+          49.6
+        ],
+        [
+          "A Gp",
+          "",
+          41.5
+        ],
+        [
+          "H Gp",
+          "",
+          39.4
+        ],
+        [
+          "Elo Diff",
+          "",
+          18.9
+        ],
+        [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          13.1
+        ],
+        [
+          "Humidity",
+          "Stadium humidity %",
+          6.4
+        ],
+        [
+          "A Sp Recent K9",
+          "",
+          2.2
+        ],
+        [
+          "H Sp Rest Days",
+          "",
+          1.9
+        ]
+      ],
+      "home_power_score": 53.5,
+      "away_power_score": 47.6,
+      "home_sp_name": "Logan Henderson",
+      "away_sp_name": "Michael King",
+      "home_wins": 103,
+      "home_losses": 59,
+      "away_wins": 91,
+      "away_losses": 71,
+      "home_streak": "W5",
+      "away_streak": "W2",
+      "home_sp_era": 2.47,
+      "away_sp_era": 3.21,
+      "home_sp_wins": 11,
+      "home_sp_losses": 3,
+      "away_sp_wins": 12,
+      "away_sp_losses": 10,
+      "game_time": "2026-10-04T20:00:00Z",
+      "home_moneyline": -144,
+      "away_moneyline": 122,
+      "total_line": 7.5,
+      "over_odds": 116,
+      "under_odds": -142,
+      "weather": {
+        "temp": 58.4,
+        "wind": 8.1,
+        "wind_dir": "in",
+        "humidity": 0.83,
+        "is_dome": false
+      }
+    },
+    {
+      "game_id": "849823",
+      "game_date": "2026-10-04",
+      "home_team": "LAD",
+      "away_team": "ATL",
+      "home_win_prob": 0.6498,
+      "away_win_prob": 0.3502,
+      "predicted_home_runs": 4.3,
+      "predicted_away_runs": 4.1,
+      "predicted_total": 8.5,
+      "confidence": 79.0,
+      "model_agreement": 0.842,
+      "predicted_winner": "LAD",
+      "model_predictions": {
+        "XGBoost": 0.701948344707489,
+        "LightGBM": 0.6619440917552681,
+        "CatBoost": 0.6739465675223173,
+        "RandomForest": 0.6287485428083656,
+        "LogisticRegression": 0.5875011258694525
+      },
+      "top_factors": [
+        [
+          "A Gp",
+          "",
+          41.8
+        ],
+        [
+          "H Gp",
+          "",
+          39.2
+        ],
+        [
+          "Sp Season Ip",
+          "",
+          26.9
+        ],
+        [
+          "H Sp Season Ip",
+          "",
+          21.5
+        ],
+        [
+          "Elo Diff",
+          "",
+          16.0
+        ],
+        [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          14.9
+        ],
+        [
+          "A Sp Recent K9",
+          "",
+          2.2
+        ],
+        [
+          "H Bp K9 7",
+          "",
+          2.2
+        ],
+        [
+          "H Bp K9 14",
+          "",
+          2.2
+        ],
+        [
+          "Bullpen workload",
+          "Away edge \u00b7 IP last 3 days",
+          -2.0
+        ]
+      ],
+      "home_power_score": 53.1,
+      "away_power_score": 48.0,
+      "home_sp_name": "Blake Snell",
+      "away_sp_name": "TBD",
+      "home_wins": 100,
+      "home_losses": 62,
+      "away_wins": 94,
+      "away_losses": 68,
+      "home_streak": "W3",
+      "away_streak": "L1",
+      "home_sp_era": 1.9,
+      "away_sp_era": null,
+      "home_sp_wins": 4,
+      "home_sp_losses": 1,
+      "away_sp_wins": null,
+      "away_sp_losses": null,
+      "game_time": "2026-10-05T00:00:00Z",
+      "home_moneyline": -148,
+      "away_moneyline": 126,
+      "total_line": 7.5,
+      "over_odds": 114,
+      "under_odds": -140,
+      "weather": {
+        "temp": 81.8,
+        "wind": 3.4,
+        "wind_dir": "out",
+        "humidity": 0.42,
+        "is_dome": false
+      }
+    }
+  ],
+  "betting_slip": {
+    "slip_date": "2026-10-04",
+    "bankroll": 10000.0,
+    "total_stake": 0,
+    "num_bets": 0,
+    "bets": [],
+    "total_ev": 0,
+    "max_exposure": 0,
+    "risk_level": "conservative"
+  }
+}
