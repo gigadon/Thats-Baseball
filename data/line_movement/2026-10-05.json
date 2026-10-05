@@ -40,6 +40,21 @@
           "total_line": 6.5
         }
       ]
+    },
+    {
+      "timestamp": "2026-10-05T23:16:50",
+      "games": [
+        {
+          "game_id": "849839",
+          "home_team": "TB",
+          "away_team": "NYY",
+          "commence_time": "2026-10-06T00:00:00Z",
+          "home_prob": 0.4648,
+          "home_moneyline": 108,
+          "away_moneyline": -124,
+          "total_line": 6.5
+        }
+      ]
     }
   ]
 }
