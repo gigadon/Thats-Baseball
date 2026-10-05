@@ -1,0 +1,259 @@
+{
+  "date": "2026-10-05",
+  "locked_at": "2026-10-05T02:02:40-04:00",
+  "predictions": [
+    {
+      "game_id": "849834",
+      "game_date": "2026-10-05",
+      "home_team": "CLE",
+      "away_team": "CWS",
+      "home_win_prob": 0.5917,
+      "away_win_prob": 0.4083,
+      "predicted_home_runs": 3.5,
+      "predicted_away_runs": 3.3,
+      "predicted_total": 6.8,
+      "confidence": 66.4,
+      "model_agreement": 0.876,
+      "predicted_winner": "CLE",
+      "model_predictions": {
+        "XGBoost": 0.5983723402023315,
+        "LightGBM": 0.5941222533799075,
+        "CatBoost": 0.6037124782460916,
+        "RandomForest": 0.583429728506096,
+        "LogisticRegression": 0.5192908577610909
+      },
+      "top_factors": [
+        [
+          "H Sp Season Ip",
+          "",
+          92.9
+        ],
+        [
+          "A Sp Season Ip",
+          "",
+          73.2
+        ],
+        [
+          "A Gp",
+          "",
+          41.2
+        ],
+        [
+          "H Gp",
+          "",
+          39.5
+        ],
+        [
+          "Sp Season Ip",
+          "",
+          16.6
+        ],
+        [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          10.8
+        ],
+        [
+          "Elo Diff",
+          "",
+          6.3
+        ],
+        [
+          "A Sp Recent K9",
+          "",
+          2.1
+        ],
+        [
+          "A Sp K9 7",
+          "",
+          2.1
+        ],
+        [
+          "H Bp K9 14",
+          "",
+          1.9
+        ]
+      ],
+      "home_power_score": 46.2,
+      "away_power_score": 42.9,
+      "home_sp_name": "Gavin Williams",
+      "away_sp_name": "Anthony Kay",
+      "home_wins": 85,
+      "home_losses": 77,
+      "away_wins": 84,
+      "away_losses": 78,
+      "home_streak": "L1",
+      "away_streak": "W1",
+      "home_sp_era": 3.76,
+      "away_sp_era": 4.44,
+      "home_sp_wins": 14,
+      "home_sp_losses": 8,
+      "away_sp_wins": 10,
+      "away_sp_losses": 9,
+      "game_time": "2026-10-05T21:00:00Z",
+      "home_moneyline": -156,
+      "away_moneyline": 132,
+      "total_line": 6.5,
+      "over_odds": -118,
+      "under_odds": -104,
+      "weather": {
+        "temp": 59.2,
+        "wind": 8.1,
+        "wind_dir": "cross",
+        "humidity": 0.81,
+        "is_dome": false
+      }
+    },
+    {
+      "game_id": "849839",
+      "game_date": "2026-10-05",
+      "home_team": "TB",
+      "away_team": "NYY",
+      "home_win_prob": 0.4188,
+      "away_win_prob": 0.5812,
+      "predicted_home_runs": 3.0,
+      "predicted_away_runs": 4.0,
+      "predicted_total": 7.0,
+      "confidence": 54.7,
+      "model_agreement": 0.534,
+      "predicted_winner": "NYY",
+      "model_predictions": {
+        "XGBoost": 0.3963496685028076,
+        "LightGBM": 0.47674781723673654,
+        "CatBoost": 0.40616315602891434,
+        "RandomForest": 0.4427628075578808,
+        "LogisticRegression": 0.14798193174041677
+      },
+      "top_factors": [
+        [
+          "A Sp Season Ip",
+          "",
+          89.7
+        ],
+        [
+          "H Sp Season Ip",
+          "",
+          85.2
+        ],
+        [
+          "A Gp",
+          "",
+          41.2
+        ],
+        [
+          "H Gp",
+          "",
+          39.4
+        ],
+        [
+          "Sp Season Ip",
+          "",
+          -15.6
+        ],
+        [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          13.1
+        ],
+        [
+          "Humidity",
+          "Stadium humidity %",
+          6.4
+        ],
+        [
+          "A Sp Recent K9",
+          "",
+          3.1
+        ],
+        [
+          "A Sp K9 7",
+          "",
+          2.6
+        ],
+        [
+          "H Bp K9 7",
+          "",
+          2.1
+        ]
+      ],
+      "home_power_score": 48.7,
+      "away_power_score": 53.7,
+      "home_sp_name": "Freddy Peralta",
+      "away_sp_name": "Cam Schlittler",
+      "home_wins": 98,
+      "home_losses": 64,
+      "away_wins": 93,
+      "away_losses": 68,
+      "home_streak": "L1",
+      "away_streak": "W1",
+      "home_sp_era": 4.42,
+      "away_sp_era": 1.95,
+      "home_sp_wins": 10,
+      "home_sp_losses": 11,
+      "away_sp_wins": 14,
+      "away_sp_losses": 6,
+      "game_time": "2026-10-06T00:00:00Z",
+      "home_moneyline": 110,
+      "away_moneyline": -130,
+      "total_line": 6.5,
+      "over_odds": -114,
+      "under_odds": -106,
+      "weather": {
+        "temp": 79.0,
+        "wind": 4.6,
+        "wind_dir": "cross",
+        "humidity": 0.88,
+        "is_dome": true
+      }
+    }
+  ],
+  "betting_slip": {
+    "slip_date": "2026-10-05",
+    "bankroll": 10000.0,
+    "total_stake": 170.26,
+    "num_bets": 2,
+    "bets": [
+      {
+        "game_id": "849839",
+        "game_date": "2026-10-05",
+        "home_team": "TB",
+        "away_team": "NYY",
+        "bet_type": "moneyline",
+        "selection": "away",
+        "odds": -130,
+        "model_prob": 0.5812,
+        "implied_prob": 0.5427,
+        "edge": 0.0385,
+        "edge_pct": 3.85,
+        "kelly_fraction": 0.0368,
+        "recommended_stake": 128.66,
+        "confidence": 54.7,
+        "ev_per_dollar": 0.0283,
+        "decimal_odds": 1.769,
+        "total_line": null
+      },
+      {
+        "game_id": "849834",
+        "game_date": "2026-10-05",
+        "home_team": "CLE",
+        "away_team": "CWS",
+        "bet_type": "total",
+        "selection": "under",
+        "odds": -104,
+        "model_prob": 0.5156,
+        "implied_prob": 0.485,
+        "edge": 0.0306,
+        "edge_pct": 3.06,
+        "kelly_fraction": 0.0119,
+        "recommended_stake": 41.6,
+        "confidence": 66.4,
+        "ev_per_dollar": 0.0114,
+        "decimal_odds": 1.962,
+        "total_line": 6.5
+      }
+    ],
+    "total_ev": 4.12,
+    "max_exposure": 170.26,
+    "risk_level": "conservative"
+  }
+}

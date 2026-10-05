@@ -1,0 +1,30 @@
+{
+  "date": "2026-10-05",
+  "snapshots": [
+    {
+      "timestamp": "2026-10-05T06:02:38",
+      "games": [
+        {
+          "game_id": "849834",
+          "home_team": "CLE",
+          "away_team": "CWS",
+          "commence_time": "2026-10-05T21:10:00Z",
+          "home_prob": 0.5857,
+          "home_moneyline": -156,
+          "away_moneyline": 132,
+          "total_line": 6.5
+        },
+        {
+          "game_id": "849839",
+          "home_team": "TB",
+          "away_team": "NYY",
+          "commence_time": "2026-10-06T00:00:00Z",
+          "home_prob": 0.4573,
+          "home_moneyline": 110,
+          "away_moneyline": -130,
+          "total_line": 6.5
+        }
+      ]
+    }
+  ]
+}
