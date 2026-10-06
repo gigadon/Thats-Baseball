@@ -1,0 +1,43 @@
+{
+  "date": "2026-10-05",
+  "tracked_at": "2026-10-06T06:40:57.272853",
+  "graded_from": "slate",
+  "score_source": "mlb_api",
+  "results": [
+    {
+      "game_id": "849834",
+      "home_team": "CLE",
+      "away_team": "CWS",
+      "home_win_prob": 0.5917,
+      "confidence": 66.4,
+      "predicted_winner": "CLE",
+      "actual_home_score": 3,
+      "actual_away_score": 4,
+      "actual_winner": "CWS",
+      "correct": false
+    },
+    {
+      "game_id": "849839",
+      "home_team": "TB",
+      "away_team": "NYY",
+      "home_win_prob": 0.4188,
+      "confidence": 54.7,
+      "predicted_winner": "NYY",
+      "actual_home_score": 5,
+      "actual_away_score": 2,
+      "actual_winner": "TB",
+      "correct": false
+    }
+  ],
+  "ungraded": [],
+  "summary": {
+    "total_games": 2,
+    "correct": 0,
+    "incorrect": 2,
+    "accuracy": 0.0,
+    "brier_score": 0.344,
+    "slate_games": 2,
+    "final_games": 2,
+    "graded_games": 2
+  }
+}

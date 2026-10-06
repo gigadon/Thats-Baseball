@@ -1,0 +1,30 @@
+{
+  "date": "2026-10-06",
+  "snapshots": [
+    {
+      "timestamp": "2026-10-06T06:41:22",
+      "games": [
+        {
+          "game_id": "849819",
+          "home_team": "ATL",
+          "away_team": "LAD",
+          "commence_time": "2026-10-06T22:00:00Z",
+          "home_prob": 0.512,
+          "home_moneyline": -115,
+          "away_moneyline": -104,
+          "total_line": 6.0
+        },
+        {
+          "game_id": "849826",
+          "home_team": "SD",
+          "away_team": "MIL",
+          "commence_time": "2026-10-07T01:30:00Z",
+          "home_prob": 0.553,
+          "home_moneyline": -134,
+          "away_moneyline": 116,
+          "total_line": 7.5
+        }
+      ]
+    }
+  ]
+}

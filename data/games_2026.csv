@@ -2444,5 +2444,7 @@ game_id,game_date,home_team_id,away_team_id,home_score,away_score,status
 849835,2026-10-03,TB,NYY,1,0,Final
 849823,2026-10-04,LAD,ATL,2,3,Final
 849825,2026-10-04,MIL,SD,4,3,Final
-849834,2026-10-05,CLE,CWS,,,Scheduled
-849839,2026-10-05,TB,NYY,,,Scheduled
+849834,2026-10-05,CLE,CWS,3,4,Final
+849839,2026-10-05,TB,NYY,5,2,Final
+849819,2026-10-06,ATL,LAD,,,Scheduled
+849826,2026-10-06,SD,MIL,,,Scheduled
