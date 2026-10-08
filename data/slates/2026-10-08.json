@@ -1,0 +1,118 @@
+{
+  "date": "2026-10-08",
+  "locked_at": "2026-10-08T02:28:09-04:00",
+  "predictions": [
+    {
+      "game_id": "849832",
+      "game_date": "2026-10-08",
+      "home_team": "CWS",
+      "away_team": "CLE",
+      "home_win_prob": 0.4767,
+      "away_win_prob": 0.5233,
+      "predicted_home_runs": 3.6,
+      "predicted_away_runs": 4.5,
+      "predicted_total": 8.1,
+      "confidence": 46.8,
+      "model_agreement": 0.911,
+      "predicted_winner": "CLE",
+      "model_predictions": {
+        "XGBoost": 0.448373019695282,
+        "LightGBM": 0.4862437533670135,
+        "CatBoost": 0.4306812203963317,
+        "RandomForest": 0.444428261739002,
+        "LogisticRegression": 0.42118087300226764
+      },
+      "top_factors": [
+        [
+          "Sp Season Ip",
+          "",
+          -100.0
+        ],
+        [
+          "A Sp Season Ip",
+          "",
+          86.3
+        ],
+        [
+          "A Gp",
+          "",
+          41.7
+        ],
+        [
+          "H Gp",
+          "",
+          39.5
+        ],
+        [
+          "H Sp Season Ip",
+          "",
+          14.1
+        ],
+        [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          11.2
+        ],
+        [
+          "Elo Diff",
+          "",
+          -6.1
+        ],
+        [
+          "A Sp Recent K9",
+          "",
+          2.6
+        ],
+        [
+          "A Sp K9 7",
+          "",
+          2.6
+        ],
+        [
+          "H Sp Rest Days",
+          "",
+          2.2
+        ]
+      ],
+      "home_power_score": 42.8,
+      "away_power_score": 46.3,
+      "home_sp_name": "Hagen Smith",
+      "away_sp_name": "Parker Messick",
+      "home_wins": 84,
+      "home_losses": 78,
+      "away_wins": 85,
+      "away_losses": 77,
+      "home_streak": "W1",
+      "away_streak": "L1",
+      "home_sp_era": 1.29,
+      "away_sp_era": 2.56,
+      "home_sp_wins": 3,
+      "home_sp_losses": 3,
+      "away_sp_wins": 12,
+      "away_sp_losses": 9,
+      "game_time": "2026-10-09T00:00:00Z",
+      "home_moneyline": -103,
+      "away_moneyline": -117,
+      "total_line": 7.5,
+      "over_odds": 101,
+      "under_odds": -122,
+      "weather": {
+        "temp": 61.2,
+        "wind": 5.8,
+        "wind_dir": "cross",
+        "humidity": 0.61,
+        "is_dome": false
+      }
+    }
+  ],
+  "betting_slip": {
+    "slip_date": "2026-10-08",
+    "bankroll": 10000.0,
+    "total_stake": 0,
+    "num_bets": 0,
+    "bets": [],
+    "total_ev": 0,
+    "max_exposure": 0,
+    "risk_level": "conservative"
+  }
+}

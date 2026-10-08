@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-08",
+  "snapshots": [
+    {
+      "timestamp": "2026-10-08T06:28:07",
+      "games": [
+        {
+          "game_id": "849832",
+          "home_team": "CWS",
+          "away_team": "CLE",
+          "commence_time": "2026-10-09T00:00:00Z",
+          "home_prob": 0.4848,
+          "home_moneyline": -103,
+          "away_moneyline": -117,
+          "total_line": 7.5
+        }
+      ]
+    }
+  ]
+}
