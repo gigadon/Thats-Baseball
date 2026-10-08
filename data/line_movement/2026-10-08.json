@@ -60,6 +60,21 @@
           "total_line": 7.0
         }
       ]
+    },
+    {
+      "timestamp": "2026-10-08T23:52:28",
+      "games": [
+        {
+          "game_id": "849832",
+          "home_team": "CWS",
+          "away_team": "CLE",
+          "commence_time": "2026-10-09T00:00:00Z",
+          "home_prob": 0.4826,
+          "home_moneyline": -102,
+          "away_moneyline": -118,
+          "total_line": 7.0
+        }
+      ]
     }
   ]
 }
