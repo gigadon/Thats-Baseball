@@ -1,0 +1,157 @@
+{
+  "date": "2026-10-10",
+  "locked_at": "2026-10-10T02:12:26-04:00",
+  "predictions": [
+    {
+      "game_id": "849831",
+      "game_date": "2026-10-10",
+      "home_team": "CLE",
+      "away_team": "CWS",
+      "home_win_prob": 0.638,
+      "away_win_prob": 0.362,
+      "predicted_home_runs": 4.0,
+      "predicted_away_runs": 3.8,
+      "predicted_total": 7.8,
+      "confidence": 80.4,
+      "model_agreement": 0.882,
+      "predicted_winner": "CLE",
+      "model_predictions": {
+        "XGBoost": 0.6704213619232178,
+        "LightGBM": 0.6550110131680652,
+        "CatBoost": 0.6552459488866827,
+        "RandomForest": 0.6113028012194456,
+        "LogisticRegression": 0.5928399133985027
+      },
+      "top_factors": [
+        [
+          "H Sp Season Ip",
+          "",
+          92.9
+        ],
+        [
+          "A Sp Season Ip",
+          "",
+          79.8
+        ],
+        [
+          "A Gp",
+          "",
+          41.5
+        ],
+        [
+          "H Gp",
+          "",
+          39.9
+        ],
+        [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          10.4
+        ],
+        [
+          "Elo Diff",
+          "",
+          8.9
+        ],
+        [
+          "Sp Season Ip",
+          "",
+          7.6
+        ],
+        [
+          "H Sp Rest Days",
+          "",
+          2.6
+        ],
+        [
+          "A Sp Recent K9",
+          "",
+          2.4
+        ],
+        [
+          "A So 7",
+          "",
+          2.3
+        ]
+      ],
+      "home_power_score": 46.3,
+      "away_power_score": 42.8,
+      "home_sp_name": "Gavin Williams",
+      "away_sp_name": "Sean Burke",
+      "home_wins": 85,
+      "home_losses": 77,
+      "away_wins": 84,
+      "away_losses": 78,
+      "home_streak": "L1",
+      "away_streak": "W1",
+      "home_sp_era": 3.76,
+      "away_sp_era": 3.34,
+      "home_sp_wins": 14,
+      "home_sp_losses": 8,
+      "away_sp_wins": 11,
+      "away_sp_losses": 7,
+      "game_time": "2026-10-11T00:00:00Z",
+      "home_moneyline": -138,
+      "away_moneyline": 118,
+      "total_line": 7.5,
+      "over_odds": 110,
+      "under_odds": -134,
+      "weather": {
+        "temp": 57.3,
+        "wind": 9.2,
+        "wind_dir": "in",
+        "humidity": 0.59,
+        "is_dome": false
+      }
+    }
+  ],
+  "betting_slip": {
+    "slip_date": "2026-10-10",
+    "bankroll": 10000.0,
+    "total_stake": 539.19,
+    "num_bets": 2,
+    "bets": [
+      {
+        "game_id": "849831",
+        "game_date": "2026-10-10",
+        "home_team": "CLE",
+        "away_team": "CWS",
+        "bet_type": "moneyline",
+        "selection": "home",
+        "odds": -138,
+        "model_prob": 0.638,
+        "implied_prob": 0.5583,
+        "edge": 0.0797,
+        "edge_pct": 7.97,
+        "kelly_fraction": 0.1384,
+        "recommended_stake": 484.54,
+        "confidence": 80.4,
+        "ev_per_dollar": 0.1003,
+        "decimal_odds": 1.725,
+        "total_line": null
+      },
+      {
+        "game_id": "849831",
+        "game_date": "2026-10-10",
+        "home_team": "CLE",
+        "away_team": "CWS",
+        "bet_type": "total",
+        "selection": "over",
+        "odds": 110,
+        "model_prob": 0.4844,
+        "implied_prob": 0.454,
+        "edge": 0.0304,
+        "edge_pct": 3.04,
+        "kelly_fraction": 0.0156,
+        "recommended_stake": 54.65,
+        "confidence": 80.4,
+        "ev_per_dollar": 0.0172,
+        "decimal_odds": 2.1,
+        "total_line": 7.5
+      }
+    ],
+    "total_ev": 49.54,
+    "max_exposure": 539.19,
+    "risk_level": "conservative"
+  }
+}
