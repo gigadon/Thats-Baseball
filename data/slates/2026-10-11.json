@@ -1,0 +1,118 @@
+{
+  "date": "2026-10-11",
+  "locked_at": "2026-10-11T02:09:41-04:00",
+  "predictions": [
+    {
+      "game_id": "849809",
+      "game_date": "2026-10-11",
+      "home_team": "MIL",
+      "away_team": "LAD",
+      "home_win_prob": 0.5228,
+      "away_win_prob": 0.4772,
+      "predicted_home_runs": 3.6,
+      "predicted_away_runs": 3.4,
+      "predicted_total": 7.1,
+      "confidence": 31.9,
+      "model_agreement": 0.323,
+      "predicted_winner": "MIL",
+      "model_predictions": {
+        "XGBoost": 0.5822794437408447,
+        "LightGBM": 0.5650888104824203,
+        "CatBoost": 0.581747096641348,
+        "RandomForest": 0.5665887707012023,
+        "LogisticRegression": 0.1512476379227305
+      },
+      "top_factors": [
+        [
+          "H Sp Season Ip",
+          "",
+          88.1
+        ],
+        [
+          "A Sp Season Ip",
+          "",
+          73.5
+        ],
+        [
+          "A Gp",
+          "",
+          41.4
+        ],
+        [
+          "H Gp",
+          "",
+          39.8
+        ],
+        [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          13.1
+        ],
+        [
+          "Elo Diff",
+          "",
+          11.8
+        ],
+        [
+          "Sp Season Ip",
+          "",
+          10.1
+        ],
+        [
+          "Humidity",
+          "Stadium humidity %",
+          6.4
+        ],
+        [
+          "A Sp Recent K9",
+          "",
+          2.9
+        ],
+        [
+          "A Sp K9 7",
+          "",
+          2.5
+        ]
+      ],
+      "home_power_score": 53.5,
+      "away_power_score": 53.1,
+      "home_sp_name": "Jacob Misiorowski",
+      "away_sp_name": "Tarik Skubal",
+      "home_wins": 103,
+      "home_losses": 59,
+      "away_wins": 100,
+      "away_losses": 62,
+      "home_streak": "W5",
+      "away_streak": "W3",
+      "home_sp_era": 1.8,
+      "away_sp_era": 2.72,
+      "home_sp_wins": 16,
+      "home_sp_losses": 5,
+      "away_sp_wins": 12,
+      "away_sp_losses": 7,
+      "game_time": "2026-10-12T00:00:00Z",
+      "home_moneyline": -112,
+      "away_moneyline": -104,
+      "total_line": 6.5,
+      "over_odds": 114,
+      "under_odds": -140,
+      "weather": {
+        "temp": 60.8,
+        "wind": 8.1,
+        "wind_dir": "in",
+        "humidity": 0.72,
+        "is_dome": false
+      }
+    }
+  ],
+  "betting_slip": {
+    "slip_date": "2026-10-11",
+    "bankroll": 10000.0,
+    "total_stake": 0,
+    "num_bets": 0,
+    "bets": [],
+    "total_ev": 0,
+    "max_exposure": 0,
+    "risk_level": "conservative"
+  }
+}
