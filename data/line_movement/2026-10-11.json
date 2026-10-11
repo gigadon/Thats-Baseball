@@ -60,6 +60,21 @@
           "total_line": 6.5
         }
       ]
+    },
+    {
+      "timestamp": "2026-10-11T23:04:50",
+      "games": [
+        {
+          "game_id": "849809",
+          "home_team": "MIL",
+          "away_team": "LAD",
+          "commence_time": "2026-10-12T00:00:00Z",
+          "home_prob": 0.4908,
+          "home_moneyline": -102,
+          "away_moneyline": -110,
+          "total_line": 6.5
+        }
+      ]
     }
   ]
 }
