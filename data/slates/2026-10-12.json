@@ -1,0 +1,220 @@
+{
+  "date": "2026-10-12",
+  "locked_at": "2026-10-12T02:18:40-04:00",
+  "predictions": [
+    {
+      "game_id": "849812",
+      "game_date": "2026-10-12",
+      "home_team": "MIL",
+      "away_team": "LAD",
+      "home_win_prob": 0.4562,
+      "away_win_prob": 0.5438,
+      "predicted_home_runs": 3.2,
+      "predicted_away_runs": 4.1,
+      "predicted_total": 7.2,
+      "confidence": 41.5,
+      "model_agreement": 0.456,
+      "predicted_winner": "LAD",
+      "model_predictions": {
+        "XGBoost": 0.46825677156448364,
+        "LightGBM": 0.5071858822376007,
+        "CatBoost": 0.4738921667625883,
+        "RandomForest": 0.4822023772971485,
+        "LogisticRegression": 0.14420308876497995
+      },
+      "top_factors": [
+        [
+          "A Sp Season Ip",
+          "",
+          85.7
+        ],
+        [
+          "Sp Season Ip",
+          "",
+          -54.7
+        ],
+        [
+          "H Sp Season Ip",
+          "",
+          49.6
+        ],
+        [
+          "A Gp",
+          "",
+          41.5
+        ],
+        [
+          "H Gp",
+          "",
+          39.9
+        ],
+        [
+          "Elo Diff",
+          "",
+          14.1
+        ],
+        [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          13.1
+        ],
+        [
+          "Humidity",
+          "Stadium humidity %",
+          6.4
+        ],
+        [
+          "H Sp Rest Days",
+          "",
+          3.2
+        ],
+        [
+          "A Sp Recent K9",
+          "",
+          2.6
+        ]
+      ],
+      "home_power_score": 53.5,
+      "away_power_score": 53.0,
+      "home_sp_name": "Logan Henderson",
+      "away_sp_name": "Yoshinobu Yamamoto",
+      "home_wins": 103,
+      "home_losses": 59,
+      "away_wins": 100,
+      "away_losses": 62,
+      "home_streak": "W5",
+      "away_streak": "W3",
+      "home_sp_era": 2.47,
+      "away_sp_era": 2.53,
+      "home_sp_wins": 11,
+      "home_sp_losses": 3,
+      "away_sp_wins": 14,
+      "away_sp_losses": 9,
+      "game_time": "2026-10-12T21:00:00Z",
+      "home_moneyline": 108,
+      "away_moneyline": -126,
+      "total_line": 6.5,
+      "over_odds": -124,
+      "under_odds": 102,
+      "weather": {
+        "temp": 61.6,
+        "wind": 9.2,
+        "wind_dir": "in",
+        "humidity": 0.81,
+        "is_dome": false
+      }
+    },
+    {
+      "game_id": "849820",
+      "game_date": "2026-10-12",
+      "home_team": "TB",
+      "away_team": "CLE",
+      "home_win_prob": 0.487,
+      "away_win_prob": 0.513,
+      "predicted_home_runs": 3.1,
+      "predicted_away_runs": 3.9,
+      "predicted_total": 7.0,
+      "confidence": 30.7,
+      "model_agreement": 0.392,
+      "predicted_winner": "CLE",
+      "model_predictions": {
+        "XGBoost": 0.5030226707458496,
+        "LightGBM": 0.5250956207664862,
+        "CatBoost": 0.5309140166673372,
+        "RandomForest": 0.5455591421518149,
+        "LogisticRegression": 0.14744465506603577
+      },
+      "top_factors": [
+        [
+          "H Sp Season Ip",
+          "",
+          86.7
+        ],
+        [
+          "A Sp Season Ip",
+          "",
+          79.9
+        ],
+        [
+          "A Gp",
+          "",
+          41.9
+        ],
+        [
+          "H Gp",
+          "",
+          39.7
+        ],
+        [
+          "Elo Diff",
+          "",
+          18.0
+        ],
+        [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          13.1
+        ],
+        [
+          "Humidity",
+          "Stadium humidity %",
+          6.4
+        ],
+        [
+          "H Sp Rest Days",
+          "",
+          3.4
+        ],
+        [
+          "A Sp K9 7",
+          "",
+          3.2
+        ],
+        [
+          "A Sp Recent K9",
+          "",
+          2.3
+        ]
+      ],
+      "home_power_score": 48.7,
+      "away_power_score": 46.4,
+      "home_sp_name": "Drew Rasmussen",
+      "away_sp_name": "Foster Griffin",
+      "home_wins": 98,
+      "home_losses": 64,
+      "away_wins": 85,
+      "away_losses": 77,
+      "home_streak": "L1",
+      "away_streak": "L1",
+      "home_sp_era": 2.67,
+      "away_sp_era": 3.6,
+      "home_sp_wins": 16,
+      "home_sp_losses": 5,
+      "away_sp_wins": 15,
+      "away_sp_losses": 6,
+      "game_time": "2026-10-13T00:00:00Z",
+      "home_moneyline": -164,
+      "away_moneyline": 138,
+      "total_line": 6.5,
+      "over_odds": -128,
+      "under_odds": 104,
+      "weather": {
+        "temp": 72.9,
+        "wind": 4.6,
+        "wind_dir": "out",
+        "humidity": 0.84,
+        "is_dome": true
+      }
+    }
+  ],
+  "betting_slip": {
+    "slip_date": "2026-10-12",
+    "bankroll": 10000.0,
+    "total_stake": 0,
+    "num_bets": 0,
+    "bets": [],
+    "total_ev": 0,
+    "max_exposure": 0,
+    "risk_level": "conservative"
+  }
+}
