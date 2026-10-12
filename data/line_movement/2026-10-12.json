@@ -25,6 +25,21 @@
           "total_line": 6.5
         }
       ]
+    },
+    {
+      "timestamp": "2026-10-12T23:09:22",
+      "games": [
+        {
+          "game_id": "849820",
+          "home_team": "TB",
+          "away_team": "CLE",
+          "commence_time": "2026-10-13T00:00:00Z",
+          "home_prob": 0.6075,
+          "home_moneyline": -166,
+          "away_moneyline": 148,
+          "total_line": 6.5
+        }
+      ]
     }
   ]
 }
