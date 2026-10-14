@@ -1,0 +1,118 @@
+{
+  "date": "2026-10-14",
+  "locked_at": "2026-10-14T01:11:34-04:00",
+  "predictions": [
+    {
+      "game_id": "849811",
+      "game_date": "2026-10-14",
+      "home_team": "LAD",
+      "away_team": "MIL",
+      "home_win_prob": 0.4828,
+      "away_win_prob": 0.5172,
+      "predicted_home_runs": 3.6,
+      "predicted_away_runs": 4.5,
+      "predicted_total": 8.1,
+      "confidence": 45.8,
+      "model_agreement": 0.946,
+      "predicted_winner": "MIL",
+      "model_predictions": {
+        "XGBoost": 0.427496999502182,
+        "LightGBM": 0.45777759088444975,
+        "CatBoost": 0.45405896939956036,
+        "RandomForest": 0.4616762845508887,
+        "LogisticRegression": 0.46532143021832717
+      },
+      "top_factors": [
+        [
+          "A Sp Season Ip",
+          "",
+          50.6
+        ],
+        [
+          "Sp Season Ip",
+          "",
+          -42.1
+        ],
+        [
+          "A Gp",
+          "",
+          41.9
+        ],
+        [
+          "H Gp",
+          "",
+          39.8
+        ],
+        [
+          "H Sp Season Ip",
+          "",
+          21.5
+        ],
+        [
+          "Elo Diff",
+          "",
+          -16.4
+        ],
+        [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          11.5
+        ],
+        [
+          "H Sp Rest Days",
+          "",
+          3.1
+        ],
+        [
+          "A Sp Recent K9",
+          "",
+          2.2
+        ],
+        [
+          "H Bp K9 14",
+          "",
+          2.2
+        ]
+      ],
+      "home_power_score": 52.8,
+      "away_power_score": 53.6,
+      "home_sp_name": "Blake Snell",
+      "away_sp_name": "Robert Gasser",
+      "home_wins": 100,
+      "home_losses": 62,
+      "away_wins": 103,
+      "away_losses": 59,
+      "home_streak": "W3",
+      "away_streak": "W5",
+      "home_sp_era": 1.9,
+      "away_sp_era": 3.87,
+      "home_sp_wins": 4,
+      "home_sp_losses": 1,
+      "away_sp_wins": 5,
+      "away_sp_losses": 5,
+      "game_time": "2026-10-15T00:00:00Z",
+      "home_moneyline": -178,
+      "away_moneyline": 150,
+      "total_line": 7.5,
+      "over_odds": -104,
+      "under_odds": -118,
+      "weather": {
+        "temp": 63.2,
+        "wind": 5.8,
+        "wind_dir": "cross",
+        "humidity": 0.54,
+        "is_dome": false
+      }
+    }
+  ],
+  "betting_slip": {
+    "slip_date": "2026-10-14",
+    "bankroll": 10000.0,
+    "total_stake": 0,
+    "num_bets": 0,
+    "bets": [],
+    "total_ev": 0,
+    "max_exposure": 0,
+    "risk_level": "conservative"
+  }
+}

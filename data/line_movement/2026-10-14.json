@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-14",
+  "snapshots": [
+    {
+      "timestamp": "2026-10-14T05:11:32",
+      "games": [
+        {
+          "game_id": "849811",
+          "home_team": "LAD",
+          "away_team": "MIL",
+          "commence_time": "2026-10-15T00:00:00Z",
+          "home_prob": 0.6155,
+          "home_moneyline": -178,
+          "away_moneyline": 150,
+          "total_line": 7.5
+        }
+      ]
+    }
+  ]
+}
