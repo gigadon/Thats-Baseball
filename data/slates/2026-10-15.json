@@ -1,0 +1,240 @@
+{
+  "date": "2026-10-15",
+  "locked_at": "2026-10-15T00:59:39-04:00",
+  "predictions": [
+    {
+      "game_id": "849818",
+      "game_date": "2026-10-15",
+      "home_team": "CLE",
+      "away_team": "TB",
+      "home_win_prob": 0.5945,
+      "away_win_prob": 0.4055,
+      "predicted_home_runs": 3.5,
+      "predicted_away_runs": 3.3,
+      "predicted_total": 6.9,
+      "confidence": 68.4,
+      "model_agreement": 0.923,
+      "predicted_winner": "CLE",
+      "model_predictions": {
+        "XGBoost": 0.5948807001113892,
+        "LightGBM": 0.6060055514714318,
+        "CatBoost": 0.5975515957148343,
+        "RandomForest": 0.5653411324724752,
+        "LogisticRegression": 0.5574647636016825
+      },
+      "top_factors": [
+        [
+          "H Sp Season Ip",
+          "",
+          92.9
+        ],
+        [
+          "A Sp Season Ip",
+          "",
+          52.0
+        ],
+        [
+          "Sp Season Ip",
+          "",
+          45.5
+        ],
+        [
+          "A Gp",
+          "",
+          41.8
+        ],
+        [
+          "H Gp",
+          "",
+          40.3
+        ],
+        [
+          "Elo Diff",
+          "",
+          -17.0
+        ],
+        [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          10.4
+        ],
+        [
+          "H Sp Rest Days",
+          "",
+          3.4
+        ],
+        [
+          "A Sp Recent K9",
+          "",
+          2.5
+        ],
+        [
+          "Wind speed",
+          "Wind at stadium (mph)",
+          2.3
+        ]
+      ],
+      "home_power_score": 46.4,
+      "away_power_score": 48.7,
+      "home_sp_name": "Gavin Williams",
+      "away_sp_name": "Griffin Jax",
+      "home_wins": 85,
+      "home_losses": 77,
+      "away_wins": 98,
+      "away_losses": 64,
+      "home_streak": "L1",
+      "away_streak": "L1",
+      "home_sp_era": 3.76,
+      "away_sp_era": 3.53,
+      "home_sp_wins": 14,
+      "home_sp_losses": 8,
+      "away_sp_wins": 8,
+      "away_sp_losses": 10,
+      "game_time": "2026-10-15T17:00:00Z",
+      "home_moneyline": -130,
+      "away_moneyline": 110,
+      "total_line": 6.5,
+      "over_odds": -118,
+      "under_odds": -104,
+      "weather": {
+        "temp": 56.8,
+        "wind": 13.8,
+        "wind_dir": "out",
+        "humidity": 0.84,
+        "is_dome": false
+      }
+    },
+    {
+      "game_id": "849810",
+      "game_date": "2026-10-15",
+      "home_team": "LAD",
+      "away_team": "MIL",
+      "home_win_prob": 0.5806,
+      "away_win_prob": 0.4194,
+      "predicted_home_runs": 4.3,
+      "predicted_away_runs": 4.1,
+      "predicted_total": 8.4,
+      "confidence": 60.2,
+      "model_agreement": 0.919,
+      "predicted_winner": "LAD",
+      "model_predictions": {
+        "XGBoost": 0.5735726952552795,
+        "LightGBM": 0.5761433787929165,
+        "CatBoost": 0.5938180883166237,
+        "RandomForest": 0.5492241518798104,
+        "LogisticRegression": 0.5373145082017253
+      },
+      "top_factors": [
+        [
+          "Sp Season Ip",
+          "",
+          46.7
+        ],
+        [
+          "A Gp",
+          "",
+          42.0
+        ],
+        [
+          "H Gp",
+          "",
+          39.9
+        ],
+        [
+          "H Sp Season Ip",
+          "",
+          37.3
+        ],
+        [
+          "Elo Diff",
+          "",
+          -19.1
+        ],
+        [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          12.6
+        ],
+        [
+          "H Sp Rest Days",
+          "",
+          3.6
+        ],
+        [
+          "A Sp Recent K9",
+          "",
+          2.2
+        ],
+        [
+          "H Bp K9 14",
+          "",
+          2.0
+        ],
+        [
+          "H Bp K9 7",
+          "",
+          2.0
+        ]
+      ],
+      "home_power_score": 52.7,
+      "away_power_score": 53.6,
+      "home_sp_name": "Tyler Glasnow",
+      "away_sp_name": "TBD",
+      "home_wins": 100,
+      "home_losses": 62,
+      "away_wins": 103,
+      "away_losses": 59,
+      "home_streak": "W3",
+      "away_streak": "W5",
+      "home_sp_era": 3.53,
+      "away_sp_era": null,
+      "home_sp_wins": 5,
+      "home_sp_losses": 2,
+      "away_sp_wins": null,
+      "away_sp_losses": null,
+      "game_time": "2026-10-16T00:00:00Z",
+      "home_moneyline": -161,
+      "away_moneyline": 133,
+      "total_line": 7.5,
+      "over_odds": -105,
+      "under_odds": -115,
+      "weather": {
+        "temp": 69.1,
+        "wind": 3.0,
+        "wind_dir": "out",
+        "humidity": 0.4,
+        "is_dome": false
+      }
+    }
+  ],
+  "betting_slip": {
+    "slip_date": "2026-10-15",
+    "bankroll": 10000.0,
+    "total_stake": 235.73,
+    "num_bets": 1,
+    "bets": [
+      {
+        "game_id": "849818",
+        "game_date": "2026-10-15",
+        "home_team": "CLE",
+        "away_team": "TB",
+        "bet_type": "moneyline",
+        "selection": "home",
+        "odds": -130,
+        "model_prob": 0.5945,
+        "implied_prob": 0.5427,
+        "edge": 0.0518,
+        "edge_pct": 5.18,
+        "kelly_fraction": 0.0674,
+        "recommended_stake": 235.73,
+        "confidence": 68.4,
+        "ev_per_dollar": 0.0518,
+        "decimal_odds": 1.769,
+        "total_line": null
+      }
+    ],
+    "total_ev": 12.21,
+    "max_exposure": 235.73,
+    "risk_level": "conservative"
+  }
+}

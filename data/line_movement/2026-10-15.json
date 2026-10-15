@@ -1,0 +1,30 @@
+{
+  "date": "2026-10-15",
+  "snapshots": [
+    {
+      "timestamp": "2026-10-15T04:59:37",
+      "games": [
+        {
+          "game_id": "849818",
+          "home_team": "CLE",
+          "away_team": "TB",
+          "commence_time": "2026-10-15T17:00:00Z",
+          "home_prob": 0.5427,
+          "home_moneyline": -130,
+          "away_moneyline": 110,
+          "total_line": 6.5
+        },
+        {
+          "game_id": "849810",
+          "home_team": "LAD",
+          "away_team": "MIL",
+          "commence_time": "2026-10-16T00:00:00Z",
+          "home_prob": 0.5897,
+          "home_moneyline": -161,
+          "away_moneyline": 133,
+          "total_line": 7.5
+        }
+      ]
+    }
+  ]
+}
