@@ -1,0 +1,118 @@
+{
+  "date": "2026-10-16",
+  "locked_at": "2026-10-16T00:49:39-04:00",
+  "predictions": [
+    {
+      "game_id": "849817",
+      "game_date": "2026-10-16",
+      "home_team": "CLE",
+      "away_team": "TB",
+      "home_win_prob": 0.4669,
+      "away_win_prob": 0.5331,
+      "predicted_home_runs": 3.1,
+      "predicted_away_runs": 4.0,
+      "predicted_total": 7.1,
+      "confidence": 45.8,
+      "model_agreement": 0.915,
+      "predicted_winner": "TB",
+      "model_predictions": {
+        "XGBoost": 0.4050322473049164,
+        "LightGBM": 0.44415747125760136,
+        "CatBoost": 0.44329893601942627,
+        "RandomForest": 0.46372595198443245,
+        "LogisticRegression": 0.41558348698574
+      },
+      "top_factors": [
+        [
+          "Sp Season Ip",
+          "",
+          -113.7
+        ],
+        [
+          "A Sp Season Ip",
+          "",
+          83.3
+        ],
+        [
+          "A Gp",
+          "",
+          41.9
+        ],
+        [
+          "H Gp",
+          "",
+          40.4
+        ],
+        [
+          "Elo Diff",
+          "",
+          -14.2
+        ],
+        [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          12.1
+        ],
+        [
+          "Wind speed",
+          "Wind at stadium (mph)",
+          3.3
+        ],
+        [
+          "H Sp K9 7",
+          "",
+          2.4
+        ],
+        [
+          "H Bp K9 7",
+          "",
+          2.3
+        ],
+        [
+          "A Bp K9 7",
+          "",
+          2.0
+        ]
+      ],
+      "home_power_score": 46.5,
+      "away_power_score": 48.6,
+      "home_sp_name": "TBD",
+      "away_sp_name": "Nick Martinez",
+      "home_wins": 85,
+      "home_losses": 77,
+      "away_wins": 98,
+      "away_losses": 64,
+      "home_streak": "L1",
+      "away_streak": "L1",
+      "home_sp_era": null,
+      "away_sp_era": 3.1,
+      "home_sp_wins": null,
+      "home_sp_losses": null,
+      "away_sp_wins": 15,
+      "away_sp_losses": 6,
+      "game_time": "2026-10-17T00:00:00Z",
+      "home_moneyline": -110,
+      "away_moneyline": -110,
+      "total_line": 6.5,
+      "over_odds": -110,
+      "under_odds": -110,
+      "weather": {
+        "temp": 66.6,
+        "wind": 19.6,
+        "wind_dir": "in",
+        "humidity": 0.88,
+        "is_dome": false
+      }
+    }
+  ],
+  "betting_slip": {
+    "slip_date": "2026-10-16",
+    "bankroll": 10000.0,
+    "total_stake": 0,
+    "num_bets": 0,
+    "bets": [],
+    "total_ev": 0,
+    "max_exposure": 0,
+    "risk_level": "conservative"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "date": "2026-10-15",
+  "settled_at": "2026-10-16T04:48:59",
+  "bankroll": 10000.0,
+  "bets": [
+    {
+      "game_id": "849818",
+      "game_date": "2026-10-15",
+      "home_team": "CLE",
+      "away_team": "TB",
+      "bet_type": "moneyline",
+      "selection": "home",
+      "odds": -130,
+      "model_prob": 0.5945,
+      "implied_prob": 0.5427,
+      "edge": 0.0518,
+      "edge_pct": 5.18,
+      "kelly_fraction": 0.0674,
+      "recommended_stake": 235.73,
+      "confidence": 68.4,
+      "ev_per_dollar": 0.0518,
+      "decimal_odds": 1.769,
+      "total_line": null,
+      "actual_home_score": 3,
+      "actual_away_score": 2,
+      "result": "win",
+      "pnl": 181.28
+    }
+  ],
+  "summary": {
+    "bets_placed": 1,
+    "bets_won": 1,
+    "bets_lost": 0,
+    "bets_pushed": 0,
+    "total_staked": 235.73,
+    "daily_pnl": 181.28,
+    "roi": 0.769,
+    "cumulative_pnl": -1099.52,
+    "max_drawdown": 1.255,
+    "bets_on_card": 1
+  }
+}
