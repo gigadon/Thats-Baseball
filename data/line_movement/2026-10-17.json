@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-17",
+  "snapshots": [
+    {
+      "timestamp": "2026-10-17T04:49:29",
+      "games": [
+        {
+          "game_id": "849816",
+          "home_team": "CLE",
+          "away_team": "TB",
+          "commence_time": "2026-10-18T00:00:00Z",
+          "home_prob": 0.4911,
+          "home_moneyline": -104,
+          "away_moneyline": -112,
+          "total_line": 6.5
+        }
+      ]
+    }
+  ]
+}
