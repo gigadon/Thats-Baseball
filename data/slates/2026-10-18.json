@@ -1,0 +1,118 @@
+{
+  "date": "2026-10-18",
+  "locked_at": "2026-10-18T00:55:42-04:00",
+  "predictions": [
+    {
+      "game_id": "849817",
+      "game_date": "2026-10-18",
+      "home_team": "CLE",
+      "away_team": "TB",
+      "home_win_prob": 0.5072,
+      "away_win_prob": 0.4928,
+      "predicted_home_runs": 3.5,
+      "predicted_away_runs": 3.3,
+      "predicted_total": 6.9,
+      "confidence": 42.1,
+      "model_agreement": 0.919,
+      "predicted_winner": "CLE",
+      "model_predictions": {
+        "XGBoost": 0.4622889459133148,
+        "LightGBM": 0.5106963072322936,
+        "CatBoost": 0.46710390112168626,
+        "RandomForest": 0.4723775272003394,
+        "LogisticRegression": 0.5050257385986473
+      },
+      "top_factors": [
+        [
+          "H Sp Season Ip",
+          "",
+          94.0
+        ],
+        [
+          "A Sp Season Ip",
+          "",
+          79.6
+        ],
+        [
+          "A Gp",
+          "",
+          42.0
+        ],
+        [
+          "H Gp",
+          "",
+          40.5
+        ],
+        [
+          "Elo Diff",
+          "",
+          -16.9
+        ],
+        [
+          "Sp Season Ip",
+          "",
+          9.1
+        ],
+        [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          7.1
+        ],
+        [
+          "H Sp Rest Days",
+          "",
+          3.6
+        ],
+        [
+          "H Bp K9 7",
+          "",
+          2.5
+        ],
+        [
+          "A Sp Recent K9",
+          "",
+          2.4
+        ]
+      ],
+      "home_power_score": 46.5,
+      "away_power_score": 48.7,
+      "home_sp_name": "Parker Messick",
+      "away_sp_name": "Drew Rasmussen",
+      "home_wins": 85,
+      "home_losses": 77,
+      "away_wins": 98,
+      "away_losses": 64,
+      "home_streak": "L1",
+      "away_streak": "L1",
+      "home_sp_era": 2.56,
+      "away_sp_era": 2.67,
+      "home_sp_wins": 12,
+      "home_sp_losses": 9,
+      "away_sp_wins": 16,
+      "away_sp_losses": 5,
+      "game_time": "2026-10-18T21:08:00Z",
+      "home_moneyline": 106,
+      "away_moneyline": -128,
+      "total_line": 6.5,
+      "over_odds": -118,
+      "under_odds": -102,
+      "weather": {
+        "temp": 39.2,
+        "wind": 4.6,
+        "wind_dir": "in",
+        "humidity": 0.85,
+        "is_dome": false
+      }
+    }
+  ],
+  "betting_slip": {
+    "slip_date": "2026-10-18",
+    "bankroll": 10000.0,
+    "total_stake": 0,
+    "num_bets": 0,
+    "bets": [],
+    "total_ev": 0,
+    "max_exposure": 0,
+    "risk_level": "conservative"
+  }
+}

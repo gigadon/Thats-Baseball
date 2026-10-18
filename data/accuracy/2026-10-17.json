@@ -1,0 +1,31 @@
+{
+  "date": "2026-10-17",
+  "tracked_at": "2026-10-18T04:55:04.800302",
+  "graded_from": "slate",
+  "score_source": "mlb_api",
+  "results": [
+    {
+      "game_id": "849816",
+      "home_team": "CLE",
+      "away_team": "TB",
+      "home_win_prob": 0.4693,
+      "confidence": 48.9,
+      "predicted_winner": "TB",
+      "actual_home_score": 3,
+      "actual_away_score": 7,
+      "actual_winner": "TB",
+      "correct": true
+    }
+  ],
+  "ungraded": [],
+  "summary": {
+    "total_games": 1,
+    "correct": 1,
+    "incorrect": 0,
+    "accuracy": 1.0,
+    "brier_score": 0.2202,
+    "slate_games": 1,
+    "final_games": 1,
+    "graded_games": 1
+  }
+}
