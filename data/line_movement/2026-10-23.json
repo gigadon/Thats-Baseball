@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-23",
+  "snapshots": [
+    {
+      "timestamp": "2026-10-23T05:11:21",
+      "games": [
+        {
+          "game_id": "849805",
+          "home_team": "MIL",
+          "away_team": "TB",
+          "commence_time": "2026-10-24T00:00:00Z",
+          "home_prob": 0.6361,
+          "home_moneyline": -196,
+          "away_moneyline": 164,
+          "total_line": 6.5
+        }
+      ]
+    }
+  ]
+}

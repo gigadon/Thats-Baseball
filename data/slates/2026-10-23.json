@@ -1,0 +1,118 @@
+{
+  "date": "2026-10-23",
+  "locked_at": "2026-10-23T01:11:22-04:00",
+  "predictions": [
+    {
+      "game_id": "849805",
+      "game_date": "2026-10-23",
+      "home_team": "MIL",
+      "away_team": "TB",
+      "home_win_prob": 0.5425,
+      "away_win_prob": 0.4575,
+      "predicted_home_runs": 3.6,
+      "predicted_away_runs": 3.4,
+      "predicted_total": 6.9,
+      "confidence": 37.2,
+      "model_agreement": 0.297,
+      "predicted_winner": "MIL",
+      "model_predictions": {
+        "XGBoost": 0.5916630029678345,
+        "LightGBM": 0.6083773192687333,
+        "CatBoost": 0.6032479830031228,
+        "RandomForest": 0.6069543948178657,
+        "LogisticRegression": 0.16335117687766793
+      },
+      "top_factors": [
+        [
+          "H Sp Season Ip",
+          "",
+          88.1
+        ],
+        [
+          "A Sp Season Ip",
+          "",
+          83.3
+        ],
+        [
+          "A Gp",
+          "",
+          42.3
+        ],
+        [
+          "H Gp",
+          "",
+          40.3
+        ],
+        [
+          "Elo Diff",
+          "",
+          19.4
+        ],
+        [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          13.1
+        ],
+        [
+          "Humidity",
+          "Stadium humidity %",
+          6.4
+        ],
+        [
+          "H Sp Rest Days",
+          "",
+          4.4
+        ],
+        [
+          "Sp Season Ip",
+          "",
+          -3.4
+        ],
+        [
+          "A Sp Recent K9",
+          "",
+          1.9
+        ]
+      ],
+      "home_power_score": 53.7,
+      "away_power_score": 48.8,
+      "home_sp_name": "Jacob Misiorowski",
+      "away_sp_name": "Nick Martinez",
+      "home_wins": 103,
+      "home_losses": 59,
+      "away_wins": 98,
+      "away_losses": 64,
+      "home_streak": "W5",
+      "away_streak": "L1",
+      "home_sp_era": 1.8,
+      "away_sp_era": 3.1,
+      "home_sp_wins": 16,
+      "home_sp_losses": 5,
+      "away_sp_wins": 15,
+      "away_sp_losses": 6,
+      "game_time": "2026-10-24T00:00:00Z",
+      "home_moneyline": -196,
+      "away_moneyline": 164,
+      "total_line": 6.5,
+      "over_odds": -105,
+      "under_odds": -115,
+      "weather": {
+        "temp": 53.5,
+        "wind": 3.4,
+        "wind_dir": "out",
+        "humidity": 0.94,
+        "is_dome": true
+      }
+    }
+  ],
+  "betting_slip": {
+    "slip_date": "2026-10-23",
+    "bankroll": 10000.0,
+    "total_stake": 0,
+    "num_bets": 0,
+    "bets": [],
+    "total_ev": 0,
+    "max_exposure": 0,
+    "risk_level": "conservative"
+  }
+}
