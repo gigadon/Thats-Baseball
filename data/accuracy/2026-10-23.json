@@ -1,0 +1,31 @@
+{
+  "date": "2026-10-23",
+  "tracked_at": "2026-10-24T04:53:21.812644",
+  "graded_from": "slate",
+  "score_source": "mlb_api",
+  "results": [
+    {
+      "game_id": "849805",
+      "home_team": "MIL",
+      "away_team": "TB",
+      "home_win_prob": 0.5425,
+      "confidence": 37.2,
+      "predicted_winner": "MIL",
+      "actual_home_score": 3,
+      "actual_away_score": 2,
+      "actual_winner": "MIL",
+      "correct": true
+    }
+  ],
+  "ungraded": [],
+  "summary": {
+    "total_games": 1,
+    "correct": 1,
+    "incorrect": 0,
+    "accuracy": 1.0,
+    "brier_score": 0.2093,
+    "slate_games": 1,
+    "final_games": 1,
+    "graded_games": 1
+  }
+}

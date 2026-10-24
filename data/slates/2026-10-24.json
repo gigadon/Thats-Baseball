@@ -1,0 +1,118 @@
+{
+  "date": "2026-10-24",
+  "locked_at": "2026-10-24T00:53:38-04:00",
+  "predictions": [
+    {
+      "game_id": "849802",
+      "game_date": "2026-10-24",
+      "home_team": "MIL",
+      "away_team": "TB",
+      "home_win_prob": 0.5185,
+      "away_win_prob": 0.4815,
+      "predicted_home_runs": 3.6,
+      "predicted_away_runs": 3.4,
+      "predicted_total": 7.1,
+      "confidence": 31.0,
+      "model_agreement": 0.34,
+      "predicted_winner": "MIL",
+      "model_predictions": {
+        "XGBoost": 0.5761786699295044,
+        "LightGBM": 0.5880379241689534,
+        "CatBoost": 0.5552628311317369,
+        "RandomForest": 0.5564828042792979,
+        "LogisticRegression": 0.15747460487243256
+      },
+      "top_factors": [
+        [
+          "A Sp Season Ip",
+          "",
+          79.6
+        ],
+        [
+          "H Sp Season Ip",
+          "",
+          49.6
+        ],
+        [
+          "Sp Season Ip",
+          "",
+          -46.5
+        ],
+        [
+          "A Gp",
+          "",
+          42.4
+        ],
+        [
+          "H Gp",
+          "",
+          40.4
+        ],
+        [
+          "Elo Diff",
+          "",
+          21.6
+        ],
+        [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          13.1
+        ],
+        [
+          "Humidity",
+          "Stadium humidity %",
+          6.4
+        ],
+        [
+          "H Sp Rest Days",
+          "",
+          5.3
+        ],
+        [
+          "A Sp Recent K9",
+          "",
+          2.4
+        ]
+      ],
+      "home_power_score": 53.7,
+      "away_power_score": 48.7,
+      "home_sp_name": "Logan Henderson",
+      "away_sp_name": "Drew Rasmussen",
+      "home_wins": 103,
+      "home_losses": 59,
+      "away_wins": 98,
+      "away_losses": 64,
+      "home_streak": "W5",
+      "away_streak": "L1",
+      "home_sp_era": 2.47,
+      "away_sp_era": 2.67,
+      "home_sp_wins": 11,
+      "home_sp_losses": 3,
+      "away_sp_wins": 16,
+      "away_sp_losses": 5,
+      "game_time": "2026-10-25T00:00:00Z",
+      "home_moneyline": -127,
+      "away_moneyline": 106,
+      "total_line": 6.5,
+      "over_odds": -115,
+      "under_odds": -105,
+      "weather": {
+        "temp": 54.2,
+        "wind": 3.4,
+        "wind_dir": "in",
+        "humidity": 0.9,
+        "is_dome": true
+      }
+    }
+  ],
+  "betting_slip": {
+    "slip_date": "2026-10-24",
+    "bankroll": 10000.0,
+    "total_stake": 0,
+    "num_bets": 0,
+    "bets": [],
+    "total_ev": 0,
+    "max_exposure": 0,
+    "risk_level": "conservative"
+  }
+}
