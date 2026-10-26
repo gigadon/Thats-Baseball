@@ -1,0 +1,109 @@
+{
+  "date": "2026-10-26",
+  "locked_at": "2026-10-26T01:08:29-04:00",
+  "predictions": [
+    {
+      "game_id": "849804",
+      "game_date": "2026-10-26",
+      "home_team": "TB",
+      "away_team": "MIL",
+      "home_win_prob": 0.4455,
+      "away_win_prob": 0.5545,
+      "predicted_home_runs": 3.9,
+      "predicted_away_runs": 5.0,
+      "predicted_total": 8.9,
+      "confidence": 39.3,
+      "model_agreement": 0.48,
+      "predicted_winner": "MIL",
+      "model_predictions": {
+        "XGBoost": 0.4662168025970459,
+        "LightGBM": 0.4972241856183756,
+        "CatBoost": 0.45411276044743454,
+        "RandomForest": 0.4478348275831069,
+        "LogisticRegression": 0.14424936677082545
+      },
+      "top_factors": [
+        [
+          "H Sp Season Ip",
+          "",
+          85.2
+        ],
+        [
+          "A Sp Season Ip",
+          "",
+          50.6
+        ],
+        [
+          "A Gp",
+          "",
+          42.4
+        ],
+        [
+          "H Gp",
+          "",
+          40.6
+        ],
+        [
+          "Sp Season Ip",
+          "",
+          37.7
+        ],
+        [
+          "Elo Diff",
+          "",
+          -23.8
+        ],
+        [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          13.1
+        ],
+        [
+          "Humidity",
+          "Stadium humidity %",
+          6.4
+        ],
+        [
+          "H Sp Rest Days",
+          "",
+          5.3
+        ],
+        [
+          "A Sp Recent K9",
+          "",
+          2.2
+        ]
+      ],
+      "home_power_score": 48.6,
+      "away_power_score": 53.8,
+      "home_sp_name": "Freddy Peralta",
+      "away_sp_name": "Robert Gasser",
+      "home_wins": 98,
+      "home_losses": 64,
+      "away_wins": 103,
+      "away_losses": 59,
+      "home_streak": "L1",
+      "away_streak": "W5",
+      "home_sp_era": 4.42,
+      "away_sp_era": 3.87,
+      "home_sp_wins": 10,
+      "home_sp_losses": 11,
+      "away_sp_wins": 5,
+      "away_sp_losses": 5,
+      "game_time": "2026-10-27T00:00:00Z",
+      "home_moneyline": null,
+      "away_moneyline": null,
+      "total_line": null,
+      "over_odds": null,
+      "under_odds": null,
+      "weather": {
+        "temp": 69.9,
+        "wind": 11.5,
+        "wind_dir": "out",
+        "humidity": 0.85,
+        "is_dome": true
+      }
+    }
+  ],
+  "betting_slip": null
+}
