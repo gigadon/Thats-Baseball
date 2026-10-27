@@ -1,0 +1,109 @@
+{
+  "date": "2026-10-27",
+  "locked_at": "2026-10-27T01:23:31-04:00",
+  "predictions": [
+    {
+      "game_id": "849803",
+      "game_date": "2026-10-27",
+      "home_team": "TB",
+      "away_team": "MIL",
+      "home_win_prob": 0.4871,
+      "away_win_prob": 0.5129,
+      "predicted_home_runs": 4.2,
+      "predicted_away_runs": 5.2,
+      "predicted_total": 9.4,
+      "confidence": 20.8,
+      "model_agreement": 0.398,
+      "predicted_winner": "MIL",
+      "model_predictions": {
+        "XGBoost": 0.5119526982307434,
+        "LightGBM": 0.5266240740537187,
+        "CatBoost": 0.5421225284431967,
+        "RandomForest": 0.5132602669496571,
+        "LogisticRegression": 0.1483094076293766
+      },
+      "top_factors": [
+        [
+          "Sp Season Ip",
+          "",
+          70.9
+        ],
+        [
+          "H Sp Season Ip",
+          "",
+          56.6
+        ],
+        [
+          "A Gp",
+          "",
+          42.6
+        ],
+        [
+          "H Gp",
+          "",
+          40.8
+        ],
+        [
+          "Elo Diff",
+          "",
+          -26.3
+        ],
+        [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          13.1
+        ],
+        [
+          "Humidity",
+          "Stadium humidity %",
+          6.4
+        ],
+        [
+          "H Sp Rest Days",
+          "",
+          5.3
+        ],
+        [
+          "A Sp Recent K9",
+          "",
+          2.2
+        ],
+        [
+          "Pitcher rest",
+          "Home edge \u00b7 Days since last start",
+          1.9
+        ]
+      ],
+      "home_power_score": 48.4,
+      "away_power_score": 53.8,
+      "home_sp_name": "Griffin Jax",
+      "away_sp_name": "TBD",
+      "home_wins": 98,
+      "home_losses": 64,
+      "away_wins": 103,
+      "away_losses": 59,
+      "home_streak": "L1",
+      "away_streak": "W5",
+      "home_sp_era": 3.53,
+      "away_sp_era": null,
+      "home_sp_wins": 8,
+      "home_sp_losses": 10,
+      "away_sp_wins": null,
+      "away_sp_losses": null,
+      "game_time": "2026-10-28T00:00:00Z",
+      "home_moneyline": null,
+      "away_moneyline": null,
+      "total_line": null,
+      "over_odds": null,
+      "under_odds": null,
+      "weather": {
+        "temp": 69.0,
+        "wind": 11.5,
+        "wind_dir": "out",
+        "humidity": 0.86,
+        "is_dome": true
+      }
+    }
+  ],
+  "betting_slip": null
+}
