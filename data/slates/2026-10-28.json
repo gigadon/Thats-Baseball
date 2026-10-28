@@ -1,0 +1,109 @@
+{
+  "date": "2026-10-28",
+  "locked_at": "2026-10-28T02:01:59-04:00",
+  "predictions": [
+    {
+      "game_id": "849799",
+      "game_date": "2026-10-28",
+      "home_team": "TB",
+      "away_team": "MIL",
+      "home_win_prob": 0.3741,
+      "away_win_prob": 0.6259,
+      "predicted_home_runs": 3.9,
+      "predicted_away_runs": 5.6,
+      "predicted_total": 9.6,
+      "confidence": 59.9,
+      "model_agreement": 0.604,
+      "predicted_winner": "MIL",
+      "model_predictions": {
+        "XGBoost": 0.35826951265335083,
+        "LightGBM": 0.41710258702927583,
+        "CatBoost": 0.31955386939831765,
+        "RandomForest": 0.3719607810551167,
+        "LogisticRegression": 0.13150350873331879
+      },
+      "top_factors": [
+        [
+          "Sp Season Ip",
+          "",
+          -110.3
+        ],
+        [
+          "A Sp Season Ip",
+          "",
+          80.9
+        ],
+        [
+          "A Gp",
+          "",
+          42.7
+        ],
+        [
+          "H Gp",
+          "",
+          40.9
+        ],
+        [
+          "Elo Diff",
+          "",
+          -23.3
+        ],
+        [
+          "Temperature",
+          "Game-time temp (\u00b0F)",
+          13.1
+        ],
+        [
+          "Humidity",
+          "Stadium humidity %",
+          6.4
+        ],
+        [
+          "A Sp Recent K9",
+          "",
+          3.0
+        ],
+        [
+          "Pitcher rest",
+          "Away edge \u00b7 Days since last start",
+          -1.9
+        ],
+        [
+          "A Bp K9 7",
+          "",
+          1.7
+        ]
+      ],
+      "home_power_score": 48.5,
+      "away_power_score": 53.8,
+      "home_sp_name": "TBD",
+      "away_sp_name": "Jacob Misiorowski",
+      "home_wins": 98,
+      "home_losses": 64,
+      "away_wins": 103,
+      "away_losses": 59,
+      "home_streak": "L1",
+      "away_streak": "W5",
+      "home_sp_era": null,
+      "away_sp_era": 1.8,
+      "home_sp_wins": null,
+      "home_sp_losses": null,
+      "away_sp_wins": 16,
+      "away_sp_losses": 5,
+      "game_time": "2026-10-29T00:00:00Z",
+      "home_moneyline": null,
+      "away_moneyline": null,
+      "total_line": null,
+      "over_odds": null,
+      "under_odds": null,
+      "weather": {
+        "temp": 71.5,
+        "wind": 12.7,
+        "wind_dir": "out",
+        "humidity": 0.84,
+        "is_dome": true
+      }
+    }
+  ],
+  "betting_slip": null
+}
